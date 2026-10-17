@@ -40,7 +40,9 @@ Stack and architecture as found in the repo. Reasons are not recorded unless sta
 
 ## Results
 
-None recorded.
+| Date | Task | Goal | Result |
+|---|---|---|---|
+| 2026-10-17 | T1 remove `[project.scripts]` | repo-hygiene | `uv lock --check` passes, `uv sync --all-groups --frozen` clean, pytest 419 passed (unchanged) |
 
 ## Gotchas
 

@@ -6,7 +6,6 @@ Generated from `src/ariel/` on 2026-10-17. Ignore list: see CLAUDE.md.
 
 - Package `ariel` (`src/ariel/__init__.py`): exports `DATA`, `SEED`, `RNG`, `console`, `log`.
 - `examples/`: runnable scripts (`a_mujoco`, `b_robots`, `c_genotypes`, `re_book`, `z_ec_course`, `new_EC_engine_example.py`).
-- `pyproject.toml` script `ariel = ariel.__main__:cli`: target file does not exist.
 - `tests/unit/` mirrors `src/ariel/`; `tests/functional/` is notebooks.
 
 ## Modules

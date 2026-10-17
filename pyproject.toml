@@ -110,9 +110,6 @@ where = ["src"]
 [tool.uv]
 package = true
 
-[project.scripts]
-ariel = "ariel.__main__:cli"
-
 [build-system]
 # When using mypyc, you must list all dependencies used by the compiled
 # modules here. Otherwise, mypyc will not be able to see the types of the

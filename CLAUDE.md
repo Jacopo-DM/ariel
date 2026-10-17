@@ -63,5 +63,4 @@ From the repo root. Python 3.12 (`.python-version` 3.12.9), uv 0.13.1.
 ## Things that bite
 
 - `ruff check` auto-fixes (including unsafe fixes) and `respect-gitignore = false`: run with `--no-fix` unless you want edits.
-- `pyproject.toml` declares `ariel = "ariel.__main__:cli"` but `src/ariel/__main__.py` does not exist, so `uv run ariel` fails.
 - `CONTRIBUTING.md` says `uv install` and Python 3.9+; both are wrong. Use `uv sync` and Python ≥ 3.12.
