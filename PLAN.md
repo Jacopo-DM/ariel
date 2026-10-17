@@ -49,7 +49,6 @@ Policy and numbers are in DESIGN.md (Decisions: "Ruff rule policy" and "Lint/typ
 
 **Tier 2: clear effect, more files or needs judgement (each its own commit, ordered by effect per cost)**
 
-- **T15b remainder.** 3 ruff findings left in `vector_decoding.py` (the broken method; see Open questions). Everything else in T15b is done.
 - **T16. mypy to 0 errors on `src`** (236 after T7; 142 were in `robogen_lite`, categories: no-untyped-def 31, attr-defined 29, no-untyped-call 26, type-arg 24, has-type 24, arg-type 24). Largest and riskiest: may need real annotation work; split by package. Medium; tests pin behaviour only partly (robogen_lite has tests, `lynx_mjspec` and `simulation/mujoco_worker.py` have none, so say if you want characterisation tests first).
 - **T17. Make pre-commit run from the venv.** Replace `language: system` reliance with installed tools (T7 adds them); update prettier from v2.6.0. Verify: `pre-commit run --all-files` on a clean copy (the hooks edit files, so run it on a scratch branch and inspect the diff). Medium.
 - **T18. CI workflow** `.github/workflows/checks.yml` running pytest, `ruff check --no-fix`, `ruff format --check`, `mypy src`, non-blocking until each reaches zero. Cannot be verified without pushing; validate locally with `actionlint` if you want it installed, otherwise a first run after you push. Medium. Coverage `fail_under` set to the measured value (about 45%, exact figure measured then), with the target 100% kept in DESIGN.md.
@@ -70,7 +69,6 @@ Policy and numbers are in DESIGN.md (Decisions: "Ruff rule policy" and "Lint/typ
 
 ## Open questions
 
-- lint-types-policy T15: `src/ariel/body_phenotypes/robogen_lite/decoders/vector_decoding.py:132` uses the undefined name `allowed_per_element` in `vectors_to_graph` (ruff F821), so that method raises `NameError` whenever it is called (an unfinished edit; `allowed_rot_per_type` is defined just above). Fixing it changes behaviour (from crashing to working), so it is outside the unchanged-behaviour goal. Options: fix the name, delete the method, or leave the finding with a `# noqa: F821` and a note. Answer pending.
 - gl-autodetect: can we test on Windows or macOS?
 - gl-autodetect: selection rule, proposed by the user, not yet decided. A GUI is a requirement of the run, not a preference: the interactive viewer needs glfw, batch and evolution runs do not. Choose among working backends by what the run needs first, then by measured render time. Order for viewing: glfw, egl, osmesa. Order for headless batch: egl, glfw, osmesa.
 
@@ -91,6 +89,7 @@ Commands from config and CI. Ran on 2026-10-17 (results in Baseline); not yet mo
 - `nox --session=tests` and `nox --session=pre-commit` are named in `.claude/dev/testing_and_tooling.md`, but `noxfile.py` defines only a `docs` session.
 
 Other problems:
+- `src/ariel/body_phenotypes/robogen_lite/decoders/vector_decoding.py`: `VectorDecoder.vectors_to_graph` raises `NameError` (`allowed_per_element` is undefined; unfinished edit). Left as is on purpose (behaviour unchanged), marked with `# noqa: F821, F841` and a comment. Fix, delete or finish it later.
 - Two commented-out-code findings (ERA001) remain in `tests/functional/cpg.ipynb` (notebook cells, left alone in T10).
 - `examples/a_mujoco/3_cameras_in_simulation.py` was changed in T3 (cv2 window replaced by matplotlib) but not run: this machine has no display, and the script fails earlier at `mujoco.Renderer(...)` (`AttributeError: ... _mjr_context`, no OpenGL context). Needs a manual run on a machine with a display. The Renderer failure is further evidence for gl-autodetect.
 - Root `CONTRIBUTING.md` (lines 80, 103) and `docs/source/contributing_guide/CONTRIBUTING.md` (line 228) still name nox sessions `tests` and `pre-commit` that `noxfile.py` does not define. Not in T2's file list; add to a task if wanted.
