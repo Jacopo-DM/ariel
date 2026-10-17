@@ -7,12 +7,12 @@
 | test-env-green | All unit tests can be collected and pass | improvement | done 2026-10-17: commits matching `git log --grep '^T3:'`; pytest 419 passed + 2 collection errors -> 437 passed, 0 errors | done | 2026-10-17 |
 | dashboards-out | Move the dashboards off `main` into a `feature-dashboard` branch | improvement | done 2026-10-17: commits matching `git log --grep '^T[45]:'`; measure: dashboard dir gone from main, branch holds it, pytest 437 passed unchanged | done | 2026-10-17 |
 | repo-hygiene | Remove the broken entry point, the stray file and the stale docs | improvement | done 2026-10-17: commits matching `git log --grep '^T[126]:'` and the housekeeping merges; console script, `generators copy.py`, placeholder docstrings (18 files to 0) and stale dev-doc claims fixed. Left: nox session names in root and docs CONTRIBUTING.md (see Known problems) | done | 2026-10-17 |
-| lint-types-policy | Settle the ruff, mypy, pyright and pre-commit policy, then make `src` and `tests` meet it | improvement, behaviour unchanged | on `src` + `tests`: `ruff check` 0 findings (now 976 under the new config, 1330 under the old), `ruff format --check` clean (47 files now), `mypy src` 0 errors (now 236 under the new config, 262 old), pytest 437 passed unchanged; pyright count measured once installed, target to be set then | draft, awaiting approval of measure and tasks | 2026-10-17 |
+| lint-types-policy | Settle the ruff, mypy, pyright and pre-commit policy, then make `src` and `tests` meet it | improvement | done 2026-10-17: commits matching `git log --grep '^T\(7\|8\|9\|1[0-8]\)'`; ruff 1330 -> 0, format 47 files -> clean, mypy 262 -> 0 (94 lines ignored as known bugs), pytest 437 passed, pre-commit passes, CI workflow added; pyright 331 -> 210 (informational) | done | 2026-10-17 |
 | gl-autodetect | ARIEL never crashes because the user's OpenGL backend is unsuitable. A manager script runs one subprocess worker per backend (glfw, egl, osmesa), records which work and how fast in `mujoco_user_config.json`, and ARIEL reads that file at import to set `MUJOCO_GL`. | new behaviour | not set yet; acceptance criteria to be proposed and agreed (candidates: the manager writes a valid file on this Linux machine; a crashing backend is recorded as failed without killing the manager; importing `ariel` sets `MUJOCO_GL` from the file). Order: after test-env-green (both touch the rendering/cv2 environment). | draft | 2026-10-17 |
 
 ## Current state
 
-Phase: planning. test-env-green, dashboards-out and repo-hygiene are done. lint-types-policy and gl-autodetect are still draft. Next step: the config review with the user (lint-types-policy), then gl-autodetect acceptance criteria.
+Phase: planning. test-env-green, dashboards-out, repo-hygiene and lint-types-policy are done. gl-autodetect is still a draft. Next step: agree gl-autodetect's acceptance criteria.
 
 ## Baseline
 
@@ -30,39 +30,16 @@ Brownfield. Measured 2026-10-17 after `uv sync --all-groups` (Python 3.12.9, Lin
 
 ## Tasks
 
-Specs and measurements are in DESIGN.md (Specs). No task changes behaviour except removing the dashboards and the `ariel` console script, both approved. Every task: tests before and after (`pytest` line in CLAUDE.md), one task per commit, PLAN.md updated in the same commit. Pytest count and the grep counts are deterministic (no noise); pytest time was 6.58, 6.59, 6.60 s over three runs, so only a change over 0.1 s would count, and no goal claims a time.
-
-Order: Tier 1 first, in the order listed. T1 to T6 done (see DESIGN.md Results). gl-autodetect no longer waits (T3 done).
-
-### Tier 1: small diff, low risk
-
-### Tier 2: clear effect, more files or medium risk
-
-None left.
-
-### Lint/type policy tasks (goal lint-types-policy; all awaiting approval)
-
-Policy and numbers are in DESIGN.md (Decisions: "Ruff rule policy" and "Lint/type policy"). Each task keeps pytest at 437 passed. Tier 1 first, in order.
-
-**Tier 1: small diff, low risk, tests unchanged**
-
-
-**Tier 2: clear effect, more files or needs judgement (each its own commit, ordered by effect per cost)**
-
-- **T18. CI workflow** `.github/workflows/checks.yml` running pytest, `ruff check --no-fix`, `ruff format --check`, `mypy src`, non-blocking until each reaches zero. Cannot be verified without pushing; validate locally with `actionlint` if you want it installed, otherwise a first run after you push. Medium. Coverage `fail_under` set to the measured value (about 45%, exact figure measured then), with the target 100% kept in DESIGN.md.
-
-**Tier 3 (not executed)**
-
-- Lint and type fixes in `examples/` (ruff 1274 findings): outside `src` and `tests`; revisit after T18.
-- pyright to zero: the count is unknown until pyright is installed (T7); the target is set from that count.
+No open tasks. Finished (see DESIGN.md Results for the numbers): T1-T6 (goals test-env-green, dashboards-out, repo-hygiene) and T7-T18 plus T15a-c (goal lint-types-policy). New tasks need approval.
 
 ### Tier 3: left alone on purpose (not executed)
 
-- Raise unit coverage from about 45% to the 100% `fail_under`: outside the three approved goals; large; belongs with lint-types-policy.
-- Characterisation tests for the dashboards: they leave `main`; revisit on `feature-dashboard`.
-- Fix the 1858 ruff findings, 51 unformatted files and 517 mypy errors: goal lint-types-policy, blocked on the config review.
-- Install `pre-commit` and `pydoclint` so the hooks run: part of the config review.
-- Resolve the `morphological_descriptor.py:664` normaliser TODO: needs a behaviour decision.
+- Raise unit coverage from 54% to the 100% target (`fail_under` is 54 now): large, and not part of an approved goal; areas with no tests are listed under Known problems.
+- Characterisation tests for the dashboards: they left `main`; revisit on `feature-dashboard`.
+- Lint and type fixes in `examples/` (ruff 1274 findings) and `docs/`: outside `src` and `tests`.
+- Pyright to zero (210 errors, informational in CI), `pydoclint` (166 findings, hook left out): not worked on.
+- The 94 `# type: ignore[...]  # known bug` lines (see Known problems): each marks unfinished or inconsistent code; fixing them changes behaviour, so each needs a decision.
+- Resolve the `morphological_descriptor.py` normaliser TODO (`# TODO: verify that bounding_box_volume ...`): needs a behaviour decision.
 - Push `feature-dashboard` or `main` to origin: needs your say-so.
 
 ## Open questions
@@ -78,17 +55,11 @@ Evidence for gl-autodetect (checked 2026-10-17):
 
 ## Known problems
 
-Commands from config and CI. Ran on 2026-10-17 (results in Baseline); not yet moved into CLAUDE.md. Not run: sphinx; pydoclint and pre-commit are not installed.
-- Fast tests: `uv run pytest tests/unit` (pytest, pytest-cov, pytest-modern; coverage `fail_under = 100`).
-- Lint: `uv run ruff check --no-fix .` and `uv run ruff format --check .`.
-- Types: `uv run mypy src` (strict); `pyrightconfig.json` also exists.
-- Docstrings: `uv run pydoclint` (pre-commit hook).
-- Docs: `uv run sphinx-build -b html docs docs/_build` (CI, `.github/workflows/sphinx.yml`) and `nox -s docs` (live reload).
-- `nox --session=tests` and `nox --session=pre-commit` are named in `.claude/dev/testing_and_tooling.md`, but `noxfile.py` defines only a `docs` session.
+Not run so far: the docs build (`uv run sphinx-build -b html docs docs/_build`, CI: `.github/workflows/sphinx.yml`; `nox -s docs` for live reload).
 
 Other problems:
 - `uv run pydoclint src` reports 166 findings (mostly DOC111/DOC301: type hints in docstrings, `__init__` docstrings). Its pre-commit hook was left out on purpose (user's choice, T17); `[tool.pydoclint]` in `pyproject.toml` is kept.
-- Pyright: 331 errors on `src tests` (measured in T7), not worked on; `pyrightconfig.json` still includes `examples/`.
+- Pyright: 210 errors on `src tests` (331 when first measured in T7; the fall is a side effect of the mypy and annotation work); `pyrightconfig.json` still includes `examples/`. Informational in CI (`continue-on-error`).
 - Type errors that mark real or unfinished code, silenced with a line-level `# type: ignore[code]  # known bug` (94 lines in 23 files, 2026-10-17; behaviour unchanged). Remove an ignore by fixing the code it marks; `mypy` (strict, `warn_unused_ignores`) will report one that is no longer needed. By file (codes with counts, then lines):
   - `body_phenotypes/lynx_mjspec/unified_pipeline/evolve.py`: 1 line(s): attr-defined 1 (lines 282)
   - `body_phenotypes/lynx_mjspec/unified_pipeline/replay.py`: 1 line(s): arg-type 1 (lines 163)
@@ -115,9 +86,7 @@ Other problems:
   - `utils/video_recorder.py`: 2 line(s): call-overload 2 (lines 80, 91)
   - Worth knowing: `NaCPG_Norm` raises `NotImplementedError` in its class body, so `na_cpg_norm.py` cannot be imported; `VectorDecoder` and `Blueprint` use attributes they never define (`conn_p_space`, `type_p_space`, `rot_p_space`, `nodes`, `edges`, `type_dict`, `rot_dict`); `OlympicArena` cannot be instantiated (abstract `_expand_spec`, misspelling of `_extend_spec`); `SimpleTiltedWorld` reads `_terrain_color` that is never set; `EA` has three unreachable branches. The 4 `no-untyped-call` ignores (`torch.set_printoptions`) are a library typing gap, not bugs.
 - `src/ariel/body_phenotypes/robogen_lite/decoders/vector_decoding.py`: `VectorDecoder.vectors_to_graph` raises `NameError` (`allowed_per_element` is undefined; unfinished edit). Left as is on purpose (behaviour unchanged), marked with `# noqa: F821, F841` and a comment. Fix, delete or finish it later.
-- Two commented-out-code findings (ERA001) remain in `tests/functional/cpg.ipynb` (notebook cells, left alone in T10).
 - `examples/a_mujoco/3_cameras_in_simulation.py` was changed in T3 (cv2 window replaced by matplotlib) but not run: this machine has no display, and the script fails earlier at `mujoco.Renderer(...)` (`AttributeError: ... _mjr_context`, no OpenGL context). Needs a manual run on a machine with a display. The Renderer failure is further evidence for gl-autodetect.
 - Root `CONTRIBUTING.md` (lines 80, 103) and `docs/source/contributing_guide/CONTRIBUTING.md` (line 228) still name nox sessions `tests` and `pre-commit` that `noxfile.py` does not define. Not in T2's file list; add to a task if wanted.
-- `.pre-commit-config.yaml` hooks use `language: system`, but `pre-commit`, `pydoclint` and the hook tools are in no dependency group, so the hooks cannot run from the venv (checked 2026-10-17).
 - No tests for: `visualisation/`, `body_phenotypes/lynx_mjspec/`, `simulation/mujoco_worker.py`, `simulation/example_usage.py`, `utils/renderers.py`, `utils/video_recorder.py`, `utils/morphological_descriptor.py`, `utils/noise_gen.py`. Behaviour of `examples/` is pinned by nothing; `tests/functional/` holds only notebooks. (From the file layout; not confirmed by coverage.)
 - Not-owned files: none; the tree was clean.

@@ -125,7 +125,7 @@ source = ["ariel", "tests"]
 
 [tool.coverage.report]
 show_missing = true
-fail_under = 100
+fail_under = 54
 exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:"]
 
 [tool.pydoclint]

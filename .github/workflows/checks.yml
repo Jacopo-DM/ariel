@@ -1,0 +1,38 @@
+name: "Checks: tests, lint, types"
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check-out the Repository
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install Python and Dependencies
+        run: uv sync --all-groups
+
+      - name: Unit tests with coverage
+        run: uv run --no-sync pytest tests/unit -q -p no:cacheprovider --cov=ariel
+
+      - name: Ruff lint
+        run: uv run --no-sync ruff check src tests
+
+      - name: Ruff format
+        run: uv run --no-sync ruff format --check src tests
+
+      - name: Mypy
+        run: uv run --no-sync mypy src
+
+      # Pyright still reports errors (see PLAN.md); informational until fixed.
+      - name: Pyright (informational)
+        run: uv run --no-sync pyright src tests
+        continue-on-error: true
