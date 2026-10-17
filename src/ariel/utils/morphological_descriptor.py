@@ -729,42 +729,42 @@ class MorphologicalMeasures:
     # ------------------------------------------------------------------
 
     @property
-    def B(self) -> float:
+    def B(self) -> float:  # noqa: N802
         """Branching B = b / b_max."""
         return self.branching
 
     @property
-    def L(self) -> float:
+    def L(self) -> float:  # noqa: N802
         """Limbs L = l / l_max."""
         return self.limbs
 
     @property
-    def E(self) -> float:
+    def E(self) -> float:  # noqa: N802
         """Extensiveness (length of limbs) E = e / e_max."""
         return self.length_of_limbs
 
     @property
-    def C(self) -> float:
+    def C(self) -> float:  # noqa: N802
         """Coverage C = num_modules / bounding_box_volume."""
         return self.coverage
 
     @property
-    def J(self) -> float:
+    def J(self) -> float:  # noqa: N802
         """Joints J = j / j_max."""
         return self.joints
 
     @property
-    def S(self) -> float:
+    def S(self) -> float:  # noqa: N802
         """Symmetry S = max(xy, xz, yz symmetry)."""
         return self.symmetry
 
     @property
-    def D(self) -> float:
+    def D(self) -> float:  # noqa: N802
         """Module diversity D = alternating BRICK/HINGE fraction."""
         return self.module_diversity
 
     @property
-    def P(self) -> float:
+    def P(self) -> float:  # noqa: N802
         """Proportion P of the ground-plane (depth x width) footprint.
 
         Uses depth and width only, valid for both 2D and 3D robots.

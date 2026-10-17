@@ -389,7 +389,7 @@ class Archive:
         hi_pct: float = 75.0,
         n: int | None = None,
         *,
-        fitness_mode: FitnessMode = "min",
+        fitness_mode: FitnessMode = "min",  # noqa: ARG002
         birth_range: AgeRange = None,
     ) -> Population:
         """Return individuals whose fitness falls within a percentile band.

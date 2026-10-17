@@ -2,6 +2,7 @@
 
 import mujoco
 import networkx as nx
+import pytest
 
 from ariel.body_phenotypes.robogen_lite.constructor import (
     construct_mjspec_from_graph,
@@ -84,8 +85,6 @@ def test_core_with_none_module_compiles() -> None:
 
 def test_unknown_module_type_raises() -> None:
     """A graph node with an unknown type raises ValueError."""
-    import pytest
-
     g = nx.DiGraph()
     g.add_node(0, type="CORE", rotation="DEG_0")
     g.add_node(1, type="UNKNOWN_TYPE", rotation="DEG_0")

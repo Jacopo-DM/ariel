@@ -41,12 +41,12 @@ class LynxArm:
     def _rotate_axis_z(self, axis: np.ndarray, yaw: float) -> np.ndarray:
         """Rotate a vector around Z axis."""
         c, s = np.cos(yaw), np.sin(yaw)
-        R = np.array([
+        rotation = np.array([
             [c, -s, 0],
             [s, c, 0],
             [0, 0, 1],
         ])
-        return R @ axis
+        return rotation @ axis
 
     def _build_robot(self) -> None:
         """Construct the kinematic chain hierarchically."""

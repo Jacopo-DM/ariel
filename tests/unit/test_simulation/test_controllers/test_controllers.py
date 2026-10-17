@@ -9,7 +9,7 @@ from ariel.simulation.controllers.controller import Controller
 from ariel.utils.tracker import Tracker
 
 
-def _zero_callback(model: mujoco.MjModel, data: mujoco.MjData) -> list[float]:
+def _zero_callback(model: mujoco.MjModel, _data: mujoco.MjData) -> list[float]:
     """Control callback that always outputs zeros."""
     return [0.0] * model.nu
 
@@ -58,7 +58,9 @@ def test_controller_set_control_runs() -> None:
 def test_controller_set_control_clips_output() -> None:
     """set_control clips control values to [-pi/2, pi/2]."""
 
-    def large_output(model: mujoco.MjModel, data: mujoco.MjData) -> list[float]:
+    def large_output(
+        model: mujoco.MjModel, _data: mujoco.MjData
+    ) -> list[float]:
         return [999.0] * model.nu
 
     model, data = _build_spider_model()
@@ -76,7 +78,9 @@ def test_controller_set_control_clips_output() -> None:
 def test_controller_nan_output_raises() -> None:
     """set_control raises ValueError when the callback returns NaN."""
 
-    def nan_callback(model: mujoco.MjModel, data: mujoco.MjData) -> list[float]:
+    def nan_callback(
+        model: mujoco.MjModel, _data: mujoco.MjData
+    ) -> list[float]:
         return [float("nan")] * model.nu
 
     model, data = _build_spider_model()

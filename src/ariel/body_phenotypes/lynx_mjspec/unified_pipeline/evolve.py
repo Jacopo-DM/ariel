@@ -89,7 +89,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def evaluate_candidate(
+def evaluate_candidate(  # noqa: PLR0913
     genome: np.ndarray,
     policy_spec: PolicySpec,
     target: np.ndarray,
@@ -197,7 +197,7 @@ def evaluate_candidate(
             + (0.10 if not touched else 0.0)
             + boundary_penalty
         )
-    except Exception:
+    except Exception:  # noqa: BLE001
         return INVALID_FITNESS
 
 

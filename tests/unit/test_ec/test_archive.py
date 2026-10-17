@@ -3,6 +3,7 @@
 import math
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from ariel.ec.archive import Archive
@@ -376,10 +377,9 @@ def test_fitness_percentile_in_band(archive) -> None:
         return
     fitnesses = [ind.fitness_ for ind in pop]
     all_fitnesses = [
-        ind.fitness_ for ind in archive._fetch_all(archive._base_query())
+        ind.fitness_
+        for ind in archive._fetch_all(archive._base_query())  # noqa: SLF001
     ]
-    import numpy as np
-
     lo = float(np.percentile(all_fitnesses, 0.0))
     hi = float(np.percentile(all_fitnesses, 50.0))
     for f in fitnesses:

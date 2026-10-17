@@ -100,7 +100,7 @@ def plot_training_logs(log_files: str | list[str]) -> None:
 
     # Place legend outside the plot so it doesn't obscure data
     plt.legend(loc="upper right")
-    plt.grid(True, linestyle=":", alpha=0.7)
+    plt.grid(visible=True, linestyle=":", alpha=0.7)
     plt.tight_layout()
     plt.savefig("lynx_arm_experiment_10x.png", dpi=300, bbox_inches="tight")
     plt.close()

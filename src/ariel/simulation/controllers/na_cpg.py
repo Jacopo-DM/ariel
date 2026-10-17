@@ -319,7 +319,7 @@ class NaCPG(nn.Module):
         self.angles.data = self.initial_state["angles"].clone()
         self.angle_history = []
 
-    def forward(self, time: float | None = None) -> torch.Tensor:
+    def forward(self, time: float | None = None) -> torch.Tensor:  # noqa: C901, PLR0915
         """
         Perform a forward pass: update CPG states, compute output angles.
 
@@ -499,7 +499,7 @@ def main() -> None:
     for _ in range(1000):
         na_cpg_mat.forward()
 
-    import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt  # noqa: PLC0415
 
     hist = torch.tensor(na_cpg_mat.angle_history)
     times = torch.arange(hist.shape[0]) * na_cpg_mat.dt

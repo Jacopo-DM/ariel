@@ -252,7 +252,7 @@ def mutate_replace_node(genome: TreeGenome) -> None:
         genome.edges = old_edges
 
 
-def mutate_subtree_replacement(
+def mutate_subtree_replacement(  # noqa: C901
     genome: TreeGenome, max_modules: int = 10
 ) -> None:
     """
@@ -418,7 +418,7 @@ def mutate_shrink(genome: TreeGenome) -> None:
         genome.edges = old_edges
 
 
-def mutate_hoist(genome: TreeGenome) -> None:
+def mutate_hoist(genome: TreeGenome) -> None:  # noqa: C901
     """Hoist mutation: replace a parent node with one of its children.
 
     Selects a random node that has children, then replaces it with one of its

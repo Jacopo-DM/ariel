@@ -99,7 +99,7 @@ def test_eaoperation_wrong_first_param_type_raises() -> None:
     with pytest.raises(TypeError, match="Population"):
 
         @EAOperation
-        def bad(x: int) -> Population:
+        def bad(x: int) -> Population:  # noqa: ARG001
             return Population([])
 
 
@@ -108,7 +108,7 @@ def test_eaoperation_wrong_return_type_raises() -> None:
     with pytest.raises(TypeError, match="Population"):
 
         @EAOperation
-        def bad(population: Population) -> list:
+        def bad(population: Population) -> list:  # noqa: ARG001
             return []
 
 
@@ -141,7 +141,7 @@ def test_eaoperation_call_with_kwargs_returns_bound_op() -> None:
     """Calling with kwargs returns a new bound EAOperation (not executing)."""
 
     @EAOperation
-    def with_param(population: Population, factor: float = 1.0) -> Population:
+    def with_param(population: Population, factor: float = 1.0) -> Population:  # noqa: ARG001
         return population
 
     bound = with_param(factor=2.0)
@@ -178,7 +178,7 @@ def test_eaoperation_repr_with_kwargs() -> None:
     """__repr__ includes bound kwargs."""
 
     @EAOperation
-    def op(population: Population, k: int = 1) -> Population:
+    def op(population: Population, k: int = 1) -> Population:  # noqa: ARG001
         return population
 
     bound = op(k=42)
@@ -284,7 +284,7 @@ def test_ea_commit_sets_time_of_birth(tmp_path) -> None:
     """_commit assigns time_of_birth=-1 individuals the current generation."""
     ea = _ea(tmp_path)
     # Fetch fresh from DB so SQLAlchemy session context is active
-    pop = ea._fetch()
+    pop = ea._fetch()  # noqa: SLF001
     for ind in pop:
         assert ind.time_of_birth == 0
 
@@ -292,21 +292,21 @@ def test_ea_commit_sets_time_of_birth(tmp_path) -> None:
 def test_ea_fetch_returns_population(tmp_path) -> None:
     """_fetch returns a Population instance."""
     ea = _ea(tmp_path)
-    pop = ea._fetch()
+    pop = ea._fetch()  # noqa: SLF001
     assert isinstance(pop, Population)
 
 
 def test_ea_fetch_only_alive(tmp_path) -> None:
     """_fetch(only_alive=True) returns only alive individuals."""
     ea = _ea(tmp_path)
-    pop = ea._fetch(only_alive=True)
+    pop = ea._fetch(only_alive=True)  # noqa: SLF001
     assert all(ind.alive for ind in pop)
 
 
 def test_ea_fetch_sort_desc(tmp_path) -> None:
     """_fetch(sort='desc') returns individuals sorted by fitness descending."""
     ea = _ea(tmp_path)
-    pop = ea._fetch(sort="desc")
+    pop = ea._fetch(sort="desc")  # noqa: SLF001
     fitnesses = [ind.fitness_ for ind in pop if ind.fitness_ is not None]
     assert fitnesses == sorted(fitnesses, reverse=True)
 
@@ -314,7 +314,7 @@ def test_ea_fetch_sort_desc(tmp_path) -> None:
 def test_ea_fetch_sort_asc(tmp_path) -> None:
     """_fetch(sort='asc') returns individuals sorted by fitness ascending."""
     ea = _ea(tmp_path)
-    pop = ea._fetch(sort="asc")
+    pop = ea._fetch(sort="asc")  # noqa: SLF001
     fitnesses = [ind.fitness_ for ind in pop if ind.fitness_ is not None]
     assert fitnesses == sorted(fitnesses)
 
@@ -322,7 +322,7 @@ def test_ea_fetch_sort_asc(tmp_path) -> None:
 def test_ea_fetch_requires_eval_false(tmp_path) -> None:
     """_fetch(requires_eval=False) returns only evaluated individuals."""
     ea = _ea(tmp_path)
-    pop = ea._fetch(requires_eval=False)
+    pop = ea._fetch(requires_eval=False)  # noqa: SLF001
     assert all(not ind.requires_eval for ind in pop)
 
 

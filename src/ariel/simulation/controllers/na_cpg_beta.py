@@ -420,7 +420,7 @@ class NaCPGBeta(nn.Module):
         self.b.data = loaded["b"]
         console.log(f"[green]Loaded parameters from {path}[/green]")
 
-    def forward(
+    def forward(  # noqa: C901, PLR0915
         self,
         time: float | None = None,
     ) -> torch.Tensor:
@@ -552,7 +552,7 @@ class NaCPGBeta(nn.Module):
 def main() -> None:
     # Imports for the example
     """Run a small demo of the beta-parametrised NA-CPG."""
-    import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt  # noqa: PLC0415
 
     # Test loop
     losses_clip = []

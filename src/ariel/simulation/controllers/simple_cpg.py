@@ -356,7 +356,7 @@ def main() -> None:
     for _ in range(1000):
         cpg.forward()
 
-    import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt  # noqa: PLC0415
 
     hist = torch.tensor(cpg.angle_history)
     times = torch.arange(hist.shape[0]) * cpg.dt

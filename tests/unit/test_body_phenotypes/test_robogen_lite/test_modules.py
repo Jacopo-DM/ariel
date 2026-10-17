@@ -3,7 +3,11 @@
 import mujoco
 import pytest
 
-from ariel.body_phenotypes.robogen_lite.config import IDX_OF_CORE, ModuleType
+from ariel.body_phenotypes.robogen_lite.config import (
+    IDX_OF_CORE,
+    ModuleFaces,
+    ModuleType,
+)
 from ariel.body_phenotypes.robogen_lite.modules.brick import BrickModule
 from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
 from ariel.body_phenotypes.robogen_lite.modules.hinge import HingeModule
@@ -27,8 +31,6 @@ def test_core_module_has_spec() -> None:
 
 def test_core_module_has_all_sites() -> None:
     """CoreModule sites dict contains all six faces."""
-    from ariel.body_phenotypes.robogen_lite.config import ModuleFaces
-
     core = CoreModule(index=IDX_OF_CORE)
     expected_faces = {
         ModuleFaces.FRONT,
@@ -73,8 +75,6 @@ def test_hinge_module_initialization() -> None:
 
 def test_hinge_module_has_front_site() -> None:
     """HingeModule sites dict contains the FRONT face."""
-    from ariel.body_phenotypes.robogen_lite.config import ModuleFaces
-
     hinge = HingeModule(index=1)
     assert ModuleFaces.FRONT in hinge.sites
     del hinge

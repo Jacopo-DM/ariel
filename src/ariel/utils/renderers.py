@@ -21,7 +21,7 @@ from ariel.utils.file_ops import generate_save_path
 from ariel.utils.video_recorder import VideoRecorder
 
 
-def single_frame_renderer(
+def single_frame_renderer(  # noqa: PLR0913
     model: mujoco.MjModel,
     data: mujoco.MjData,
     steps: int = 1,

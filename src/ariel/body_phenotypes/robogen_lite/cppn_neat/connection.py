@@ -11,7 +11,7 @@ class Connection:
         in_id: int,
         out_id: int,
         weight: float,
-        enabled: bool,
+        enabled: bool,  # noqa: FBT001 (positional in Genome and copy())
         innov_id: int,
     ) -> None:
         """Create a connection from `in_id` to `out_id` with a weight."""

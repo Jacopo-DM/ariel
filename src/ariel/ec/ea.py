@@ -323,7 +323,7 @@ class EA:
     >>> ea = EA(None, ops, restart=("__data__/run_1/database.db", 50))
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         population: Population | None = None,
         operations: list[EAOperation] | None = None,

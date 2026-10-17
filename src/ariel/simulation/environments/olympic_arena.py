@@ -47,7 +47,7 @@ class OlympicArena(BaseWorld):
 
     name = "olympic_arena"
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         # Overall arena parameters
         arena_width: float = 2.0,
@@ -152,14 +152,14 @@ class OlympicArena(BaseWorld):
         # Normalized coordinates in [0,1]
         u = np.linspace(0.0, 1.0, size)
         v = np.linspace(0.0, 1.0, size)
-        U, V = np.meshgrid(u, v, indexing="xy")
+        grid_u, grid_v = np.meshgrid(u, v, indexing="xy")
 
         # Distance to nearest edge
         d = np.minimum.reduce([
-            U,
-            1.0 - U,
-            V,
-            1.0 - V,
+            grid_u,
+            1.0 - grid_u,
+            grid_v,
+            1.0 - grid_v,
         ])  # 0 at edge, 0.5 at center
 
         # Map distance to [0,1] over a band of width 'edge_width'

@@ -4,7 +4,9 @@ from ariel.ec.individual import Individual
 from ariel.ec.population import Population
 
 
-def _make_ind(fitness: float | None = None, alive: bool = True) -> Individual:
+def _make_ind(
+    fitness: float | None = None, *, alive: bool = True
+) -> Individual:
     ind = Individual(alive=alive)
     if fitness is not None:
         ind.fitness = fitness

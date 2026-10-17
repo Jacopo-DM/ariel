@@ -18,6 +18,7 @@ class Tracker:
         mujoco_obj_to_find: mj.mjtObj | None = None,
         name_to_bind: str | None = None,
         observable_attributes: list[str] | None = None,
+        *,
         quiet: bool | None = False,
     ) -> None:
         """
@@ -91,7 +92,7 @@ class Tracker:
                     idx: [] for idx in range(len(self.to_track))
                 }
 
-    def update(self, data: mj.MjData) -> None:
+    def update(self, data: mj.MjData) -> None:  # noqa: ARG002
         """Update the history of tracked attributes for each bound object."""
         # Update the bound objects
         for idx, obj in enumerate(self.to_track):

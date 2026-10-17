@@ -2,11 +2,15 @@
 
 import numpy as np
 import torch
+from networkx import DiGraph
 
 from ariel.body_phenotypes.robogen_lite.config import (
     NUM_OF_FACES,
     NUM_OF_ROTATIONS,
     NUM_OF_TYPES_OF_MODULES,
+)
+from ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding import (
+    HighProbabilityDecoder,
 )
 from ariel.ec.genotypes.nde.nde import NeuralDevelopmentalEncoding
 
@@ -21,7 +25,7 @@ def _nde(n: int = 5) -> NeuralDevelopmentalEncoding:
     return NeuralDevelopmentalEncoding(number_of_modules=n)
 
 
-def _genotype(n: int = 5, seed: int = 0) -> list[np.ndarray]:
+def _genotype(n: int = 5, seed: int = 0) -> list[np.ndarray]:  # noqa: ARG001
     """Three float32 chromosomes (type, connection, rotation), fixed length."""
     rng = np.random.default_rng(seed)
     return [rng.random(GENOTYPE_SIZE).astype(np.float32) for _ in range(3)]
@@ -225,12 +229,6 @@ def test_nde_forward_large_module_count() -> None:
 
 def test_nde_output_feeds_hi_prob_decoder() -> None:
     """NDE outputs can be directly fed into HighProbabilityDecoder."""
-    from networkx import DiGraph
-
-    from ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding import (
-        HighProbabilityDecoder,
-    )
-
     n = 5
     nde = NeuralDevelopmentalEncoding(number_of_modules=n)
     type_p, conn_p, rot_p = nde.forward(_genotype(n))
