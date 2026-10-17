@@ -31,14 +31,9 @@ Brownfield. Measured 2026-10-17 after `uv sync --all-groups` (Python 3.12.9, Lin
 
 Specs and measurements are in DESIGN.md (Specs). No task changes behaviour except removing the dashboards and the `ariel` console script, both approved. Every task: tests before and after (`pytest` line in CLAUDE.md), one task per commit, PLAN.md updated in the same commit. Pytest count and the grep counts are deterministic (no noise); pytest time was 6.58, 6.59, 6.60 s over three runs, so only a change over 0.1 s would count, and no goal claims a time.
 
-Order: Tier 1 first, in the order listed. T1 done (see DESIGN.md Results). T4 must come before T5 and T6. gl-autodetect waits for T3.
+Order: Tier 1 first, in the order listed. T1 and T2 done (see DESIGN.md Results). T4 must come before T5 and T6. gl-autodetect waits for T3.
 
 ### Tier 1: small diff, low risk
-
-**T2. Fix stale developer docs** (repo-hygiene, "stale docs")
-- Changes: `.claude/dev/testing_and_tooling.md` (claims `nox --session=tests` and `nox --session=pre-commit` exist; `noxfile.py` has only `docs`; says pre-commit is installable through nox; mentions `uv venv` + `uv sync` flow) and CLAUDE.md "Things that bite" entries that T1 and the earlier fixes make obsolete.
-- Risk low. Cost: about +10/-10 lines of prose.
-- Verify: re-read each claim against `noxfile.py`, `pyproject.toml` and `.pre-commit-config.yaml`; pytest unchanged.
 
 ### Tier 2: clear effect, more files or medium risk
 
@@ -102,6 +97,7 @@ Commands from config and CI. Ran on 2026-10-17 (results in Baseline); not yet mo
 - `nox --session=tests` and `nox --session=pre-commit` are named in `.claude/dev/testing_and_tooling.md`, but `noxfile.py` defines only a `docs` session.
 
 Other problems:
+- Root `CONTRIBUTING.md` (lines 80, 103) and `docs/source/contributing_guide/CONTRIBUTING.md` (line 228) still name nox sessions `tests` and `pre-commit` that `noxfile.py` does not define. Not in T2's file list; add to a task if wanted.
 - `tests/unit/test_simulation/test_environments/test_environments.py` and `tests/unit/test_utils/test_tracker.py` fail at collection: `import cv2` raises `libGL.so.1: cannot open shared object file` (system library missing on this machine; the dependency is `opencv-python`, not headless). Their tests are not in the 419.
 - `.pre-commit-config.yaml` hooks use `language: system`, but `pre-commit`, `pydoclint` and the hook tools are in no dependency group, so the hooks cannot run from the venv (checked 2026-10-17).
 - No tests for: `visualisation/`, `body_phenotypes/lynx_mjspec/`, `simulation/mujoco_worker.py`, `simulation/example_usage.py`, `utils/renderers.py`, `utils/video_recorder.py`, `utils/morphological_descriptor.py`, `utils/noise_gen.py`. Behaviour of `examples/` is pinned by nothing; `tests/functional/` holds only notebooks. (From the file layout; not confirmed by coverage.)

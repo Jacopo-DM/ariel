@@ -1,7 +1,7 @@
 # Testing & tooling
 
-ARIEL uses **uv** for environments, **nox** for task automation, **pytest** for
-tests, and **pre-commit** for commit-time gates. Source of truth:
+ARIEL uses **uv** for environments, **nox** for docs builds, **pytest** for
+tests, and a **pre-commit** config for commit-time gates. Source of truth:
 [noxfile.py](../../noxfile.py), [pyproject.toml](../../pyproject.toml),
 [.pre-commit-config.yaml](../../.pre-commit-config.yaml),
 [CONTRIBUTING.md](../../CONTRIBUTING.md).
@@ -16,35 +16,33 @@ uv sync
 uv run examples/re_book/1_brain_evolution.py   # run anything via `uv run`
 ```
 
-(`CONTRIBUTING.md` also shows `uv install`; the README's `uv venv` + `uv sync`
-is the current flow.)
+Use `uv sync --all-groups` to include the dev and docs groups.
 
 ## Tests & coverage
 
 ```bash
-nox                       # full suite
-nox --session=tests       # unit tests only
-nox --list-sessions       # see available sessions
+uv run pytest tests/unit                  # unit tests
+uv run pytest tests/unit --cov=ariel      # with coverage
+nox --list                                # sessions: only `docs` exists today
 ```
 
 - Tests live in [tests/](../../tests/), written with `pytest`
   (`pytest`, `pytest-cov`, `pytest-modern`).
-- **Coverage must be 100%** — `pyproject.toml` sets
-  `[tool.coverage.report] fail_under = 100`. New code needs new tests or the
-  suite fails. Excluded lines: `pragma: no cover`, `if TYPE_CHECKING:`.
+- **Coverage target is 100%** — `pyproject.toml` sets
+  `[tool.coverage.report] fail_under = 100`. Measured coverage is about 45%
+  today (see PLAN.md), so the threshold is not met. New code needs new tests.
+  Excluded lines: `pragma: no cover`, `if TYPE_CHECKING:`.
 - Asserts are allowed in test files (ruff `S101` carve-out for `tests/`,
   `test_*.py`, `noxfile.py`).
 
 When adding a feature, add the test in the matching `tests/…` path **in the same
-change** — don't defer it, or coverage drops below 100% and CI blocks.
+change** — don't defer it. No CI job runs the tests; the only workflow builds
+the docs ([.github/workflows/sphinx.yml](../../.github/workflows/sphinx.yml)).
 
 ## Pre-commit
 
-Install the git hook once:
-
-```bash
-nox --session=pre-commit -- install
-```
+There is no nox session for pre-commit, and `pre-commit` and `pydoclint` are
+in no dependency group, so the hooks cannot be installed from the venv today.
 
 The hooks (see [.pre-commit-config.yaml](../../.pre-commit-config.yaml)) run
 `ruff check` + `ruff format`, `pydoclint` (NumPy docstring linting), `prettier`,
@@ -55,6 +53,5 @@ be rejected at commit time — write it to standard up front (see
 ## Optional: mypyc compiled build
 
 ARIEL can be compiled with `mypyc` for speed (opt-in, off by default). Triggered
-by the `ARIEL_COMPILE_MYPYC=1` env var via [setup.py](../../setup.py); a
-`tests_compiled` nox session builds and installs the compiled package. You won't
-need this for normal development — only when validating the compiled path.
+by the `ARIEL_COMPILE_MYPYC=1` env var via [setup.py](../../setup.py). No nox
+session builds it. You won't need this for normal development.

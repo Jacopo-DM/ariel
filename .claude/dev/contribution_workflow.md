@@ -14,14 +14,14 @@ for the full text and links. This page is the checklist.
 ## The loop
 
 1. Branch off the default branch (don't commit straight to it).
-2. Set up: `uv venv` → `uv sync` (see
+2. Set up: `uv venv` → `uv sync --all-groups` (see
    [testing_and_tooling.md](testing_and_tooling.md)).
-3. Install the pre-commit hook: `nox --session=pre-commit -- install`.
+3. Pre-commit hooks: configured in `.pre-commit-config.yaml` but not installable from the venv yet (see [testing_and_tooling.md](testing_and_tooling.md)).
 4. Write code to the house standard ([coding_standards.md](coding_standards.md),
    [docstrings_and_types.md](docstrings_and_types.md),
    [functional_vs_oo.md](functional_vs_oo.md)).
 5. Add/extend tests in [tests/](../../tests/) — coverage must stay **100%**.
-6. Run `nox` (full suite); it must pass **without errors or warnings**.
+6. Run `uv run pytest tests/unit`; it must pass **without errors or warnings**.
 7. Update docs if you added functionality.
 
 ## PR acceptance criteria (from CONTRIBUTING.md)

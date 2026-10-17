@@ -43,6 +43,7 @@ Stack and architecture as found in the repo. Reasons are not recorded unless sta
 | Date | Task | Goal | Result |
 |---|---|---|---|
 | 2026-10-17 | T1 remove `[project.scripts]` | repo-hygiene | `uv lock --check` passes, `uv sync --all-groups --frozen` clean, pytest 419 passed (unchanged) |
+| 2026-10-17 | T2 stale dev docs | repo-hygiene | `.claude/dev/testing_and_tooling.md` and `contribution_workflow.md` no longer name nox sessions, a `tests_compiled` session or a blocking CI that do not exist; pytest 419 passed (unchanged, docs only) |
 
 ## Gotchas
 

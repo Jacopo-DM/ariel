@@ -63,4 +63,4 @@ From the repo root. Python 3.12 (`.python-version` 3.12.9), uv 0.13.1.
 ## Things that bite
 
 - `ruff check` auto-fixes (including unsafe fixes) and `respect-gitignore = false`: run with `--no-fix` unless you want edits.
-- `CONTRIBUTING.md` says `uv install` and Python 3.9+; both are wrong. Use `uv sync` and Python ≥ 3.12.
+- `CONTRIBUTING.md` (root) and `docs/source/contributing_guide/CONTRIBUTING.md` still tell you to run `nox --session=tests` / `pre-commit`; `noxfile.py` only has `docs`.
