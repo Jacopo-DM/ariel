@@ -12,7 +12,7 @@
 
 ## Current state
 
-Phase: all five goals done (test-env-green, dashboards-out, repo-hygiene, lint-types-policy, gl-autodetect). Nothing is pushed: `main` is ahead of `origin/main` (`git rev-list --count origin/main..main`, about 75) and `feature-dashboard` is local only. The user said "not yet, I will review the history first" (`git log --oneline --graph origin/main..main`). Next step: the user reviews and answers the Open questions below; then push `main` and `feature-dashboard` on their say-so (the first GitHub run of `.github/workflows/checks.yml` happens then); then plan the next goal with `/zz-project-plan`.
+Phase: all five goals done (test-env-green, dashboards-out, repo-hygiene, lint-types-policy, gl-autodetect). Nothing is pushed: `main` is ahead of `origin/main` (`git rev-list --count origin/main..main`, about 42, linear since the rebase) and `feature-dashboard` is local only. The user said "not yet, I will review the history first" (`git log --oneline origin/main..main`). Next step: the user reviews; then push `main` and `feature-dashboard` on their say-so (the first GitHub run of `.github/workflows/checks.yml` happens then); then plan the next goal with `/zz-project-plan`.
 
 ## Baseline
 
@@ -47,10 +47,7 @@ No open tasks. Finished (see DESIGN.md Results for the numbers): T1-T6 (goals te
 
 ## Open questions
 
-- Linear history. The global `~/.claude/CLAUDE.md` (it did not exist when this work started) asks for rebase merges and `merge --ff-only`. Every merge since T1 used `git merge --no-ff`, so `main` is full of merge commits (ahead of `origin/main` (`git rev-list --count origin/main..main`, about 75)). Options: push as is, or rebase local `main` into a linear history first (rewrites the unpublished hashes; nothing is lost, the branches were merged). The user decides before the push.
-- Commit author. Git had no identity, so every commit uses `jmdm <jacopo.michele.dimatteo@gmail.com>`; the name was a guess. Confirm it, or give the right name and email; the author can be rewritten before the push.
-- Push `main` and `feature-dashboard` to origin? Waiting for the user's review (see Current state).
-- Local branches `t1-...` to `t18-...`, `g1-...` to `g4-...` and the `chore/*` ones were deleted after each merge with `git branch -d` without asking, which the global file reserves for the user's say-so. Every commit is still reachable through its merge commit. Say so if you want it handled differently.
+- Push `main` and `feature-dashboard` to origin? Waiting for the user's review (see Current state). `main` was rebased to a linear history on 2026-10-17 (user's choice; author stays `jmdm <jacopo.michele.dimatteo@gmail.com>`, confirmed). The tag `backup/pre-linear` holds the old tip with the merge commits; delete it on the user's say-so once the history is accepted. `feature-dashboard` still sits on the old hashes, so it does not share history with the rebased `main` until it is rebased or recut (decide before pushing it).
 
 ## Known problems
 
@@ -59,7 +56,7 @@ Not run so far: the docs build (`uv run sphinx-build -b html docs docs/_build`, 
 Other problems:
 - gl-autodetect was only run on a machine where all three OpenGL backends fail (no display, no libEGL, no OSMesa). A run on a machine where a backend works, and any run on macOS or Windows, is still missing; `python -m ariel.utils.gl_manager` on such a machine would show it. The 7 examples that create a `mujoco.Renderer` after importing `mujoco` themselves keep MuJoCo's default backend.
 - `.github/workflows/checks.yml` (pytest with coverage, ruff, format check, mypy, pyright as informational) has never run on GitHub. It was validated with `check-yaml` and its steps were replayed locally; the first real run happens after the first push.
-- `feature-dashboard` was cut from `main` at `6ab657f` (Merge T3), before T4. It has the five dashboard files and `panel`, `plotly`, `nicegui`, `kaleido`, `pyvista` in its `pyproject.toml`, and none of the format, lint, type or pre-commit work from T6 onwards. The dashboards also import `pandas` and `json5`, which no `pyproject.toml` declares.
+- `feature-dashboard` was cut from `main` at the old `6ab657f` (Merge T3; rewritten by the rebase, reachable through `backup/pre-linear`), before T4. It has the five dashboard files and `panel`, `plotly`, `nicegui`, `kaleido`, `pyvista` in its `pyproject.toml`, and none of the format, lint, type or pre-commit work from T6 onwards. The dashboards also import `pandas` and `json5`, which no `pyproject.toml` declares.
 - The global `~/.claude/CLAUDE.md` asks for Python with no `Any`. About 39 lines added to `src` in T14 and T16 use `Any` (`dict[str, Any]`, `NDArray[Any]`, `nx.DiGraph[Any]`). The existing code base uses `Any` widely; not worked on.
 - `uv run pydoclint src` reports 166 findings (mostly DOC111/DOC301: type hints in docstrings, `__init__` docstrings). Its pre-commit hook was left out on purpose (user's choice, T17); `[tool.pydoclint]` in `pyproject.toml` is kept.
 - Pyright: 211 errors on `src tests` (331 when first measured in T7; the fall is a side effect of the mypy and annotation work); `pyrightconfig.json` still includes `examples/`. Informational in CI (`continue-on-error`).

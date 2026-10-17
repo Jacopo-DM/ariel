@@ -43,9 +43,9 @@ Ruff is pinned to 0.14.* and does not fix by default; `ruff check --fix` is opt-
 ## Git and approvals
 
 - Git has no `user.name` or `user.email` set in this repo. Commit with `git -c user.name=jmdm -c user.email=jacopo.michele.dimatteo@gmail.com commit ...` and do not change the git config. The name `jmdm` was a guess (PLAN.md, Open questions).
-- Merge as the global file says (rebase, then `git merge --ff-only`). Everything from 2026-10-17 was merged with `git merge --no-ff`, so `main` has merge commits (PLAN.md, Open questions).
+- Merge as the global file says (rebase, then `git merge --ff-only`). `main` was rebased to a linear history on 2026-10-17; the tag `backup/pre-linear` keeps the old tip (PLAN.md, Open questions).
 - Library behaviour changes only with the user's explicit approval. A lint or type fix that would change behaviour gets a line-level `# noqa: CODE` or `# type: ignore[code]  # known bug` and an entry in PLAN.md Known problems instead of a fix.
-- Push and branch deletion wait for the user's say-so, as the global file says. Nothing has been pushed: `main` is ahead of `origin/main` (`git rev-list --count origin/main..main`, about 75), and `feature-dashboard` exists only locally.
+- Push and branch deletion wait for the user's say-so, as the global file says. Nothing has been pushed: `main` is ahead of `origin/main` (`git rev-list --count origin/main..main`, about 42), and `feature-dashboard` exists only locally.
 
 ## Data and secrets
 
