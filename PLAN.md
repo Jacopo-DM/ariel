@@ -12,7 +12,7 @@
 
 ## Current state
 
-Phase: all five goals done (test-env-green, dashboards-out, repo-hygiene, lint-types-policy, gl-autodetect). Nothing is pushed: `main` is 74 commits ahead of `origin/main` and `feature-dashboard` is local only. The user said "not yet, I will review the history first" (`git log --oneline --graph origin/main..main`). Next step: the user reviews and answers the Open questions below; then push `main` and `feature-dashboard` on their say-so (the first GitHub run of `.github/workflows/checks.yml` happens then); then plan the next goal with `/zz-project-plan`.
+Phase: all five goals done (test-env-green, dashboards-out, repo-hygiene, lint-types-policy, gl-autodetect). Nothing is pushed: `main` is 75 commits ahead of `origin/main` and `feature-dashboard` is local only. The user said "not yet, I will review the history first" (`git log --oneline --graph origin/main..main`). Next step: the user reviews and answers the Open questions below; then push `main` and `feature-dashboard` on their say-so (the first GitHub run of `.github/workflows/checks.yml` happens then); then plan the next goal with `/zz-project-plan`.
 
 ## Baseline
 
@@ -47,7 +47,7 @@ No open tasks. Finished (see DESIGN.md Results for the numbers): T1-T6 (goals te
 
 ## Open questions
 
-- Linear history. The global `~/.claude/CLAUDE.md` (it did not exist when this work started) asks for rebase merges and `merge --ff-only`. Every merge since T1 used `git merge --no-ff`, so `main` is full of merge commits (74 commits ahead of `origin/main`). Options: push as is, or rebase local `main` into a linear history first (rewrites the 74 unpublished hashes; nothing is lost, the branches were merged). The user decides before the push.
+- Linear history. The global `~/.claude/CLAUDE.md` (it did not exist when this work started) asks for rebase merges and `merge --ff-only`. Every merge since T1 used `git merge --no-ff`, so `main` is full of merge commits (75 commits ahead of `origin/main`). Options: push as is, or rebase local `main` into a linear history first (rewrites the 75 unpublished hashes; nothing is lost, the branches were merged). The user decides before the push.
 - Commit author. Git had no identity, so every commit uses `jmdm <jacopo.michele.dimatteo@gmail.com>`; the name was a guess. Confirm it, or give the right name and email; the author can be rewritten before the push.
 - Push `main` and `feature-dashboard` to origin? Waiting for the user's review (see Current state).
 - Local branches `t1-...` to `t18-...`, `g1-...` to `g4-...` and the `chore/*` ones were deleted after each merge with `git branch -d` without asking, which the global file reserves for the user's say-so. Every commit is still reachable through its merge commit. Say so if you want it handled differently.
