@@ -12,7 +12,7 @@
 
 ## Current state
 
-Phase: all five goals done (test-env-green, dashboards-out, repo-hygiene, lint-types-policy, gl-autodetect). Nothing is pushed: `main` is ahead of `origin/main` (`git rev-list --count origin/main..main`, about 44, linear since the rebase) and `feature-dashboard` is local only. The user said "not yet, I will review the history first" (`git log --oneline origin/main..main`). Next step: the user reviews; then push `main` and `feature-dashboard` to `fork` on their say-so (the first GitHub run of `.github/workflows/checks.yml` happens then); then plan the next goal with `/zz-project-plan`.
+Phase: all five goals done (test-env-green, dashboards-out, repo-hygiene, lint-types-policy, gl-autodetect). `main` was pushed to the `fork` remote (`Jacopo-DM/ariel`) on 2026-10-17 and is level with `fork/main`; `origin/main` (`ci-group/ariel`) is untouched, so `main` is ahead of it (`git rev-list --count origin/main..main`, about 45, linear). `feature-dashboard` is local only. On the fork, `checks.yml` and the Sphinx workflow both passed on the first run. Next step: the user decides about `feature-dashboard` and the first experiment branch; then plan the next goal with `/zz-project-plan`.
 
 ## Baseline
 
@@ -42,20 +42,19 @@ No open tasks. Finished (see DESIGN.md Results for the numbers): T1-T6 (goals te
 - Pyright to zero (211 errors, informational in CI), `pydoclint` (166 findings, hook left out): not worked on.
 - The 94 `# type: ignore[...]  # known bug` lines (see Known problems): each marks unfinished or inconsistent code; fixing them changes behaviour, so each needs a decision.
 - Resolve the `morphological_descriptor.py` normaliser TODO (`# TODO: verify that bounding_box_volume ...`): needs a behaviour decision.
-- Push `feature-dashboard` or `main` to `fork`: needs your say-so.
+- Push `feature-dashboard` to `fork`: needs your say-so.
 - gl-autodetect extras that the spec lists as non-goals: a detector for driver changes (only a mujoco version or platform change triggers a re-probe; `python -m ariel.utils.gl_manager` covers the rest), a real render benchmark, fixing the 7 examples that import `mujoco` before `ariel`, and a setting to turn the probe off.
 
 ## Open questions
 
-- Push `main` and `feature-dashboard` to the `fork` remote (`Jacopo-DM/ariel`; `origin` is `ci-group/ariel`, not ours)? Waiting for the user's review (see Current state). `main` was rebased to a linear history on 2026-10-17 (user's choice; author stays `jmdm <jacopo.michele.dimatteo@gmail.com>`, confirmed). The tag `backup/pre-linear` holds the old tip with the merge commits; delete it on the user's say-so once the history is accepted. `feature-dashboard` still sits on the old hashes, so it does not share history with the rebased `main` until it is rebased or recut (decide before pushing it).
+- Push `feature-dashboard` to the `fork` remote (`Jacopo-DM/ariel`; `origin` is `ci-group/ariel`, not ours)? `main` is already there. `main` was rebased to a linear history on 2026-10-17 (user's choice; author stays `jmdm <jacopo.michele.dimatteo@gmail.com>`, confirmed). The tag `backup/pre-linear` holds the old tip with the merge commits; delete it on the user's say-so once the history is accepted. `feature-dashboard` still sits on the old hashes, so it does not share history with the rebased `main` until it is rebased or recut (decide before pushing it).
 
 ## Known problems
 
-Not run so far: the docs build (`uv run sphinx-build -b html docs docs/_build`, CI: `.github/workflows/sphinx.yml`; `nox -s docs` for live reload).
+The docs build (`uv run sphinx-build -b html docs docs/_build`, CI: `.github/workflows/sphinx.yml`; `nox -s docs` for live reload) was not run locally. The Sphinx workflow passed on the fork on 2026-10-17.
 
 Other problems:
 - gl-autodetect was only run on a machine where all three OpenGL backends fail (no display, no libEGL, no OSMesa). A run on a machine where a backend works, and any run on macOS or Windows, is still missing; `python -m ariel.utils.gl_manager` on such a machine would show it. The 7 examples that create a `mujoco.Renderer` after importing `mujoco` themselves keep MuJoCo's default backend.
-- `.github/workflows/checks.yml` (pytest with coverage, ruff, format check, mypy, pyright as informational) has never run on GitHub. It was validated with `check-yaml` and its steps were replayed locally; the first real run happens after the first push.
 - `feature-dashboard` was cut from `main` at the old `6ab657f` (Merge T3; rewritten by the rebase, reachable through `backup/pre-linear`), before T4. It has the five dashboard files and `panel`, `plotly`, `nicegui`, `kaleido`, `pyvista` in its `pyproject.toml`, and none of the format, lint, type or pre-commit work from T6 onwards. The dashboards also import `pandas` and `json5`, which no `pyproject.toml` declares.
 - The global `~/.claude/CLAUDE.md` asks for Python with no `Any`. About 39 lines added to `src` in T14 and T16 use `Any` (`dict[str, Any]`, `NDArray[Any]`, `nx.DiGraph[Any]`). The existing code base uses `Any` widely; not worked on.
 - `uv run pydoclint src` reports 166 findings (mostly DOC111/DOC301: type hints in docstrings, `__init__` docstrings). Its pre-commit hook was left out on purpose (user's choice, T17); `[tool.pydoclint]` in `pyproject.toml` is kept.

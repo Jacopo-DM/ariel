@@ -45,7 +45,7 @@ Ruff is pinned to 0.14.* and does not fix by default; `ruff check --fix` is opt-
 - Git has no `user.name` or `user.email` set in this repo. Commit with `git -c user.name=jmdm -c user.email=jacopo.michele.dimatteo@gmail.com commit ...` and do not change the git config. The user confirmed the name `jmdm` on 2026-10-17.
 - Merge as the global file says (rebase, then `git merge --ff-only`). `main` was rebased to a linear history on 2026-10-17; the tag `backup/pre-linear` keeps the old tip (PLAN.md, Open questions).
 - Library behaviour changes only with the user's explicit approval. A lint or type fix that would change behaviour gets a line-level `# noqa: CODE` or `# type: ignore[code]  # known bug` and an entry in PLAN.md Known problems instead of a fix.
-- Push and branch deletion wait for the user's say-so, as the global file says. Pushes go to `fork`, not `origin`. Nothing has been pushed: `main` is ahead of `origin/main` (`git rev-list --count origin/main..main`, about 44), and `feature-dashboard` exists only locally.
+- Push and branch deletion wait for the user's say-so, as the global file says. Pushes go to `fork`, not `origin`. `main` is on `fork` (pushed 2026-10-17); it is ahead of `origin/main` (`git rev-list --count origin/main..main`, about 45), and `feature-dashboard` exists only locally.
 - Remotes: `origin` is `ci-group/ariel` (not ours to push to); `fork` is `git@github.com:Jacopo-DM/ariel.git`, the user's GitHub fork (created 2026-10-17, empty of our work), meant for experiments away from `main`. `gh` is installed on this Linux machine and logged in as `Jacopo-DM`.
 
 ## Data and secrets
