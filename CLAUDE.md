@@ -21,9 +21,14 @@ From the repo root. Python 3.12 (`.python-version` 3.12.9), uv 0.13.1.
 
 | Purpose | Command | Checked |
 |---|---|---|
+| Install everything | `uv sync --all-groups` | ~5 min, ~9 GB `.venv` |
 | Lockfile matches pyproject | `uv lock --check` | passes, ~2 s, read-only |
+| Unit tests | `uv run --no-sync pytest tests/unit -q -p no:cacheprovider --continue-on-collection-errors` | 419 passed, 2 collection errors, ~6.6 s |
+| Lint | `uv run --no-sync ruff check --no-fix src tests` | fails today (1858 findings), <1 s, read-only |
+| Format check | `uv run --no-sync ruff format --check src tests` | fails today (51 files), <1 s, read-only |
+| Types | `uv run --no-sync mypy src` | fails today (517 errors), ~40 s, read-only |
 
-The test, lint, type-check and docs commands are in PLAN.md under Known problems until a venv exists and they have been run. Note for when they are: `ruff.toml` sets `fix = true` and `unsafe-fixes = true`, so `ruff check` rewrites files; add `--no-fix` to check only.
+`ruff.toml` sets `fix = true` and `unsafe-fixes = true`, so a bare `ruff check` rewrites files: always pass `--no-fix` to check. Pytest with `--cov=ariel` adds ~4 s and writes `.coverage`. Failing results are listed in PLAN.md.
 
 ## Code rules
 
