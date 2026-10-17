@@ -50,6 +50,7 @@ Stack and architecture as found in the repo. Reasons are not recorded unless sta
 | 2026-10-17 | T4 dashboards off main | dashboards-out | branch `feature-dashboard` (local, not pushed) holds the 5 dashboard files; `main` no longer has `src/ariel/visualisation/dashboard/` (5,539 lines removed); pytest 437 passed (unchanged); mypy errors 517 -> 262 (a side effect, the dashboards were the untyped-call hotspot) |
 | 2026-10-17 | T5 drop `panel`, `plotly`, `nicegui`, `kaleido`, `pyvista` | dashboards-out | `uv.lock` 481 -> 437 packages (-1058 lines); `.venv` 9.3 GB -> 8.4 GB; `uv sync` 1.2 s; pytest 437 passed, mypy 262 errors (both unchanged by T5) |
 | 2026-10-17 | T6 placeholder docstrings | repo-hygiene | 18 files (not 17: counted again after T4) had `TODO(...): description of script`; now 0. One real TODO stays (`utils/morphological_descriptor.py:664`). ruff findings 1330 -> 1330 (the Baseline count of 1858 included files since removed); pytest 437 passed |
+| 2026-10-17 | T7 configs and dev dependencies | lint-types-policy | ruff 1330 -> 976 findings, mypy 262 -> 236 errors, format 47 files (unchanged), pytest 437 passed. Added dev deps `pre-commit` 4.7.0, `pydoclint` 0.11.1, `pyright` 1.1.414 and pinned `ruff==0.14.*`. Pyright baseline: 331 errors on `src tests`, 15 s (first run downloaded 229 MB into `~/.cache/pyright-python`) |
 
 ## Gotchas
 

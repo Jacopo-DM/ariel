@@ -5,10 +5,9 @@ target-version = "py312"
 exclude = [".venv", ".git", ".typings"]
 
 # Customization of the linter and formatter
-fix = true                # Enable auto-fixes for all rules
-unsafe-fixes = true       # Enable unsafe auto-fixes
+fix = false
+unsafe-fixes = false
 show-fixes = true         # Show fixes in the output
-preview = true            # Allow unstable features
 respect-gitignore = false # Ignore files listed in .gitignore
 
 # Same as Black.
@@ -56,6 +55,8 @@ ignore = [
     "CPY001", # Requests copyright notice
     "TD003",  # Requests issue-link under TODO
     "INP001", # implicit module __init__ thing
+    "COM812", # trailing commas: conflicts with the formatter
+    "TRY003", # long messages in exceptions
     "S311", # Cryptographic Purposes, not really needed here
     # --- Annoying (but useful) ---
     "PLR2004", # Magic value used in comparison, consider replacing with a constant variable
@@ -79,7 +80,7 @@ ignore = [
 # Allow fix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
 unfixable = []
-preview = true
+preview = false
 allowed-confusables = []
 task-tags = ["TODO", "WARN", "[ ]", "[~]", "[x]", "[?]", "[!]"]
 
@@ -98,3 +99,10 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 "noxfile.py" = [
     "S101", # asserts not allowed --> ok in nox config
 ]
+
+[lint.pylint]
+max-args = 8
+
+[lint.per-file-ignores]
+"tests/**" = ["ANN", "D100", "D101", "D102", "D103", "D104", "D105", "D106", "D107"]
+"examples/**" = ["T201"]
