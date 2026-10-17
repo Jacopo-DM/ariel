@@ -22,14 +22,14 @@ Stack and architecture as found in the repo. Reasons are not recorded unless sta
 - Body encodings: RoboGen-lite modular robots (`Core`, `Brick`, `Hinge`) decoded from genotypes (tree, CPPN-NEAT, NDE in PyTorch, vectors). The Lynx arm is a separate body family.
 - Controllers are CPG-based (`SimpleCPG`, `NaCPG`), and tasks are free-function fitness functions.
 - Optimisation libraries available: DEAP, EvoTorch, Nevergrad, plus an in-repo `RevDE`.
-- Dashboards use Plotly/Panel/NiceGUI.
+- Dashboards (Plotly/Panel) live on the `feature-dashboard` branch, not on `main`; `main` has no plotting dependencies.
 - Typing and docs: strict ruff (`ALL`), strict mypy and pyright, NumPy docstrings, 100% coverage target. Free functions and `@dataclass` are preferred over classes (`.claude/dev/functional_vs_oo.md`).
 - Global state at import: `ariel/__init__.py` sets `DATA`, a seeded `RNG` (seed 42) and rich logging. Reason not recorded.
 
 - Image handling: switch `opencv-python` to `opencv-python-headless` (decided 2026-10-17, for goal test-env-green). Reason: `import cv2` fails with `libGL.so.1` missing on machines without that system library, and nothing in `src/` needs a cv2 window. The one live window, in `examples/a_mujoco/3_cameras_in_simulation.py`, moves to matplotlib. Performance hint: if image or camera display ever feels slow, suspect that matplotlib replaced `cv2.imshow`, which is faster for live frames. Implemented in T3 with the version pinned to 4.11.0.86 (the locked opencv-python version; PyPI's newest is a 5.x major). Related to but separate from goal gl-autodetect: cv2 and MuJoCo use different GL paths, so this switch does not settle which `MUJOCO_GL` backend to use.
 - gl-autodetect config (decided 2026-10-17): `mujoco_user_config.json` lives in the user's working directory, not `~/.config`, because ARIEL is used as a library and already keys its outputs to the working directory (`ariel.DATA = cwd/__data__`). Cost: the probe re-runs per working folder although the result depends on the machine, and the file needs a `.gitignore` note. It is regenerated on first run if missing and on request via the manager script; a missing file must never crash import (falls back to MuJoCo's default). Not yet implemented.
 - Entry point: no console script; `[project.scripts]` is removed rather than adding `ariel.__main__` (decided 2026-10-17). Reason: the user does not want a CLI. Not yet implemented.
-- Dashboards leave `main` for a `feature-dashboard` branch, to be revisited once the core is fixed (decided 2026-10-17). Reason: untested, three near-duplicate versions, about 5k lines. Not yet implemented.
+- Dashboards leave `main` for a `feature-dashboard` branch, to be revisited once the core is fixed (decided 2026-10-17; done in T4, T5). Reason: untested, three near-duplicate versions, about 5.5k lines.
 
 ## Rejected approaches
 
@@ -46,6 +46,7 @@ Stack and architecture as found in the repo. Reasons are not recorded unless sta
 | 2026-10-17 | T2 stale dev docs | repo-hygiene | `.claude/dev/testing_and_tooling.md` and `contribution_workflow.md` no longer name nox sessions, a `tests_compiled` session or a blocking CI that do not exist; pytest 419 passed (unchanged, docs only) |
 | 2026-10-17 | T3 `opencv-python-headless==4.11.0.86` | test-env-green | `pytest tests/unit`: 0 collection errors, 437 passed, 0 failed (was 419 passed + 2 collection errors); `cv2` 4.11.0. `uv.lock` diff is large (1102 lines changed) but names changed: opencv-python -> opencv-python-headless and one added macOS-only package (`pyobjc-framework-pubsub`). Camera example edited, not run (no display) |
 | 2026-10-17 | T4 dashboards off main | dashboards-out | branch `feature-dashboard` (local, not pushed) holds the 5 dashboard files; `main` no longer has `src/ariel/visualisation/dashboard/` (5,539 lines removed); pytest 437 passed (unchanged); mypy errors 517 -> 262 (a side effect, the dashboards were the untyped-call hotspot) |
+| 2026-10-17 | T5 drop `panel`, `plotly`, `nicegui`, `kaleido`, `pyvista` | dashboards-out | `uv.lock` 481 -> 437 packages (-1058 lines); `.venv` 9.3 GB -> 8.4 GB; `uv sync` 1.2 s; pytest 437 passed, mypy 262 errors (both unchanged by T5) |
 
 ## Gotchas
 

@@ -5,7 +5,7 @@
 | Name | Goal | Kind | Success measure | Status | Added |
 |---|---|---|---|---|---|
 | test-env-green | All unit tests can be collected and pass | improvement, behaviour unchanged | `uv run pytest tests/unit` reports 0 collection errors and 0 failures (today 2 collection errors, 419 passed) | approved | 2026-10-17 |
-| dashboards-out | Move the dashboards off `main` into a `feature-dashboard` branch | improvement, behaviour unchanged for the core | `feature-dashboard` branch holds the current `main`; on `main`, `src/ariel/visualisation/dashboard/` is gone, references in docs/README/.claude updated, dependencies used only by dashboards (panel, nicegui, plotly, kaleido, pyvista: none imported elsewhere in `.py` files) removed or listed as a decision; `pytest tests/unit` result is unchanged | approved | 2026-10-17 |
+| dashboards-out | Move the dashboards off `main` into a `feature-dashboard` branch | improvement | done 2026-10-17: commits matching `git log --grep '^T[45]:'`; measure: dashboard dir gone from main, branch holds it, pytest 437 passed unchanged | done | 2026-10-17 |
 | repo-hygiene | Remove the broken entry point, the stray file and the stale docs | improvement, behaviour unchanged | the `[project.scripts]` entry is removed from `pyproject.toml` (decided 2026-10-17; `ariel.__main__` does not exist); `src/ariel/ec/generators copy.py` removed (done 2026-10-17, user approved; unreferenced); `CONTRIBUTING.md` says `uv sync` and Python >= 3.12; placeholder `TODO(jmdm)` docstrings count in `src/` goes from 19 to 0 or each is listed as kept | approved | 2026-10-17 |
 | lint-types-policy | Decide which ruff/mypy/pyright/pre-commit rules are sensible, then make the code meet them | improvement | pending: measure set after the config review with the user (baseline: ruff 1858 findings, format 51 files, mypy 517 errors) | draft, blocked on config review | 2026-10-17 |
 | gl-autodetect | ARIEL never crashes because the user's OpenGL backend is unsuitable. A manager script runs one subprocess worker per backend (glfw, egl, osmesa), records which work and how fast in `mujoco_user_config.json`, and ARIEL reads that file at import to set `MUJOCO_GL`. | new behaviour | not set yet; acceptance criteria to be proposed and agreed (candidates: the manager writes a valid file on this Linux machine; a crashing backend is recorded as failed without killing the manager; importing `ariel` sets `MUJOCO_GL` from the file). Order: after test-env-green (both touch the rendering/cv2 environment). | draft | 2026-10-17 |
@@ -21,7 +21,7 @@ Brownfield. Measured 2026-10-17 after `uv sync --all-groups` (Python 3.12.9, Lin
 | Check | Result | Time |
 |---|---|---|
 | `uv lock --check` | pass | ~2 s |
-| `ruff check --no-fix src tests` | fail: 1858 errors (461 auto-fixable); top: ANN001 331, E501 281, W505 105 | <1 s |
+| `ruff check --no-fix src tests` | fail: 1858 errors (before T4; not re-measured) (461 auto-fixable); top: ANN001 331, E501 281, W505 105 | <1 s |
 | `ruff format --check src tests` | fail: 51 files would be reformatted, 96 formatted | <1 s |
 | `mypy src` (strict) | fail: 517 errors in 49 of 102 files; after T4: 262 errors in 44 of 96 files | ~40 s |
 | `pytest tests/unit` | 419 passed, 2 collection errors (before T3); after T3: 437 passed, 0 errors | 6.6 s (3 runs: 6.58, 6.59, 6.60) |
@@ -31,18 +31,11 @@ Brownfield. Measured 2026-10-17 after `uv sync --all-groups` (Python 3.12.9, Lin
 
 Specs and measurements are in DESIGN.md (Specs). No task changes behaviour except removing the dashboards and the `ariel` console script, both approved. Every task: tests before and after (`pytest` line in CLAUDE.md), one task per commit, PLAN.md updated in the same commit. Pytest count and the grep counts are deterministic (no noise); pytest time was 6.58, 6.59, 6.60 s over three runs, so only a change over 0.1 s would count, and no goal claims a time.
 
-Order: Tier 1 first, in the order listed. T1 to T4 done (see DESIGN.md Results). T4 is done; T5 and T6 follow it. gl-autodetect no longer waits (T3 done).
+Order: Tier 1 first, in the order listed. T1 to T5 done (see DESIGN.md Results). T6 is next. gl-autodetect no longer waits (T3 done).
 
 ### Tier 1: small diff, low risk
 
 ### Tier 2: clear effect, more files or medium risk
-
-**T5. Drop dependencies used only by the dashboards** (dashboards-out)
-- Changes: `pyproject.toml`, `uv.lock`. Candidates: `panel`, `plotly` (imported only by dashboards); `nicegui`, `kaleido`, `pyvista` (imported nowhere in code, checked in `.py`, `.ipynb`, `.md`). `pandas` and `json5` are imported by the dashboards but declared nowhere (transitive). Each one removed only after you confirm by name.
-- Effect: smaller `.venv` (9.3 GB today; measured after), shorter `uv sync`. Estimate: unknown until measured; torch dominates.
-- Risk medium: a notebook or wiki code sample could use one (grep found none); `matplotlib`/`pandas` users may depend on them transitively.
-- Cost: -5 lines in `pyproject.toml`, lockfile churn.
-- Verify: pytest unchanged, `uv sync --all-groups` clean, `uv lock --check`, mypy error count not higher than 517 (T4 may lower it).
 
 **T6. Replace placeholder docstrings** (repo-hygiene)
 - Changes: the `TODO(jmdm): description of script` module docstrings in 17 files (recount after T4; list from `grep -rn "description of script" src`). Each gets a one-line real description read from the module. The single real TODO in `src/ariel/utils/morphological_descriptor.py:664` (normaliser check) is kept and listed, because it is a correctness question, not a placeholder.

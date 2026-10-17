@@ -21,7 +21,7 @@ From the repo root. Python 3.12 (`.python-version` 3.12.9), uv 0.13.1.
 
 | Purpose | Command | Checked |
 |---|---|---|
-| Install everything | `uv sync --all-groups` | ~5 min, ~9 GB `.venv` |
+| Install everything | `uv sync --all-groups` | ~5 min first time, ~8.4 GB `.venv` |
 | Lockfile matches pyproject | `uv lock --check` | passes, ~2 s, read-only |
 | Unit tests | `uv run --no-sync pytest tests/unit -q -p no:cacheprovider` | 437 passed, ~6.6 s |
 | Lint | `uv run --no-sync ruff check --no-fix src tests` | fails today (1858 findings), <1 s, read-only |
