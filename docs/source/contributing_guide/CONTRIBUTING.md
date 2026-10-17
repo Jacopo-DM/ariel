@@ -108,7 +108,7 @@ ariel/
 │   ├── simulation/         # Physics simulation (MuJoCo)
 │   ├── parameters/         # Configuration and parameter management
 │   ├── utils/              # Shared utilities
-│   └── visualisation/      # Dashboard and visualisation tools
+│   └── visualisation/      # Analysis tooling (dashboards: feature-dashboard branch)
 ├── tests/
 │   ├── unit/               # Unit tests
 │   └── functional/         # Functional / integration tests

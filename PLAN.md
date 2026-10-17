@@ -23,7 +23,7 @@ Brownfield. Measured 2026-10-17 after `uv sync --all-groups` (Python 3.12.9, Lin
 | `uv lock --check` | pass | ~2 s |
 | `ruff check --no-fix src tests` | fail: 1858 errors (461 auto-fixable); top: ANN001 331, E501 281, W505 105 | <1 s |
 | `ruff format --check src tests` | fail: 51 files would be reformatted, 96 formatted | <1 s |
-| `mypy src` (strict) | fail: 517 errors in 49 of 102 files | ~40 s |
+| `mypy src` (strict) | fail: 517 errors in 49 of 102 files; after T4: 262 errors in 44 of 96 files | ~40 s |
 | `pytest tests/unit` | 419 passed, 2 collection errors (before T3); after T3: 437 passed, 0 errors | 6.6 s (3 runs: 6.58, 6.59, 6.60) |
 | coverage, same run | 5033 statements, 2760 missed (about 45% line coverage; `fail_under` is 100) | with `--cov` ~10 s |
 
@@ -31,19 +31,11 @@ Brownfield. Measured 2026-10-17 after `uv sync --all-groups` (Python 3.12.9, Lin
 
 Specs and measurements are in DESIGN.md (Specs). No task changes behaviour except removing the dashboards and the `ariel` console script, both approved. Every task: tests before and after (`pytest` line in CLAUDE.md), one task per commit, PLAN.md updated in the same commit. Pytest count and the grep counts are deterministic (no noise); pytest time was 6.58, 6.59, 6.60 s over three runs, so only a change over 0.1 s would count, and no goal claims a time.
 
-Order: Tier 1 first, in the order listed. T1, T2 and T3 done (see DESIGN.md Results). T4 must come before T5 and T6. gl-autodetect no longer waits (T3 done).
+Order: Tier 1 first, in the order listed. T1 to T4 done (see DESIGN.md Results). T4 is done; T5 and T6 follow it. gl-autodetect no longer waits (T3 done).
 
 ### Tier 1: small diff, low risk
 
 ### Tier 2: clear effect, more files or medium risk
-
-**T4. Move dashboards off main** (dashboards-out)
-- Changes: create local branch `feature-dashboard` at current `main` (not pushed without your say-so); on `main` remove `src/ariel/visualisation/dashboard/` (4 dashboard files + `custom_plots.py` + `plot_registry.py`, about 5.8k lines); update `src/ariel/visualisation/__init__.py` docstring, README tree (line 110), `.claude/dev/repo_map.md` (line 23), `docs/source/contributing_guide/CONTRIBUTING.md` (line 111); keep `visualisation/analysis/`. Check `.claude/wiki/ariel_database.md`, `wiki/ariel_individual_db.md`, `wiki/ariel_db_pandas.md` (they mention plotly/panel); update only if they describe the removed code.
-- Effect: about -5.8k lines on main; `grep -rn "visualisation/dashboard"` finds nothing outside git history; pytest unchanged. Estimate from `wc -l` on the files.
-- Risk low-medium: nothing in `src/`, `tests/` or `examples/` imports the dashboards (checked); the dashboards have no tests.
-- Cost: -5.8k lines, no new concepts or dependencies.
-- Verify: pytest before and after identical; `feature-dashboard` contains the dashboards (`git ls-tree`).
-- Needs T3 first only because pytest counts change in T3; order T3 then T4.
 
 **T5. Drop dependencies used only by the dashboards** (dashboards-out)
 - Changes: `pyproject.toml`, `uv.lock`. Candidates: `panel`, `plotly` (imported only by dashboards); `nicegui`, `kaleido`, `pyvista` (imported nowhere in code, checked in `.py`, `.ipynb`, `.md`). `pandas` and `json5` are imported by the dashboards but declared nowhere (transitive). Each one removed only after you confirm by name.

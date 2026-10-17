@@ -107,7 +107,7 @@ ariel/
 │   │   └── mujoco_worker.py        #   Evaluates an individual, returns fitness
 │   ├── parameters/                 # Shared types, module defs, MuJoCo params
 │   ├── utils/                      # Renderers, trackers, video, optimizers, descriptors
-│   └── visualisation/              # Dashboards and analysis tooling
+│   └── visualisation/              # Analysis tooling (dashboards: feature-dashboard branch)
 ├── examples/                       # Runnable examples
 │   ├── a_mujoco/                   #   MuJoCo basics (launcher, rendering, cameras)
 │   ├── b_robots/                   #   Building robots from graphs/decoders

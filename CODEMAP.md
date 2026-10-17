@@ -24,7 +24,7 @@ Generated from `src/ariel/` on 2026-10-17. Ignore list: see CLAUDE.md.
 | `ariel.simulation` | MuJoCo worker base class | `mujoco_worker` |
 | `ariel.parameters` | shared types and params | `ariel_types`, `ariel_modules`, `mujoco_params` |
 | `ariel.utils` | helpers | `Tracker`, renderers, `VideoRecorder`, `file_ops`, `mujoco_ops`, `runners`, `noise_gen`, `morphological_descriptor`, `optimizers.RevDE` |
-| `ariel.visualisation` | dashboards and analysis | `dashboard/`, `analysis/` |
+| `ariel.visualisation` | analysis tooling (dashboards are on branch `feature-dashboard`) | `analysis/` |
 
 ## Import direction
 

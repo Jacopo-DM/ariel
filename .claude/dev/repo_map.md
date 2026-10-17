@@ -20,7 +20,7 @@ same packages (public imports + snippets), see [../user/00_index.md](../user/00_
 | [simulation/tasks/](../../src/ariel/simulation/tasks/) | Fitness functions (`targeted_locomotion`, `gait_learning`, `turning_in_place`) | new fitness/evaluation metrics (free functions) |
 | [parameters/](../../src/ariel/parameters/) | Type aliases (`ariel_types.py`), MuJoCo & module params (Pydantic) | shared types or config constants |
 | [utils/](../../src/ariel/utils/) | `Tracker`, renderers, `VideoRecorder`, `MorphologicalMeasures`, `file_ops`, `mujoco_ops`, `optimizers/` (`RevDE`) | cross-cutting helpers |
-| [visualisation/](../../src/ariel/visualisation/) | Dashboards / analysis (Plotly/Panel) | plotting & dashboards |
+| [visualisation/](../../src/ariel/visualisation/) | Analysis tooling (dashboards moved to the `feature-dashboard` branch) | analysis code |
 
 ## Conventions when adding code
 

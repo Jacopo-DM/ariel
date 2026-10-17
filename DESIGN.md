@@ -45,6 +45,7 @@ Stack and architecture as found in the repo. Reasons are not recorded unless sta
 | 2026-10-17 | T1 remove `[project.scripts]` | repo-hygiene | `uv lock --check` passes, `uv sync --all-groups --frozen` clean, pytest 419 passed (unchanged) |
 | 2026-10-17 | T2 stale dev docs | repo-hygiene | `.claude/dev/testing_and_tooling.md` and `contribution_workflow.md` no longer name nox sessions, a `tests_compiled` session or a blocking CI that do not exist; pytest 419 passed (unchanged, docs only) |
 | 2026-10-17 | T3 `opencv-python-headless==4.11.0.86` | test-env-green | `pytest tests/unit`: 0 collection errors, 437 passed, 0 failed (was 419 passed + 2 collection errors); `cv2` 4.11.0. `uv.lock` diff is large (1102 lines changed) but names changed: opencv-python -> opencv-python-headless and one added macOS-only package (`pyobjc-framework-pubsub`). Camera example edited, not run (no display) |
+| 2026-10-17 | T4 dashboards off main | dashboards-out | branch `feature-dashboard` (local, not pushed) holds the 5 dashboard files; `main` no longer has `src/ariel/visualisation/dashboard/` (about 5.8k lines removed); pytest 437 passed (unchanged); mypy errors 517 -> 262 (a side effect, the dashboards were the untyped-call hotspot) |
 
 ## Gotchas
 
