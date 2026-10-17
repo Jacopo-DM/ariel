@@ -30,7 +30,7 @@ Brownfield. Measured 2026-10-17 after `uv sync --all-groups` (Python 3.12.9, Lin
 
 ## Tasks
 
-No open tasks. Finished (see DESIGN.md Results for the numbers): T1-T6 (goals test-env-green, dashboards-out, repo-hygiene) and T7-T18 plus T15a-c (goal lint-types-policy). New tasks need approval.
+No open tasks. Finished (see DESIGN.md Results for the numbers): T1-T6 (goals test-env-green, dashboards-out, repo-hygiene) T7-T18 plus T15a-c (goal lint-types-policy), and G1-G4 (goal gl-autodetect). New tasks need approval.
 
 ### Tier 3: left alone on purpose (not executed)
 
@@ -44,6 +44,7 @@ No open tasks. Finished (see DESIGN.md Results for the numbers): T1-T6 (goals te
 
 ## Open questions
 
+None.
 
 ## Known problems
 
