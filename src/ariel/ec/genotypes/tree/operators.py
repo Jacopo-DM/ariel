@@ -87,7 +87,9 @@ def subtree_swap(
     discarded.  After the exchange the two genomes are pruned and validated.
     """
 
-    def extract_subtree(genome: TreeGenome, root: int):
+    def extract_subtree(
+        genome: TreeGenome, root: int
+    ) -> tuple[dict[int, dict[str, str]], list[dict[str, Any]]]:
         g = genome.to_networkx()
         subnodes = set([root] + list(nx.descendants(g, root)))
         internal_edges = [

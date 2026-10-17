@@ -197,7 +197,9 @@ class EAOperation[**P]:
         self.kwargs = kwargs
         self.name = func.__name__
 
-    def __call__(self, *args, **kwargs) -> "Population | EAOperation[P]":
+    def __call__(
+        self, *args: object, **kwargs: object
+    ) -> "Population | EAOperation[P]":
         """
         Either bind configuration arguments or execute against a population.
 

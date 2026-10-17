@@ -1,5 +1,7 @@
 """Lynxmotion arm body built as a MuJoCo MjSpec."""
 
+from typing import Any
+
 import mujoco
 import mujoco.viewer
 import numpy as np
@@ -15,7 +17,7 @@ class LynxArm:
 
     """
 
-    def __init__(self, config=None):
+    def __init__(self, config: dict[str, Any] | None = None) -> None:
         """Create the arm spec from `config` (a default arm if None)."""
         self.spec = mujoco.MjSpec()
         self.spec.compiler.degree = False
@@ -46,7 +48,7 @@ class LynxArm:
         ])
         return R @ axis
 
-    def _build_robot(self):
+    def _build_robot(self) -> None:
         """Construct the kinematic chain hierarchically."""
         # 1. ROOT / BASE
         base_link = self.spec.worldbody.add_body(

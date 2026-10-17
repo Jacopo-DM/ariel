@@ -24,7 +24,7 @@ Brownfield. Measured 2026-10-17 after `uv sync --all-groups` (Python 3.12.9, Lin
 | `ruff check --no-fix src tests` | fail: 1858 errors; after T6: 1330 (461 auto-fixable); top: ANN001 331, E501 281, W505 105 | <1 s |
 | `pyright src tests` (added in T7) | fail: 331 errors | 15 s |
 | `ruff format --check src tests` | fail: 51 files would be reformatted, 96 formatted; after T6: 47 and 94; after T8: pass (141 files) | <1 s |
-| `mypy src` (strict) | fail: 517 errors in 49 of 102 files; after T4: 262 errors in 44 of 96 files; after T7: 236 in 41 | ~40 s |
+| `mypy src` (strict) | fail: 517 errors in 49 of 102 files; after T4: 262 errors in 44 of 96 files; after T7: 236 in 41; after T14: 186 in 35 | ~40 s |
 | `pytest tests/unit` | 419 passed, 2 collection errors (before T3); after T3: 437 passed, 0 errors | 6.6 s (3 runs: 6.58, 6.59, 6.60) |
 | coverage, same run | 5033 statements, 2760 missed (about 45% line coverage; `fail_under` is 100) | with `--cov` ~10 s |
 
@@ -49,7 +49,6 @@ Policy and numbers are in DESIGN.md (Decisions: "Ruff rule policy" and "Lint/typ
 
 **Tier 2: clear effect, more files or needs judgement (each its own commit, ordered by effect per cost)**
 
-- **T14. Annotations in `src/`** (ANN about 56 after tests are exempt): add types; mypy cross-checks. Low-medium.
 - **T15. Remaining rule fixes** (about 165 findings: SIM300, SLF001, PLC0415, PT011, ARG, F841 and others, no exemptions): each one read before changing; PLC0415 (import inside function) may hide a circular import, so those are checked individually. Medium.
 - **T16. mypy to 0 errors on `src`** (236 after T7; 142 were in `robogen_lite`, categories: no-untyped-def 31, attr-defined 29, no-untyped-call 26, type-arg 24, has-type 24, arg-type 24). Largest and riskiest: may need real annotation work; split by package. Medium; tests pin behaviour only partly (robogen_lite has tests, `lynx_mjspec` and `simulation/mujoco_worker.py` have none, so say if you want characterisation tests first).
 - **T17. Make pre-commit run from the venv.** Replace `language: system` reliance with installed tools (T7 adds them); update prettier from v2.6.0. Verify: `pre-commit run --all-files` on a clean copy (the hooks edit files, so run it on a scratch branch and inspect the diff). Medium.

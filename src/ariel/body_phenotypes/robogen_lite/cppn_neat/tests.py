@@ -4,7 +4,7 @@ from .genome import Genome
 from .id_manager import IdManager
 
 
-def display_genome(genome: Genome, title: str):
+def display_genome(genome: Genome, title: str) -> None:
     """Print a readable summary of a genome's structure."""
     print("-" * 40)
     print(f"🧬 {title}")
@@ -28,7 +28,7 @@ def display_genome(genome: Genome, title: str):
     print("-" * 40 + "\n")
 
 
-def test_mutation():
+def test_mutation() -> None:
     """Tests the add_node and add_connection mutations."""
     print("=" * 60)
     print("🧪 T E S T I N G   M U T A T I O N 🧪")
@@ -63,7 +63,7 @@ def test_mutation():
     display_genome(genome, "Mutated Genome (Corrected)")
 
 
-def test_crossover():
+def test_crossover() -> None:
     """Tests the crossover of two parent genomes."""
     print("=" * 60)
     print(" T E S T I N G   C R O S S O V E R ")

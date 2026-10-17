@@ -4,7 +4,7 @@ import mujoco as mj
 import numpy as np
 
 
-def get_state_from_data(data: mj.MjData):
+def get_state_from_data(data: mj.MjData) -> np.ndarray:
     """Extract the robot state EXCLUDING global position.
 
     Processes quaternion to be consistent (scaled by sign of w).

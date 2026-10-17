@@ -112,7 +112,7 @@ class TargetedLocomotionWorker(MuJoCoWorkerBase):
                 displacement = data.qpos[:3].copy()
                 target = tuple(np.array(config.target_position) + displacement)
 
-                def cb(m, d) -> None:
+                def cb(m: mj.MjModel, d: mj.MjData) -> None:
                     pos = d.qpos[:3].copy()
                     vec = np.array(target) - pos
                     dist = np.linalg.norm(vec) + 1e-6

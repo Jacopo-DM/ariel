@@ -1,6 +1,10 @@
 """CPPN genome: nodes, connections, mutation, crossover and activation."""
 
+from __future__ import annotations
+
 import random
+from collections.abc import Callable
+from typing import Self
 
 from .activations import ACTIVATION_FUNCTIONS, DEFAULT_ACTIVATION
 from .connection import Connection
@@ -16,7 +20,7 @@ class Genome:
         connections: dict[int, Connection],
         fitness: float,
         serialized: dict = None,
-    ):
+    ) -> None:
         """Create a genome from its nodes, connections and fitness."""
         self.nodes = nodes
         self.connections = connections
@@ -24,19 +28,19 @@ class Genome:
         self.serialized = serialized
 
     @staticmethod
-    def _get_random_weight():
+    def _get_random_weight() -> float:
         return random.uniform(-1.0, 1.0)
 
     @staticmethod
-    def _get_random_bias():
+    def _get_random_bias() -> float:
         return random.uniform(-1.0, 1.0)
 
     @staticmethod
-    def _get_random_activation():
+    def _get_random_activation() -> str:
         """Select a random activation function from the available list."""
         return random.choice(list(ACTIVATION_FUNCTIONS))
 
-    def copy(self):
+    def copy(self) -> Genome:
         """Return a new Genome object with identical, deep-copied gene sets."""
         # Deep copy nodes (Node class has a copy method)
         new_nodes = {_id: node.copy() for _id, node in self.nodes.items()}
@@ -56,7 +60,7 @@ class Genome:
         num_outputs: int,
         next_node_id: int,
         next_innov_id: int,
-    ):
+    ) -> Self:
         """
         Create a new, randomly initialized Genome with a base topology.
 
@@ -105,9 +109,9 @@ class Genome:
         self,
         node_add_rate: float,
         conn_add_rate: float,
-        next_innov_id_getter,  # function to get/update global innovation ID
-        next_node_id_getter,  # function to get/update global node ID
-    ):
+        next_innov_id_getter: Callable[[], int],  # global innovation ID
+        next_node_id_getter: Callable[[], int],  # global node ID
+    ) -> None:
         """Apply structural mutation (add_node or add_connection)."""
         if random.random() < conn_add_rate:
             self._mutate_add_connection(next_innov_id_getter)
@@ -115,7 +119,9 @@ class Genome:
         if random.random() < node_add_rate:
             self._mutate_add_node(next_innov_id_getter, next_node_id_getter)
 
-    def _mutate_add_connection(self, next_innov_id_getter):
+    def _mutate_add_connection(
+        self, next_innov_id_getter: Callable[[], int]
+    ) -> None:
         """Attempt to add a connection between two unconnected nodes."""
         all_nodes = list(self.nodes.keys())
         # We need at least two nodes to form a connection
@@ -146,7 +152,11 @@ class Genome:
 
         self.add_connection(new_connection)
 
-    def _mutate_add_node(self, next_innov_id_getter, next_node_id_getter):
+    def _mutate_add_node(
+        self,
+        next_innov_id_getter: Callable[[], int],
+        next_node_id_getter: Callable[[], int],
+    ) -> None:
         """Split an existing connection by inserting a new hidden node."""
         if not self.connections:
             return
@@ -275,7 +285,7 @@ class Genome:
             offspring_node_genes, offspring_connection_genes, fitness=0.0
         )
 
-    def add_connection(self, connection: Connection):
+    def add_connection(self, connection: Connection) -> None:
         """Add a connection gene to the genome."""
         if connection not in self.connections.values():
             self.connections[connection.innov_id] = connection
@@ -283,7 +293,7 @@ class Genome:
             msg = "Connection already exists in genome."
             raise ValueError(msg)
 
-    def add_node(self, node: Node):
+    def add_node(self, node: Node) -> None:
         """Add a node gene to the genome."""
         if node not in self.nodes.values():
             self.nodes[node._id] = node
@@ -291,7 +301,7 @@ class Genome:
             msg = "Node already exists in genome."
             raise ValueError(msg)
 
-    def get_node_ordering(self):
+    def get_node_ordering(self) -> list[int]:
         """
         Calculate a topological order for feed-forward activation.
 

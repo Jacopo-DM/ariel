@@ -22,7 +22,7 @@ def _parse_log(file_path: str) -> dict[str, list]:
     }
 
 
-def plot_training_logs(log_files):
+def plot_training_logs(log_files: str | list[str]) -> None:
     """
     Parse multiple log files and plot aggregated statistics across runs.
 

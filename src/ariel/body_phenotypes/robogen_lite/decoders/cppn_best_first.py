@@ -28,7 +28,7 @@ def softmax(raw_scores: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
 class MorphologyDecoderBestFirst:
     """Decodes a CPPN using a true greedy, best-first search strategy."""
 
-    def __init__(self, cppn_genome: Genome, max_modules: int = 20):
+    def __init__(self, cppn_genome: Genome, max_modules: int = 20) -> None:
         """Create a decoder for `cppn_genome` (at most `max_modules`)."""
         self.cppn_genome = cppn_genome
         self.max_modules = max_modules

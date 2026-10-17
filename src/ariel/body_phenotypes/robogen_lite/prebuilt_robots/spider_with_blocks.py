@@ -22,7 +22,7 @@ faces = [
 F, L, B, R = faces
 
 
-def make_core():
+def make_core() -> CoreModule:
     """Return a new core module named "C"."""
     core = CoreModule(index=0)
     core.name = "C"

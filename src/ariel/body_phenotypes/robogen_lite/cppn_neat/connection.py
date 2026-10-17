@@ -1,5 +1,7 @@
 """Connection gene of a CPPN genome."""
 
+from __future__ import annotations
+
 
 class Connection:
     """A connection gene in a NEAT genome."""
@@ -11,7 +13,7 @@ class Connection:
         weight: float,
         enabled: bool,
         innov_id: int,
-    ):
+    ) -> None:
         """Create a connection from `in_id` to `out_id` with a weight."""
         self.in_id = in_id
         self.out_id = out_id
@@ -19,7 +21,7 @@ class Connection:
         self.enabled = enabled
         self.innov_id = innov_id
 
-    def copy(self):
+    def copy(self) -> Connection:
         """Return a new Connection object with identical values."""
         return Connection(
             self.in_id, self.out_id, self.weight, self.enabled, self.innov_id

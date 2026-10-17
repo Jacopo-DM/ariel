@@ -5,6 +5,7 @@ Mostly based on the revolve2 implementation:
 https://github.com/ci-group/revolve2/blob/master/standards/revolve2/standards/morphological_measures.py
 """
 
+from collections.abc import Hashable
 from itertools import product
 from typing import Any
 
@@ -118,7 +119,7 @@ class MorphologicalMeasures:
     # Private helpers
     # ------------------------------------------------------------------
 
-    def _find_core_node(self) -> Any:
+    def _find_core_node(self) -> Hashable:
         roots = [n for n in self.graph.nodes() if self.graph.in_degree(n) == 0]
         if len(roots) != 1:
             msg = f"Expected exactly one root node, found {len(roots)}"
@@ -139,10 +140,10 @@ class MorphologicalMeasures:
             for n in self.graph.nodes()
         )
 
-    def _get_node_type(self, node: Any) -> str:
+    def _get_node_type(self, node: Hashable) -> str:
         return self.graph.nodes[node].get("type", "UNKNOWN")
 
-    def _get_allowed_faces(self, node: Any) -> list[str]:
+    def _get_allowed_faces(self, node: Hashable) -> list[str]:
         t = self._get_node_type(node)
         if t == "CORE":
             return ["FRONT", "BACK", "RIGHT", "LEFT", "TOP", "BOTTOM"]
@@ -152,7 +153,7 @@ class MorphologicalMeasures:
             return ["FRONT"]
         return []
 
-    def _get_node_connections(self, node: Any) -> list[str]:
+    def _get_node_connections(self, node: Hashable) -> list[str]:
         faces = []
         for successor in self.graph.successors(node):
             data = self.graph.get_edge_data(node, successor)
@@ -160,7 +161,7 @@ class MorphologicalMeasures:
                 faces.append(data["face"])
         return faces
 
-    def _count_neighbors(self, node: Any) -> int:
+    def _count_neighbors(self, node: Hashable) -> int:
         return self.graph.in_degree(node) + self.graph.out_degree(node)
 
     def _graph_to_grid(
@@ -191,7 +192,7 @@ class MorphologicalMeasures:
 
     def _calculate_graph_positions(
         self,
-        node: Any,
+        node: Hashable,
         positions: dict,
         pos: np.ndarray,
     ) -> None:

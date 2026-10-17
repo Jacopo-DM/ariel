@@ -19,7 +19,7 @@ class IdManager:
         save_path: str | Path = "id_state.json",
         node_start: int | None = None,
         innov_start: int | None = None,
-    ):
+    ) -> None:
         """
         Initialize the IdManager.
 
@@ -56,7 +56,7 @@ class IdManager:
         self._innov_id += 1
         return self._innov_id
 
-    def set_initial_ids(self, num_inputs: int, num_outputs: int):
+    def set_initial_ids(self, num_inputs: int, num_outputs: int) -> None:
         """
         Set the initial counters based on a genome's topology.
 
@@ -74,7 +74,7 @@ class IdManager:
             f"{self._innov_id + 1}."
         )
 
-    def save(self):
+    def save(self) -> None:
         """Save the current ID counters to the specified JSON file."""
         state = {"next_node_id": self._node_id, "next_innov_id": self._innov_id}
         try:
@@ -83,7 +83,7 @@ class IdManager:
         except OSError as e:
             print(f"Error saving ID state: {e}")
 
-    def load(self):
+    def load(self) -> None:
         """Load the ID counters from the specified JSON file if it exists."""
         if not self.save_path.exists():
             return

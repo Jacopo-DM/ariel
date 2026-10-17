@@ -125,7 +125,7 @@ class TableWorld:
             pos=[0, 0, self.table_height + self.table_thickness / 2 + 0.01],
         )
 
-    def spawn(self, other_spec) -> None:
+    def spawn(self, other_spec: mujoco.MjSpec) -> None:
         """Spawn robot body flush on the table surface."""
         # Robot base is flush with the table surface
         table_top_z = self.table_height + self.table_thickness / 2

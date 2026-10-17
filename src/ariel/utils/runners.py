@@ -1,8 +1,18 @@
 """Headless runners that step a MuJoCo simulation for a set duration."""
 
 # Third-party libraries
+from typing import Protocol
+
 import mujoco
 import numpy as np
+
+
+class SupportsSetControl(Protocol):
+    """Anything with a `set_control(model, data)` method."""
+
+    def set_control(self, model: mujoco.MjModel, data: mujoco.MjData) -> None:
+        """Write the control inputs for the current step."""
+
 
 # Global constants
 SEED = 42
@@ -44,7 +54,7 @@ def simple_runner(
 def thread_safe_runner(
     model: mujoco.MjModel,
     data: mujoco.MjData,
-    controller,
+    controller: SupportsSetControl,
     duration: float = 10.0,
 ) -> None:
     """

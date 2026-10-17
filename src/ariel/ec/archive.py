@@ -104,7 +104,9 @@ class Archive:
 
         return statement
 
-    def _fetch_all(self, statement) -> list[Individual]:
+    def _fetch_all(
+        self, statement: Select[tuple[Individual]]
+    ) -> list[Individual]:
         with Session(self.engine) as session:
             rows = list(session.exec(statement).all())
         for ind in rows:
