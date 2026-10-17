@@ -12,9 +12,9 @@ Here is a list of important resources for contributors:
 - [Code of Conduct]
 
 [gpl 3.0 license]: https://opensource.org/licenses/GPL-3.0
-[source code]: https://github.com/Jacopo-DM/ariel
+[source code]: https://github.com/ci-group/ariel
 [documentation]: https://ariel.readthedocs.io/
-[issue tracker]: https://github.com/Jacopo-DM/ariel/issues
+[issue tracker]: https://github.com/ci-group/ariel/issues
 
 ## How to report a bug
 
@@ -106,7 +106,7 @@ $ nox --session=pre-commit -- install
 It is recommended to open an issue before starting work on anything.
 This will allow a chance to talk it over with the owners and validate your approach.
 
-[pull request]: https://github.com/Jacopo-DM/ariel/pulls
+[pull request]: https://github.com/ci-group/ariel/pulls
 
 <!-- github-only -->
 
