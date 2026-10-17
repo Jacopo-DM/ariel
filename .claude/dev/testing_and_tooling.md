@@ -28,27 +28,29 @@ nox --list                                # sessions: only `docs` exists today
 
 - Tests live in [tests/](../../tests/), written with `pytest`
   (`pytest`, `pytest-cov`, `pytest-modern`).
-- **Coverage target is 100%** — `pyproject.toml` sets
-  `[tool.coverage.report] fail_under = 100`. Measured coverage is about 45%
-  today (see PLAN.md), so the threshold is not met. New code needs new tests.
+- **Coverage target is 100%**, `pyproject.toml` sets
+  `[tool.coverage.report] fail_under = 54`, the measured value, so the suite
+  passes; raise it as tests are added. New code needs new tests.
   Excluded lines: `pragma: no cover`, `if TYPE_CHECKING:`.
 - Asserts are allowed in test files (ruff `S101` carve-out for `tests/`,
   `test_*.py`, `noxfile.py`).
 
 When adding a feature, add the test in the matching `tests/…` path **in the same
-change** — don't defer it. No CI job runs the tests; the only workflow builds
+change**, don't defer it. CI runs the tests, ruff and mypy
+([.github/workflows/checks.yml](../../.github/workflows/checks.yml)) and builds
 the docs ([.github/workflows/sphinx.yml](../../.github/workflows/sphinx.yml)).
 
 ## Pre-commit
 
-There is no nox session for pre-commit, and `pre-commit` and `pydoclint` are
-in no dependency group, so the hooks cannot be installed from the venv today.
+`pre-commit` is in the dev group. Run `uv run --no-sync pre-commit run
+--all-files`.
 
 The hooks (see [.pre-commit-config.yaml](../../.pre-commit-config.yaml)) run
-`ruff check` + `ruff format`, `pydoclint` (NumPy docstring linting), `prettier`,
-and TOML/YAML validators. Code that isn't ruff-clean and numpydoc-compliant will
-be rejected at commit time — write it to standard up front (see
-[coding_standards.md](coding_standards.md)).
+`ruff check` + `ruff format` on `src/` and `tests/`, plus large-file, TOML,
+YAML, end-of-file and whitespace checks. Code that isn't ruff-clean will be
+rejected at commit time; write it to standard up front (see
+[coding_standards.md](coding_standards.md)). `pydoclint` is installed but not a
+hook yet.
 
 ## Optional: mypyc compiled build
 

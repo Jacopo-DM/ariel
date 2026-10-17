@@ -5,8 +5,9 @@ Generated from `src/ariel/` on 2026-10-17. Ignore list: see CLAUDE.md.
 ## Entry points
 
 - Package `ariel` (`src/ariel/__init__.py`): exports `DATA`, `SEED`, `RNG`, `console`, `log`; first reads `mujoco_user_config.json` to set `MUJOCO_GL` (before anything imports mujoco).
+- `python -m ariel.utils.gl_manager`: probes the OpenGL backends and writes `mujoco_user_config.json` in the current folder.
 - `examples/`: runnable scripts (`a_mujoco`, `b_robots`, `c_genotypes`, `re_book`, `z_ec_course`, `new_EC_engine_example.py`).
-- `tests/unit/` mirrors `src/ariel/`; `tests/functional/` is notebooks.
+- `tests/unit/` mirrors `src/ariel/`; `tests/functional/` is notebooks; `tests/conftest.py` presets `MUJOCO_GL`.
 
 ## Modules
 
@@ -23,9 +24,9 @@ Generated from `src/ariel/` on 2026-10-17. Ignore list: see CLAUDE.md.
 | `ariel.simulation.tasks` | fitness functions | `targeted_locomotion`, `gait_learning`, `turning_in_place` |
 | `ariel.simulation` | MuJoCo worker base class | `mujoco_worker` |
 | `ariel.parameters` | shared types and params | `ariel_types`, `ariel_modules`, `mujoco_params` |
-| `ariel.utils` | helpers | `Tracker`, renderers, `VideoRecorder`, `file_ops`, `gl_backend` / `gl_manager` (OpenGL backend probe and `MUJOCO_GL` setup, import-order sensitive), `mujoco_ops`, `runners`, `noise_gen`, `morphological_descriptor`, `optimizers.RevDE` |
+| `ariel.utils` | helpers | `Tracker`, renderers, `VideoRecorder`, `file_ops`, `gl_backend` / `gl_manager` / `_gl_probe_worker` (OpenGL backend probe and `MUJOCO_GL` setup, import-order sensitive: `gl_backend` imports neither mujoco nor any ariel package, and `renderers` calls `ensure_gl_backend()` before `import mujoco`), `mujoco_ops`, `runners`, `noise_gen`, `morphological_descriptor`, `optimizers.RevDE` |
 | `ariel.visualisation` | analysis tooling (dashboards are on branch `feature-dashboard`) | `analysis/` |
 
 ## Import direction
 
-From `from ariel.X import` lines, checked on 2026-10-17: `ec` → `body_phenotypes`, `simulation`, `utils`; `simulation` → `parameters`, `utils`; `body_phenotypes` → `parameters`; `utils` → `parameters`; `parameters` → none. `examples` import from all. `visualisation` was not checked. No architecture test enforces this.
+From `from ariel.X import` lines, checked on 2026-10-17: `ec` → `body_phenotypes`, `simulation`, `utils`; `simulation` → `parameters`, `utils`; `body_phenotypes` → `parameters`; `utils` → `parameters`; `parameters` → none. Every package may also import the `ariel` root (`log`, `console`, `DATA`), and `ariel/__init__.py` imports `ariel.utils.gl_backend`. `examples` import from all. `visualisation` imports nothing from ariel (only an empty `analysis/__init__.py` is left). No architecture test enforces this.

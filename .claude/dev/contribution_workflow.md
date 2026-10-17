@@ -16,7 +16,7 @@ for the full text and links. This page is the checklist.
 1. Branch off the default branch (don't commit straight to it).
 2. Set up: `uv venv` → `uv sync --all-groups` (see
    [testing_and_tooling.md](testing_and_tooling.md)).
-3. Pre-commit hooks: configured in `.pre-commit-config.yaml` but not installable from the venv yet (see [testing_and_tooling.md](testing_and_tooling.md)).
+3. Pre-commit hooks: `uv run --no-sync pre-commit run --all-files` (see [testing_and_tooling.md](testing_and_tooling.md)).
 4. Write code to the house standard ([coding_standards.md](coding_standards.md),
    [docstrings_and_types.md](docstrings_and_types.md),
    [functional_vs_oo.md](functional_vs_oo.md)).

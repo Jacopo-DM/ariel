@@ -12,7 +12,7 @@
 
 ## Current state
 
-Phase: all five goals done (test-env-green, dashboards-out, repo-hygiene, lint-types-policy, gl-autodetect). Next step: push main and feature-dashboard (needs the user's say-so), then plan the next goal.
+Phase: all five goals done (test-env-green, dashboards-out, repo-hygiene, lint-types-policy, gl-autodetect). Nothing is pushed: `main` is 74 commits ahead of `origin/main` and `feature-dashboard` is local only. The user said "not yet, I will review the history first" (`git log --oneline --graph origin/main..main`). Next step: the user reviews and answers the Open questions below; then push `main` and `feature-dashboard` on their say-so (the first GitHub run of `.github/workflows/checks.yml` happens then); then plan the next goal with `/zz-project-plan`.
 
 ## Baseline
 
@@ -28,6 +28,8 @@ Brownfield. Measured 2026-10-17 after `uv sync --all-groups` (Python 3.12.9, Lin
 | `pytest tests/unit` | 419 passed, 2 collection errors (before T3); after T3: 437 passed, 0 errors | 6.6 s (3 runs: 6.58, 6.59, 6.60) |
 | coverage, same run | 5033 statements, 2760 missed (about 45% line coverage; `fail_under` is 100) | with `--cov` ~10 s |
 
+Now (2026-10-17, after gl-autodetect, `main` at the last merge): `uv lock --check` pass; `pytest tests/unit` 482 passed in about 6.6 s (about 10-16 s with `--cov`); coverage 54% with `fail_under = 54`; `ruff check src tests` 0 findings; `ruff format --check src tests` clean; `mypy src` 0 errors (94 lines ignored, see Known problems); `pyright src tests` 211 errors; `pre-commit run --all-files` passes.
+
 ## Tasks
 
 No open tasks. Finished (see DESIGN.md Results for the numbers): T1-T6 (goals test-env-green, dashboards-out, repo-hygiene) T7-T18 plus T15a-c (goal lint-types-policy), and G1-G4 (goal gl-autodetect). New tasks need approval.
@@ -37,14 +39,18 @@ No open tasks. Finished (see DESIGN.md Results for the numbers): T1-T6 (goals te
 - Raise unit coverage from 54% to the 100% target (`fail_under` is 54 now): large, and not part of an approved goal; areas with no tests are listed under Known problems.
 - Characterisation tests for the dashboards: they left `main`; revisit on `feature-dashboard`.
 - Lint and type fixes in `examples/` (ruff 1274 findings) and `docs/`: outside `src` and `tests`.
-- Pyright to zero (210 errors, informational in CI), `pydoclint` (166 findings, hook left out): not worked on.
+- Pyright to zero (211 errors, informational in CI), `pydoclint` (166 findings, hook left out): not worked on.
 - The 94 `# type: ignore[...]  # known bug` lines (see Known problems): each marks unfinished or inconsistent code; fixing them changes behaviour, so each needs a decision.
 - Resolve the `morphological_descriptor.py` normaliser TODO (`# TODO: verify that bounding_box_volume ...`): needs a behaviour decision.
 - Push `feature-dashboard` or `main` to origin: needs your say-so.
+- gl-autodetect extras that the spec lists as non-goals: a detector for driver changes (only a mujoco version or platform change triggers a re-probe; `python -m ariel.utils.gl_manager` covers the rest), a real render benchmark, fixing the 7 examples that import `mujoco` before `ariel`, and a setting to turn the probe off.
 
 ## Open questions
 
-None.
+- Linear history. The global `~/.claude/CLAUDE.md` (it did not exist when this work started) asks for rebase merges and `merge --ff-only`. Every merge since T1 used `git merge --no-ff`, so `main` is full of merge commits (74 commits ahead of `origin/main`). Options: push as is, or rebase local `main` into a linear history first (rewrites the 74 unpublished hashes; nothing is lost, the branches were merged). The user decides before the push.
+- Commit author. Git had no identity, so every commit uses `jmdm <jacopo.michele.dimatteo@gmail.com>`; the name was a guess. Confirm it, or give the right name and email; the author can be rewritten before the push.
+- Push `main` and `feature-dashboard` to origin? Waiting for the user's review (see Current state).
+- Local branches `t1-...` to `t18-...`, `g1-...` to `g4-...` and the `chore/*` ones were deleted after each merge with `git branch -d` without asking, which the global file reserves for the user's say-so. Every commit is still reachable through its merge commit. Say so if you want it handled differently.
 
 ## Known problems
 
@@ -52,8 +58,11 @@ Not run so far: the docs build (`uv run sphinx-build -b html docs docs/_build`, 
 
 Other problems:
 - gl-autodetect was only run on a machine where all three OpenGL backends fail (no display, no libEGL, no OSMesa). A run on a machine where a backend works, and any run on macOS or Windows, is still missing; `python -m ariel.utils.gl_manager` on such a machine would show it. The 7 examples that create a `mujoco.Renderer` after importing `mujoco` themselves keep MuJoCo's default backend.
+- `.github/workflows/checks.yml` (pytest with coverage, ruff, format check, mypy, pyright as informational) has never run on GitHub. It was validated with `check-yaml` and its steps were replayed locally; the first real run happens after the first push.
+- `feature-dashboard` was cut from `main` at `6ab657f` (Merge T3), before T4. It has the five dashboard files and `panel`, `plotly`, `nicegui`, `kaleido`, `pyvista` in its `pyproject.toml`, and none of the format, lint, type or pre-commit work from T6 onwards. The dashboards also import `pandas` and `json5`, which no `pyproject.toml` declares.
+- The global `~/.claude/CLAUDE.md` asks for Python with no `Any`. About 39 lines added to `src` in T14 and T16 use `Any` (`dict[str, Any]`, `NDArray[Any]`, `nx.DiGraph[Any]`). The existing code base uses `Any` widely; not worked on.
 - `uv run pydoclint src` reports 166 findings (mostly DOC111/DOC301: type hints in docstrings, `__init__` docstrings). Its pre-commit hook was left out on purpose (user's choice, T17); `[tool.pydoclint]` in `pyproject.toml` is kept.
-- Pyright: 210 errors on `src tests` (331 when first measured in T7; the fall is a side effect of the mypy and annotation work); `pyrightconfig.json` still includes `examples/`. Informational in CI (`continue-on-error`).
+- Pyright: 211 errors on `src tests` (331 when first measured in T7; the fall is a side effect of the mypy and annotation work); `pyrightconfig.json` still includes `examples/`. Informational in CI (`continue-on-error`).
 - Type errors that mark real or unfinished code, silenced with a line-level `# type: ignore[code]  # known bug` (94 lines in 23 files, 2026-10-17; behaviour unchanged). Remove an ignore by fixing the code it marks; `mypy` (strict, `warn_unused_ignores`) will report one that is no longer needed. By file (codes with counts, then lines):
   - `body_phenotypes/lynx_mjspec/unified_pipeline/evolve.py`: 1 line(s): attr-defined 1 (lines 282)
   - `body_phenotypes/lynx_mjspec/unified_pipeline/replay.py`: 1 line(s): arg-type 1 (lines 163)
