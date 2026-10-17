@@ -16,6 +16,13 @@ from rich.console import Console
 from rich.logging import RichHandler
 from rich.traceback import install
 
+# Local libraries
+from ariel.utils.gl_backend import configure_from_file
+
+# --- OPENGL BACKEND --- #
+# MuJoCo reads MUJOCO_GL when it is imported, so this must run before that.
+configure_from_file()
+
 # --- DATA SETUP --- #
 CWD = Path.cwd()
 DATA = Path(CWD / "__data__")
