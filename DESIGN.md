@@ -12,6 +12,42 @@ Proposed 2026-10-17 with the task list; recorded as agreed once the user approve
 
 Architecture alternatives: none; these are removals and fixes, no new modules.
 
+**gl-autodetect** (proposed 2026-10-17, awaiting approval). Users: anyone running ARIEL (as a library or from `examples/`) on a machine where the default MuJoCo OpenGL backend is unsuitable: no display, no libEGL, no OSMesa, or a driver that crashes. They run a render or a video example and today get a traceback or a hard crash.
+
+Facts the spec rests on (checked 2026-10-17, mujoco 3.8.0): `MUJOCO_GL` is read when `mujoco` is imported (`mujoco/rendering/classic/gl_context.py`), so it must be set before the first `import mujoco` in the process; it only affects `mujoco.Renderer` (offscreen), not `mujoco.viewer`, which always uses GLFW and needs a display; the only code in `src/` that creates a `Renderer` is `ariel/utils/renderers.py` (3 places), and 7 examples create one directly; `examples/re_book/1_brain_evolution_multithreaded.py` documents a hard crash (access violation in `glfwCreateWindow`) when a Renderer is created in a worker thread, so a failing backend can kill its process and each backend must be probed in its own subprocess. On the development machine all three backends fail at `Renderer` creation (glfw: no display; egl: libEGL missing; osmesa: libOSMesa missing), in 0.2-0.5 s each.
+
+Behaviour:
+- A *worker* (`python -m ariel.utils._gl_probe_worker <backend>`, imports only `mujoco`, never `ariel`) sets `MUJOCO_GL`, builds a tiny model, creates a 64x64 `Renderer`, renders 5 frames and prints one JSON line: ok, mean render time in ms, error text.
+- A *manager* (`python -m ariel.utils.gl_manager`, also callable as a function) runs one worker subprocess per backend valid for the platform (Linux: glfw, egl, osmesa; macOS, Windows: glfw only), with a timeout (30 s per backend), records a crash (non-zero or negative exit code), a timeout or an error as `ok: false` with the reason, and writes `mujoco_user_config.json` in the current working directory (atomic write, lock file against parallel writers). A rich progress bar shows the probe and says it is a one-off.
+- Config content: `version`, `platform`, `python`, `mujoco` version, `backends` (per backend: `ok`, `render_ms` or null, `error` or null), `selected` (the working backend with the lowest `render_ms`, ties glfw, egl, osmesa; null if none), `viewer_available` (true if glfw works, i.e. a display exists).
+- `import ariel` reads the file if present and, only if `MUJOCO_GL` is unset and `mujoco` is not yet imported, sets `MUJOCO_GL` to `selected`. It never probes and never raises: a missing, unreadable or corrupt file is a warning (corrupt) or nothing (missing).
+- Importing a module that needs OpenGL (today `ariel.utils.renderers`; a public `ariel.utils.gl_backend.ensure_gl_backend()` for user scripts) probes automatically when the file is missing, with the progress bar and a one-off message, then applies the result if `mujoco` is not yet imported (otherwise it says the choice takes effect on the next run). Two processes starting at once probe once (lock).
+- The config is also refreshed when the recorded `mujoco` version or platform differs from the running one, and on request: `python -m ariel.utils.gl_manager`.
+- An existing `MUJOCO_GL` in the environment always wins and is never overwritten.
+
+Acceptance criteria (each a test):
+1. Running the manager in a temporary folder writes a valid file (all keys above, correct types); on a machine where nothing works, `selected` is null and `viewer_available` false, the manager exits 0.
+2. A worker that crashes (simulated with a fake backend that aborts) or hangs past the timeout is recorded `ok: false` with a reason, the other backends are still probed, and the manager exits 0.
+3. With a config whose `selected` is `osmesa` and `MUJOCO_GL` unset, a fresh `python -c "import ariel, os; print(os.environ.get('MUJOCO_GL'))"` prints `osmesa`; with `MUJOCO_GL=egl` preset it prints `egl`; with `selected: null` it prints `None`; with a corrupt file it prints a warning and does not raise.
+4. Importing `ariel.utils.renderers` with no file probes exactly once and creates the file; a second import in the same folder does not start a subprocess.
+5. Two processes importing at the same moment produce one file and one probe run.
+6. A read-only working directory only warns; ARIEL still imports.
+7. `pytest tests/unit` passes with the new tests (no real GL needed: workers are faked), `ruff check`, `ruff format --check` and `mypy` stay at zero, coverage stays at least 54%.
+8. `.gitignore` lists `mujoco_user_config.json`; the README has a short note (what the file is, how to regenerate, that `MUJOCO_GL` wins).
+Not verified here (needs another machine): a run where at least one backend works, and Windows/macOS.
+
+Non-goals: changing the interactive viewer; switching backend while a process runs; fixing examples that import `mujoco` before `ariel` (they keep the default backend and only get a hint); GPU selection or a real benchmark (one small render per backend is the speed measure); setting `PYOPENGL_PLATFORM` (MuJoCo does it for egl itself); a setting to turn the probe off.
+
+Integration points: `src/ariel/__init__.py` (reads config, already sets global state), new `src/ariel/utils/gl_backend.py` (read/apply/ensure, imports no mujoco), `gl_manager.py`, `_gl_probe_worker.py`; `src/ariel/utils/renderers.py` (calls `ensure_gl_backend()` before `import mujoco`, with an isort split and an E402 note); tests under `tests/unit/test_utils/`; `.gitignore`; README. `rich` is already a dependency, so no new dependency. The import-direction rule holds: `utils` imports nothing from the other packages.
+
+Architecture and alternatives:
+- Chosen: subprocess-per-backend probe plus a JSON file in the user's working folder, read at `import ariel`, auto-probe on first import of a GL-needing module.
+- Rejected: probing in-process (a glfw crash kills the caller, as the multithreaded example documents); documenting `MUJOCO_GL` only (leaves the crash for every new user); config under `~/.config/ariel/` (user preferred the working folder for library use; cost: a new folder re-probes once); probing on every `import ariel` (seconds of delay in every worker process); two modes `view`/`batch` (the viewer ignores `MUJOCO_GL`, so the second mode would change nothing).
+- Consequence of the cwd choice: the file belongs to the machine, not the folder, so each new working folder probes once.
+
+Open ambiguities: (a) the staleness rule above (mujoco version or platform change) does not notice a driver change; the manual command covers that; (b) the 30 s timeout and 5-frame, 64x64 measure are my picks; (c) when `mujoco` is already imported at probe time the choice only applies on the next run.
+
+
 ## Decisions
 
 Stack and architecture as found in the repo. Reasons are not recorded unless stated.

@@ -8,7 +8,7 @@
 | dashboards-out | Move the dashboards off `main` into a `feature-dashboard` branch | improvement | done 2026-10-17: commits matching `git log --grep '^T[45]:'`; measure: dashboard dir gone from main, branch holds it, pytest 437 passed unchanged | done | 2026-10-17 |
 | repo-hygiene | Remove the broken entry point, the stray file and the stale docs | improvement | done 2026-10-17: commits matching `git log --grep '^T[126]:'` and the housekeeping merges; console script, `generators copy.py`, placeholder docstrings (18 files to 0) and stale dev-doc claims fixed. Left: nox session names in root and docs CONTRIBUTING.md (see Known problems) | done | 2026-10-17 |
 | lint-types-policy | Settle the ruff, mypy, pyright and pre-commit policy, then make `src` and `tests` meet it | improvement | done 2026-10-17: commits matching `git log --grep '^T\(7\|8\|9\|1[0-8]\)'`; ruff 1330 -> 0, format 47 files -> clean, mypy 262 -> 0 (94 lines ignored as known bugs), pytest 437 passed, pre-commit passes, CI workflow added; pyright 331 -> 210 (informational) | done | 2026-10-17 |
-| gl-autodetect | ARIEL never crashes because the user's OpenGL backend is unsuitable. A manager script runs one subprocess worker per backend (glfw, egl, osmesa), records which work and how fast in `mujoco_user_config.json`, and ARIEL reads that file at import to set `MUJOCO_GL`. | new behaviour | not set yet; acceptance criteria to be proposed and agreed (candidates: the manager writes a valid file on this Linux machine; a crashing backend is recorded as failed without killing the manager; importing `ariel` sets `MUJOCO_GL` from the file). Order: after test-env-green (both touch the rendering/cv2 environment). | draft | 2026-10-17 |
+| gl-autodetect | ARIEL never crashes because the user's OpenGL backend is unsuitable: a manager probes glfw, egl and osmesa in one subprocess each, records the result in `mujoco_user_config.json` (working folder), and ARIEL applies it to `MUJOCO_GL` before `mujoco` is imported | new behaviour | 8 acceptance criteria in DESIGN.md (Specs, gl-autodetect): valid file written and manager exits 0 even when every backend fails; crashing or hanging worker recorded as failed; `import ariel` applies the file and never overrides a preset `MUJOCO_GL`; first import of `ariel.utils.renderers` probes once under a lock; corrupt or read-only cases only warn; tests, ruff, mypy and coverage 54% hold | draft, spec awaiting approval | 2026-10-17 |
 
 ## Current state
 
@@ -32,6 +32,20 @@ Brownfield. Measured 2026-10-17 after `uv sync --all-groups` (Python 3.12.9, Lin
 
 No open tasks. Finished (see DESIGN.md Results for the numbers): T1-T6 (goals test-env-green, dashboards-out, repo-hygiene) and T7-T18 plus T15a-c (goal lint-types-policy). New tasks need approval.
 
+### gl-autodetect tasks (awaiting approval)
+
+Vertical slices, each ending in something that runs and passes its tests; no new dependency (rich is already one). Tier 1 is the walking skeleton.
+
+**Tier 1**
+- **G1. Probe worker and manager (walking skeleton).** New `utils/_gl_probe_worker.py`, `utils/gl_manager.py` (+ `__main__` entry), tests with a fake worker (crash, hang, error, success). Criteria 1, 2. Risk low-medium: subprocess handling and timeouts; cost about 150 lines + 150 lines of tests, no new concepts beyond the config schema. Verify: tests, and a real run on this machine (all three fail, `selected: null`).
+- **G2. Read and apply at `import ariel`.** New `utils/gl_backend.py` (read, validate, apply, no mujoco import) and a call in `ariel/__init__.py`. Criterion 3 (subprocess tests with `python -c`). Risk medium: import-time side effect, must never raise; cost about 80 lines + 100 lines of tests.
+
+**Tier 2**
+- **G3. Auto-probe on first import of `ariel.utils.renderers` with rich progress and a lock.** Criteria 4, 5, 6. Risk medium (concurrency, import order, E402/isort split); cost about 80 lines + 120 lines of tests. Note: `renderers.py` has tests only through `cppn_decoding`, so a characterisation check of its three functions is added first if you want it (no tests pin `single_frame_renderer` today).
+- **G4. Staleness rule and docs.** Re-probe when the recorded mujoco version or platform differs; `.gitignore`, README note, CLAUDE.md and CODEMAP. Criterion 8. Risk low.
+
+**Tier 3 (not executed)**: running on Windows/macOS or on a machine where a backend works (needs a machine); fixing the 7 examples that import `mujoco` before `ariel`; a driver-change detector; a real render benchmark.
+
 ### Tier 3: left alone on purpose (not executed)
 
 - Raise unit coverage from 54% to the 100% target (`fail_under` is 54 now): large, and not part of an approved goal; areas with no tests are listed under Known problems.
@@ -44,10 +58,9 @@ No open tasks. Finished (see DESIGN.md Results for the numbers): T1-T6 (goals te
 
 ## Open questions
 
-- gl-autodetect: can we test on Windows or macOS?
-- gl-autodetect: selection rule, proposed by the user, not yet decided. A GUI is a requirement of the run, not a preference: the interactive viewer needs glfw, batch and evolution runs do not. Choose among working backends by what the run needs first, then by measured render time. Order for viewing: glfw, egl, osmesa. Order for headless batch: egl, glfw, osmesa.
+- gl-autodetect: Windows and macOS cannot be tested here (decided: best-effort, glfw only); a machine with a working backend is needed to check the success path. Who can run `python -m ariel.utils.gl_manager` on one?
 
-Evidence for gl-autodetect (checked 2026-10-17):
+Evidence for gl-autodetect (the spec is in DESIGN.md; the remaining question is the approval of the spec and tasks below) (checked 2026-10-17):
 - Nothing in `src/`, `examples/` or `tests/` sets `MUJOCO_GL` or `PYOPENGL_PLATFORM`, and `mujoco_user_config.json` does not exist.
 - `src/ariel/utils/renderers.py` constructs `Renderer(` in 3 places; 22 `mujoco.Renderer(` / `mj.Renderer(` calls in `examples/` (the request said about 15).
 - `examples/re_book/1_brain_evolution_multithreaded.py` line 366 documents a crash: an access violation in `glfwCreateWindow` when `mujoco.Renderer()` is created in a worker thread. So each backend must be probed in its own subprocess.
