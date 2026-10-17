@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import datetime, timezone
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import asdict
+from datetime import UTC, datetime
 from pathlib import Path
 
 import mujoco
@@ -14,13 +14,13 @@ import numpy as np
 from ariel.body_phenotypes.lynx_mjspec.unified_pipeline.common import (
     DEFAULT_CTRL_FREQ,
     DEFAULT_SIM_STEPS,
-    DEFAULT_TOUCH_THRESHOLD,
     DEFAULT_TARGET,
+    DEFAULT_TOUCH_THRESHOLD,
     NUM_TUBES,
-    TUBE_MIN,
     TUBE_MAX,
-    PolicySpec,
+    TUBE_MIN,
     FastNumpyNetwork,
+    PolicySpec,
     apply_position_delta_control,
     build_model,
     build_observation,
@@ -35,7 +35,7 @@ DEFAULT_TIME_BONUS_WEIGHT = 0.08
 
 
 def make_run_name() -> str:
-    return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    return datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
 
 
 def parse_args() -> argparse.Namespace:
@@ -261,7 +261,7 @@ def main() -> None:
                 )
             )
 
-            for cand, fit in zip(candidates, fitnesses):
+            for cand, fit in zip(candidates, fitnesses, strict=False):
                 optimizer.tell(cand, float(fit))
 
             valid = [f for f in fitnesses if f < INVALID_FITNESS]

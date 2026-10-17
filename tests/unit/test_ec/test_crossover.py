@@ -79,7 +79,7 @@ def test_n_point_mismatched_shapes_raise() -> None:
 
 
 def test_uniform_returns_two_children() -> None:
-    """uniform crossover produces two same-length children."""
+    """Uniform crossover produces two same-length children."""
     p_i, p_j = _genes(10), _genes(10)
     c1, c2 = Crossover.uniform(p_i, p_j)
     assert len(c1) == 10
@@ -96,13 +96,13 @@ def test_uniform_genes_come_from_parents() -> None:
 
 
 def test_uniform_invalid_probability_raises() -> None:
-    """uniform with swap_probability outside [0, 1] raises ValueError."""
+    """Uniform with swap_probability outside [0, 1] raises ValueError."""
     with pytest.raises(ValueError):
         Crossover.uniform(_genes(5), _genes(5), swap_probability=1.5)
 
 
 def test_uniform_probability_zero_unchanged() -> None:
-    """uniform with swap_probability=0 leaves both children equal to parents."""
+    """Uniform with swap_probability=0 leaves both children equal to parents."""
     p_i = [1.0, 2.0, 3.0]
     p_j = [4.0, 5.0, 6.0]
     c1, c2 = Crossover.uniform(p_i, p_j, swap_probability=0.0)
@@ -111,7 +111,7 @@ def test_uniform_probability_zero_unchanged() -> None:
 
 
 def test_uniform_probability_one_swaps_all() -> None:
-    """uniform with swap_probability=1 fully swaps both children."""
+    """Uniform with swap_probability=1 fully swaps both children."""
     p_i = [1.0, 2.0, 3.0]
     p_j = [4.0, 5.0, 6.0]
     c1, c2 = Crossover.uniform(p_i, p_j, swap_probability=1.0)

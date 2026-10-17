@@ -1,7 +1,5 @@
 """Test: Population class behaviour."""
 
-import pytest
-
 from ariel.ec.individual import Individual
 from ariel.ec.population import Population
 
@@ -65,20 +63,20 @@ def test_population_add() -> None:
 
 
 def test_population_repr() -> None:
-    """repr shows the size."""
+    """Repr shows the size."""
     pop = Population([_make_ind()])
-    assert "Population(n=1)" == repr(pop)
+    assert repr(pop) == "Population(n=1)"
 
 
 def test_population_append() -> None:
-    """append adds one individual in place."""
+    """Append adds one individual in place."""
     pop = Population.empty()
     pop.append(_make_ind(5.0))
     assert len(pop) == 1
 
 
 def test_population_extend() -> None:
-    """extend adds multiple individuals in place."""
+    """Extend adds multiple individuals in place."""
     pop = Population([_make_ind(1.0)])
     pop.extend([_make_ind(2.0), _make_ind(3.0)])
     assert len(pop) == 3
@@ -131,14 +129,14 @@ def test_population_sort_descending() -> None:
 
 
 def test_population_shuffle_same_size() -> None:
-    """shuffle returns a population of the same size."""
+    """Shuffle returns a population of the same size."""
     pop = Population([_make_ind(float(i)) for i in range(6)])
     shuffled = pop.shuffle()
     assert len(shuffled) == len(pop)
 
 
 def test_population_where_filters() -> None:
-    """where keeps only individuals satisfying the predicate."""
+    """Where keeps only individuals satisfying the predicate."""
     pop = Population([_make_ind(1.0, alive=True), _make_ind(2.0, alive=False)])
     alive = pop.where(lambda ind: ind.alive)
     assert len(alive) == 1
@@ -146,19 +144,19 @@ def test_population_where_filters() -> None:
 
 
 def test_population_alive_property() -> None:
-    """alive property returns only living individuals."""
+    """Alive property returns only living individuals."""
     pop = Population([_make_ind(alive=True), _make_ind(alive=False)])
     assert len(pop.alive) == 1
 
 
 def test_population_dead_property() -> None:
-    """dead property returns only dead individuals."""
+    """Dead property returns only dead individuals."""
     pop = Population([_make_ind(alive=True), _make_ind(alive=False)])
     assert len(pop.dead) == 1
 
 
 def test_population_unevaluated_property() -> None:
-    """unevaluated returns individuals where requires_eval is True."""
+    """Unevaluated returns individuals where requires_eval is True."""
     ind_eval = _make_ind(5.0)
     ind_uneval = Individual()
     pop = Population([ind_eval, ind_uneval])
@@ -166,7 +164,7 @@ def test_population_unevaluated_property() -> None:
 
 
 def test_population_evaluated_property() -> None:
-    """evaluated returns individuals where requires_eval is False."""
+    """Evaluated returns individuals where requires_eval is False."""
     ind_eval = _make_ind(5.0)
     ind_uneval = Individual()
     pop = Population([ind_eval, ind_uneval])
@@ -174,7 +172,7 @@ def test_population_evaluated_property() -> None:
 
 
 def test_population_size_property() -> None:
-    """size property equals len()."""
+    """Size property equals len()."""
     pop = Population([_make_ind() for _ in range(4)])
     assert pop.size == len(pop)
 

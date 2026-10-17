@@ -5,10 +5,8 @@ import tempfile
 from pathlib import Path
 
 import networkx as nx
-import pytest
 
 from ariel.ec.genotypes.tree.tree_genome import TreeGenome
-
 
 # ---------------------------------------------------------------------------
 # Helpers

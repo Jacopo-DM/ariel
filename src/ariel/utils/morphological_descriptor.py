@@ -16,7 +16,7 @@ from numpy.typing import NDArray
 #   This class is a collection of measures, so many properties are expected
 
 
-class MorphologicalMeasures:  # noqa: PLR0904
+class MorphologicalMeasures:
     """Modular robot morphological measures computed from a tree (blueprint).
 
     Works with a NetworkX directed graph representation of a robot.

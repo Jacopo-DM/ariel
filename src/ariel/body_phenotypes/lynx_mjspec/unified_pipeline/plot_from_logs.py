@@ -1,10 +1,11 @@
+import re
+
 import matplotlib.pyplot as plt
 import numpy as np
-import re
 
 
 def _parse_log(file_path: str) -> dict[str, list]:
-    with open(file_path, "r") as f:
+    with open(file_path) as f:
         content = f.read()
     gens = [int(m) for m in re.findall(r"gen=(\d+)", content)]
     bests = [float(m) for m in re.findall(r"best=([-\d\.]+)", content)]

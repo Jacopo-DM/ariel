@@ -10,9 +10,9 @@ Todo:
 import math
 from pathlib import Path
 
-# Third-party libraries
-import numpy as np
 import mujoco
+
+# Third-party libraries
 from PIL import Image
 
 # Local libraries

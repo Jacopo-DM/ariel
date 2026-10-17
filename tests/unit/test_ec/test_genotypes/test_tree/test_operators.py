@@ -2,8 +2,6 @@
 
 import copy
 
-import pytest
-
 from ariel.ec.genotypes.tree.operators import (
     add_node,
     crossover_subtree,
@@ -20,7 +18,6 @@ from ariel.ec.genotypes.tree.operators import (
 )
 from ariel.ec.genotypes.tree.tree_genome import TreeGenome
 from ariel.ec.genotypes.tree.validation import validate_genome_dict
-
 
 # ---------------------------------------------------------------------------
 # Helpers

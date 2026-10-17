@@ -4,7 +4,7 @@
 from dataclasses import dataclass
 
 # Local libraries
-from ariel.parameters.ariel_types import Dimension, Rotation
+from ariel.parameters.ariel_types import Dimension
 from ariel.simulation.environments._compound_world import CompoundWorld
 from ariel.simulation.environments.heightmap_functions import (
     rugged_heightmap,

@@ -24,7 +24,7 @@ def test_fitness_setter_clears_requires_eval() -> None:
 
 
 def test_fitness_getter_returns_float() -> None:
-    """fitness property returns a float after assignment."""
+    """Fitness property returns a float after assignment."""
     ind = Individual()
     ind.fitness = 42
     assert isinstance(ind.fitness, float)

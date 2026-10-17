@@ -52,7 +52,6 @@ class Controller:
         **kwargs : dict[Any, Any]
             Additional keyword arguments to pass to the controller callback function.
         """
-
         # Calculate current time step
         time = data.time
         time_step = model.opt.timestep

@@ -1,7 +1,6 @@
 """Test: NeuralDevelopmentalEncoding — init, forward shapes, and value range."""
 
 import numpy as np
-import pytest
 import torch
 
 from ariel.body_phenotypes.robogen_lite.config import (
@@ -10,7 +9,6 @@ from ariel.body_phenotypes.robogen_lite.config import (
     NUM_OF_TYPES_OF_MODULES,
 )
 from ariel.ec.genotypes.nde.nde import NeuralDevelopmentalEncoding
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -183,7 +181,7 @@ def test_nde_forward_deterministic_same_input() -> None:
     g = _genotype()
     out1 = nde.forward(g)
     out2 = nde.forward(g)
-    for a1, a2 in zip(out1, out2):
+    for a1, a2 in zip(out1, out2, strict=False):
         assert np.allclose(a1, a2)
 
 
@@ -193,7 +191,7 @@ def test_nde_forward_different_inputs_differ() -> None:
     out1 = nde.forward(_genotype(seed=0))
     out2 = nde.forward(_genotype(seed=99))
     # At least one output array must differ
-    assert not all(np.allclose(a, b) for a, b in zip(out1, out2))
+    assert not all(np.allclose(a, b) for a, b in zip(out1, out2, strict=False))
 
 
 # ---------------------------------------------------------------------------
@@ -227,10 +225,11 @@ def test_nde_forward_large_module_count() -> None:
 
 def test_nde_output_feeds_hi_prob_decoder() -> None:
     """NDE outputs can be directly fed into HighProbabilityDecoder."""
+    from networkx import DiGraph
+
     from ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding import (
         HighProbabilityDecoder,
     )
-    from networkx import DiGraph
 
     n = 5
     nde = NeuralDevelopmentalEncoding(number_of_modules=n)

@@ -1,7 +1,7 @@
-import math
 import mujoco
-import numpy as np
 import mujoco.viewer
+import numpy as np
+
 from ariel.body_phenotypes.lynx_mjspec.table import TableWorld
 
 
@@ -44,7 +44,6 @@ class LynxArm:
 
     def _build_robot(self):
         """Constructs the kinematic chain hierarchically."""
-
         # 1. ROOT / BASE
         base_link = self.spec.worldbody.add_body(
             name="lynx_base", pos=[0, 0, 0]

@@ -50,9 +50,9 @@ def test_idx_of_core_is_zero() -> None:
 
 def test_derived_constants() -> None:
     """Derived system parameter constants match enum lengths."""
-    assert NUM_OF_TYPES_OF_MODULES == len(ModuleType)
-    assert NUM_OF_FACES == len(ModuleFaces)
-    assert NUM_OF_ROTATIONS == len(ModuleRotationsIdx)
+    assert len(ModuleType) == NUM_OF_TYPES_OF_MODULES
+    assert len(ModuleFaces) == NUM_OF_FACES
+    assert len(ModuleRotationsIdx) == NUM_OF_ROTATIONS
 
 
 def test_allowed_faces_core_has_four_faces() -> None:

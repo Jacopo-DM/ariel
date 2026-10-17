@@ -46,7 +46,6 @@ Policy and numbers are in DESIGN.md (Decisions: "Ruff rule policy" and "Lint/typ
 
 **Tier 1: small diff, low risk, tests unchanged**
 
-- **T9. Safe auto-fixes.** `ruff check --fix` (safe fixes only) for I001 25, D403 39, D202 15, Q000 15, etc. (about 150 findings under the new config). Risk low-medium: each fix is mechanical, but review the diff before committing. Verify: pytest unchanged, ruff count down by the fixed number.
 
 **Tier 2: clear effect, more files or needs judgement (each its own commit, ordered by effect per cost)**
 

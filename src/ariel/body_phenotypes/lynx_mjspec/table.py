@@ -1,6 +1,7 @@
 """Table environment for MjSpec Lynx arm."""
 
 from dataclasses import dataclass
+
 import mujoco
 
 

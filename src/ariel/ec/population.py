@@ -35,7 +35,7 @@ def _safe_attr(individual: Individual, attribute: str) -> float:
         return float("-inf")
 
 
-class Population:  # noqa: PLR0904
+class Population:
     """
     Ordered, mutable container of ``Individual`` objects.
 

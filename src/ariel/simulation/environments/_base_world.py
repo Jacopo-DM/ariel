@@ -58,7 +58,6 @@ class BaseWorld:
         load_precompiled : bool, optional
             Whether to load a precompiled XML file if available, by default True
         """
-
         # Use default mujoco config if none is provided
         if mujoco_config is None:
             self.mujoco_config = MujocoConfig()
@@ -84,7 +83,6 @@ class BaseWorld:
 
     def _init_spec(self) -> mj.MjSpec:
         """Initialize the MuJoCo specification."""
-
         spec = mj.MjSpec()
 
         # Model name
@@ -185,7 +183,8 @@ class BaseWorld:
         Returns
         -------
             float
-                The lowest Z position of the robot in the world."""
+                The lowest Z position of the robot in the world.
+        """
         # Generate model and data from a temporary copy of the spec
         model: mj.MjModel = cast("mj.MjModel", self.spec.compile())
         data = mj.MjData(model)
@@ -287,7 +286,6 @@ class BaseWorld:
         """
         Check and correct the spawn position to avoid collisions with the floor.
 
-
         Parameters
         ----------
         spawn_site : mj.MjsBody
@@ -301,7 +299,6 @@ class BaseWorld:
         validate_no_collisions : bool, optional
             Whether to validate the spawn position for collisions, by default False
         """
-
         # Log the correction process
         msg = "-" * 60
         log.debug(msg)

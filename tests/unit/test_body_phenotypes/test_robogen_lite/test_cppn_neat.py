@@ -14,7 +14,6 @@ from ariel.body_phenotypes.robogen_lite.cppn_neat.activations import (
     tanh,
 )
 
-
 # ---------------------------------------------------------------------------
 # sigmoid
 # ---------------------------------------------------------------------------
@@ -36,7 +35,7 @@ def test_sigmoid_large_negative() -> None:
 
 
 def test_sigmoid_range() -> None:
-    """sigmoid output is always in (0, 1)."""
+    """Sigmoid output is always in (0, 1)."""
     for x in [-10, -1, 0, 1, 10]:
         val = sigmoid(x)
         assert 0.0 < val < 1.0
@@ -63,7 +62,7 @@ def test_tanh_negative() -> None:
 
 
 def test_tanh_range() -> None:
-    """tanh output is always in (-1, 1)."""
+    """Tanh output is always in (-1, 1)."""
     for x in [-10, -1, 0, 1, 10]:
         val = tanh(x)
         assert -1.0 < val < 1.0
@@ -85,7 +84,7 @@ def test_sin_act_pi_half() -> None:
 
 
 def test_sin_act_range() -> None:
-    """sin output is always in [-1, 1]."""
+    """Sin output is always in [-1, 1]."""
     for x in [-10, -1, 0, 1, 10]:
         val = sin_act(x)
         assert -1.0 <= val <= 1.0
@@ -102,19 +101,19 @@ def test_gaussian_zero() -> None:
 
 
 def test_gaussian_positive() -> None:
-    """gaussian output is always positive."""
+    """Gaussian output is always positive."""
     for x in [-5, -1, 0, 1, 5]:
         assert gaussian(x) > 0
 
 
 def test_gaussian_symmetric() -> None:
-    """gaussian is symmetric: gaussian(x) == gaussian(-x)."""
+    """Gaussian is symmetric: gaussian(x) == gaussian(-x)."""
     for x in [1, 2, 3]:
         assert gaussian(x) == pytest.approx(gaussian(-x))
 
 
 def test_gaussian_decays() -> None:
-    """gaussian decays away from zero."""
+    """Gaussian decays away from zero."""
     assert gaussian(1) < gaussian(0)
     assert gaussian(2) < gaussian(1)
 
@@ -130,12 +129,12 @@ def test_relu_zero() -> None:
 
 
 def test_relu_positive() -> None:
-    """relu passes positive values unchanged."""
+    """Relu passes positive values unchanged."""
     assert relu(3.5) == pytest.approx(3.5)
 
 
 def test_relu_negative() -> None:
-    """relu clamps negative values to 0."""
+    """Relu clamps negative values to 0."""
     assert relu(-5.0) == pytest.approx(0.0)
 
 

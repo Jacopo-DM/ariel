@@ -1,8 +1,5 @@
 import math
 import sys
-from typing import Callable
-
-import numpy as np
 
 from ariel.body_phenotypes.robogen_lite.config import ModuleFaces
 from ariel.body_phenotypes.robogen_lite.modules.brick import BrickModule

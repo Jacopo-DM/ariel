@@ -18,7 +18,6 @@ from ariel.simulation.tasks.targeted_locomotion import (
 )
 from ariel.simulation.tasks.turning_in_place import turning_in_place
 
-
 # ---------------------------------------------------------------------------
 # gait_learning
 # ---------------------------------------------------------------------------

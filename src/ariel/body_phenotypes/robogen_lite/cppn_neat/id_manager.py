@@ -1,6 +1,5 @@
 import json
 from pathlib import Path
-from typing import Dict, Optional, Union
 
 
 class IdManager:
@@ -14,9 +13,9 @@ class IdManager:
 
     def __init__(
         self,
-        save_path: Union[str, Path] = "id_state.json",
-        node_start: Optional[int] = None,
-        innov_start: Optional[int] = None,
+        save_path: str | Path = "id_state.json",
+        node_start: int | None = None,
+        innov_start: int | None = None,
     ):
         """
         Initializes the IdManager.
@@ -72,7 +71,7 @@ class IdManager:
         try:
             with self.save_path.open("w") as f:
                 json.dump(state, f, indent=4)
-        except IOError as e:
+        except OSError as e:
             print(f"Error saving ID state: {e}")
 
     def load(self):
@@ -85,7 +84,7 @@ class IdManager:
                 state = json.load(f)
                 self._node_id = state.get("next_node_id", 0)
                 self._innov_id = state.get("next_innov_id", 0)
-        except (IOError, json.JSONDecodeError) as e:
+        except (OSError, json.JSONDecodeError) as e:
             print(f"Error loading ID state: {e}. Starting with fresh IDs.")
             self._node_id = 0
             self._innov_id = 0

@@ -14,8 +14,8 @@ import networkx as nx
 from ariel.body_phenotypes.robogen_lite.config import (
     ALLOWED_FACES,
     ALLOWED_ROTATIONS,
-    ModuleType,
     IDX_OF_CORE,
+    ModuleType,
 )
 
 from .tree_genome import TreeGenome

@@ -10,7 +10,6 @@ from ariel.ec.ea import EA, EAOperation
 from ariel.ec.individual import Individual
 from ariel.ec.population import Population
 
-
 # ---------------------------------------------------------------------------
 # Fixture helpers
 # ---------------------------------------------------------------------------
@@ -53,7 +52,7 @@ def archive_db(tmp_path_factory) -> Path:
     return db
 
 
-@pytest.fixture()
+@pytest.fixture
 def archive(archive_db: Path) -> Archive:
     return Archive(archive_db)
 
@@ -86,7 +85,7 @@ def test_archive_repr_contains_name(archive) -> None:
 
 
 def test_archive_size(archive) -> None:
-    """size returns the total number of evaluated individuals."""
+    """Size returns the total number of evaluated individuals."""
     assert archive.size >= 20
 
 
@@ -117,7 +116,7 @@ def test_fitness_stats_returns_dict(archive) -> None:
 
 
 def test_fitness_stats_min_max(archive) -> None:
-    """min and max fitness values match the known population range."""
+    """Min and max fitness values match the known population range."""
     stats = archive.fitness_stats()
     assert stats["min"] == pytest.approx(0.0)
     assert stats["max"] == pytest.approx(19.0)
@@ -388,7 +387,7 @@ def test_fitness_percentile_in_band(archive) -> None:
 
 
 def test_fitness_percentile_with_n_sampling(archive) -> None:
-    """n parameter limits the number of returned individuals."""
+    """N parameter limits the number of returned individuals."""
     pop = archive.fitness_percentile_population(0.0, 100.0, n=3)
     assert len(pop) <= 3
 

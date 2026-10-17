@@ -9,7 +9,6 @@ from ariel.ec.generators import (
     IntegersGenerator,
 )
 
-
 # ---------------------------------------------------------------------------
 # IntegersGenerator
 # ---------------------------------------------------------------------------
@@ -29,7 +28,7 @@ def test_integers_generator_in_range() -> None:
 
 
 def test_integers_generator_choice_from_set() -> None:
-    """choice samples from the supplied set."""
+    """Choice samples from the supplied set."""
     value_set = [10, 20, 30]
     result = IntegersGenerator.choice(value_set, size=50)
     assert all(v in value_set for v in result)
@@ -103,21 +102,21 @@ def test_integer_mutator_creep_same_length() -> None:
 
 
 def test_integer_mutator_swap_same_elements() -> None:
-    """swap preserves the multiset of genes."""
+    """Swap preserves the multiset of genes."""
     individual = [1, 2, 3, 4, 5]
     result = IntegerMutator.swap(individual, mutation_probability=1.0)
     assert sorted(result) == sorted(individual)
 
 
 def test_integer_mutator_inversion_same_elements() -> None:
-    """inversion preserves the multiset of genes."""
+    """Inversion preserves the multiset of genes."""
     individual = [1, 2, 3, 4, 5]
     result = IntegerMutator.inversion(individual, mutation_probability=1.0)
     assert sorted(result) == sorted(individual)
 
 
 def test_integer_mutator_scramble_same_elements() -> None:
-    """scramble preserves the multiset of genes."""
+    """Scramble preserves the multiset of genes."""
     individual = [10, 20, 30, 40, 50]
     result = IntegerMutator.scramble(individual, mutation_probability=1.0)
     assert sorted(result) == sorted(individual)
@@ -129,7 +128,7 @@ def test_integer_mutator_scramble_same_elements() -> None:
 
 
 def test_float_mutator_gaussian_same_length() -> None:
-    """gaussian mutation returns a list of the same length."""
+    """Gaussian mutation returns a list of the same length."""
     individual = [0.1, 0.2, 0.3]
     result = FloatMutator.gaussian(
         individual, std=0.01, mutation_probability=0.5
@@ -138,7 +137,7 @@ def test_float_mutator_gaussian_same_length() -> None:
 
 
 def test_float_mutator_gaussian_respects_bounds() -> None:
-    """gaussian mutation with bounds clips results."""
+    """Gaussian mutation with bounds clips results."""
     individual = [0.5] * 20
     result = FloatMutator.gaussian(
         individual,
@@ -165,7 +164,7 @@ def test_float_mutator_uniform_reset_prob_zero_unchanged() -> None:
 
 
 def test_float_mutator_boundary_only_extremes() -> None:
-    """boundary mutation replaces genes with either low or high."""
+    """Boundary mutation replaces genes with either low or high."""
     individual = [0.5] * 20
     result = FloatMutator.boundary(
         individual, low=0.0, high=1.0, mutation_probability=1.0
@@ -176,7 +175,7 @@ def test_float_mutator_boundary_only_extremes() -> None:
 
 
 def test_float_mutator_polynomial_within_bounds() -> None:
-    """polynomial mutation keeps all genes within [low, high]."""
+    """Polynomial mutation keeps all genes within [low, high]."""
     individual = [0.5] * 10
     result = FloatMutator.polynomial(
         individual, low=0.0, high=1.0, mutation_probability=1.0
@@ -185,14 +184,14 @@ def test_float_mutator_polynomial_within_bounds() -> None:
 
 
 def test_float_mutator_swap_same_elements() -> None:
-    """float swap preserves the multiset of genes."""
+    """Float swap preserves the multiset of genes."""
     individual = [1.0, 2.0, 3.0, 4.0]
     result = FloatMutator.swap(individual, mutation_probability=1.0)
     assert sorted(result) == pytest.approx(sorted(individual))
 
 
 def test_float_mutator_inversion_same_elements() -> None:
-    """float inversion preserves the multiset of genes."""
+    """Float inversion preserves the multiset of genes."""
     individual = [1.0, 2.0, 3.0, 4.0, 5.0]
     result = FloatMutator.inversion(individual, mutation_probability=1.0)
     assert sorted(result) == pytest.approx(sorted(individual))

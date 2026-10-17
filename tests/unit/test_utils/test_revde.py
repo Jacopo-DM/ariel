@@ -13,7 +13,7 @@ def test_revde_initialization() -> None:
 
 
 def test_revde_mutate_returns_three_children() -> None:
-    """mutate returns a list of three arrays."""
+    """Mutate returns a list of three arrays."""
     revde = RevDE(scaling_factor=0.5)
     a = np.array([1.0, 2.0, 3.0])
     b = np.array([4.0, 5.0, 6.0])
@@ -33,7 +33,7 @@ def test_revde_mutate_children_same_shape() -> None:
 
 
 def test_revde_mutate_mismatched_shapes_raise() -> None:
-    """mutate raises ValueError when parent shapes differ."""
+    """Mutate raises ValueError when parent shapes differ."""
     revde = RevDE(scaling_factor=0.5)
     a = np.ones(3)
     b = np.ones(4)
@@ -72,5 +72,5 @@ def test_revde_reversibility() -> None:
     a, b, c = rng.random(6), rng.random(6), rng.random(6)
     children1 = revde.mutate(a, b, c)
     children2 = revde.mutate(a, b, c)
-    for ch1, ch2 in zip(children1, children2):
+    for ch1, ch2 in zip(children1, children2, strict=False):
         assert np.allclose(ch1, ch2)

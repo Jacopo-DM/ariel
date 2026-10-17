@@ -35,7 +35,6 @@ class Genome:
 
     def copy(self):
         """Returns a new Genome object with identical, deep-copied gene sets."""
-
         # Deep copy nodes (Node class has a copy method)
         new_nodes = {_id: node.copy() for _id, node in self.nodes.items()}
 
@@ -59,7 +58,6 @@ class Genome:
         Creates a new, randomly initialized Genome with a base topology.
         Initial topology is fully connected inputs to outputs.
         """
-
         nodes = {}
         connections = {}
 
@@ -109,7 +107,6 @@ class Genome:
         """
         Applies structural mutation (add_node or add_connection).
         """
-
         if random.random() < conn_add_rate:
             self._mutate_add_connection(next_innov_id_getter)
 
@@ -118,7 +115,6 @@ class Genome:
 
     def _mutate_add_connection(self, next_innov_id_getter):
         """Attempts to add a new connection between two existing, non-connected nodes."""
-
         all_nodes = list(self.nodes.keys())
         # We need at least two nodes to form a connection
         if len(all_nodes) < 2:
@@ -151,7 +147,6 @@ class Genome:
         """
         Splits an existing connection by inserting a new (hidden) node.
         """
-
         if not self.connections:
             return
 
@@ -202,7 +197,6 @@ class Genome:
         Creates a new offspring Genome by crossing over this Genome (parent A)
         and another Genome (parent B).
         """
-
         # Determine the fitter parent
         if is_maximisation:
             if self.fitness >= other.fitness:
@@ -301,7 +295,7 @@ class Genome:
         """
         # 1. Build the graph structure and count incoming connections (in-degrees) for each node.
         graph = {node_id: [] for node_id in self.nodes}
-        in_degree = {node_id: 0 for node_id in self.nodes}
+        in_degree = dict.fromkeys(self.nodes, 0)
 
         for conn in self.connections.values():
             if conn.enabled:
@@ -345,7 +339,6 @@ class Genome:
         1. Tries a topological sort (Feed-Forward) for speed and precision.
         2. If a cycle is detected, falls back to iterative relaxation (Recurrent).
         """
-
         # 1. Identify Input/Output IDs
         input_node_ids = [
             _id for _id, node in self.nodes.items() if node.typ == "input"
@@ -399,7 +392,7 @@ class Genome:
             # A cycle exists. We update all nodes iteratively for N steps.
 
             # 1. Initialize state (all 0.0)
-            current_values = {node_id: 0.0 for node_id in self.nodes}
+            current_values = dict.fromkeys(self.nodes, 0.0)
 
             # 2. Set Inputs
             for i, node_id in enumerate(input_node_ids):

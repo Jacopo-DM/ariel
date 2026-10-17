@@ -104,7 +104,7 @@ class PerlinNoise:
         h = self._hash2(xi, yi) % self._grad_lut.shape[0]
         return self._grad_lut[h]
 
-    def as_grid(  # noqa: D102, PLR0914
+    def as_grid(
         self,
         width: int,
         height: int,

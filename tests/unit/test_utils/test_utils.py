@@ -1,7 +1,6 @@
 """Test: utility classes and functions."""
 
 # Standard library
-from pathlib import Path
 
 # Third-party libraries
 import networkx as nx
@@ -11,7 +10,6 @@ import pytest
 # Local libraries
 from ariel.utils.morphological_descriptor import MorphologicalMeasures
 from ariel.utils.noise_gen import PerlinNoise
-
 
 # ---------------------------------------------------------------------------
 # PerlinNoise
@@ -204,11 +202,11 @@ def test_morphological_is_2d_flag() -> None:
 def test_morphological_paper_aliases_consistent() -> None:
     """Paper-letter aliases agree with their named property counterparts."""
     m = MorphologicalMeasures(_make_branching_graph())
-    assert m.B == pytest.approx(m.branching)
-    assert m.L == pytest.approx(m.limbs)
-    assert m.E == pytest.approx(m.length_of_limbs)
-    assert m.C == pytest.approx(m.coverage)
-    assert m.J == pytest.approx(m.joints)
-    assert m.S == pytest.approx(m.symmetry)
-    assert m.D == pytest.approx(m.module_diversity)
-    assert m.P == pytest.approx(m.proportion)
+    assert pytest.approx(m.branching) == m.B
+    assert pytest.approx(m.limbs) == m.L
+    assert pytest.approx(m.length_of_limbs) == m.E
+    assert pytest.approx(m.coverage) == m.C
+    assert pytest.approx(m.joints) == m.J
+    assert pytest.approx(m.symmetry) == m.S
+    assert pytest.approx(m.module_diversity) == m.D
+    assert pytest.approx(m.proportion) == m.P

@@ -6,10 +6,9 @@ to a NetworkX DiGraph compatible with `construct_mjspec_from_graph`.
 
 from __future__ import annotations
 
+import json
 import typing
 from dataclasses import dataclass, field
-import json
-from typing import Dict, List, Optional
 
 import networkx as nx
 
@@ -17,9 +16,9 @@ import networkx as nx
 @dataclass
 class TreeGenome:
     # nodes: mapping id -> dict with keys: type (Enum.name), rotation (Enum.name)
-    nodes: Dict[int, Dict[str, str]] = field(default_factory=dict)
+    nodes: dict[int, dict[str, str]] = field(default_factory=dict)
     # edges: list of {"parent": int, "child": int, "face": ModuleFaces.name}
-    edges: List[Dict[str, typing.Any]] = field(default_factory=list)
+    edges: list[dict[str, typing.Any]] = field(default_factory=list)
 
     def to_networkx(self) -> nx.DiGraph:
         g = nx.DiGraph()
@@ -29,17 +28,17 @@ class TreeGenome:
             g.add_edge(e["parent"], e["child"], face=e["face"])
         return g
 
-    def to_dict(self) -> Dict[str, typing.Any]:
+    def to_dict(self) -> dict[str, typing.Any]:
         return {
             "nodes": {str(k): v for k, v in self.nodes.items()},
             "edges": self.edges,
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, typing.Any]) -> "TreeGenome":
+    def from_dict(cls, data: dict[str, typing.Any]) -> TreeGenome:
         nodes_raw = data.get("nodes", {})
         # accept both string-keyed mapping and list
-        nodes: Dict[int, Dict[str, str]] = {}
+        nodes: dict[int, dict[str, str]] = {}
         if isinstance(nodes_raw, dict):
             for k, v in nodes_raw.items():
                 nodes[int(k)] = {"type": v["type"], "rotation": v["rotation"]}
@@ -58,7 +57,7 @@ class TreeGenome:
             json.dump(self.to_dict(), fh, indent=2)
 
     @classmethod
-    def load_json(cls, path: str) -> "TreeGenome":
-        with open(path, "r") as fh:
+    def load_json(cls, path: str) -> TreeGenome:
+        with open(path) as fh:
             data = json.load(fh)
         return cls.from_dict(data)

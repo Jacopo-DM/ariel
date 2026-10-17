@@ -8,7 +8,6 @@ from ariel.ec.ea import EA, EAOperation, EASettings
 from ariel.ec.individual import Individual
 from ariel.ec.population import Population
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -346,7 +345,7 @@ def test_ea_fetch_population_updates_self(tmp_path) -> None:
 
 
 def test_ea_size_property(tmp_path) -> None:
-    """size returns the number of alive individuals."""
+    """Size returns the number of alive individuals."""
     ea = _ea(tmp_path, pop=_make_pop(6))
     assert ea.size == 6
 

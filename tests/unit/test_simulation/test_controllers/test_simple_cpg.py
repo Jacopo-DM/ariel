@@ -9,7 +9,6 @@ from ariel.simulation.controllers.simple_cpg import (
     create_fully_connected_adjacency,
 )
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------

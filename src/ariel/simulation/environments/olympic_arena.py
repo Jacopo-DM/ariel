@@ -98,7 +98,6 @@ class OlympicArena(BaseWorld):
         load_precompiled : bool
             Whether to load a precompiled XML if available (default: True).
         """
-
         # Initialize base class
         super().__init__(name=self.name, load_precompiled=load_precompiled)
 

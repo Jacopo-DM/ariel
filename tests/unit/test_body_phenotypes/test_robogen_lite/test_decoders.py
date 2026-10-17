@@ -18,7 +18,6 @@ from ariel.body_phenotypes.robogen_lite.decoders.vector_decoding import (
     VectorDecoder,
 )
 
-
 # ---------------------------------------------------------------------------
 # Shared helpers
 # ---------------------------------------------------------------------------
