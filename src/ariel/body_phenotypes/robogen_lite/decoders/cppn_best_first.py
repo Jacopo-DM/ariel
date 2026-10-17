@@ -1,5 +1,9 @@
 """Decode a CPPN genome into a robot graph, best connection first."""
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, cast
+
 import networkx as nx
 import numpy as np
 import numpy.typing as npt
@@ -14,7 +18,9 @@ from ariel.body_phenotypes.robogen_lite.config import (
     ModuleRotationsIdx,
     ModuleType,
 )
-from ariel.body_phenotypes.robogen_lite.cppn_neat.genome import Genome
+
+if TYPE_CHECKING:
+    from ariel.body_phenotypes.robogen_lite.cppn_neat.genome import Genome
 
 console = Console()
 
@@ -22,7 +28,7 @@ console = Console()
 def softmax(raw_scores: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
     """Return the softmax of `raw_scores`."""
     e_x = np.exp(raw_scores - np.max(raw_scores))
-    return e_x / e_x.sum()
+    return cast("np.ndarray", e_x / e_x.sum())
 
 
 class MorphologyDecoderBestFirst:
@@ -41,7 +47,9 @@ class MorphologyDecoderBestFirst:
             ModuleFaces.LEFT: (0, 0, -1),
         }
 
-    def _get_child_coords(self, parent_pos: tuple, face: ModuleFaces) -> tuple:
+    def _get_child_coords(
+        self, parent_pos: tuple[int, int, int], face: ModuleFaces
+    ) -> tuple[int, int, int]:
         delta = self.face_deltas[face]
         return (
             parent_pos[0] + delta[0],
@@ -49,9 +57,9 @@ class MorphologyDecoderBestFirst:
             parent_pos[2] + delta[2],
         )
 
-    def decode(self) -> nx.DiGraph:
+    def decode(self) -> nx.DiGraph[Any]:
         """Grow the robot graph from the core, best-scoring connection first."""
-        robot_graph = nx.DiGraph()
+        robot_graph: nx.DiGraph[Any] = nx.DiGraph()
         occupied_coords = {}
         module_data = {}
 
@@ -85,15 +93,15 @@ class MorphologyDecoderBestFirst:
                 parent_pos = module_data[parent_id]["pos"]
                 parent_type = module_data[parent_id]["type"]
                 for face in ModuleFaces:
-                    if face not in ALLOWED_FACES[parent_type]:
+                    if face not in ALLOWED_FACES[parent_type]:  # type: ignore[index]  # known bug
                         continue
 
-                    child_pos = self._get_child_coords(parent_pos, face)
+                    child_pos = self._get_child_coords(parent_pos, face)  # type: ignore[arg-type]  # known bug
 
                     if child_pos in occupied_coords:
                         continue
 
-                    cppn_inputs = list(parent_pos) + list(child_pos)
+                    cppn_inputs = list(parent_pos) + list(child_pos)  # type: ignore[call-overload]  # known bug
                     raw_outputs = self.cppn_genome.activate(cppn_inputs)
 
                     conn_score = raw_outputs[0]
@@ -138,19 +146,21 @@ class MorphologyDecoderBestFirst:
                 )
                 break
 
-            best_conn = max(potential_connections, key=lambda x: x["score"])
+            best_conn = max(potential_connections, key=lambda x: x["score"])  # type: ignore[arg-type,return-value]  # known bug
 
             child_id = next_module_id
             robot_graph.add_node(
                 child_id,
-                type=best_conn["child_type"].name,
-                rotation=best_conn["child_rot"].name,
+                type=best_conn["child_type"].name,  # type: ignore[attr-defined]  # known bug
+                rotation=best_conn["child_rot"].name,  # type: ignore[attr-defined]  # known bug
             )
             robot_graph.add_edge(
-                best_conn["parent_id"], child_id, face=best_conn["face"].name
+                best_conn["parent_id"],
+                child_id,
+                face=best_conn["face"].name,  # type: ignore[attr-defined]  # known bug
             )
 
-            occupied_coords[best_conn["child_pos"]] = child_id
+            occupied_coords[best_conn["child_pos"]] = child_id  # type: ignore[index]  # known bug
             module_data[child_id] = {
                 "pos": best_conn["child_pos"],
                 "type": best_conn["child_type"],

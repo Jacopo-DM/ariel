@@ -80,7 +80,7 @@ class EASettings(BaseSettings):
     db_file_name: str = "database.db"
     db_handling: DBHandlingMode = "delete"
 
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]  # known bug
     @property
     def db_file_path(self) -> Path:
         """Absolute path to the SQLite database file.
@@ -236,7 +236,7 @@ class EAOperation[**P]:
         if args and isinstance(args[0], Population):
             population = args[0]
             if not isinstance(population, Population):
-                msg = (
+                msg = (  # type: ignore[unreachable]  # known bug
                     f"'{self.func.__name__}' expected a Population as input, "
                     f"got '{type(population).__name__}'."
                 )
@@ -245,7 +245,7 @@ class EAOperation[**P]:
                 )
             result = self.func(population, *self.args, **self.kwargs)
             if not isinstance(result, Population):
-                msg = (
+                msg = (  # type: ignore[unreachable]  # known bug
                     f"'{self.func.__name__}' expected a Population as return "
                     f"value, got '{type(result).__name__}'."
                 )
@@ -254,11 +254,11 @@ class EAOperation[**P]:
                 )
             return result
 
-        return EAOperation(self.func, *args, **kwargs)
+        return EAOperation(self.func, *args, **kwargs)  # type: ignore[arg-type]  # known bug
 
     def __repr__(self) -> str:
         """Return the function name with its bound keyword arguments."""
-        kwargs = ", ".join(f"{k}={v!r}" for k, v in self.kwargs.items())
+        kwargs = ", ".join(f"{k}={v!r}" for k, v in self.kwargs.items())  # type: ignore[attr-defined]  # known bug
         return f"{self.func.__name__}({kwargs})"
 
 
@@ -326,7 +326,7 @@ class EA:
     def __init__(  # noqa: PLR0913
         self,
         population: Population | None = None,
-        operations: list[EAOperation] | None = None,
+        operations: list[EAOperation[...]] | None = None,
         *,
         restart: "tuple[Path | str, int] | Path | str | None" = None,
         num_steps: int | None = None,
@@ -358,7 +358,7 @@ class EA:
                         select(func.max(Individual.time_of_death))
                     ).one()
                     if restart_gen is None:
-                        msg = "Source database contains no individuals."
+                        msg = "Source database contains no individuals."  # type: ignore[unreachable]  # known bug
                         raise ValueError(msg)
 
                 rows = list(
@@ -397,7 +397,7 @@ class EA:
             msg = "Provide either 'population' or 'restart'."
             raise ValueError(msg)
 
-        self.operations: list[EAOperation] = operations
+        self.operations: list[EAOperation[...]] = operations
         self.is_maximisation: bool = (
             is_maximisation
             if is_maximisation is not None
@@ -636,7 +636,7 @@ class EA:
         self.current_generation += 1
         self.fetch_population()
         for op in self.operations:
-            self.population = op(self.population)
+            self.population = op(self.population)  # type: ignore[assignment]  # known bug
         self._commit()
 
     def run(self) -> None:

@@ -33,7 +33,7 @@ DATA.mkdir(exist_ok=True)
 # --- TERMINAL OUTPUT SETUP ---
 install(show_locals=False)
 console = Console()
-torch.set_printoptions(precision=4)
+torch.set_printoptions(precision=4)  # type: ignore[no-untyped-call]  # known bug
 
 
 def create_fully_connected_adjacency(num_nodes: int) -> dict[int, list[int]]:
@@ -70,6 +70,10 @@ class SimpleCPG(nn.Module):
 
     Where r_i = sqrt(x_i^2 + y_i^2)
     """
+
+    x: torch.Tensor
+    y: torch.Tensor
+    angles: torch.Tensor
 
     def __init__(
         self,
@@ -163,7 +167,7 @@ class SimpleCPG(nn.Module):
         self.register_buffer("y", torch.randn(self.n) * 0.1)
         self.register_buffer("angles", torch.zeros(self.n))
 
-        self.angle_history = []
+        self.angle_history: list[list[float]] = []
         self.initial_state = {
             "x": self.x.clone(),
             "y": self.y.clone(),

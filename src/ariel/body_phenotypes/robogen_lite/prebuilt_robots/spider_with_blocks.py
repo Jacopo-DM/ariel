@@ -25,7 +25,7 @@ F, L, B, R = faces
 def make_core() -> CoreModule:
     """Return a new core module named "C"."""
     core = CoreModule(index=0)
-    core.name = "C"
+    core.name = "C"  # type: ignore[attr-defined]  # known bug
     return core
 
 
@@ -37,10 +37,10 @@ def attach(
     rotation: float = 0,
 ) -> SUBMODULES:
     """Attach `module` to `parent` on `face` and return it."""
-    name = f"{parent.name}-{name}"
+    name = f"{parent.name}-{name}"  # type: ignore[union-attr]  # known bug
     parent.sites[face].attach_body(body=module.body, prefix=name + "-")
 
-    module.name = name
+    module.name = name  # type: ignore[union-attr]  # known bug
 
     if rotation != 0:
         module.rotate(rotation)

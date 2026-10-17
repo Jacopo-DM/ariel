@@ -42,8 +42,8 @@ class IdManager:
             self._innov_id = innov_start
         else:
             # Persistent Mode: Load from file or start fresh.
-            self._node_id: int = 0
-            self._innov_id: int = 0
+            self._node_id = 0
+            self._innov_id = 0
             self.load()
 
     def get_next_node_id(self) -> int:

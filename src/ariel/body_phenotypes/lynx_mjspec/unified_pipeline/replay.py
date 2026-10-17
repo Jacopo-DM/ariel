@@ -160,7 +160,7 @@ def main() -> None:
         metadata.get("target", DEFAULT_TARGET.tolist()), dtype=np.float64
     )
     touch_threshold = float(
-        metadata.get("touch_threshold", DEFAULT_TOUCH_THRESHOLD)
+        metadata.get("touch_threshold", DEFAULT_TOUCH_THRESHOLD)  # type: ignore[arg-type]  # known bug
     )
     target = np.array(
         [args.target_x, args.target_y, args.target_z], dtype=np.float64

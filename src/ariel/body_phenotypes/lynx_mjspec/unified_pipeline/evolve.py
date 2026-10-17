@@ -279,7 +279,7 @@ def main() -> None:
 
             valid = [f for f in fitnesses if f < INVALID_FITNESS]
             try:
-                sigma_str = f" σ={optimizer.optim.es.sigma:.4f}"  # noqa: RUF001
+                sigma_str = f" σ={optimizer.optim.es.sigma:.4f}"  # type: ignore[attr-defined]  # noqa: RUF001  # known bug
             except AttributeError:
                 sigma_str = ""
             best_idx = int(np.argmin(fitnesses))

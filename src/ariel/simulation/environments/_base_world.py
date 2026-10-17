@@ -243,7 +243,7 @@ class BaseWorld:
         # Return the lowest position rounded to avoid floating point issues
         if lowest_point == np.inf:
             return 0.0
-        return np.round(lowest_point, 6)
+        return cast("float", np.round(lowest_point, 6))
 
     def _find_contacts(self) -> set[tuple[str, str, float]]:
         # Generate model and data

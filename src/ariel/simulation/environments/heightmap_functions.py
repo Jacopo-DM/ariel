@@ -1,5 +1,7 @@
 """Heightmap generation functions for simulation environments."""
 
+import typing
+
 # Third-party libraries
 import cv2
 import numpy as np
@@ -85,7 +87,7 @@ def smooth_edges_heightmap(
             interpolation=cv2.INTER_CUBIC,
         )
 
-    return mask.astype(ND_FLOAT_PRECISION)
+    return typing.cast("np.ndarray", mask.astype(ND_FLOAT_PRECISION))
 
 
 def amphitheater_heightmap(
@@ -155,4 +157,4 @@ def crater_heightmap(
             dsize=(dims[1], dims[0]),
             interpolation=cv2.INTER_CUBIC,
         )
-    return heightmap.astype(ND_FLOAT_PRECISION)
+    return typing.cast("np.ndarray", heightmap.astype(ND_FLOAT_PRECISION))

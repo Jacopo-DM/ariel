@@ -2,12 +2,13 @@
 
 import re
 from pathlib import Path
+from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
 
 
-def _parse_log(file_path: str) -> dict[str, list]:
+def _parse_log(file_path: str) -> dict[str, list[Any]]:
     with Path(file_path).open() as f:
         content = f.read()
     gens = [int(m) for m in re.findall(r"gen=(\d+)", content)]

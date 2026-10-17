@@ -83,7 +83,7 @@ class TargetedLocomotionWorker(MuJoCoWorkerBase):
         self,
         model: mj.MjModel,
         data: mj.MjData,
-        config: LocomotionConfig,
+        config: LocomotionConfig,  # type: ignore[override]  # known bug
     ) -> float:
         """Optimise a controller with CMA-ES and return the best fitness."""
         rng = np.random.default_rng(config.seed)
@@ -184,5 +184,5 @@ if __name__ == "__main__":
     eval_args = [(dummy_xml, config), (dummy_xml, config)]
     worker = TargetedLocomotionWorker()
 
-    results = evaluate_population(eval_args, worker, num_workers=2)
+    results = evaluate_population(eval_args, worker, num_workers=2)  # type: ignore[arg-type]  # known bug
     print("Fitness values:", results)

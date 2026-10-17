@@ -177,6 +177,6 @@ if __name__ == "__main__":
         rot_p_genes,
     ]
 
-    outputs = nde.forward(genotype)
+    outputs = nde.forward(genotype)  # type: ignore[arg-type]  # known bug
     for output in outputs:
         console.log(output.shape)

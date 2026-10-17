@@ -5,13 +5,18 @@ Mostly based on the revolve2 implementation:
 https://github.com/ci-group/revolve2/blob/master/standards/revolve2/standards/morphological_measures.py
 """
 
-from collections.abc import Hashable
-from itertools import product
-from typing import Any
+from __future__ import annotations
 
-import networkx as nx
+from itertools import product
+from typing import TYPE_CHECKING, Any, cast
+
 import numpy as np
-from numpy.typing import NDArray
+
+if TYPE_CHECKING:
+    from collections.abc import Hashable
+
+    import networkx as nx
+    from numpy.typing import NDArray
 
 # ruff ignore: PLR0904 (too-many-public-methods)
 #   This class is a collection of measures, so many properties are expected
@@ -86,7 +91,7 @@ class MorphologicalMeasures:
         Degree of symmetry across the YZ plane (X-axis mirror), in [0, 1].
     """
 
-    def __init__(self, robot_graph: nx.DiGraph) -> None:
+    def __init__(self, robot_graph: nx.DiGraph[Any]) -> None:
         """Create the measures for `robot_graph`; raise if it is empty."""
         if robot_graph.number_of_nodes() == 0:
             msg = "Cannot analyze empty robot graph"
@@ -124,9 +129,9 @@ class MorphologicalMeasures:
         if len(roots) != 1:
             msg = f"Expected exactly one root node, found {len(roots)}"
             raise ValueError(msg)
-        return roots[0]
+        return cast("Hashable", roots[0])
 
-    def _get_nodes_by_type(self, module_type: str) -> list:
+    def _get_nodes_by_type(self, module_type: str) -> list[Hashable]:
         return [
             n
             for n in self.graph.nodes()
@@ -141,7 +146,7 @@ class MorphologicalMeasures:
         )
 
     def _get_node_type(self, node: Hashable) -> str:
-        return self.graph.nodes[node].get("type", "UNKNOWN")
+        return cast("str", self.graph.nodes[node].get("type", "UNKNOWN"))
 
     def _get_allowed_faces(self, node: Hashable) -> list[str]:
         t = self._get_node_type(node)
@@ -166,8 +171,8 @@ class MorphologicalMeasures:
 
     def _graph_to_grid(
         self,
-        robot_graph: nx.DiGraph,
-    ) -> tuple[NDArray, np.ndarray]:
+        robot_graph: nx.DiGraph[Any],
+    ) -> tuple[NDArray[Any], np.ndarray]:
         if robot_graph.number_of_nodes() == 0:
             msg = "Cannot convert empty robot graph to grid"
             raise ValueError(msg)
@@ -193,7 +198,7 @@ class MorphologicalMeasures:
     def _calculate_graph_positions(
         self,
         node: Hashable,
-        positions: dict,
+        positions: dict[Hashable, np.ndarray],
         pos: np.ndarray,
     ) -> None:
         positions[node] = pos.copy()
@@ -217,7 +222,7 @@ class MorphologicalMeasures:
             self._get_allowed_faces(self.core_node),
         )
 
-    def _calculate_filled_bricks(self) -> list:
+    def _calculate_filled_bricks(self) -> list[Hashable]:
         return [
             b
             for b in self.bricks
@@ -225,7 +230,7 @@ class MorphologicalMeasures:
             == len(self._get_allowed_faces(b))
         ]
 
-    def _calculate_filled_active_hinges(self) -> list:
+    def _calculate_filled_active_hinges(self) -> list[Hashable]:
         return [
             h
             for h in self.active_hinges
@@ -233,10 +238,10 @@ class MorphologicalMeasures:
             == len(self._get_allowed_faces(h))
         ]
 
-    def _calculate_single_neighbour_bricks(self) -> list:
+    def _calculate_single_neighbour_bricks(self) -> list[Hashable]:
         return [b for b in self.bricks if self.graph.out_degree(b) == 0]
 
-    def _calculate_single_neighbour_modules(self) -> list:
+    def _calculate_single_neighbour_modules(self) -> list[Hashable]:
         return [
             n
             for n in self.modules
@@ -244,10 +249,10 @@ class MorphologicalMeasures:
             and self._count_neighbors(n) == 1
         ]
 
-    def _calculate_double_neighbour_bricks(self) -> list:
+    def _calculate_double_neighbour_bricks(self) -> list[Hashable]:
         return [b for b in self.bricks if self.graph.out_degree(b) == 1]
 
-    def _calculate_double_neighbour_active_hinges(self) -> list:
+    def _calculate_double_neighbour_active_hinges(self) -> list[Hashable]:
         return [h for h in self.active_hinges if self.graph.out_degree(h) == 1]
 
     def _pad_grid(self) -> None:
@@ -335,7 +340,7 @@ class MorphologicalMeasures:
         -------
         int
         """
-        return self.grid.shape[0]
+        return cast("int", self.grid.shape[0])
 
     @property
     def bounding_box_width(self) -> int:
@@ -345,7 +350,7 @@ class MorphologicalMeasures:
         -------
         int
         """
-        return self.grid.shape[1]
+        return cast("int", self.grid.shape[1])
 
     @property
     def bounding_box_height(self) -> int:
@@ -355,7 +360,7 @@ class MorphologicalMeasures:
         -------
         int
         """
-        return self.grid.shape[2]
+        return cast("int", self.grid.shape[2])
 
     @property
     def bounding_box_volume(self) -> int:

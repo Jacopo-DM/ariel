@@ -1,5 +1,7 @@
 """Turning in place task."""
 
+from typing import cast
+
 # Third-party libraries
 import numpy as np
 
@@ -38,4 +40,4 @@ def turning_in_place(xy_history: list[tuple[float, float]]) -> float:
     displacement = np.linalg.norm(xy[-1] - xy[0])
 
     # Penalize if robot drifts away
-    return total_turning_angle / (1.0 + displacement)
+    return cast("float", total_turning_angle / (1.0 + displacement))

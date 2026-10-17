@@ -1,5 +1,7 @@
 """Gait learning."""
 
+from typing import cast
+
 
 def xy_displacement(
     xy1: tuple[float, float],
@@ -20,7 +22,9 @@ def xy_displacement(
     float
         The Euclidean distance between the two points.
     """
-    return ((xy1[0] - xy2[0]) ** 2 + (xy1[1] - xy2[1]) ** 2) ** 0.5
+    return cast(
+        "float", ((xy1[0] - xy2[0]) ** 2 + (xy1[1] - xy2[1]) ** 2) ** 0.5
+    )
 
 
 def x_speed(

@@ -23,9 +23,9 @@ class TreeGenome:
     # edges: list of {"parent": int, "child": int, "face": ModuleFaces.name}
     edges: list[dict[str, typing.Any]] = field(default_factory=list)
 
-    def to_networkx(self) -> nx.DiGraph:
+    def to_networkx(self) -> nx.DiGraph[int]:
         """Return the genome as a networkx DiGraph."""
-        g = nx.DiGraph()
+        g: nx.DiGraph[int] = nx.DiGraph()
         for nid, nobj in self.nodes.items():
             g.add_node(nid, type=nobj["type"], rotation=nobj["rotation"])
         for e in self.edges:

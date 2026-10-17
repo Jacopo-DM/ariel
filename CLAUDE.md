@@ -26,7 +26,7 @@ From the repo root. Python 3.12 (`.python-version` 3.12.9), uv 0.13.1.
 | Unit tests | `uv run --no-sync pytest tests/unit -q -p no:cacheprovider` | 437 passed, ~6.6 s |
 | Lint | `uv run --no-sync ruff check src tests` | passes (src, tests), <1 s, read-only (`fix = false`) |
 | Format check | `uv run --no-sync ruff format --check src tests` | passes (141 files), <1 s, read-only; also covers notebooks under `tests/` |
-| Types (mypy) | `uv run --no-sync mypy src` | fails today (185 errors), ~40 s, read-only |
+| Types (mypy) | `uv run --no-sync mypy src` | passes (96 files), ~40 s, read-only; 94 lines carry `# type: ignore[...]  # known bug`, listed in PLAN.md |
 | Types (pyright) | `uv run --no-sync pyright src tests` | fails today (331 errors), ~15 s, read-only; first run downloads Node into `~/.cache/pyright-python` (229 MB) |
 
 Ruff is pinned to 0.14.* and does not fix by default; `ruff check --fix` is opt-in. Pytest with `--cov=ariel` adds ~4 s and writes `.coverage`. Failing results are listed in PLAN.md.

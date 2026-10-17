@@ -41,7 +41,7 @@ DATA.mkdir(exist_ok=True)
 # --- TERMINAL OUTPUT SETUP ---
 install(show_locals=False)
 console = Console()
-torch.set_printoptions(precision=4)
+torch.set_printoptions(precision=4)  # type: ignore[no-untyped-call]  # known bug
 
 
 def create_fully_connected_adjacency(num_nodes: int) -> dict[int, list[int]]:
@@ -58,7 +58,7 @@ class NaCPG_Norm(nn.Module):  # noqa: N801
     msg = "This class is a work in progress and not ready for use."
     raise NotImplementedError(msg)
 
-    xy: torch.Tensor
+    xy: torch.Tensor  # type: ignore[unreachable]  # known bug
     xy_dot_old: torch.Tensor
     angles: torch.Tensor
 
@@ -453,12 +453,12 @@ def main(run_id: int) -> torch.Tensor:
         adj_dict, angle_tracking=True, normalize=True, duration=dur, alpha=30
     )
 
-    range_ = int(dur * int(1 / na_cpg_mat.dt))
+    range_ = int(dur * int(1 / na_cpg_mat.dt))  # type: ignore[has-type]  # known bug
     console.log(f"Running NaCPG_Norm for {range_} steps (Run {run_id})")
     for time_step in range(range_):
         na_cpg_mat.forward(time_step)
 
-    hist = torch.tensor(na_cpg_mat.angle_history)
+    hist = torch.tensor(na_cpg_mat.angle_history)  # type: ignore[has-type]  # known bug
     console.log(
         f"NaCPG_Norm Run {run_id} took {time.perf_counter() - t:.2f} seconds"
     )

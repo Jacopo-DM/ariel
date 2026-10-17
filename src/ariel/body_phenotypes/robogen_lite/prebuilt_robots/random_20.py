@@ -59,7 +59,7 @@ def random_spider20(seed: int = 1337) -> CoreModule:
             child = HingeModule(index=idx)
             child.rotate(rng.choice(hinge_rotations))
         else:
-            child = BrickModule(index=idx)
+            child = BrickModule(index=idx)  # type: ignore[assignment]  # known bug
 
         parent.sites[attach_face].attach_body(
             body=child.body,

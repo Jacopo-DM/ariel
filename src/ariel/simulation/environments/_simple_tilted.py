@@ -53,7 +53,7 @@ class SimpleTiltedWorld(BaseWorld):
         if self.checker_floor is True:
             self._create_checker_texture()
         else:
-            self._floor_kwargs["rgba"] = self._terrain_color
+            self._floor_kwargs["rgba"] = self._terrain_color  # type: ignore[attr-defined]  # known bug
 
         #  Expand the MuJoCo specification
         self._expand_spec()

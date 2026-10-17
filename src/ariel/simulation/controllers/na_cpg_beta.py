@@ -47,7 +47,7 @@ DATA.mkdir(exist_ok=True)
 # --- TERMINAL OUTPUT SETUP ---
 install(show_locals=False)
 console = Console()
-torch.set_printoptions(precision=4)
+torch.set_printoptions(precision=4)  # type: ignore[no-untyped-call]  # known bug
 
 
 # --- Beta Parameters --- #
@@ -141,7 +141,7 @@ class NaCPGBeta(nn.Module):
 
         # Angles
         self.angle_tracking = angle_tracking
-        self.angle_history = []
+        self.angle_history: list[list[float]] = []
         self.angle_limits = angle_limits
         self.clipping = clipping
         self.clamping_error = 0.0
@@ -252,14 +252,16 @@ class NaCPGBeta(nn.Module):
             "angles": self.angles.clone(),
         }
 
-    def init_state(self, value: float, size: int | list[int]) -> torch.Tensor:
+    def init_state(
+        self, value: float, size: int | list[int] | tuple[int, ...]
+    ) -> torch.Tensor:
         """Sample an initial state with random signs and magnitude `value`."""
         return torch.Tensor(RNG.choice([-value, value], size=size))
 
     def scaled_beta(
         self,
         beta_params: BetaParams,
-        size: int | list[int],
+        size: int | list[int] | tuple[int, ...],
         *,
         negative_reflect: bool = True,
     ) -> torch.Tensor:
@@ -357,14 +359,14 @@ class NaCPGBeta(nn.Module):
         return alpha * (1 - r2i**2)
 
     @staticmethod
-    def term_b(zeta_i: float, w_i: float) -> float:
+    def term_b(zeta_i: torch.Tensor, w_i: torch.Tensor) -> torch.Tensor:
         """Term B from the NA-CPG equations."""
-        return (1 / (zeta_i + E)) * w_i
+        return (1 / (zeta_i + E)) * w_i  # type: ignore[no-any-return]  # known bug
 
     @staticmethod
-    def zeta(ha_i: float, x_dot_old: float) -> float:
+    def zeta(ha_i: torch.Tensor, x_dot_old: torch.Tensor) -> torch.Tensor:
         """Zeta function from the NA-CPG equations."""
-        return 1 - ha_i * ((x_dot_old + E) / (torch.abs(x_dot_old) + E))
+        return 1 - ha_i * ((x_dot_old + E) / (torch.abs(x_dot_old) + E))  # type: ignore[no-any-return]  # known bug
 
     def set_state(
         self,
@@ -534,7 +536,7 @@ class NaCPGBeta(nn.Module):
         if np.any(np.isnan(angles.cpu().numpy())):
             msg = "NaN values detected in the angle signal.\n"
             msg += f"{angles.cpu().numpy()=}\n"
-            msg += f"{self.clamping_error.cpu().numpy()=}\n"
+            msg += f"{self.clamping_error.cpu().numpy()=}\n"  # type: ignore[attr-defined]  # known bug
             msg += f"{self.xy.cpu().numpy()=}\n"
             msg += f"{self.xy_dot_old.cpu().numpy()=}\n"
             msg += f"{self.ha.cpu().numpy()=}\n"

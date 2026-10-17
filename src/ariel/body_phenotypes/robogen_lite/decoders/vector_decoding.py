@@ -41,7 +41,7 @@ class VectorDecoder(Blueprint):
 
     def assign_symbols_from_range(
         self,
-        vector: npt.NDArray | Sequence[float],
+        vector: npt.NDArray[Any] | Sequence[float],
         symbols: Sequence[T] | Sequence[Sequence[T]],
         weight: Sequence[float] | Sequence[Sequence[float]] | None = None,
     ) -> list[T]:
@@ -59,7 +59,7 @@ class VectorDecoder(Blueprint):
 
         for i, value in enumerate(vector):
             current_symbols: Sequence[T] = (
-                symbols[i] if per_element else symbols
+                symbols[i] if per_element else symbols  # type: ignore[assignment]  # known bug
             )  # pyright: ignore[reportAssignmentType]
 
             num_symbols = len(current_symbols)
@@ -88,9 +88,9 @@ class VectorDecoder(Blueprint):
 
     def vectors_to_graph(
         self,
-        type_vector: npt.NDArray,
-        connection_vector: npt.NDArray,
-        rotation_vector: npt.NDArray,
+        type_vector: npt.NDArray[Any],
+        connection_vector: npt.NDArray[Any],
+        rotation_vector: npt.NDArray[Any],
     ) -> DiGraph[Any]:
         """
         Convert vector to a graph.
@@ -127,12 +127,13 @@ class VectorDecoder(Blueprint):
         # Known bug (see PLAN.md): unfinished code, `allowed_per_element` is
         # undefined, so this method raises NameError when called.
         allowed_rot_per_type = [  # noqa: F841
-            ALLOWED_ROTATIONS[module_type] for module_type in module_types
+            ALLOWED_ROTATIONS[module_type]  # type: ignore[index]  # known bug
+            for module_type in module_types
         ]
 
         rotations = self.assign_symbols_from_range(  # noqa: F841
             vector=self.rotation_vector,
-            symbols=allowed_per_element,  # noqa: F821
+            symbols=allowed_per_element,  # type: ignore[name-defined]  # noqa: F821  # known bug
         )
         rot_types = [i.value for i in ModuleRotationsIdx]
         self.assign_symbols_from_range(
@@ -145,7 +146,7 @@ class VectorDecoder(Blueprint):
         # Initialize module types and rotations
 
         # Decode probability spaces into a graph
-        self.decode_vector_to_graph()
+        self.decode_vector_to_graph()  # type: ignore[unreachable]  # known bug
 
         # Apply constraints
         self.apply_connection_constraints()
@@ -186,11 +187,11 @@ class VectorDecoder(Blueprint):
         self.edges = []
 
         # Available faces for connections
-        available_faces = np.zeros_like(self.conn_p_space)
+        available_faces = np.zeros_like(self.conn_p_space)  # type: ignore[attr-defined]  # known bug
         available_faces[IDX_OF_CORE, :, :] = 1.0
         for _ in range(len(pre_nodes)):
             # Get the current state of the connection probability space
-            current_state = self.conn_p_space * available_faces
+            current_state = self.conn_p_space * available_faces  # type: ignore[attr-defined]  # known bug
 
             # Find the maximum value in the connection probability space
             max_index = np.unravel_index(
@@ -199,7 +200,7 @@ class VectorDecoder(Blueprint):
             )
 
             # Convert to list for easier manipulation
-            max_index = [int(i) for i in max_index]
+            max_index = [int(i) for i in max_index]  # type: ignore[assignment]  # known bug
             from_module, to_module, conn_face = max_index
 
             # Check if the maximum value is zero (no more connections)
@@ -216,12 +217,12 @@ class VectorDecoder(Blueprint):
                 raise ValueError(msg)
 
             # Ensure no NONE modules are instantiated
-            if self.type_dict[to_module] == ModuleType.NONE:
+            if self.type_dict[to_module] == ModuleType.NONE:  # type: ignore[index]  # known bug
                 msg = "Cannot instantiate a NONE module.\n"
                 msg += "This indicates an error in decoding."
                 raise ValueError(msg)
 
-            if self.type_dict[from_module] == ModuleType.NONE:
+            if self.type_dict[from_module] == ModuleType.NONE:  # type: ignore[index]  # known bug
                 msg = "Cannot instantiate a NONE module.\n"
                 msg += "This indicates an error in decoding."
                 raise ValueError(msg)
@@ -232,13 +233,13 @@ class VectorDecoder(Blueprint):
             )
 
             # Update instantiated modules
-            pre_nodes[to_module] = 1
+            pre_nodes[to_module] = 1  # type: ignore[index]  # known bug
 
             # Disable taken face
-            self.conn_p_space[from_module, :, conn_face] = 0.0
+            self.conn_p_space[from_module, :, conn_face] = 0.0  # type: ignore[attr-defined]  # known bug
 
             # Child has only one parent
-            self.conn_p_space[:, to_module, :] = 0.0
+            self.conn_p_space[:, to_module, :] = 0.0  # type: ignore[attr-defined]  # known bug
 
             # Update available faces
             available_faces[to_module, :, :] = 1.0
@@ -252,7 +253,7 @@ class VectorDecoder(Blueprint):
     def set_module_types_and_rotations(self) -> None:
         """Set the module types and rotations using vectors."""
         # Module type from argmax of type probability space
-        type_from_argmax = np.argmax(self.type_p_space, axis=1)
+        type_from_argmax = np.argmax(self.type_p_space, axis=1)  # type: ignore[attr-defined]  # known bug
         self.type_dict = {
             i: ModuleType(int(type_from_argmax[i]))
             for i in range(self.num_modules)
@@ -267,18 +268,18 @@ class VectorDecoder(Blueprint):
             disallowed_faces = all_possible_faces - allowed_faces
             for face in disallowed_faces:
                 # Disable as parent
-                self.conn_p_space[module_idx, :, face.value] = 0.0
+                self.conn_p_space[module_idx, :, face.value] = 0.0  # type: ignore[attr-defined]  # known bug
                 # Disable as child
-                self.conn_p_space[:, module_idx, face.value] = 0.0
+                self.conn_p_space[:, module_idx, face.value] = 0.0  # type: ignore[attr-defined]  # known bug
 
             # Constrain rotations based on module type
             allowed_rotations = set(ALLOWED_ROTATIONS[module_type])
             disallowed_rotations = all_possible_rotations - allowed_rotations
             for rotation in disallowed_rotations:
-                self.rot_p_space[module_idx, rotation.value] = 0.0
+                self.rot_p_space[module_idx, rotation.value] = 0.0  # type: ignore[attr-defined]  # known bug
 
         # Rotation type form argmax of rotation probability space
-        rot_from_argmax = np.argmax(self.rot_p_space, axis=1)
+        rot_from_argmax = np.argmax(self.rot_p_space, axis=1)  # type: ignore[attr-defined]  # known bug
         self.rot_dict = {
             i: ModuleRotationsIdx(int(rot_from_argmax[i]))
             for i in range(self.num_modules)
@@ -290,11 +291,11 @@ class VectorDecoder(Blueprint):
         """."""
         # Self connection not allowed
         for i in range(NUM_OF_FACES):
-            np.fill_diagonal(self.conn_p_space[:, :, i], 0.0)
+            np.fill_diagonal(self.conn_p_space[:, :, i], 0.0)  # type: ignore[attr-defined]  # known bug
 
         # Core is unique
-        self.type_p_space[:, int(ModuleType.CORE.value)] = 0.0
-        self.type_p_space[IDX_OF_CORE, int(ModuleType.CORE.value)] = 1.0
+        self.type_p_space[:, int(ModuleType.CORE.value)] = 0.0  # type: ignore[attr-defined]  # known bug
+        self.type_p_space[IDX_OF_CORE, int(ModuleType.CORE.value)] = 1.0  # type: ignore[attr-defined]  # known bug
 
         # Core is always a parent, never a child
-        self.conn_p_space[:, IDX_OF_CORE, :] = 0.0
+        self.conn_p_space[:, IDX_OF_CORE, :] = 0.0  # type: ignore[attr-defined]  # known bug

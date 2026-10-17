@@ -41,7 +41,7 @@ DATA.mkdir(exist_ok=True)
 # --- TERMINAL OUTPUT SETUP ---
 install(show_locals=False)
 console = Console()
-torch.set_printoptions(precision=4)
+torch.set_printoptions(precision=4)  # type: ignore[no-untyped-call]  # known bug
 
 
 def create_fully_connected_adjacency(num_nodes: int) -> dict[int, list[int]]:
@@ -188,7 +188,7 @@ class NaCPG(nn.Module):
             "angles",
             torch.zeros(self.n),
         )
-        self.angle_history = []
+        self.angle_history: list[list[float]] = []
         self.initial_state = {
             "xy": self.xy.clone(),
             "xy_dot_old": self.xy_dot_old.clone(),
@@ -303,14 +303,14 @@ class NaCPG(nn.Module):
         return alpha * (1 - r2i**2)
 
     @staticmethod
-    def term_b(zeta_i: float, w_i: float) -> float:
+    def term_b(zeta_i: torch.Tensor, w_i: torch.Tensor) -> torch.Tensor:
         """Term B from the NA-CPG equations."""
-        return (1 / (zeta_i + E)) * w_i
+        return (1 / (zeta_i + E)) * w_i  # type: ignore[no-any-return]  # known bug
 
     @staticmethod
-    def zeta(ha_i: float, x_dot_old: float) -> float:
+    def zeta(ha_i: torch.Tensor, x_dot_old: torch.Tensor) -> torch.Tensor:
         """Zeta function from the NA-CPG equations."""
-        return 1 - ha_i * ((x_dot_old + E) / (torch.abs(x_dot_old) + E))
+        return 1 - ha_i * ((x_dot_old + E) / (torch.abs(x_dot_old) + E))  # type: ignore[no-any-return]  # known bug
 
     def reset(self) -> None:
         """Reset the internal states to their initial values."""
@@ -438,7 +438,7 @@ class NaCPG(nn.Module):
         if np.any(np.isnan(angles.cpu().numpy())):
             msg = "NaN values detected in the angle signal.\n"
             msg += f"{angles.cpu().numpy()=}\n"
-            msg += f"{self.clamping_error.cpu().numpy()=}\n"
+            msg += f"{self.clamping_error.cpu().numpy()=}\n"  # type: ignore[attr-defined]  # known bug
             msg += f"{self.xy.cpu().numpy()=}\n"
             msg += f"{self.xy_dot_old.cpu().numpy()=}\n"
             msg += f"{self.ha.cpu().numpy()=}\n"

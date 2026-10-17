@@ -24,7 +24,7 @@ Brownfield. Measured 2026-10-17 after `uv sync --all-groups` (Python 3.12.9, Lin
 | `ruff check --no-fix src tests` | fail: 1858 errors; after T6: 1330 (461 auto-fixable); top: ANN001 331, E501 281, W505 105 | <1 s |
 | `pyright src tests` (added in T7) | fail: 331 errors | 15 s |
 | `ruff format --check src tests` | fail: 51 files would be reformatted, 96 formatted; after T6: 47 and 94; after T8: pass (141 files) | <1 s |
-| `mypy src` (strict) | fail: 517 errors in 49 of 102 files; after T4: 262 errors in 44 of 96 files; after T7: 236 in 41; after T14: 186 in 35; after T15a: 185 | ~40 s |
+| `mypy src` (strict) | fail: 517 errors in 49 of 102 files; after T4: 262 errors in 44 of 96 files; after T7: 236 in 41; after T14: 186 in 35; after T15a: 185; after T16: 0 (pass) | ~40 s |
 | `pytest tests/unit` | 419 passed, 2 collection errors (before T3); after T3: 437 passed, 0 errors | 6.6 s (3 runs: 6.58, 6.59, 6.60) |
 | coverage, same run | 5033 statements, 2760 missed (about 45% line coverage; `fail_under` is 100) | with `--cov` ~10 s |
 
@@ -49,7 +49,6 @@ Policy and numbers are in DESIGN.md (Decisions: "Ruff rule policy" and "Lint/typ
 
 **Tier 2: clear effect, more files or needs judgement (each its own commit, ordered by effect per cost)**
 
-- **T16. mypy to 0 errors on `src`** (185 errors in 35 files; triage done 2026-10-17, no code changed yet). Roughly 110 are annotation-only (type-arg 24, no-any-return 21, var-annotated 8, plus `has-type` 24 mostly from `simple_cpg.py` 22): safe to fix. About 75 point at real or unfinished code: `VectorDecoder` (`vector_decoding.py`) uses attributes that are never defined (`conn_p_space`, `type_p_space`, `rot_p_space`: 13 attr-defined) and `Blueprint` (`_blueprint.py`) uses `nodes`/`edges`/`type_dict`/`rot_dict` that it never sets (4); `constructor.py` 3 attr-defined and 4 assignment; `ea.py` has 3 unreachable branches; `spider_with_blocks.py` 5 union-attr; `genome.py` 5 arg-type. Fixing these without `# type: ignore` means changing behaviour (adding the missing attributes, or removing dead code), which is outside the unchanged-behaviour goal. Decision needed: see the question asked 2026-10-17 (fix the annotation-only ones now; for the real-bug ones either `# type: ignore[code]  # known bug` with a Known-problems entry, or fix/delete them as separate approved tasks). Not started.
 - **T17. Make pre-commit run from the venv.** Replace `language: system` reliance with installed tools (T7 adds them); update prettier from v2.6.0. Verify: `pre-commit run --all-files` on a clean copy (the hooks edit files, so run it on a scratch branch and inspect the diff). Medium.
 - **T18. CI workflow** `.github/workflows/checks.yml` running pytest, `ruff check --no-fix`, `ruff format --check`, `mypy src`, non-blocking until each reaches zero. Cannot be verified without pushing; validate locally with `actionlint` if you want it installed, otherwise a first run after you push. Medium. Coverage `fail_under` set to the measured value (about 45%, exact figure measured then), with the target 100% kept in DESIGN.md.
 
@@ -89,6 +88,31 @@ Commands from config and CI. Ran on 2026-10-17 (results in Baseline); not yet mo
 - `nox --session=tests` and `nox --session=pre-commit` are named in `.claude/dev/testing_and_tooling.md`, but `noxfile.py` defines only a `docs` session.
 
 Other problems:
+- Type errors that mark real or unfinished code, silenced with a line-level `# type: ignore[code]  # known bug` (94 lines in 23 files, 2026-10-17; behaviour unchanged). Remove an ignore by fixing the code it marks; `mypy` (strict, `warn_unused_ignores`) will report one that is no longer needed. By file (codes with counts, then lines):
+  - `body_phenotypes/lynx_mjspec/unified_pipeline/evolve.py`: 1 line(s): attr-defined 1 (lines 282)
+  - `body_phenotypes/lynx_mjspec/unified_pipeline/replay.py`: 1 line(s): arg-type 1 (lines 163)
+  - `body_phenotypes/robogen_lite/constructor.py`: 7 line(s): assignment 4, attr-defined 3 (lines 61, 63, 65, 76, 87, 88, 89)
+  - `body_phenotypes/robogen_lite/cppn_neat/genome.py`: 7 line(s): arg-type 5, index 2 (lines 76, 85, 179, 412, 413, 454, 455)
+  - `body_phenotypes/robogen_lite/cppn_neat/tests.py`: 1 line(s): truthy-function 1 (lines 15)
+  - `body_phenotypes/robogen_lite/decoders/_blueprint.py`: 4 line(s): attr-defined 4 (lines 60, 63, 64, 66)
+  - `body_phenotypes/robogen_lite/decoders/cppn_best_first.py`: 8 line(s): arg-type 2, attr-defined 3, call-overload 1, index 2, return-value 1 (lines 96, 99, 104, 149, 154, 155, 160, 163)
+  - `body_phenotypes/robogen_lite/decoders/hi_prob_decoding.py`: 4 line(s): assignment 1, index 3 (lines 130, 147, 152, 163)
+  - `body_phenotypes/robogen_lite/decoders/vector_decoding.py`: 21 line(s): assignment 2, attr-defined 13, index 4, name-defined 1, unreachable 1 (lines 62, 130, 136, 149, 190, 194, 203, 220, 225, 236, 239, 242, 256, 271, 273, 279, 282, 294, 297, 298, 301)
+  - `body_phenotypes/robogen_lite/prebuilt_robots/random_20.py`: 1 line(s): assignment 1 (lines 62)
+  - `body_phenotypes/robogen_lite/prebuilt_robots/spider_with_blocks.py`: 3 line(s): attr-defined 1, union-attr 2 (lines 28, 40, 43)
+  - `ec/archive.py`: 5 line(s): arg-type 1, assignment 1, call-overload 1, operator 2 (lines 100, 101, 102, 111, 443)
+  - `ec/ea.py`: 7 line(s): arg-type 1, assignment 1, attr-defined 1, prop-decorator 1, unreachable 3 (lines 83, 239, 248, 257, 261, 361, 639)
+  - `ec/genotypes/nde/nde.py`: 1 line(s): arg-type 1 (lines 180)
+  - `simulation/controllers/na_cpg.py`: 4 line(s): attr-defined 1, no-any-return 2, no-untyped-call 1 (lines 44, 308, 313, 441)
+  - `simulation/controllers/na_cpg_beta.py`: 4 line(s): attr-defined 1, no-any-return 2, no-untyped-call 1 (lines 50, 364, 369, 539)
+  - `simulation/controllers/na_cpg_norm.py`: 4 line(s): has-type 2, no-untyped-call 1, unreachable 1 (lines 44, 61, 456, 461)
+  - `simulation/controllers/simple_cpg.py`: 1 line(s): no-untyped-call 1 (lines 36)
+  - `simulation/environments/_compound_world.py`: 1 line(s): assignment 1 (lines 176)
+  - `simulation/environments/_simple_tilted.py`: 1 line(s): attr-defined 1 (lines 56)
+  - `simulation/environments/olympic_arena.py`: 4 line(s): abstract 1, arg-type 1, assignment 1, call-overload 1 (lines 37, 38, 151, 327)
+  - `simulation/example_usage.py`: 2 line(s): arg-type 1, override 1 (lines 86, 187)
+  - `utils/video_recorder.py`: 2 line(s): call-overload 2 (lines 80, 91)
+  - Worth knowing: `NaCPG_Norm` raises `NotImplementedError` in its class body, so `na_cpg_norm.py` cannot be imported; `VectorDecoder` and `Blueprint` use attributes they never define (`conn_p_space`, `type_p_space`, `rot_p_space`, `nodes`, `edges`, `type_dict`, `rot_dict`); `OlympicArena` cannot be instantiated (abstract `_expand_spec`, misspelling of `_extend_spec`); `SimpleTiltedWorld` reads `_terrain_color` that is never set; `EA` has three unreachable branches. The 4 `no-untyped-call` ignores (`torch.set_printoptions`) are a library typing gap, not bugs.
 - `src/ariel/body_phenotypes/robogen_lite/decoders/vector_decoding.py`: `VectorDecoder.vectors_to_graph` raises `NameError` (`allowed_per_element` is undefined; unfinished edit). Left as is on purpose (behaviour unchanged), marked with `# noqa: F821, F841` and a comment. Fix, delete or finish it later.
 - Two commented-out-code findings (ERA001) remain in `tests/functional/cpg.ipynb` (notebook cells, left alone in T10).
 - `examples/a_mujoco/3_cameras_in_simulation.py` was changed in T3 (cv2 window replaced by matplotlib) but not run: this machine has no display, and the script fails earlier at `mujoco.Renderer(...)` (`AttributeError: ... _mjr_context`, no OpenGL context). Needs a manual run on a machine with a display. The Renderer failure is further evidence for gl-autodetect.

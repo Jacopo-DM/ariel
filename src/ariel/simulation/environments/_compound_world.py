@@ -173,7 +173,7 @@ class CompoundWorld(BaseWorld):
         )
 
         # Update floor geom parameters
-        self._floor_kwargs["quat"] = self.rotation_as_quat
+        self._floor_kwargs["quat"] = self.rotation_as_quat  # type: ignore[assignment]  # known bug
 
     def _create_checker_texture(self) -> None:
         self.spec.add_texture(

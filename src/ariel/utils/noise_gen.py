@@ -2,7 +2,7 @@
 
 # Standard library
 from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, cast
 
 # Third-party libraries
 import numpy as np
@@ -84,7 +84,7 @@ class PerlinNoise:
         # Ensure non-negative and wrap
         xi &= 255
         yi &= 255
-        return self._perm[(self._perm[xi] + yi) & 255]
+        return cast("np.ndarray", self._perm[(self._perm[xi] + yi) & 255])
 
     def _grad_at_corner(self, xi: IntArray, yi: IntArray) -> FloatArray:
         """
@@ -102,7 +102,7 @@ class PerlinNoise:
             array with shape xi.shape + (2,)
         """
         h = self._hash2(xi, yi) % self._grad_lut.shape[0]
-        return self._grad_lut[h]
+        return cast("np.ndarray", self._grad_lut[h])
 
     def as_grid(
         self,

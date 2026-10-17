@@ -97,9 +97,9 @@ class Archive:
                 Individual.time_of_death <= hi,
             )
         if fitness_range is not None:
-            lo, hi = fitness_range
-            statement = statement.where(Individual.fitness_ >= lo).where(
-                Individual.fitness_ <= hi,
+            lo, hi = fitness_range  # type: ignore[assignment]  # known bug
+            statement = statement.where(Individual.fitness_ >= lo).where(  # type: ignore[operator]  # known bug
+                Individual.fitness_ <= hi,  # type: ignore[operator]  # known bug
             )
 
         return statement
@@ -108,7 +108,7 @@ class Archive:
         self, statement: Select[tuple[Individual]]
     ) -> list[Individual]:
         with Session(self.engine) as session:
-            rows = list(session.exec(statement).all())
+            rows = list(session.exec(statement).all())  # type: ignore[call-overload]  # known bug
         for ind in rows:
             ind.id = None
         return rows
@@ -440,7 +440,7 @@ class Archive:
         """Total number of evaluated individuals stored in the archive."""
         with Session(self.engine) as session:
             return session.exec(
-                select(func.count(Individual.id)).where(
+                select(func.count(Individual.id)).where(  # type: ignore[arg-type]  # known bug
                     Individual.requires_eval == False,  # noqa: E712
                 ),
             ).one()

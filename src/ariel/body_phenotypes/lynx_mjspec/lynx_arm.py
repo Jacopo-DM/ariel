@@ -1,6 +1,6 @@
 """Lynxmotion arm body built as a MuJoCo MjSpec."""
 
-from typing import Any
+from typing import Any, cast
 
 import mujoco
 import mujoco.viewer
@@ -46,7 +46,7 @@ class LynxArm:
             [s, c, 0],
             [0, 0, 1],
         ])
-        return rotation @ axis
+        return cast("np.ndarray", rotation @ axis)
 
     def _build_robot(self) -> None:
         """Construct the kinematic chain hierarchically."""

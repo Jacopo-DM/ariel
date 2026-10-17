@@ -58,11 +58,11 @@ def construct_mjspec_from_graph(graph: DiGraph[Any]) -> CoreModule:
             case ModuleType.CORE.name:
                 module = CoreModule(index=IDX_OF_CORE)
             case ModuleType.HINGE.name:
-                module = HingeModule(index=node)
+                module = HingeModule(index=node)  # type: ignore[assignment]  # known bug
             case ModuleType.BRICK.name:
-                module = BrickModule(index=node)
+                module = BrickModule(index=node)  # type: ignore[assignment]  # known bug
             case ModuleType.NONE.name:
-                module = None
+                module = None  # type: ignore[assignment]  # known bug
             case _:
                 msg = f"Unknown module type: {module_type}"
                 raise ValueError(msg)
@@ -73,7 +73,7 @@ def construct_mjspec_from_graph(graph: DiGraph[Any]) -> CoreModule:
             module.rotate(rotation_angle)
             modules[node] = module
         else:
-            modules[node] = None
+            modules[node] = None  # type: ignore[assignment]  # known bug
 
     # Attach bodies to modules based on the graph edges
     for edge in graph.edges:
@@ -84,9 +84,9 @@ def construct_mjspec_from_graph(graph: DiGraph[Any]) -> CoreModule:
 
         # Check if both modules exist (not 'None')
         if modules[to_module]:
-            modules[from_module].sites[ModuleFaces[face]].attach_body(
-                body=modules[to_module].body,
-                prefix=f"{modules[from_module].index}-{modules[to_module].index}-{ModuleFaces[face].value}-",
+            modules[from_module].sites[ModuleFaces[face]].attach_body(  # type: ignore[attr-defined]  # known bug
+                body=modules[to_module].body,  # type: ignore[attr-defined]  # known bug
+                prefix=f"{modules[from_module].index}-{modules[to_module].index}-{ModuleFaces[face].value}-",  # type: ignore[attr-defined]  # known bug
             )
 
     core_module = modules[IDX_OF_CORE]

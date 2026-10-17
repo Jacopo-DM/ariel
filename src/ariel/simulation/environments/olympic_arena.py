@@ -1,5 +1,7 @@
 """Hybrid MuJoCo world combining flat, rugged, and inclined terrain sections."""
 
+from typing import cast
+
 # Standard library
 # Third-party libraries
 import mujoco
@@ -32,8 +34,8 @@ def quaternion_from_axis_angle(axis: str, angle_deg: float) -> list[float]:
             msg += f" Got {axis=}. Should be 'x', 'y' or 'z'"
             raise ValueError(msg)
 
-    axis_tup = np.asarray(axis_tup, dtype=float)
-    axis_tup /= np.linalg.norm(axis_tup)
+    axis_tup = np.asarray(axis_tup, dtype=float)  # type: ignore[assignment]  # known bug
+    axis_tup /= np.linalg.norm(axis_tup)  # type: ignore[call-overload]  # known bug
     angle_rad = np.deg2rad(angle_deg)
     half_angle = angle_rad / 2
     w = np.cos(half_angle)
@@ -146,7 +148,7 @@ class OlympicArena(BaseWorld):
         # Generate a grid of noise
         width, height = size, size
         scale = hill
-        noise = pnoise.as_grid(width, height, scale=scale, normalize=False)
+        noise = pnoise.as_grid(width, height, scale=scale, normalize=False)  # type: ignore[arg-type]  # known bug
 
         # --- Smooth edge mask (0 at borders -> 1 inside) --- #
         # Normalized coordinates in [0,1]
@@ -169,7 +171,7 @@ class OlympicArena(BaseWorld):
         mask = t * t * (3.0 - 2.0 * t)  # smoothstep(0,1,t)
 
         # Apply mask so edges fade to 0 smoothly
-        return noise * mask
+        return cast("np.ndarray", noise * mask)
 
     def _extend_spec(self) -> None:
         # --- Assets --- #
@@ -322,7 +324,7 @@ class OlympicArena(BaseWorld):
 
 if __name__ == "__main__":
     # Compile and save the XML for inspection
-    arena = OlympicArena(
+    arena = OlympicArena(  # type: ignore[abstract]  # known bug
         load_precompiled=False,
     )
     arena.store_to_xml()

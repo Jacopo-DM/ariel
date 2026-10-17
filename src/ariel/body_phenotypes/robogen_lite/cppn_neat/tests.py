@@ -12,7 +12,7 @@ def display_genome(genome: Genome, title: str) -> None:
     print("   Nodes:")
     # Sort nodes by ID for consistent display order
     for node in sorted(genome.nodes.values(), key=lambda n: n._id):  # noqa: SLF001
-        act_func = node.activation.__name__ if node.activation else "None"
+        act_func = node.activation.__name__ if node.activation else "None"  # type: ignore[truthy-function]  # known bug
         print(
             f"     - Node {node._id} (type: {node.typ}, "  # noqa: SLF001
             f"bias: {node.bias:.3f}, act: {act_func})"

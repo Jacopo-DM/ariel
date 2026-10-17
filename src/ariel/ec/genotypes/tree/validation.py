@@ -40,7 +40,7 @@ def is_single_connected_tree(genome: dict[str, Any]) -> bool:
         return False
 
     # Build adjacency list and check core has no parents
-    adj_list = {nid: [] for nid in node_ids}
+    adj_list: dict[int, list[int]] = {nid: [] for nid in node_ids}
     has_parent = dict.fromkeys(node_ids, False)
 
     for e in edges:

@@ -57,13 +57,13 @@ class Blueprint:
 
     def generate_networkx_graph(self) -> None:
         """Generate a NetworkX graph from the decoded graph."""
-        for node in self.nodes:
+        for node in self.nodes:  # type: ignore[attr-defined]  # known bug
             self.graph.add_node(
                 node,
-                type=self.type_dict[node].name,
-                rotation=self.rot_dict[node].name,
+                type=self.type_dict[node].name,  # type: ignore[attr-defined]  # known bug
+                rotation=self.rot_dict[node].name,  # type: ignore[attr-defined]  # known bug
             )
-        for edges in self.edges:
+        for edges in self.edges:  # type: ignore[attr-defined]  # known bug
             parent, child, face = edges
             self.graph.add_edge(
                 parent,
@@ -114,12 +114,13 @@ def load_graph_from_json(
     """
     with Path(load_file).open("r", encoding="utf-8") as f:
         data = json.load(f)
-    return json_graph.node_link_graph(
+    graph: DiGraph[Any] = json_graph.node_link_graph(
         data,
         directed=True,
         multigraph=False,
         edges="edges",
     )
+    return graph
 
 
 def draw_graph(
