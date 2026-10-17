@@ -1,3 +1,5 @@
+"""Decode a CPPN genome into a robot body and simulate it."""
+
 from pathlib import Path
 
 import mujoco
@@ -37,6 +39,7 @@ np.set_printoptions(precision=3, suppress=True)
 
 
 def run(robot: CoreModule, *, with_viewer: bool = False) -> None:
+    """Spawn `robot` in a flat world and simulate it, optionally in a viewer."""
     world = SimpleFlatWorld()
     world.spawn(robot.spec)
     model = world.spec.compile()

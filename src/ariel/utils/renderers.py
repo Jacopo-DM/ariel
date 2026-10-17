@@ -36,6 +36,7 @@ def single_frame_renderer(
     save_path: str | Path | None = None,
 ) -> Image.Image:
     # Reset state and time of simulation
+    """Simulate `steps` steps, render one frame and return the image."""
     mujoco.mj_resetData(model, data)
 
     # MuJoCo visualisation configuration

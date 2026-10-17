@@ -1,3 +1,5 @@
+"""CPPN genome: nodes, connections, mutation, crossover and activation."""
+
 import random
 
 from .activations import ACTIVATION_FUNCTIONS, DEFAULT_ACTIVATION
@@ -15,6 +17,7 @@ class Genome:
         fitness: float,
         serialized: dict = None,
     ):
+        """Create a genome from its nodes, connections and fitness."""
         self.nodes = nodes
         self.connections = connections
         self.fitness = fitness
@@ -30,11 +33,11 @@ class Genome:
 
     @staticmethod
     def _get_random_activation():
-        """Selects a random activation function from the available list."""
+        """Select a random activation function from the available list."""
         return random.choice(list(ACTIVATION_FUNCTIONS))
 
     def copy(self):
-        """Returns a new Genome object with identical, deep-copied gene sets."""
+        """Return a new Genome object with identical, deep-copied gene sets."""
         # Deep copy nodes (Node class has a copy method)
         new_nodes = {_id: node.copy() for _id, node in self.nodes.items()}
 
@@ -55,7 +58,8 @@ class Genome:
         next_innov_id: int,
     ):
         """
-        Creates a new, randomly initialized Genome with a base topology.
+        Create a new, randomly initialized Genome with a base topology.
+
         Initial topology is fully connected inputs to outputs.
         """
         nodes = {}
@@ -272,7 +276,7 @@ class Genome:
         )
 
     def add_connection(self, connection: Connection):
-        """Adds a connection gene to the genome."""
+        """Add a connection gene to the genome."""
         if connection not in self.connections.values():
             self.connections[connection.innov_id] = connection
         else:
@@ -280,7 +284,7 @@ class Genome:
             raise ValueError(msg)
 
     def add_node(self, node: Node):
-        """Adds a node gene to the genome."""
+        """Add a node gene to the genome."""
         if node not in self.nodes.values():
             self.nodes[node._id] = node
         else:
@@ -289,8 +293,9 @@ class Genome:
 
     def get_node_ordering(self):
         """
-        Calculates a topological sort order for feed-forward activation using
-        Kahn's algorithm.
+        Calculate a topological order for feed-forward activation.
+
+        Uses Kahn's algorithm.
         This ensures a node is evaluated only after all its input nodes are
         ready.
         https://www.geeksforgeeks.org/dsa/topological-sorting-indegree-based-solution/
@@ -342,7 +347,8 @@ class Genome:
 
     def activate(self, inputs: list[float]) -> list[float]:
         """
-        Activates the neural network.
+        Activate the neural network.
+
         1. Tries a topological sort (Feed-Forward) for speed and precision.
         2. If a cycle is detected, falls back to iterative relaxation
           (Recurrent).
@@ -439,7 +445,7 @@ class Genome:
             return [current_values[_id] for _id in output_node_ids]
 
     def to_dict(self) -> dict:
-        """Serializes the Genome to a dictionary."""
+        """Serialize the Genome to a dictionary."""
         return {
             "nodes": {
                 str(k): {

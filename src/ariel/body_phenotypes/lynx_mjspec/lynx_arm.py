@@ -1,3 +1,5 @@
+"""Lynxmotion arm body built as a MuJoCo MjSpec."""
+
 import mujoco
 import mujoco.viewer
 import numpy as np
@@ -8,11 +10,13 @@ from ariel.body_phenotypes.lynx_mjspec.table import TableWorld
 class LynxArm:
     """
     A unified MjSpec builder for the Lynxmotion Arm.
+
     Builds the entire robot in a single kinematic tree.
 
     """
 
     def __init__(self, config=None):
+        """Create the arm spec from `config` (a default arm if None)."""
         self.spec = mujoco.MjSpec()
         self.spec.compiler.degree = False
 
@@ -43,7 +47,7 @@ class LynxArm:
         return R @ axis
 
     def _build_robot(self):
-        """Constructs the kinematic chain hierarchically."""
+        """Construct the kinematic chain hierarchically."""
         # 1. ROOT / BASE
         base_link = self.spec.worldbody.add_body(
             name="lynx_base", pos=[0, 0, 0]

@@ -1,3 +1,5 @@
+"""Evolve Lynx arm tube lengths and policy weights (command line)."""
+
 from __future__ import annotations
 
 import argparse
@@ -35,10 +37,12 @@ DEFAULT_TIME_BONUS_WEIGHT = 0.08
 
 
 def make_run_name() -> str:
+    """Return a UTC timestamp used to name a run."""
     return datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
 
 
 def parse_args() -> argparse.Namespace:
+    """Parse the command-line arguments of the evolution run."""
     parser = argparse.ArgumentParser(
         description="Unified Lynx evolution pipeline"
     )
@@ -96,6 +100,7 @@ def evaluate_candidate(
     hold_steps_to_stop: int,
     time_bonus_weight: float,
 ) -> float:
+    """Return the fitness of one genome (tube lengths plus policy weights)."""
     try:
         tube_lengths_raw = genome[:NUM_TUBES]
         weights = genome[NUM_TUBES:]
@@ -197,6 +202,7 @@ def evaluate_candidate(
 
 
 def main() -> None:
+    """Run the evolution and save the artifacts of the run."""
     args = parse_args()
 
     rng = np.random.default_rng(args.seed)

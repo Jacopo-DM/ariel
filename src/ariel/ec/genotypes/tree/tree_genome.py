@@ -17,11 +17,14 @@ import networkx as nx
 class TreeGenome:
     # nodes: mapping id -> dict with keys: type (Enum.name), rotation
     # (Enum.name)
+    """Tree genome: module nodes and the edges that connect them."""
+
     nodes: dict[int, dict[str, str]] = field(default_factory=dict)
     # edges: list of {"parent": int, "child": int, "face": ModuleFaces.name}
     edges: list[dict[str, typing.Any]] = field(default_factory=list)
 
     def to_networkx(self) -> nx.DiGraph:
+        """Return the genome as a networkx DiGraph."""
         g = nx.DiGraph()
         for nid, nobj in self.nodes.items():
             g.add_node(nid, type=nobj["type"], rotation=nobj["rotation"])
@@ -30,6 +33,7 @@ class TreeGenome:
         return g
 
     def to_dict(self) -> dict[str, typing.Any]:
+        """Return the genome as a JSON-serialisable dict."""
         return {
             "nodes": {str(k): v for k, v in self.nodes.items()},
             "edges": self.edges,
@@ -37,6 +41,7 @@ class TreeGenome:
 
     @classmethod
     def from_dict(cls, data: dict[str, typing.Any]) -> TreeGenome:
+        """Create a genome from a dict as returned by `to_dict`."""
         nodes_raw = data.get("nodes", {})
         # accept both string-keyed mapping and list
         nodes: dict[int, dict[str, str]] = {}
@@ -54,11 +59,13 @@ class TreeGenome:
         return cls(nodes=nodes, edges=edges)
 
     def save_json(self, path: str) -> None:
+        """Write the genome to `path` as JSON."""
         with open(path, "w") as fh:
             json.dump(self.to_dict(), fh, indent=2)
 
     @classmethod
     def load_json(cls, path: str) -> TreeGenome:
+        """Read a genome from the JSON file at `path`."""
         with open(path) as fh:
             data = json.load(fh)
         return cls.from_dict(data)

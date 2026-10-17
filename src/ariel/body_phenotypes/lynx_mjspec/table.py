@@ -12,6 +12,7 @@ class TableWorld:
     name: str = "table-world"
 
     def __init__(self) -> None:
+        """Create the world spec with a floor and a table."""
         self.spec = mujoco.MjSpec()
         self.spec.copy_during_attach = True
 

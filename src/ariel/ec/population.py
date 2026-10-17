@@ -56,6 +56,7 @@ class Population:
     """
 
     def __init__(self, individuals: list[Individual]) -> None:
+        """Create a population from a list of individuals."""
         self.population: list[Individual] = list(individuals)
 
     # -- Core sequence protocol ------------------------------------------------
@@ -211,6 +212,7 @@ class Population:
         sort: Literal["max", "min"] = "max",
         attribute: str = "fitness_",
     ) -> "Population":
+        """Return a new population sorted by `attribute`."""
         reverse: bool = sort == "max"
 
         def key(ind: Individual) -> float:

@@ -349,7 +349,7 @@ class SimpleCPG(nn.Module):
 
 
 def main() -> None:
-    """Example usage of SimpleCPG."""
+    """Show example usage of SimpleCPG."""
     adj_dict = create_fully_connected_adjacency(3)
     cpg = SimpleCPG(adj_dict, angle_tracking=True)
 

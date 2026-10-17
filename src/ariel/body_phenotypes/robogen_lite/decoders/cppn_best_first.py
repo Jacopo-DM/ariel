@@ -1,3 +1,5 @@
+"""Decode a CPPN genome into a robot graph, best connection first."""
+
 import networkx as nx
 import numpy as np
 import numpy.typing as npt
@@ -18,6 +20,7 @@ console = Console()
 
 
 def softmax(raw_scores: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
+    """Return the softmax of `raw_scores`."""
     e_x = np.exp(raw_scores - np.max(raw_scores))
     return e_x / e_x.sum()
 
@@ -26,6 +29,7 @@ class MorphologyDecoderBestFirst:
     """Decodes a CPPN using a true greedy, best-first search strategy."""
 
     def __init__(self, cppn_genome: Genome, max_modules: int = 20):
+        """Create a decoder for `cppn_genome` (at most `max_modules`)."""
         self.cppn_genome = cppn_genome
         self.max_modules = max_modules
         self.face_deltas = {
@@ -46,6 +50,7 @@ class MorphologyDecoderBestFirst:
         )
 
     def decode(self) -> nx.DiGraph:
+        """Grow the robot graph from the core, best-scoring connection first."""
         robot_graph = nx.DiGraph()
         occupied_coords = {}
         module_data = {}

@@ -492,7 +492,7 @@ class NaCPG(nn.Module):
 
 # Example usage
 def main() -> None:
-    """Example usage of the NaCPG class."""
+    """Show example usage of the NaCPG class."""
     adj_dict = create_fully_connected_adjacency(3)
     na_cpg_mat = NaCPG(adj_dict, angle_tracking=True)
 

@@ -47,6 +47,8 @@ class MujocoConfig(BaseSettings):
     # --- Compiler --- #
     # https://mujoco.readthedocs.io/en/stable/APIreference/APItypes.html#mjscompiler
     # https://mujoco.readthedocs.io/en/2.3.7/XMLreference.html#compiler
+    """MuJoCo compiler, option and visual settings."""
+
     autolimits: bool = True
     balanceinertia: bool = True
     degree: bool = False

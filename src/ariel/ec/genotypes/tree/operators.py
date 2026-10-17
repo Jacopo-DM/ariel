@@ -31,12 +31,14 @@ def add_node(
     rotation: str,
 ) -> None:
     # add node and edge if allowed; caller should ensure face is free
+    """Add node `node_id` and an edge from `parent` on `face`."""
     genome.nodes[node_id] = {"type": mtype, "rotation": rotation}
     genome.edges.append({"parent": parent, "child": node_id, "face": face})
 
 
 def remove_subtree(genome: TreeGenome, node_id: int) -> None:
     # remove node and all descendants
+    """Remove node `node_id` and all of its descendants."""
     g = genome.to_networkx()
     if node_id not in g:
         return
@@ -252,7 +254,7 @@ def mutate_subtree_replacement(
     genome: TreeGenome, max_modules: int = 10
 ) -> None:
     """
-    Standard GP subtree mutation: replace a subtree with a new one.
+    Apply standard GP subtree mutation: replace a subtree with a new one.
 
     Selects a random non-core node, removes its entire subtree, and replaces it
     with a new randomly generated subtree. This is the primary mutation operator

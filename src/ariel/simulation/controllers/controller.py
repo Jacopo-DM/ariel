@@ -16,6 +16,8 @@ from ariel.utils.tracker import Tracker
 @dataclass
 class Controller:
     # Function that executes the actual control step
+    """Apply a control callback to a MuJoCo simulation, optionally tracked."""
+
     controller_callback_function: Callable[..., Any]
 
     # How often to call the controller (for every simulation step)
@@ -37,7 +39,7 @@ class Controller:
         *args: Any | None,
         **kwargs: dict[Any, Any] | None,
     ) -> None:
-        """Sets the controller callback function and gives additional arguments.
+        """Set the controller callback function and gives additional arguments.
 
         Parameters
         ----------

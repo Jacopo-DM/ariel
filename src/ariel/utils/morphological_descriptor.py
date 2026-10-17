@@ -86,6 +86,7 @@ class MorphologicalMeasures:
     """
 
     def __init__(self, robot_graph: nx.DiGraph) -> None:
+        """Create the measures for `robot_graph`; raise if it is empty."""
         if robot_graph.number_of_nodes() == 0:
             msg = "Cannot analyze empty robot graph"
             raise ValueError(msg)

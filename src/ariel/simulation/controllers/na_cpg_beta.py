@@ -52,6 +52,8 @@ torch.set_printoptions(precision=4)
 
 # --- Beta Parameters --- #
 class BetaParams(NamedTuple):
+    """Shape parameters (a, b) and bounds (c, d) of a scaled beta."""
+
     a: float
     b: float
     c: float
@@ -59,6 +61,7 @@ class BetaParams(NamedTuple):
 
 
 def create_fully_connected_adjacency(num_nodes: int) -> dict[int, list[int]]:
+    """Return an adjacency dict where every node connects to all others."""
     adjacency_dict = {}
     for i in range(num_nodes):
         adjacency_dict[i] = [j for j in range(num_nodes) if j != i]
@@ -129,6 +132,7 @@ class NaCPGBeta(nn.Module):
         # ================================================================== #
         # User parameters
         # ------------------------------------------------------------------ #
+        """Initialize the beta-parametrised NA-CPG module."""
         super().__init__()
 
         # Connectivity
@@ -249,6 +253,7 @@ class NaCPGBeta(nn.Module):
         }
 
     def init_state(self, value: float, size: int | list[int]) -> torch.Tensor:
+        """Sample an initial state with random signs and magnitude `value`."""
         return torch.Tensor(RNG.choice([-value, value], size=size))
 
     def scaled_beta(
@@ -259,6 +264,7 @@ class NaCPGBeta(nn.Module):
         negative_reflect: bool = True,
     ) -> torch.Tensor:
         # Unpack parameters
+        """Sample from a beta distribution scaled to the range [c, d]."""
         a, b, c, d = beta_params
 
         # a & b must be grater than 0
@@ -283,6 +289,7 @@ class NaCPGBeta(nn.Module):
         self,
         params: list[float] | np.ndarray | torch.Tensor,
     ) -> torch.Tensor:
+        """Convert input parameters to torch.Tensor if needed."""
         if isinstance(params, list):
             params = torch.tensor(params, dtype=torch.float32)
         elif isinstance(params, np.ndarray):
@@ -291,6 +298,7 @@ class NaCPGBeta(nn.Module):
 
     def set_flat_params(self, params: torch.Tensor) -> None:
         # Convert params to tensor if needed
+        """Set all learnable parameters from a flat tensor."""
         safe_params = self.param_type_converter(params)
 
         # Check size is correct
@@ -309,6 +317,7 @@ class NaCPGBeta(nn.Module):
             pointer += num_param
 
     def set_param_with_dict(self, params: dict[str, torch.Tensor]) -> None:
+        """Set parameters from a dict of group names to tensors."""
         for key, value in params.items():
             safe_value = self.param_type_converter(value)
             self.set_params_by_group(key, safe_value)
@@ -319,6 +328,7 @@ class NaCPGBeta(nn.Module):
         params: torch.Tensor,
     ) -> None:
         # Convert params to tensor if needed
+        """Set parameters for a specific group."""
         safe_params = self.param_type_converter(params)
 
         # Check group exists
@@ -338,18 +348,22 @@ class NaCPGBeta(nn.Module):
         param.data = safe_params.view_as(param)
 
     def get_flat_params(self) -> torch.Tensor:
+        """Get all learnable parameters as a flat tensor."""
         return torch.cat([p.flatten() for p in self.parameter_groups.values()])
 
     @staticmethod
     def term_a(alpha: float, r2i: float) -> float:
+        """Term A from the NA-CPG equations."""
         return alpha * (1 - r2i**2)
 
     @staticmethod
     def term_b(zeta_i: float, w_i: float) -> float:
+        """Term B from the NA-CPG equations."""
         return (1 / (zeta_i + E)) * w_i
 
     @staticmethod
     def zeta(ha_i: float, x_dot_old: float) -> float:
+        """Zeta function from the NA-CPG equations."""
         return 1 - ha_i * ((x_dot_old + E) / (torch.abs(x_dot_old) + E))
 
     def set_state(
@@ -357,10 +371,12 @@ class NaCPGBeta(nn.Module):
         xy: list[float] | np.ndarray | torch.Tensor,
         xy_dot_old: list[float] | np.ndarray | torch.Tensor,
     ) -> None:
+        """Set the CPG state (xy) and the previous derivative (xy_dot_old)."""
         self.xy = self.param_type_converter(xy)
         self.xy_dot_old = self.param_type_converter(xy_dot_old)
 
     def reset_state(self) -> None:
+        """Reset the internal states to their initial values."""
         self.xy.data = self.initial_state["xy"].clone()
         self.xy_dot_old.data = self.initial_state["xy_dot_old"].clone()
         self.angles.data = self.initial_state["angles"].clone()
@@ -371,9 +387,11 @@ class NaCPGBeta(nn.Module):
         coefficients: tuple[float, float, float, float],
         w: float,
     ) -> float:
+        """Evaluate the constraint polynomial at `w`."""
         return float(np.polyval(coefficients, w))
 
     def run_for(self, steps: int) -> torch.Tensor:
+        """Run the CPG for `steps` steps and return the final angles."""
         for _ in range(steps):
             self.forward()
         return self.angles.clone()
@@ -407,6 +425,7 @@ class NaCPGBeta(nn.Module):
         time: float | None = None,
     ) -> torch.Tensor:
         # Reset if time is zero
+        """Perform a forward pass: update CPG states, compute output angles."""
         if time is not None and torch.isclose(
             torch.tensor(time),
             torch.tensor(0.0),
@@ -532,6 +551,7 @@ class NaCPGBeta(nn.Module):
 # Example usage
 def main() -> None:
     # Imports for the example
+    """Run a small demo of the beta-parametrised NA-CPG."""
     import matplotlib.pyplot as plt
 
     # Test loop

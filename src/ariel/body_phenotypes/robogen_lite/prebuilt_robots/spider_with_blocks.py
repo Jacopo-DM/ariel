@@ -1,3 +1,5 @@
+"""Spider robot body variants built from core, hinge and brick modules."""
+
 import math
 import sys
 
@@ -21,6 +23,7 @@ F, L, B, R = faces
 
 
 def make_core():
+    """Return a new core module named "C"."""
     core = CoreModule(index=0)
     core.name = "C"
     return core
@@ -33,6 +36,7 @@ def attach(
     name: str,
     rotation: float = 0,
 ) -> SUBMODULES:
+    """Attach `module` to `parent` on `face` and return it."""
     name = f"{parent.name}-{name}"
     parent.sites[face].attach_body(body=module.body, prefix=name + "-")
 
@@ -45,6 +49,7 @@ def attach(
 
 
 def body_spider() -> CoreModule:
+    """Return the spider body: a core with four legs."""
     core = make_core()
 
     for i, f in enumerate(faces, start=1):
@@ -57,6 +62,7 @@ def body_spider() -> CoreModule:
 
 
 def body_spider45() -> CoreModule:
+    """Return the spider body rotated by 45 degrees about the vertical axis."""
     core = body_spider()
     core.spec.body("core").quat = (
         math.cos(math.pi / 8),

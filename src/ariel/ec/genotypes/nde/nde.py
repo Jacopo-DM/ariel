@@ -54,8 +54,9 @@ console = Console()
 
 
 class NeuralDevelopmentalEncoding(nn.Module):
+    """Neural developmental encoding: maps genotypes to module probabilities."""
+
     def __init__(self, number_of_modules: int, genotype_size: int = 64) -> None:
-        super().__init__()
         """
         Neural developmental encoder.
 
@@ -70,6 +71,7 @@ class NeuralDevelopmentalEncoding(nn.Module):
         genotype_size : int, optional
             Size of each genotype chromosome, by default 64.
         """
+        super().__init__()
 
         # Hidden Layers
         self.fc1 = nn.Linear(genotype_size, 64)

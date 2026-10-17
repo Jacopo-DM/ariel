@@ -1,9 +1,11 @@
+"""Manual checks of the CPPN genome (prints the genome)."""
+
 from .genome import Genome
 from .id_manager import IdManager
 
 
 def display_genome(genome: Genome, title: str):
-    """Prints a readable summary of a genome's structure."""
+    """Print a readable summary of a genome's structure."""
     print("-" * 40)
     print(f"🧬 {title}")
     print(f"   Fitness: {genome.fitness}")

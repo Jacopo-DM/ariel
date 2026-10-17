@@ -150,6 +150,7 @@ class EAOperation[**P]:
         *args: P.args,
         **kwargs: P.kwargs,
     ) -> None:
+        """Wrap `func` with its bound positional and keyword arguments."""
         sig = inspect.signature(func)
         params = list(sig.parameters.values())
 
@@ -254,6 +255,7 @@ class EAOperation[**P]:
         return EAOperation(self.func, *args, **kwargs)
 
     def __repr__(self) -> str:
+        """Return the function name with its bound keyword arguments."""
         kwargs = ", ".join(f"{k}={v!r}" for k, v in self.kwargs.items())
         return f"{self.func.__name__}({kwargs})"
 
@@ -332,6 +334,7 @@ class EA:
         db_file_path: Path | None = None,
         db_handling: DBHandlingMode | None = None,
     ) -> None:
+        """Create an EA from an optional population and list of operations."""
         if operations is None:
             msg = "'operations' is required."
             raise ValueError(msg)

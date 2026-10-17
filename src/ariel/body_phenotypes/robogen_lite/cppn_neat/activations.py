@@ -1,8 +1,10 @@
+"""Activation functions available to CPPN nodes."""
+
 import math
 
 
 def sigmoid(x: int) -> float:
-    """The standard logistic sigmoid function."""
+    """Return the standard logistic sigmoid."""
     return 1.0 / (1.0 + math.exp(-x))
 
 

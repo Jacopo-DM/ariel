@@ -31,6 +31,7 @@ def generate_save_path(
 ) -> Path:
     """
     Generate a unique file path for saving files.
+
     The function generates a file path based on the provided parameters.
     If `file_name` is not provided, a timestamp-based name is generated.
 

@@ -1,4 +1,4 @@
-"""Util functions for mujoco s"""
+"""Util functions for mujoco s."""
 
 import mujoco as mj
 import numpy as np

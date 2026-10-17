@@ -1,3 +1,5 @@
+"""Plot training statistics parsed from evolution log files."""
+
 import re
 
 import matplotlib.pyplot as plt
@@ -22,7 +24,8 @@ def _parse_log(file_path: str) -> dict[str, list]:
 
 def plot_training_logs(log_files):
     """
-    Parses multiple log files and plots aggregated statistics across runs.
+    Parse multiple log files and plot aggregated statistics across runs.
+
     Each metric (best, mean) is shown as the cross-run mean ± 1 std band.
 
     Args:

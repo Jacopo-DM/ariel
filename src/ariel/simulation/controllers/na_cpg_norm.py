@@ -45,6 +45,7 @@ torch.set_printoptions(precision=4)
 
 
 def create_fully_connected_adjacency(num_nodes: int) -> dict[int, list[int]]:
+    """Return an adjacency dict where every node connects to all others."""
     adjacency_dict = {}
     for i in range(num_nodes):
         adjacency_dict[i] = [j for j in range(num_nodes) if j != i]
@@ -74,6 +75,8 @@ class NaCPG_Norm(nn.Module):
         seed: int | None = None,
     ) -> None:
         """
+        Initialize the normalized NA-CPG module.
+
         Parameters
         ----------
         adjacency_dict : dict[int, list[int]]
@@ -197,6 +200,7 @@ class NaCPG_Norm(nn.Module):
             self.init_angle_history()
 
     def init_angle_history(self) -> None:
+        """Precompute the angle history and normalize each joint to +-pi/2."""
         self.angle_tracking = True
         for _ in range(self.duration * int(1 / self.dt) + 10):
             self.forward()
@@ -213,6 +217,7 @@ class NaCPG_Norm(nn.Module):
         self,
         params: list[float] | np.ndarray | torch.Tensor,
     ) -> torch.Tensor:
+        """Convert input parameters to torch.Tensor if needed."""
         if isinstance(params, list):
             params = torch.tensor(params, dtype=torch.float32)
         elif isinstance(params, np.ndarray):
@@ -221,6 +226,7 @@ class NaCPG_Norm(nn.Module):
 
     def set_flat_params(self, params: torch.Tensor) -> None:
         # Convert params to tensor if needed
+        """Set all learnable parameters from a flat tensor."""
         safe_params = self.param_type_converter(params)
 
         # Check size is correct
@@ -239,6 +245,7 @@ class NaCPG_Norm(nn.Module):
             pointer += num_param
 
     def set_param_with_dict(self, params: dict[str, torch.Tensor]) -> None:
+        """Set parameters from a dict of group names to tensors."""
         for key, value in params.items():
             safe_value = self.param_type_converter(value)
             self.set_params_by_group(key, safe_value)
@@ -249,6 +256,7 @@ class NaCPG_Norm(nn.Module):
         params: torch.Tensor,
     ) -> None:
         # Convert params to tensor if needed
+        """Set parameters for a specific group."""
         safe_params = self.param_type_converter(params)
 
         # Check group exists
@@ -268,21 +276,26 @@ class NaCPG_Norm(nn.Module):
         param.data = safe_params.view_as(param)
 
     def get_flat_params(self) -> torch.Tensor:
+        """Get all learnable parameters as a flat tensor."""
         return torch.cat([p.flatten() for p in self.parameter_groups.values()])
 
     @staticmethod
     def term_a(alpha: float, r2i: float) -> float:
+        """Term A from the NA-CPG equations."""
         return alpha * (1 - r2i**2)
 
     @staticmethod
     def term_b(zeta_i: float, w_i: float) -> float:
+        """Term B from the NA-CPG equations."""
         return (1 / (zeta_i + E)) * w_i
 
     @staticmethod
     def zeta(ha_i: float, x_dot_old: float) -> float:
+        """Zeta function from the NA-CPG equations."""
         return 1 - ha_i * ((x_dot_old + E) / (torch.abs(x_dot_old) + E))
 
     def reset(self) -> None:
+        """Reset the internal states to their initial values."""
         self.xy.data = self.initial_state["xy"].clone()
         self.xy_dot_old.data = self.initial_state["xy_dot_old"].clone()
         self.angles.data = self.initial_state["angles"].clone()
@@ -290,6 +303,7 @@ class NaCPG_Norm(nn.Module):
         self.current_step = 0
 
     def step(self, time: float) -> torch.Tensor:
+        """Return the next precomputed (normalized) angles from the history."""
         self.current_step += 1
         return self.angle_history[self.current_step - 1]
 
@@ -299,6 +313,7 @@ class NaCPG_Norm(nn.Module):
         # ):
         # if time is not None and abs(float(time)) < 1e-12:
         # Normalize amplitudes
+        """Perform a forward pass: update CPG states, compute output angles."""
         if self.normalize and self.is_normalized:
             return self.step(self.current_step)
 
@@ -430,6 +445,7 @@ class NaCPG_Norm(nn.Module):
 
 # Example usage
 def main(run_id: int) -> torch.Tensor:
+    """Run one demo of the NA-CPG and return its angle history."""
     dur = 10  # duration in seconds
     t = time.perf_counter()
     adj_dict = create_fully_connected_adjacency(3)
@@ -450,6 +466,7 @@ def main(run_id: int) -> torch.Tensor:
 
 
 def plot_all_runs(histories: list[torch.Tensor], dt: float) -> None:
+    """Plot the angle histories of all runs against time."""
     import matplotlib.pyplot as plt
 
     plt.figure(figsize=(12, 8))

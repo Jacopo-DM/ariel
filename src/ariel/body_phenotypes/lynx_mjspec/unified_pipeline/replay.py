@@ -1,3 +1,5 @@
+"""Replay a saved Lynx evolution run in the MuJoCo viewer."""
+
 from __future__ import annotations
 
 import argparse
@@ -24,6 +26,7 @@ from ariel.body_phenotypes.lynx_mjspec.unified_pipeline.common import (
 
 
 def parse_args() -> argparse.Namespace:
+    """Parse the command-line arguments of the replay."""
     parser = argparse.ArgumentParser(description="Unified Lynx replay pipeline")
     parser.add_argument(
         "--artifact-dir", type=str, default="__data__/lynx_mjspec/unified"
@@ -44,6 +47,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def resolve_artifact_dir(artifact_dir: Path) -> Path:
+    """Return the run directory that holds `metadata.json`."""
     if (artifact_dir / "metadata.json").exists():
         return artifact_dir
 
@@ -62,6 +66,7 @@ def resolve_artifact_dir(artifact_dir: Path) -> Path:
 def load_artifacts(
     artifact_dir: Path,
 ) -> tuple[np.ndarray, np.ndarray, PolicySpec, dict[str, object]]:
+    """Load the best genome, policy spec and metadata of a run."""
     artifact_dir = resolve_artifact_dir(artifact_dir)
 
     metadata_path = artifact_dir / "metadata.json"
@@ -100,6 +105,7 @@ def run_rollout(
     ctrl_freq: int,
     touch_threshold: float,
 ) -> tuple[float, float, float, float | None]:
+    """Run the policy; return initial, min, final distance and touch time."""
     set_target_position(model, data, tgt_sid, target)
 
     initial_distance = float(
@@ -144,6 +150,7 @@ def run_rollout(
 
 
 def main() -> None:
+    """Load a saved run and replay it."""
     args = parse_args()
 
     artifact_dir = Path(args.artifact_dir)

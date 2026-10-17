@@ -32,6 +32,7 @@ def fitness_distance_and_efficiency(
     target_pos: np.ndarray,
     total_control_effort: float,
 ) -> float:
+    """Return the distance fitness plus a penalty on control effort."""
     delta_dist = fitness_delta_distance(initial_pos, final_pos, target_pos)
 
     # FIXED: Added penalty (Higher score = worse)
@@ -45,6 +46,7 @@ def fitness_survival_and_locomotion(
     target_pos: np.ndarray,
     min_z_height: float,
 ) -> float:
+    """Return distance fitness, or a penalty if the robot sank too low."""
     if min_z_height < 0.05:
         return 10.0
 
@@ -57,6 +59,7 @@ def fitness_direct_path(
     target_pos: np.ndarray,
     total_path_length: float,
 ) -> float:
+    """Return the distance fitness adjusted by the path length travelled."""
     delta_dist = fitness_delta_distance(initial_pos, final_pos, target_pos)
     straight_line_displacement = _xy_distance(final_pos, initial_pos)
     wasted_movement = total_path_length - straight_line_displacement

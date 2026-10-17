@@ -13,7 +13,7 @@ from ariel.body_phenotypes.robogen_lite.modules.hinge import HingeModule
 
 
 def baby_a() -> CoreModule:
-    """Custom robot body built with the 3D editor."""
+    """Build a custom robot body made with the 3D editor."""
     core = CoreModule(index=0)
     hinge_0 = HingeModule(index=2)
     hinge_0.rotate(90)
@@ -100,7 +100,7 @@ def baby_a() -> CoreModule:
 
 
 def baby_b() -> CoreModule:
-    """Custom robot body built with the 3D editor."""
+    """Build a custom robot body made with the 3D editor."""
     core = CoreModule(index=0)
     hinge_0 = HingeModule(index=2)
     core.sites[ModuleFaces.BACK].attach_body(
@@ -212,7 +212,7 @@ def baby_b() -> CoreModule:
 
 
 def gecko() -> CoreModule:
-    """Custom robot body built with the 3D editor."""
+    """Build a custom robot body made with the 3D editor."""
     core = CoreModule(index=0)
     hinge_0 = HingeModule(index=4)
     core.sites[ModuleFaces.FRONT].attach_body(
@@ -282,7 +282,7 @@ def gecko() -> CoreModule:
 
 
 def linkin_modified() -> CoreModule:
-    """Custom robot body built with the 3D editor."""
+    """Build a custom robot body made with the 3D editor."""
     core = CoreModule(index=0)
     hinge_0 = HingeModule(index=5)
     core.sites[ModuleFaces.LEFT].attach_body(
@@ -368,7 +368,7 @@ def linkin_modified() -> CoreModule:
 
 
 def snake() -> CoreModule:
-    """Custom robot body built with the 3D editor."""
+    """Build a custom robot body made with the 3D editor."""
     core = CoreModule(index=0)
     hinge_0 = HingeModule(index=1)
     hinge_0.rotate(90)
@@ -457,7 +457,7 @@ def snake() -> CoreModule:
 
 
 def turtle() -> CoreModule:
-    """Custom robot body built with the 3D editor."""
+    """Build a custom robot body made with the 3D editor."""
     core = CoreModule(index=0)
     brick_0 = BrickModule(index=1)
     core.sites[ModuleFaces.RIGHT].attach_body(
@@ -567,7 +567,7 @@ def turtle() -> CoreModule:
 
 
 def iguana() -> CoreModule:
-    """Custom robot body built with the 3D editor."""
+    """Build a custom robot body made with the 3D editor."""
     core = CoreModule(index=0)
     hinge_0 = HingeModule(index=897)
     hinge_0.rotate(-90)
@@ -649,7 +649,7 @@ def iguana() -> CoreModule:
 
 
 def spider_8() -> CoreModule:
-    """Custom robot body built with the 3D editor."""
+    """Build a custom robot body made with the 3D editor."""
     core = CoreModule(index=0)
     hinge_0 = HingeModule(index=2)
     core.sites[ModuleFaces.BACK].attach_body(
@@ -739,7 +739,7 @@ def spider_8() -> CoreModule:
 
 
 def spider_12() -> CoreModule:
-    """Custom robot body built with the 3D editor."""
+    """Build a custom robot body made with the 3D editor."""
     core = CoreModule(index=0)
     hinge_0 = HingeModule(index=2)
     core.sites[ModuleFaces.RIGHT].attach_body(
@@ -873,7 +873,7 @@ def spider_12() -> CoreModule:
 
 
 def spider_16() -> CoreModule:
-    """Custom robot body built with the 3D editor."""
+    """Build a custom robot body made with the 3D editor."""
     core = CoreModule(index=0)
     hinge_0 = HingeModule(index=2)
     core.sites[ModuleFaces.RIGHT].attach_body(
@@ -1051,7 +1051,7 @@ def spider_16() -> CoreModule:
 
 
 def centipede_3() -> CoreModule:
-    """Custom robot body built with the 3D editor."""
+    """Build a custom robot body made with the 3D editor."""
     core = CoreModule(index=0)
     hinge_0 = HingeModule(index=8)
     core.sites[ModuleFaces.FRONT].attach_body(
@@ -1175,7 +1175,7 @@ def centipede_3() -> CoreModule:
 
 
 def centipede_4() -> CoreModule:
-    """Custom robot body built with the 3D editor."""
+    """Build a custom robot body made with the 3D editor."""
     core = CoreModule(index=0)
     hinge_0 = HingeModule(index=8)
     core.sites[ModuleFaces.FRONT].attach_body(
@@ -1331,7 +1331,7 @@ def centipede_4() -> CoreModule:
 
 
 def centipede_5() -> CoreModule:
-    """Custom robot body built with the 3D editor."""
+    """Build a custom robot body made with the 3D editor."""
     core = CoreModule(index=0)
     hinge_0 = HingeModule(index=8)
     core.sites[ModuleFaces.FRONT].attach_body(

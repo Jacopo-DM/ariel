@@ -1,3 +1,5 @@
+"""Issue unique node and innovation IDs, optionally persisted to disk."""
+
 import json
 from pathlib import Path
 
@@ -19,7 +21,7 @@ class IdManager:
         innov_start: int | None = None,
     ):
         """
-        Initializes the IdManager.
+        Initialize the IdManager.
 
         If node_start and innov_start are provided, the manager starts with
         those values in-memory. Otherwise, it attempts to load its state
@@ -45,7 +47,7 @@ class IdManager:
             self.load()
 
     def get_next_node_id(self) -> int:
-        """Returns the next available node ID and increments the counter."""
+        """Return the next available node ID and increments the counter."""
         self._node_id += 1
         return self._node_id
 
@@ -56,7 +58,8 @@ class IdManager:
 
     def set_initial_ids(self, num_inputs: int, num_outputs: int):
         """
-        Sets the initial counters based on a genome's topology.
+        Set the initial counters based on a genome's topology.
+
         Call this once at the start of a new persistent run.
         """
         # Node IDs are 0-indexed. The last used ID is total_nodes - 1.
@@ -72,7 +75,7 @@ class IdManager:
         )
 
     def save(self):
-        """Saves the current ID counters to the specified JSON file."""
+        """Save the current ID counters to the specified JSON file."""
         state = {"next_node_id": self._node_id, "next_innov_id": self._innov_id}
         try:
             with self.save_path.open("w") as f:
@@ -81,7 +84,7 @@ class IdManager:
             print(f"Error saving ID state: {e}")
 
     def load(self):
-        """Loads the ID counters from the specified JSON file if it exists."""
+        """Load the ID counters from the specified JSON file if it exists."""
         if not self.save_path.exists():
             return
 

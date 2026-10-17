@@ -47,7 +47,7 @@ def test_euler_to_quat_90_deg_rotation() -> None:
 
 
 def _simple_spec() -> mujoco.MjSpec:
-    """A minimal single-box spec with no self-collision possible."""
+    """Return a minimal single-box spec with no self-collision possible."""
     spec = mujoco.MjSpec()
     body = spec.worldbody.add_body(name="box")
     body.add_geom(

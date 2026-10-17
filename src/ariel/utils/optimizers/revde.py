@@ -42,8 +42,11 @@ console = Console()
 
 
 class RevDE:
+    """Reversible differential evolution (RevDE) mutation operator."""
+
     def __init__(self, scaling_factor: float) -> None:
         # Passed parameters
+        """Build the mutation matrix from `scaling_factor`."""
         f = scaling_factor
         f2 = f**2
         f3 = f**3
@@ -68,6 +71,7 @@ class RevDE:
         parent_c: ArrayGenotype,
     ) -> list[ArrayGenotype]:
         # Ensure parents have the same shape
+        """Return three mutants of three parents of equal shape."""
         if not (parent_a.shape == parent_b.shape == parent_c.shape):
             msg = "Parents must have the same shape"
             raise ValueError(msg)

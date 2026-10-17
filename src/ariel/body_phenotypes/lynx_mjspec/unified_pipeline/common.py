@@ -1,3 +1,5 @@
+"""Shared building blocks of the unified Lynx evolution pipeline."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -26,6 +28,8 @@ DEFAULT_MAX_DELTA = 0.12
 
 @dataclass(frozen=True)
 class PolicySpec:
+    """Sizes and action limits of the policy network."""
+
     input_size: int = NUM_JOINTS + NUM_JOINTS + 3
     hidden_size: int = 32
     output_size: int = NUM_JOINTS
@@ -43,6 +47,7 @@ class FastNumpyNetwork:
         output_size: int,
         weights: np.ndarray,
     ) -> None:
+        """Create a three-layer tanh network with zero-initialised weights."""
         w1_end = hidden_size * input_size
         b1_end = w1_end + hidden_size
 
@@ -66,6 +71,7 @@ class FastNumpyNetwork:
         self.b3 = weights[w3_end:b3_end]
 
     def forward(self, x: np.ndarray) -> np.ndarray:
+        """Map an observation to an action in [-1, 1]^output_size."""
         x = np.tanh(self.w1 @ x + self.b1)
         x = np.tanh(self.w2 @ x + self.b2)
         x = np.tanh(self.w3 @ x + self.b3)
@@ -73,6 +79,7 @@ class FastNumpyNetwork:
 
 
 def num_network_params(spec: PolicySpec) -> int:
+    """Return the number of weights and biases of the policy network."""
     h = spec.hidden_size
     i = spec.input_size
     o = spec.output_size
@@ -80,6 +87,7 @@ def num_network_params(spec: PolicySpec) -> int:
 
 
 def resolve_site_id(model: mujoco.MjModel, base_name: str) -> int:
+    """Return the id of a site by name or name suffix, or -1."""
     sid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, base_name)
     if sid != -1:
         return sid
@@ -95,6 +103,7 @@ def resolve_site_id(model: mujoco.MjModel, base_name: str) -> int:
 def get_actuated_joint_ids(
     model: mujoco.MjModel, count: int = NUM_JOINTS
 ) -> list[int]:
+    """Return the joint ids driven by the first `count` actuators."""
     ids: list[int] = []
     for i in range(min(count, model.nu)):
         jid = int(model.actuator_trnid[i, 0])
@@ -106,6 +115,7 @@ def get_actuated_joint_ids(
 def get_joint_state(
     model: mujoco.MjModel, data: mujoco.MjData, joint_ids: list[int]
 ) -> tuple[np.ndarray, np.ndarray]:
+    """Return the positions and velocities of the given joints."""
     q = np.zeros(NUM_JOINTS, dtype=np.float64)
     qd = np.zeros(NUM_JOINTS, dtype=np.float64)
 
@@ -124,6 +134,7 @@ def set_target_position(
     target_site_id: int,
     target: np.ndarray,
 ) -> None:
+    """Move the target site to the world position `target`."""
     body_id = int(model.site_bodyid[target_site_id])
 
     # If the site is attached to worldbody, site_pos is already in world
@@ -148,6 +159,7 @@ def build_observation(
     tcp_sid: int,
     tgt_sid: int,
 ) -> np.ndarray:
+    """Return joint positions, velocities and target relative to the TCP."""
     q, qd = get_joint_state(model, data, joint_ids)
     rel_target = data.site_xpos[tgt_sid] - data.site_xpos[tcp_sid]
     return np.concatenate([q, qd, rel_target]).astype(np.float64)
@@ -161,6 +173,7 @@ def apply_position_delta_control(
     action_scale: float,
     max_delta: float,
 ) -> None:
+    """Set position targets from a clipped, scaled action delta."""
     q, _ = get_joint_state(model, data, joint_ids)
     delta = np.clip(action, -1.0, 1.0) * action_scale
     delta = np.clip(delta, -max_delta, max_delta)
@@ -176,6 +189,7 @@ def apply_position_delta_control(
 def build_model(
     tube_lengths: np.ndarray,
 ) -> tuple[mujoco.MjModel, mujoco.MjData, int, int, list[int]]:
+    """Compile the arm on a table; return model, data and ids."""
     config: dict[str, Any] = {
         "num_joints": NUM_JOINTS,
         "genotype_tube": [1] * NUM_TUBES,

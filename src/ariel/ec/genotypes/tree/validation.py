@@ -70,6 +70,7 @@ def is_single_connected_tree(genome: dict[str, Any]) -> bool:
 
 
 def validate_genome_dict(genome: dict[str, Any]) -> None:
+    """Check a genome dict for consistency; raise ValueError if invalid."""
     nodes = genome.get("nodes", {})
     edges = genome.get("edges", [])
 

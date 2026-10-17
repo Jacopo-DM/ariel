@@ -11,6 +11,8 @@ from ariel import log
 
 
 class Tracker:
+    """Track and log the state of MuJoCo objects during a simulation."""
+
     def __init__(
         self,
         mujoco_obj_to_find: mj.mjtObj | None = None,
@@ -65,7 +67,7 @@ class Tracker:
         data: mj.MjData,
     ) -> None:
         """
-        Setup the tracker by finding and binding the specified MuJoCo objects.
+        Set up the tracker by finding and binding the specified MuJoCo objects.
 
         Parameters
         ----------
@@ -90,18 +92,14 @@ class Tracker:
                 }
 
     def update(self, data: mj.MjData) -> None:
-        """
-        Update the history of tracked attributes for each bound object.
-        """
+        """Update the history of tracked attributes for each bound object."""
         # Update the bound objects
         for idx, obj in enumerate(self.to_track):
             for attr in self.observable_attributes:
                 self.history[attr][idx].append(getattr(obj, attr).copy())
 
     def reset(self) -> None:
-        """
-        Reset the history of tracked attributes.
-        """
+        """Reset the history of tracked attributes."""
         # Reset the history dictionary
         for attr in self.observable_attributes:
             for idx in range(len(self.to_track)):

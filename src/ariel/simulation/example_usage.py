@@ -85,6 +85,7 @@ class TargetedLocomotionWorker(MuJoCoWorkerBase):
         data: mj.MjData,
         config: LocomotionConfig,
     ) -> float:
+        """Optimise a controller with CMA-ES and return the best fitness."""
         rng = np.random.default_rng(config.seed)
 
         state_size = len(data.qpos) + len(data.qvel) + 3

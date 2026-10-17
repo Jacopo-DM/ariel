@@ -5,4 +5,6 @@ from pydantic_settings import BaseSettings
 
 
 class ArielConfig(BaseSettings):
+    """Global ARIEL settings."""
+
     verbose: bool = True

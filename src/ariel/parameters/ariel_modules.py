@@ -46,6 +46,8 @@ class SER0019(BaseSettings):
     # --- Servo Config --- #
     # https://github.com/ci-group/ariel-models/blob/master/v2/servo_specs/SER0019_sevo.pdf
     # Assume 6 V operation
+    """Specifications of the SER0019 servo (6 V operation)."""
+
     MIN_ANGLE: float = -np.pi  # radians
     MAX_ANGLE: float = np.pi  # radians
     MAX_SPEED: float = 0.18  # seconds per 60 degrees of rotation
@@ -59,6 +61,8 @@ class SER0019(BaseSettings):
 class ArielModulesConfig(BaseSettings):
     # --- Brick Config --- #
     # Module weights (kg)
+    """Masses, dimensions and limits of the RoboGen-lite modules."""
+
     BRICK_MASS: WeightType = 0.055  # 55 grams
 
     # Module dimensions (length, width, height) in meters

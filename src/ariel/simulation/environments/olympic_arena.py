@@ -19,6 +19,7 @@ TERRAIN_COLOR = [0.460, 0.362, 0.216, 1.0]
 
 
 def quaternion_from_axis_angle(axis: str, angle_deg: float) -> list[float]:
+    """Return the quaternion for a rotation of `angle_deg` about `axis`."""
     match axis:
         case "x":
             axis_tup = [1, 0, 0]
@@ -42,6 +43,8 @@ def quaternion_from_axis_angle(axis: str, angle_deg: float) -> list[float]:
 
 
 class OlympicArena(BaseWorld):
+    """Hybrid MuJoCo world with flat, rugged and inclined terrain."""
+
     name = "olympic_arena"
 
     def __init__(
@@ -65,6 +68,7 @@ class OlympicArena(BaseWorld):
     ) -> None:
         """
         Hybrid MuJoCo world combining flat, rugged, and inclined terrain.
+
         The world is divided into three sections along the X-axis:
         1. Flat terrain section (left)
         2. Rugged terrain section (middle)

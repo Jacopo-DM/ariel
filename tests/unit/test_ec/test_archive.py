@@ -21,7 +21,7 @@ def noop(population: Population) -> Population:
 
 
 def _make_evaluated_pop(n: int = 20) -> Population:
-    """Population of n individuals with distinct float fitnesses 0..n-1."""
+    """Return n individuals with distinct float fitnesses 0..n-1."""
     inds = []
     for i in range(n):
         ind = Individual()
