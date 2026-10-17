@@ -30,7 +30,10 @@ def _validate_same_shape(
         If ``arr_i.shape != arr_j.shape``.
     """
     if arr_i.shape != arr_j.shape:
-        msg = f"Parents must share the same shape: {arr_i.shape!r} vs {arr_j.shape!r}"
+        msg = (
+            f"Parents must share the same shape: "
+            f"{arr_i.shape!r} vs {arr_j.shape!r}"
+        )
         raise ValueError(
             msg,
         )
@@ -285,7 +288,10 @@ class Crossover:
             If ``parent_i`` and ``parent_j`` differ in length.
         """
         if len(parent_i) != len(parent_j):
-            msg = f"Parents must have equal length: {len(parent_i)} vs {len(parent_j)}"
+            msg = (
+                f"Parents must have equal length: "
+                f"{len(parent_i)} vs {len(parent_j)}"
+            )
             raise ValueError(
                 msg,
             )

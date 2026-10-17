@@ -56,7 +56,8 @@ def create_fully_connected_adjacency(num_nodes: int) -> dict[int, list[int]]:
     Returns
     -------
     dict[int, list[int]]
-        Adjacency dictionary where each key is a node index and the value is a list
+        Adjacency dictionary where each key is a node index and the value is a
+        list
         of indices of connected nodes.
     """
     adjacency_dict = {}
@@ -87,17 +88,20 @@ class NaCPG(nn.Module):
         Parameters
         ----------
         adjacency_dict : dict[int, list[int]]
-            Dictionary defining the connectivity of the CPG network. Each key is a node
+            Dictionary defining the connectivity of the CPG network. Each key is
+            a node
             index, and the value is a list of indices of connected nodes.
         alpha : float, optional
             Learning rate for the CPG dynamics, by default 0.1.
         dt : float, optional
             Time step for the CPG updates, by default 0.01.
         hard_bounds : tuple[float, float] | None, optional
-            If provided, the output angles will be clamped to these bounds. If None,
+            If provided, the output angles will be clamped to these bounds. If
+            None,
             no clamping is applied, by default (-π/2, π/2).
         angle_tracking : bool, optional
-            If True, the history of output angles will be stored for analysis, by default False.
+            If True, the history of output angles will be stored for analysis,
+            by default False.
         seed : int | None, optional
             Random seed for reproducibility, by default None.
         """
@@ -243,12 +247,13 @@ class NaCPG(nn.Module):
 
     def set_param_with_dict(self, params: dict[str, torch.Tensor]) -> None:
         """
-        Set parameters using a dictionary where keys are group names and values are tensors.
+        Set parameters from a dict of group names to tensors.
 
         Parameters
         ----------
         params : dict[str, torch.Tensor]
-            Dictionary with parameter group names as keys and parameter tensors as values.
+            Dictionary with parameter group names as keys and parameter tensors
+            as values.
         """
         for key, value in params.items():
             safe_value = self.param_type_converter(value)
@@ -316,12 +321,13 @@ class NaCPG(nn.Module):
 
     def forward(self, time: float | None = None) -> torch.Tensor:
         """
-        Perform a forward pass to update the CPG states and compute output angles.
+        Perform a forward pass: update CPG states, compute output angles.
 
         Parameters
         ----------
         time : float | None, optional
-            Current simulation time. If provided and equal to zero, the CPG states
+            Current simulation time. If provided and equal to zero, the CPG
+            states
             will be reset, by default None.
 
         Returns

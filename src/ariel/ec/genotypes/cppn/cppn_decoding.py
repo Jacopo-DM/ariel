@@ -92,7 +92,8 @@ if __name__ == "__main__":
     )
 
     # 5. Apply initial mutations to the genome.
-    # (this was done in old revolve2, and it makes sense to keep it but it's optional)
+    # (this was done in old revolve2, and it makes sense to keep it but it's
+    # optional)
     for i in range(num_initial_mutations):
         my_cppn_genome.mutate(
             1.0,  # Use floats for rates

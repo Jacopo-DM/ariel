@@ -1,7 +1,8 @@
 """
 Simplified Central Pattern Generator (CPG) using coupled Hopf oscillators.
 
-This is a faster, simpler alternative to NA-CPG that should learn more efficiently.
+This is a faster, simpler alternative to NA-CPG that should learn more
+efficiently.
 Uses classic coupled oscillator dynamics with an identical API.
 
 References
@@ -47,7 +48,8 @@ def create_fully_connected_adjacency(num_nodes: int) -> dict[int, list[int]]:
     Returns
     -------
     dict[int, list[int]]
-        Adjacency dictionary where each key is a node index and the value is a list
+        Adjacency dictionary where each key is a node index and the value is a
+        list
         of indices of connected nodes.
     """
     adjacency_dict = {}
@@ -61,8 +63,10 @@ class SimpleCPG(nn.Module):
     Simplified CPG using coupled Hopf oscillators.
 
     Dynamics:
-        dx_i/dt = (mu - r_i^2) * x_i - w_i * y_i + sum_j(coupling_ij * (x_j - x_i))
-        dy_i/dt = (mu - r_i^2) * y_i + w_i * x_i + sum_j(coupling_ij * (y_j - y_i))
+        dx_i/dt = (mu - r_i^2) * x_i - w_i * y_i + sum_j(coupling_ij * (x_j -
+        x_i))
+        dy_i/dt = (mu - r_i^2) * y_i + w_i * x_i + sum_j(coupling_ij * (y_j -
+        y_i))
 
     Where r_i = sqrt(x_i^2 + y_i^2)
     """
@@ -182,7 +186,11 @@ class SimpleCPG(nn.Module):
         safe_params = self.param_type_converter(params)
 
         if safe_params.numel() != self.num_of_parameters:
-            msg = f"Parameter vector has incorrect size. Expected {self.num_of_parameters}, got {safe_params.numel()}."
+            msg = (
+                "Parameter vector has incorrect size. "
+                f"Expected {self.num_of_parameters}, "
+                f"got {safe_params.numel()}."
+            )
             raise ValueError(msg)
 
         pointer = 0

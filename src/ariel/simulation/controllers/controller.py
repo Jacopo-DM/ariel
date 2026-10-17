@@ -50,7 +50,8 @@ class Controller:
         *args : Any
             Additional arguments to pass to the controller callback function.
         **kwargs : dict[Any, Any]
-            Additional keyword arguments to pass to the controller callback function.
+            Additional keyword arguments to pass to the controller callback
+            function.
         """
         # Calculate current time step
         time = data.time

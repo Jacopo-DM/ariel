@@ -86,7 +86,7 @@ def test_fitness_delta_distance_negative_when_closer() -> None:
 
 
 def test_fitness_delta_distance_positive_when_farther() -> None:
-    """fitness_delta_distance is positive when the robot moves away from target."""
+    """fitness_delta_distance is positive when moving away from target."""
     initial = np.array([1.0, 0.0, 0.0])
     final = np.array([10.0, 0.0, 0.0])
     target = np.array([0.0, 0.0, 0.0])
@@ -94,7 +94,7 @@ def test_fitness_delta_distance_positive_when_farther() -> None:
 
 
 def test_fitness_distance_and_efficiency_adds_effort_penalty() -> None:
-    """fitness_distance_and_efficiency > fitness_delta_distance for positive effort."""
+    """fitness_distance_and_efficiency > fitness_delta_distance for effort."""
     initial = np.array([5.0, 0.0, 0.0])
     final = np.array([0.0, 0.0, 0.0])
     target = np.array([0.0, 0.0, 0.0])
@@ -117,7 +117,7 @@ def test_fitness_survival_penalty_when_too_low() -> None:
 
 
 def test_fitness_survival_normal_when_above_threshold() -> None:
-    """fitness_survival_and_locomotion delegates to delta_distance above z threshold."""
+    """fitness_survival_and_locomotion delegates to delta_distance above z."""
     initial = np.array([5.0, 0.0, 0.0])
     final = np.array([0.0, 0.0, 0.0])
     target = np.array([0.0, 0.0, 0.0])

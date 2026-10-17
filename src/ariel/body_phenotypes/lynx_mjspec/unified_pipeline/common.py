@@ -126,13 +126,15 @@ def set_target_position(
 ) -> None:
     body_id = int(model.site_bodyid[target_site_id])
 
-    # If the site is attached to worldbody, site_pos is already in world coordinates.
+    # If the site is attached to worldbody, site_pos is already in world
+    # coordinates.
     if body_id == 0:
         model.site_pos[target_site_id] = target
         mujoco.mj_forward(model, data)
         return
 
-    # For body-attached sites, update the local site offset relative to parent body.
+    # For body-attached sites, update the local site offset relative to parent
+    # body.
     parent_body_id = int(model.body_parentid[body_id])
     parent_xpos = data.xpos[parent_body_id]
     model.site_pos[target_site_id] = target - parent_xpos
@@ -198,7 +200,10 @@ def build_model(
 
     joint_ids = get_actuated_joint_ids(model)
     if len(joint_ids) < NUM_JOINTS:
-        msg = f"Expected at least {NUM_JOINTS} actuated joints, got {len(joint_ids)}"
+        msg = (
+            f"Expected at least {NUM_JOINTS} actuated joints, "
+            f"got {len(joint_ids)}"
+        )
         raise RuntimeError(msg)
 
     return model, data, tcp_sid, tgt_sid, joint_ids

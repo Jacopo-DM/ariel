@@ -22,7 +22,7 @@ def _nde(n: int = 5) -> NeuralDevelopmentalEncoding:
 
 
 def _genotype(n: int = 5, seed: int = 0) -> list[np.ndarray]:
-    """Three float32 chromosomes (type, connection, rotation), each of length GENOTYPE_SIZE."""
+    """Three float32 chromosomes (type, connection, rotation), fixed length."""
     rng = np.random.default_rng(seed)
     return [rng.random(GENOTYPE_SIZE).astype(np.float32) for _ in range(3)]
 

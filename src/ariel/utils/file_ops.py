@@ -37,13 +37,17 @@ def generate_save_path(
     Parameters
     ----------
     file_name
-        The desired name of the file (without extension). If None, a timestamp-based name is generated.
+        The desired name of the file (without extension). If None, a
+        timestamp-based name is generated.
     file_path
-        The directory where the file will be saved. If None, defaults to the `DATA` directory.
+        The directory where the file will be saved. If None, defaults to the
+        `DATA` directory.
     file_extension
-        The file extension (e.g., '.txt', '.csv'). If None, attempts to infer from `file_name` or `file_path`.
+        The file extension (e.g., '.txt', '.csv'). If None, attempts to infer
+        from `file_name` or `file_path`.
     append_date
-        Whether to append the current date and time to the file name for uniqueness.
+        Whether to append the current date and time to the file name for
+        uniqueness.
 
     Returns
     -------

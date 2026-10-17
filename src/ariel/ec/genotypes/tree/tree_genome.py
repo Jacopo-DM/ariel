@@ -15,7 +15,8 @@ import networkx as nx
 
 @dataclass
 class TreeGenome:
-    # nodes: mapping id -> dict with keys: type (Enum.name), rotation (Enum.name)
+    # nodes: mapping id -> dict with keys: type (Enum.name), rotation
+    # (Enum.name)
     nodes: dict[int, dict[str, str]] = field(default_factory=dict)
     # edges: list of {"parent": int, "child": int, "face": ModuleFaces.name}
     edges: list[dict[str, typing.Any]] = field(default_factory=list)

@@ -11,7 +11,7 @@ def _xy_distance(a: np.ndarray, b: np.ndarray) -> float:
 def distance_to_target(
     final_position: np.ndarray, target_position: np.ndarray
 ) -> float:
-    """Remaining planar distance to target (lower is better for minimization)."""
+    """Remaining planar distance to target (lower is better)."""
     res = float(np.linalg.norm(final_position[:2] - target_position[:2]))
     return res
 
@@ -19,7 +19,7 @@ def distance_to_target(
 def fitness_delta_distance(
     initial_pos: np.ndarray, final_pos: np.ndarray, target_pos: np.ndarray
 ) -> float:
-    """Rewards closing distance. Flipped for minimization (lower score is better)."""
+    """Reward closing distance; flipped so lower is better."""
     initial_dist = _xy_distance(initial_pos, target_pos)
     final_dist = _xy_distance(final_pos, target_pos)
 

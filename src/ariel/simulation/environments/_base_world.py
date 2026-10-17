@@ -295,9 +295,11 @@ class BaseWorld:
         spawn_name : str
             The prefix name of the spawned robot.
         base_point : float, optional
-            Minimum distance above the lowest point of the robot, by default 0.01
+            Minimum distance above the lowest point of the robot, by default
+            0.01
         validate_no_collisions : bool, optional
-            Whether to validate the spawn position for collisions, by default False
+            Whether to validate the spawn position for collisions, by default
+            False
         """
         # Log the correction process
         msg = "-" * 60
@@ -362,15 +364,19 @@ class BaseWorld:
         position : Position, optional
             The (x, y, z) position to spawn the robot, by default None
         rotation : Rotation, optional
-            The (x, y, z) Euler angles (in degrees) for the robot's orientation, by default None
+            The (x, y, z) Euler angles (in degrees) for the robot's orientation,
+            by default None
         spawn_prefix : str, optional
             Prefix for naming the spawned robot, by default None
         correct_collision_with_floor : bool, optional
-            Whether to adjust the spawn position to avoid collisions with the floor, by default True
+            Whether to adjust the spawn position to avoid collisions with the
+            floor, by default True
         validate_no_collisions : bool, optional
-            Whether to validate the spawn position for collisions after adjustment, by default False
+            Whether to validate the spawn position for collisions after
+            adjustment, by default False
         rotation_sequence : str, optional
-            The sequence of axes for Euler to quaternion conversion, by default "XYZ"
+            The sequence of axes for Euler to quaternion conversion, by default
+            "XYZ"
 
         Returns
         -------

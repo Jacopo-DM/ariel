@@ -12,14 +12,16 @@ def display_genome(genome: Genome, title: str):
     for node in sorted(genome.nodes.values(), key=lambda n: n._id):
         act_func = node.activation.__name__ if node.activation else "None"
         print(
-            f"     - Node {node._id} (type: {node.typ}, bias: {node.bias:.3f}, act: {act_func})"
+            f"     - Node {node._id} (type: {node.typ}, "
+            f"bias: {node.bias:.3f}, act: {act_func})"
         )
     print("   Connections:")
     # Sort connections by innovation ID for consistent display order
     for conn in sorted(genome.connections.values(), key=lambda c: c.innov_id):
         status = "✅ Enabled" if conn.enabled else "❌ Disabled"
         print(
-            f"     - Innov {conn.innov_id}: ({conn.in_id} -> {conn.out_id}), w: {conn.weight:.3f} [{status}]"
+            f"     - Innov {conn.innov_id}: ({conn.in_id} -> {conn.out_id}), "
+            f"w: {conn.weight:.3f} [{status}]"
         )
     print("-" * 40 + "\n")
 

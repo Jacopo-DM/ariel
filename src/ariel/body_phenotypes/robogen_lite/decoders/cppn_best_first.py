@@ -74,7 +74,8 @@ class MorphologyDecoderBestFirst:
         while len(robot_graph) < self.max_modules:
             potential_connections = []
 
-            # At each step, we check the ENTIRE frontier of all existing modules.
+            # At each step, we check the ENTIRE frontier of all existing
+            # modules.
             for parent_id in frontier:
                 parent_pos = module_data[parent_id]["pos"]
                 parent_type = module_data[parent_id]["type"]
@@ -127,7 +128,8 @@ class MorphologyDecoderBestFirst:
 
             if not potential_connections:
                 console.log(
-                    "[yellow]Decoder stalled: No valid connections found anywhere on the robot.[/yellow]"
+                    "[yellow]Decoder stalled: No valid connections found "
+                    "anywhere on the robot.[/yellow]"
                 )
                 break
 

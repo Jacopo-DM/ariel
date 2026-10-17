@@ -149,7 +149,8 @@ def subtree_swap(
     # clean up any now-invalid connections and perform final checks
     _prune_invalid_edges(a)
     _prune_invalid_edges(b)
-    # Note: Validation moved to calling code to allow for temporary invalid states during crossover
+    # Note: Validation moved to calling code to allow for temporary invalid
+    # states during crossover
 
 
 # ---------------------------------------------------------------------------
@@ -162,9 +163,12 @@ def crossover_subtree(
 ) -> tuple[TreeGenome, TreeGenome]:
     """Perform standard GP subtree crossover on tree genomes.
 
-    Two offspring are produced by exchanging randomly chosen subtrees from each parent.
-    Unlike one-point crossover on linear genomes, this selects any node (including leaves)
-    and swaps the entire subtree rooted at that node. Returns a pair ``(child1, child2)``.
+    Two offspring are produced by exchanging randomly chosen subtrees from each
+    parent.
+    Unlike one-point crossover on linear genomes, this selects any node
+    (including leaves)
+    and swaps the entire subtree rooted at that node. Returns a pair ``(child1,
+    child2)``.
     Parents are left unmodified.
     """
     child1 = copy.deepcopy(a)
@@ -179,7 +183,8 @@ def crossover_subtree(
     if n1 is None or n2 is None:
         return child1, child2
 
-    # Standard GP: swap subtrees directly at selected nodes (no ancestor expansion)
+    # Standard GP: swap subtrees directly at selected nodes (no ancestor
+    # expansion)
     subtree_swap(child1, child2, n1, n2)
     # Validate after crossover
 
@@ -246,7 +251,8 @@ def mutate_replace_node(genome: TreeGenome) -> None:
 def mutate_subtree_replacement(
     genome: TreeGenome, max_modules: int = 10
 ) -> None:
-    """Standard GP subtree mutation: replace a random subtree with a newly generated one.
+    """
+    Standard GP subtree mutation: replace a subtree with a new one.
 
     Selects a random non-core node, removes its entire subtree, and replaces it
     with a new randomly generated subtree. This is the primary mutation operator
@@ -354,7 +360,8 @@ def mutate_subtree_replacement(
 
 
 def mutate_shrink(genome: TreeGenome) -> None:
-    """Shrink mutation: replace a node and its subtree with a single new leaf node.
+    """
+    Shrink mutation: replace a node and its subtree with a single new leaf node.
 
     Selects a random non-core node, removes its entire subtree, and replaces it
     with a single new randomly chosen module type. This reduces tree size and
@@ -451,7 +458,8 @@ def mutate_hoist(genome: TreeGenome) -> None:
     if grandparent_id is None:
         return  # Can't hoist root
 
-    # Remove the parent and all its other children (except the one being hoisted)
+    # Remove the parent and all its other children (except the one being
+    # hoisted)
     for child in children:
         if child != child_to_hoist:
             remove_subtree(genome, child)

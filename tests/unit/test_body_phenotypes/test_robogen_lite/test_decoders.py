@@ -148,7 +148,7 @@ def test_hi_prob_decoder_single_module() -> None:
 
 
 def test_hi_prob_apply_constraints_removes_self_connections() -> None:
-    """After apply_connection_constraints, all diagonal conn entries are zero."""
+    """After apply_connection_constraints, diagonal conn entries are zero."""
     decoder = HighProbabilityDecoder(num_modules=NUM_MODULES)
     decoder.conn_p_space = _conn_space()
     decoder.rot_p_space = _rot_space()

@@ -60,7 +60,8 @@ class NeuralDevelopmentalEncoding(nn.Module):
         Neural developmental encoder.
 
         Given a genotype (list of chromosomes), output the phenotype
-        (probability matrices corresponding to module types, connections, rotations).
+        (probability matrices corresponding to module types, connections,
+        rotations).
 
         Parameters
         ----------

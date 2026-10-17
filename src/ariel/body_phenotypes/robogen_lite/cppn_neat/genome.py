@@ -104,9 +104,7 @@ class Genome:
         next_innov_id_getter,  # function to get/update global innovation ID
         next_node_id_getter,  # function to get/update global node ID
     ):
-        """
-        Applies structural mutation (add_node or add_connection).
-        """
+        """Apply structural mutation (add_node or add_connection)."""
         if random.random() < conn_add_rate:
             self._mutate_add_connection(next_innov_id_getter)
 
@@ -114,7 +112,7 @@ class Genome:
             self._mutate_add_node(next_innov_id_getter, next_node_id_getter)
 
     def _mutate_add_connection(self, next_innov_id_getter):
-        """Attempts to add a new connection between two existing, non-connected nodes."""
+        """Attempt to add a connection between two unconnected nodes."""
         all_nodes = list(self.nodes.keys())
         # We need at least two nodes to form a connection
         if len(all_nodes) < 2:
@@ -123,7 +121,8 @@ class Genome:
         # Pick two random distinct nodes
         in_id, out_id = random.sample(all_nodes, 2)
 
-        # Enforce feed-forward: source must not be output, destination must not be input
+        # Enforce feed-forward: source must not be output, destination must not
+        # be input
         if self.nodes[out_id].typ == "input":
             in_id, out_id = out_id, in_id
         if self.nodes[in_id].typ == "output":
@@ -144,9 +143,7 @@ class Genome:
         self.add_connection(new_connection)
 
     def _mutate_add_node(self, next_innov_id_getter, next_node_id_getter):
-        """
-        Splits an existing connection by inserting a new (hidden) node.
-        """
+        """Split an existing connection by inserting a new hidden node."""
         if not self.connections:
             return
 
@@ -193,10 +190,7 @@ class Genome:
     def crossover(
         self, other: "Genome", is_maximisation: bool = True
     ) -> "Genome":
-        """
-        Creates a new offspring Genome by crossing over this Genome (parent A)
-        and another Genome (parent B).
-        """
+        """Cross over this Genome (parent A) with another (parent B)."""
         # Determine the fitter parent
         if is_maximisation:
             if self.fitness >= other.fitness:
@@ -214,7 +208,8 @@ class Genome:
                 fitter_parent = other
             less_fit_parent = self
 
-        # If fitnesses are equal, the shorter genome (fewer genes) should be the 'less_fit_parent'
+        # If fitnesses are equal, the shorter genome (fewer genes) should be the
+        # 'less_fit_parent'
         # to ensure symmetry in gene inheritance.
         if self.fitness == other.fitness and len(self.connections) < len(
             other.connections
@@ -225,7 +220,8 @@ class Genome:
         offspring_node_genes = {}
         offspring_connection_genes = {}
 
-        # 1. Crossover Connection Genes (nothing fancy, just a using the set operator OR here)
+        # 1. Crossover Connection Genes (nothing fancy, just a using the set
+        # operator OR here)
         all_innov_ids = set(fitter_parent.connections.keys()) | set(
             less_fit_parent.connections.keys()
         )
@@ -259,11 +255,13 @@ class Genome:
             all_inherited_node_ids.add(conn.in_id)
             all_inherited_node_ids.add(conn.out_id)
 
-        # Get the node gene from the fitter parent if possible, otherwise from the less fit parent
+        # Get the node gene from the fitter parent if possible, otherwise from
+        # the less fit parent
         combined_nodes = {**less_fit_parent.nodes, **fitter_parent.nodes}
 
         for node_id in all_inherited_node_ids:
-            # Nodes are inherited without structural change, just copy the properties
+            # Nodes are inherited without structural change, just copy the
+            # properties
             node_gene = combined_nodes.get(node_id)
             if node_gene:
                 offspring_node_genes[node_id] = node_gene.copy()
@@ -291,11 +289,14 @@ class Genome:
 
     def get_node_ordering(self):
         """
-        Calculates a topological sort order for feed-forward activation using Kahn's algorithm.
-        This ensures a node is evaluated only after all its input nodes are ready.
+        Calculates a topological sort order for feed-forward activation using
+        Kahn's algorithm.
+        This ensures a node is evaluated only after all its input nodes are
+        ready.
         https://www.geeksforgeeks.org/dsa/topological-sorting-indegree-based-solution/
         """
-        # 1. Build the graph structure and count incoming connections (in-degrees) for each node.
+        # 1. Build the graph structure and count incoming connections
+        # (in-degrees) for each node.
         graph = {node_id: [] for node_id in self.nodes}
         in_degree = dict.fromkeys(self.nodes, 0)
 
@@ -306,7 +307,8 @@ class Genome:
                 # The output node gains an incoming connection
                 in_degree[conn.out_id] += 1
 
-        # 2. Initialize a queue with all nodes that have no incoming connections.
+        # 2. Initialize a queue with all nodes that have no incoming
+        # connections.
         # These are the network's starting points (i.e., the input nodes).
         queue = [node_id for node_id in self.nodes if in_degree[node_id] == 0]
 
@@ -321,7 +323,8 @@ class Genome:
             # For the node we just processed, "remove" its outgoing edges.
             for neighbor_id in graph[node_id]:
                 in_degree[neighbor_id] -= 1
-                # If a neighbor's in-degree drops to 0, it's now ready to be evaluated.
+                # If a neighbor's in-degree drops to 0, it's now ready to be
+                # evaluated.
                 if in_degree[neighbor_id] == 0:
                     queue.append(neighbor_id)
 
@@ -329,7 +332,10 @@ class Genome:
         # this means there was a cycle in the graph (a recurrent connection).
         if len(sorted_order) != len(self.nodes):
             # For a feed-forward CPPN, this indicates an issue.
-            msg = "A cycle was detected in the genome's graph, cannot create a feed-forward order."
+            msg = (
+                "A cycle was detected in the genome's graph, "
+                "cannot create a feed-forward order."
+            )
             raise Exception(msg)
 
         return sorted_order
@@ -338,7 +344,8 @@ class Genome:
         """
         Activates the neural network.
         1. Tries a topological sort (Feed-Forward) for speed and precision.
-        2. If a cycle is detected, falls back to iterative relaxation (Recurrent).
+        2. If a cycle is detected, falls back to iterative relaxation
+          (Recurrent).
         """
         # 1. Identify Input/Output IDs
         input_node_ids = [
@@ -376,7 +383,8 @@ class Genome:
 
                 weighted_sum = 0.0
                 for conn in incoming_map[node_id]:
-                    # In feed-forward, conn.in_id is GUARANTEED to be in node_outputs
+                    # In feed-forward, conn.in_id is GUARANTEED to be in
+                    # node_outputs
                     if conn.in_id in node_outputs:
                         weighted_sum += node_outputs[conn.in_id] * conn.weight
 
@@ -451,7 +459,8 @@ class Genome:
                     "enabled": c.enabled,
                     "innov_id": c.innov_id,
                 }
-                # Iterate values() because self.connections is a dict {innov_id: Connection}
+                # Iterate values() because self.connections is a dict {innov_id:
+                # Connection}
                 for c in self.connections.values()
             ],
         }

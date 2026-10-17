@@ -335,7 +335,10 @@ class Archive:
             raise ValueError(msg)
 
         if tournament_size > len(pool_list):
-            msg = f"tournament_size={tournament_size} exceeds pool size={len(pool_list)}."
+            msg = (
+                f"tournament_size={tournament_size} "
+                f"exceeds pool size={len(pool_list)}."
+            )
             raise AssertionError(msg)
 
         def _key(ind: Individual) -> float:
@@ -441,7 +444,7 @@ class Archive:
 
     @property
     def generation_range(self) -> tuple[int, int]:
-        """``(earliest_birth, latest_death)`` generation indices in the archive."""
+        """``(earliest_birth, latest_death)`` generation indices."""
         with Session(self.engine) as session:
             min_birth = session.exec(
                 select(func.min(Individual.time_of_birth)),

@@ -426,7 +426,8 @@ class MorphologicalMeasures:
 
     @property
     def num_filled_modules(self) -> int:
-        """Total fully-saturated modules (filled bricks + filled hinges + filled core).
+        """
+        Total fully-saturated modules (filled bricks, hinges and core).
 
         Returns
         -------
@@ -484,7 +485,8 @@ class MorphologicalMeasures:
 
     @property
     def max_potential_single_neighbour_modules(self) -> int:
-        """Upper bound on single-neighbour modules given this module set (l_max).
+        """
+        Upper bound on single-neighbour modules given this module set (l_max).
 
         Returns
         -------
@@ -494,7 +496,8 @@ class MorphologicalMeasures:
 
     @property
     def max_potential_joints(self) -> int:
-        """Maximum possible joints if every inter-module connection were a hinge.
+        """
+        Maximum possible joints if every inter-module connection were a hinge.
 
         Returns
         -------
@@ -505,7 +508,8 @@ class MorphologicalMeasures:
 
     @property
     def potential_double_neighbour_bricks_and_active_hinges(self) -> int:
-        """Upper bound on double-neighbour bricks+hinges given this module set (e_max).
+        """
+        Upper bound on double-neighbour bricks+hinges (e_max).
 
         Returns
         -------

@@ -62,7 +62,8 @@ def test_revde_linear_transformation() -> None:
 
 
 def test_revde_reversibility() -> None:
-    """Applying the transformation twice with the inverse restores the originals.
+    """
+    Applying the transformation twice with the inverse restores the originals.
 
     For RevDE the matrix is designed to be (approximately) reversible.
     Here we just verify determinism: same inputs always give same outputs.

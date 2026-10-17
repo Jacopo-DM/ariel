@@ -64,14 +64,16 @@ class OlympicArena(BaseWorld):
         load_precompiled: bool = True,
     ) -> None:
         """
-        Hybrid MuJoCo world combining flat, rugged, and inclined terrain sections.
+        Hybrid MuJoCo world combining flat, rugged, and inclined terrain.
         The world is divided into three sections along the X-axis:
         1. Flat terrain section (left)
         2. Rugged terrain section (middle)
         3. Inclined terrain section (right)
 
-        The arena is surrounded by cliffs on all sides which force the robot to stay in bounds.
-        The robot can fall off the terrain, which results to a "death". No specific
+        The arena is surrounded by cliffs on all sides which force the robot to
+        stay in bounds.
+        The robot can fall off the terrain, which results to a "death". No
+        specific
 
         Parameters
         ----------

@@ -11,7 +11,8 @@ def spider() -> CoreModule:
 
     Body Description
     ---------
-    The spider body consists of a core module, 4 legs. Each leg constains two hinges,
+    The spider body consists of a core module, 4 legs. Each leg constains two
+    hinges,
     with blocks attached at the end of them.
 
     Returns

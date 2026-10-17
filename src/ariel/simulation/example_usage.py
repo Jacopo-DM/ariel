@@ -154,7 +154,8 @@ def evaluate_population(
 
 if __name__ == "__main__":
     # Dummy smoke-test: two identical placeholder XML strings.
-    # Replace with real robot XML from construct_mjspec_from_graph + SimpleFlatWorld.
+    # Replace with real robot XML from construct_mjspec_from_graph +
+    # SimpleFlatWorld.
     dummy_xml = """
     <mujoco>
       <worldbody>

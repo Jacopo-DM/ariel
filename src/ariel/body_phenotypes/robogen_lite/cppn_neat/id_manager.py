@@ -8,7 +8,8 @@ class IdManager:
 
     Supports two modes:
     1. Persistent Mode (default): Loads and saves its state from a JSON file.
-    2. In-Memory Mode: Initializes with specified starting IDs, useful for tests.
+    2. In-Memory Mode: Initializes with specified starting IDs, useful for
+      tests.
     """
 
     def __init__(
@@ -26,8 +27,10 @@ class IdManager:
 
         Args:
             save_path (Union[str, Path]): Path for saving/loading the ID state.
-            node_start (int, optional): The last used ID for nodes. Defaults to None.
-            innov_start (int, optional): The last used ID for innovations. Defaults to None.
+            node_start (int, optional): The last used ID for nodes. Defaults to
+                None.
+            innov_start (int, optional): The last used ID for innovations.
+                Defaults to None.
         """
         self.save_path = Path(save_path)
 
@@ -47,7 +50,7 @@ class IdManager:
         return self._node_id
 
     def get_next_innov_id(self) -> int:
-        """Returns the next available innovation ID and increments the counter."""
+        """Return the next innovation ID and increment the counter."""
         self._innov_id += 1
         return self._innov_id
 
@@ -59,10 +62,13 @@ class IdManager:
         # Node IDs are 0-indexed. The last used ID is total_nodes - 1.
         self._node_id = num_inputs + num_outputs - 1
 
-        # Innovation IDs start after initial connections. Last used ID is total_conns - 1.
+        # Innovation IDs start after initial connections. Last used ID is
+        # total_conns - 1.
         self._innov_id = (num_inputs * num_outputs) - 1
         print(
-            f"IdManager initialized: Next Node ID starts at {self._node_id + 1}, Next Innov ID starts at {self._innov_id + 1}."
+            f"IdManager initialized: Next Node ID starts at "
+            f"{self._node_id + 1}, Next Innov ID starts at "
+            f"{self._innov_id + 1}."
         )
 
     def save(self):

@@ -49,7 +49,6 @@ Policy and numbers are in DESIGN.md (Decisions: "Ruff rule policy" and "Lint/typ
 
 **Tier 2: clear effect, more files or needs judgement (each its own commit, ordered by effect per cost)**
 
-- **T12. Wrap long lines by hand** (E501 239, W505 95 = 334 findings, about 60 files). Low risk but the biggest diff; split by package (`body_phenotypes`, `simulation`, `ec`, `utils`, `parameters`, `tests`), one commit each.
 - **T13. Docstrings in `src/`** (D100-D107 about 90 after tests are exempt; D401 43): real one-line descriptions read from each function. Low risk. Split by package.
 - **T14. Annotations in `src/`** (ANN about 56 after tests are exempt): add types; mypy cross-checks. Low-medium.
 - **T15. Remaining rule fixes** (about 165 findings: SIM300, SLF001, PLC0415, PT011, ARG, F841 and others, no exemptions): each one read before changing; PLC0415 (import inside function) may hide a circular import, so those are checked individually. Medium.

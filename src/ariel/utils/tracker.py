@@ -26,13 +26,15 @@ class Tracker:
         Parameters
         ----------
         mujoco_obj_to_find
-            The type of MuJoCo object to find and track (e.g., mjtObj.mjOBJ_GEOM).
+            The type of MuJoCo object to find and track (e.g.,
+            mjtObj.mjOBJ_GEOM).
             If None, defaults to tracking all geoms.
         name_to_bind
             A substring to match in the names of the objects to bind and track.
             If None, defaults to "core".
         observable_attributes
-            A list of attribute names to track for each bound object (e.g., ["xpos", "xquat"]).
+            A list of attribute names to track for each bound object (e.g.,
+            ["xpos", "xquat"]).
             If None, defaults to tracking the "xpos" attribute.
         """
         # Set default tracking parameters
@@ -40,8 +42,11 @@ class Tracker:
             mujoco_obj_to_find = mj.mjtObj.mjOBJ_GEOM
             name_to_bind = "core"
             if not quiet:
-                msg = "No tracking parameters provided, "
-                msg += "defaulting to tracking all geoms with 'core' in their name."
+                msg = (
+                    "No tracking parameters provided, "
+                    "defaulting to tracking all geoms with 'core' "
+                    "in their name."
+                )
                 log.info(msg)
 
         # Set default observable attributes

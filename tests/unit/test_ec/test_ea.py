@@ -118,7 +118,7 @@ def test_eaoperation_wrong_return_type_raises() -> None:
 
 
 def test_eaoperation_call_with_population_executes() -> None:
-    """Calling an EAOperation with a Population executes and returns Population."""
+    """Calling an EAOperation with a Population returns a Population."""
     pop = _make_pop()
     result = noop(pop)
     assert isinstance(result, Population)

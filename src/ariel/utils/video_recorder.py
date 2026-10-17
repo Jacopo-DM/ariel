@@ -71,7 +71,8 @@ class VideoRecorder:
             file_name += f"_{timestamp}"
 
         # Create recorder object with fallback codecs.
-        # Some environments (e.g., OpenCV builds without H.264) cannot open `avc1`.
+        # Some environments (e.g., OpenCV builds without H.264) cannot open
+        # `avc1`.
         output_file = output_folder / f"{file_name}{self._file_extension}"
 
         fourcc = cv2.VideoWriter_fourcc(*self._video_encoding)
@@ -98,8 +99,10 @@ class VideoRecorder:
         if not video_writer.isOpened():
             msg = (
                 "Could not initialize video writer with codecs "
-                f"'{self._video_encoding}' + fallbacks {self._fallback_encoders}. "
-                "Install FFmpeg/GStreamer codecs or use an OpenCV build with video encoders."
+                f"'{self._video_encoding}' + fallbacks "
+                f"{self._fallback_encoders}. "
+                "Install FFmpeg/GStreamer codecs or use an OpenCV build with "
+                "video encoders."
             )
             raise RuntimeError(msg)
 

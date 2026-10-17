@@ -333,7 +333,7 @@ class FloatsGenerator:
 
 
 class IntegerMutator:
-    """Namespace of static mutation operators for integer-encoded individuals."""
+    """Static mutation operators for integer-encoded individuals."""
 
     @staticmethod
     def random_reset(

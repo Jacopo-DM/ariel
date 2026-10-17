@@ -31,7 +31,7 @@ def test_perlin_noise_seeded_reproducible() -> None:
 
 
 def test_perlin_noise_different_seeds_differ() -> None:
-    """Two PerlinNoise instances with different seeds produce different grids."""
+    """Two PerlinNoise instances with different seeds give different grids."""
     n1 = PerlinNoise(seed=1)
     n2 = PerlinNoise(seed=2)
     g1 = n1.as_grid(32, 32, scale=8.0)

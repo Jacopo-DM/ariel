@@ -188,7 +188,7 @@ def test_best_individual_min_mode(archive) -> None:
 
 
 def test_best_individual_max_mode(archive) -> None:
-    """best_individual('max') returns the individual with the highest fitness."""
+    """best_individual('max') returns the individual with highest fitness."""
     ind = archive.best_individual(fitness_mode="max")
     assert ind.fitness_ == pytest.approx(19.0)
 

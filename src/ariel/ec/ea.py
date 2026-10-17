@@ -163,19 +163,29 @@ class EAOperation[**P]:
                     msg,
                 )
             if params[0].annotation is not Population:
+                annotation_name = getattr(
+                    params[0].annotation,
+                    "__name__",
+                    params[0].annotation,
+                )
                 msg = (
                     f"@EAOperation function '{func.__name__}' first argument "
                     f"must be annotated as Population, got "
-                    f"'{getattr(params[0].annotation, '__name__', params[0].annotation)}'."
+                    f"'{annotation_name}'."
                 )
                 raise TypeError(
                     msg,
                 )
             if sig.return_annotation is not Population:
+                return_name = getattr(
+                    sig.return_annotation,
+                    "__name__",
+                    sig.return_annotation,
+                )
                 msg = (
                     f"@EAOperation function '{func.__name__}' must return "
                     f"Population, got "
-                    f"'{getattr(sig.return_annotation, '__name__', sig.return_annotation)}'."
+                    f"'{return_name}'."
                 )
                 raise TypeError(
                     msg,

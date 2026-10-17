@@ -101,8 +101,10 @@ def evaluate_candidate(
         weights = genome[NUM_TUBES:]
 
         # Penalize out-of-bounds tubes instead of silently clipping.
-        # Per CMA-ES tutorial (B.5): simple repair violates distributional assumptions.
-        # Evaluate at repaired point, add penalty proportional to violation distance.
+        # Per CMA-ES tutorial (B.5): simple repair violates distributional
+        # assumptions.
+        # Evaluate at repaired point, add penalty proportional to violation
+        # distance.
         tube_lengths = np.clip(tube_lengths_raw, TUBE_MIN, TUBE_MAX)
         boundary_penalty = 2.0 * float(
             np.sum((tube_lengths_raw - tube_lengths) ** 2)
@@ -163,10 +165,12 @@ def evaluate_candidate(
                 not np.isfinite(data.qpos).all()
                 or not np.isfinite(data.qvel).all()
             ):
-                # Return progress-aware penalty so CMA-ES can still rank diverging candidates.
+                # Return progress-aware penalty so CMA-ES can still rank
+                # diverging candidates.
                 return min_distance + 1.0
 
-            # End the rollout early once the policy has reached and stably held near target.
+            # End the rollout early once the policy has reached and stably held
+            # near target.
             if (
                 d <= touch_threshold
                 and consecutive_hold_steps >= hold_steps_to_stop
@@ -214,9 +218,11 @@ def main() -> None:
     weights_init = rng.uniform(-0.1, 0.1, size=num_weights).astype(np.float64)
 
     # Split parametrization so tubes and weights get independent sigma values.
-    # Tube sigma: 0.3 * (TUBE_MAX - TUBE_MIN) = 0.27 (per CMA-ES tutorial Eq. sigma=0.3*(b-a)).
+    # Tube sigma: 0.3 * (TUBE_MAX - TUBE_MIN) = 0.27 (per CMA-ES tutorial Eq.
+    # sigma=0.3*(b-a)).
     # Weight sigma: kept small to avoid tanh saturation in early generations.
-    # set_bounds tells CMA the valid range; clipping keeps proposals in-bounds before penalization.
+    # set_bounds tells CMA the valid range; clipping keeps proposals in-bounds
+    # before penalization.
     tubes_p = (
         ng.p.Array(init=tubes_init)
         .set_bounds(TUBE_MIN, TUBE_MAX, method="clipping")
@@ -227,7 +233,8 @@ def main() -> None:
     )
     parametrization = ng.p.Tuple(tubes_p, weights_p)
 
-    # num_workers must equal population so the optimizer's internal λ matches the batch size.
+    # num_workers must equal population so the optimizer's internal λ matches
+    # the batch size.
     optimizer = ng.optimizers.registry[args.optimizer](
         parametrization=parametrization,
         budget=int(args.generations) * int(args.population),
@@ -274,7 +281,8 @@ def main() -> None:
             print(
                 f"gen={gen:03d} best={np.min(fitnesses):.5f} "
                 f"mean={np.mean(fitnesses):.5f} std={np.std(fitnesses):.5f} "
-                f"worst={np.max(fitnesses):.5f} valid={len(valid)}/{len(fitnesses)}"
+                f"worst={np.max(fitnesses):.5f} "
+                f"valid={len(valid)}/{len(fitnesses)}"
                 f"{sigma_str}"
             )
             print(f"         tubes={best_tubes}")

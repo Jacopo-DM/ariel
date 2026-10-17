@@ -77,7 +77,8 @@ def plot_training_logs(log_files):
     # plt.fill_between(gens,
     #                  agg_best_mean - agg_best_std,
     #                  agg_best_mean + agg_best_std,
-    #                  color='darkorange', alpha=0.2, label='Best ±1σ across runs')
+    #                  color='darkorange', alpha=0.2, label='Best ±1σ across
+    # runs')
 
     # Mean-of-mean across runs with ±1σ band.
     plt.plot(
@@ -126,7 +127,8 @@ if __name__ == "__main__":
 
     batch_dir = Path("__data__/lynx_mjspec/unified_batch_10x")
 
-    # Collect train.log from every real run directory (skip symlinks like latest_run).
+    # Collect train.log from every real run directory (skip symlinks like
+    # latest_run).
     log_files = sorted(
         str(p / "train.log")
         for p in batch_dir.iterdir()
