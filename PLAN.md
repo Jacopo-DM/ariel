@@ -49,7 +49,6 @@ Policy and numbers are in DESIGN.md (Decisions: "Ruff rule policy" and "Lint/typ
 
 **Tier 2: clear effect, more files or needs judgement (each its own commit, ordered by effect per cost)**
 
-- **T10. Delete commented-out code** (ERA001 54). Risk low; code stays in git history. Verify pytest.
 - **T11. Exception messages** (EM101/EM102, 16): assign to `msg` first. Same behaviour. Low.
 - **T12. Wrap long lines by hand** (E501 239, W505 95 = 334 findings, about 60 files). Low risk but the biggest diff; split by package (`body_phenotypes`, `simulation`, `ec`, `utils`, `parameters`, `tests`), one commit each.
 - **T13. Docstrings in `src/`** (D100-D107 about 90 after tests are exempt; D401 43): real one-line descriptions read from each function. Low risk. Split by package.
@@ -75,6 +74,7 @@ Policy and numbers are in DESIGN.md (Decisions: "Ruff rule policy" and "Lint/typ
 
 ## Open questions
 
+- lint-types-policy T15: `src/ariel/body_phenotypes/robogen_lite/decoders/vector_decoding.py:132` uses the undefined name `allowed_per_element` in `vectors_to_graph` (ruff F821), so that method raises `NameError` whenever it is called (an unfinished edit; `allowed_rot_per_type` is defined just above). Fixing it changes behaviour (from crashing to working), so it is outside the unchanged-behaviour goal. Options: fix the name, delete the method, or leave the finding with a `# noqa: F821` and a note. Answer pending.
 - gl-autodetect: can we test on Windows or macOS?
 - gl-autodetect: selection rule, proposed by the user, not yet decided. A GUI is a requirement of the run, not a preference: the interactive viewer needs glfw, batch and evolution runs do not. Choose among working backends by what the run needs first, then by measured render time. Order for viewing: glfw, egl, osmesa. Order for headless batch: egl, glfw, osmesa.
 
@@ -95,6 +95,7 @@ Commands from config and CI. Ran on 2026-10-17 (results in Baseline); not yet mo
 - `nox --session=tests` and `nox --session=pre-commit` are named in `.claude/dev/testing_and_tooling.md`, but `noxfile.py` defines only a `docs` session.
 
 Other problems:
+- Two commented-out-code findings (ERA001) remain in `tests/functional/cpg.ipynb` (notebook cells, left alone in T10).
 - `examples/a_mujoco/3_cameras_in_simulation.py` was changed in T3 (cv2 window replaced by matplotlib) but not run: this machine has no display, and the script fails earlier at `mujoco.Renderer(...)` (`AttributeError: ... _mjr_context`, no OpenGL context). Needs a manual run on a machine with a display. The Renderer failure is further evidence for gl-autodetect.
 - Root `CONTRIBUTING.md` (lines 80, 103) and `docs/source/contributing_guide/CONTRIBUTING.md` (line 228) still name nox sessions `tests` and `pre-commit` that `noxfile.py` does not define. Not in T2's file list; add to a task if wanted.
 - `.pre-commit-config.yaml` hooks use `language: system`, but `pre-commit`, `pydoclint` and the hook tools are in no dependency group, so the hooks cannot run from the venv (checked 2026-10-17).

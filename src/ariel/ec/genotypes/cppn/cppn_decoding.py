@@ -42,10 +42,7 @@ def run(robot: CoreModule, *, with_viewer: bool = False) -> None:
     model = world.spec.compile()
     data = mujoco.MjData(model)
 
-    # xml = world.spec.to_xml()
     # with (DATA / f"{SCRIPT_NAME}.xml").open("w", encoding="utf-8") as f:
-    #     f.write(xml)
-    # console.log(f"DoF (model.nv): {model.nv}, Actuators (model.nu): {model.nu}")
 
     mujoco.mj_resetData(model, data)
     single_frame_renderer(model, data, steps=10)
@@ -97,28 +94,22 @@ if __name__ == "__main__":
     # 5. Apply initial mutations to the genome.
     # (this was done in old revolve2, and it makes sense to keep it but it's optional)
     for i in range(num_initial_mutations):
-        # print(f"Applying mutation {i+1}/{num_initial_mutations}...")
         my_cppn_genome.mutate(
             1.0,  # Use floats for rates
             1.0,  # Use floats for rates
             id_manager.get_next_innov_id,
             id_manager.get_next_node_id,
         )
-        # print("Number of Nodes: ", len(my_cppn_genome.nodes))
-        # print("Number of Connections: ", len(my_cppn_genome.connections))
 
     # 6. Decode the genome into a robot morphology.
-    # console.log(f"Decoding with [bold cyan]{DECODER_TYPE}[/bold cyan]...")
 
     decoder = MorphologyDecoderBestFirst(
         cppn_genome=my_cppn_genome, max_modules=MAX_MODULES
     )
     decoded_robot_graph = decoder.decode()
 
-    # console.log(f"[bold green]Success! Found a morphology with {decoded_robot_graph.number_of_nodes()} modules.[/bold green]")
     final_robot_graph = decoded_robot_graph
 
     # 7. Construct and run the final robot.
     core = construct_mjspec_from_graph(final_robot_graph)
-    # console.log("[bold green]Robot constructed! Starting simulation...[/bold green]")
     run(core, with_viewer=True)

@@ -465,10 +465,7 @@ class NaCPGBeta(nn.Module):
 
                 # Constraint function (CF)
                 xi_dot_old, yi_dot_old = self.xy_dot_old[i]
-                # diff = self.constraint_function(
                 #     self.coefficients,
-                #     w=self.w.cpu().numpy()[i],
-                # )
                 diff = 10
                 xi_dot = torch.clamp(
                     xi_dot,

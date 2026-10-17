@@ -43,11 +43,6 @@ class ModuleRotationsIdx(Enum):
     DEG_0 = 0
     DEG_45 = 1
     DEG_90 = 2
-    # DEG_135 = 3
-    # DEG_180 = 4
-    # DEG_225 = 5
-    # DEG_270 = 6
-    # DEG_315 = 7
 
 
 class ModuleRotationsTheta(Enum):
@@ -56,11 +51,6 @@ class ModuleRotationsTheta(Enum):
     DEG_0 = 0
     DEG_45 = 45
     DEG_90 = 90
-    # DEG_135 = 135
-    # DEG_180 = 180
-    # DEG_225 = 225
-    # DEG_270 = 270
-    # DEG_315 = 315
 
 
 class ModuleInstance(BaseModel):

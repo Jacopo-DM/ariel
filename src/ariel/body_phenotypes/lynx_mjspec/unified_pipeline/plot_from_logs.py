@@ -118,10 +118,8 @@ def plot_training_logs(log_files):
 # ==========================================
 
 # 1. Plotting a single file:
-# plot_training_logs('train.log')
 
 # 2. Plotting multiple files to compare runs:
-# plot_training_logs(['train_run1.log', 'train_run2.log'])
 
 if __name__ == "__main__":
     from pathlib import Path

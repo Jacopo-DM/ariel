@@ -198,7 +198,6 @@ class NaCPG_Norm(nn.Module):
             self.init_angle_history()
 
     def init_angle_history(self) -> None:
-        # console.log("[yellow]Normalizing CPG output angles[/yellow]: Angle tracking enabled since its needed")
         self.angle_tracking = True
         for _ in range(self.duration * int(1 / self.dt) + 10):
             self.forward()
@@ -209,7 +208,6 @@ class NaCPG_Norm(nn.Module):
             hist / hist.abs().max(dim=0, keepdim=True).values * (torch.pi / 2)
         )
         console.log(f"len angle history {len(self.angle_history)}")
-        # console.log(self.angle_history)
         self.is_normalized = True
 
     def param_type_converter(
@@ -294,19 +292,13 @@ class NaCPG_Norm(nn.Module):
 
     def step(self, time: float) -> torch.Tensor:
         self.current_step += 1
-        # print(len(self.angle_history))
-        # print(time)
         return self.angle_history[self.current_step - 1]
 
     def forward(self, time: float | None = None) -> torch.Tensor:
         # Reset if time is zero
         # if time is not None and torch.isclose(
-        #     torch.tensor(time),
-        #     torch.tensor(0.0),
         # ):
-        #     self.reset()
         # if time is not None and abs(float(time)) < 1e-12:
-        #     self.reset()
         # Normalize amplitudes
         if self.normalize and self.is_normalized:
             return self.step(self.current_step)
@@ -388,16 +380,9 @@ class NaCPG_Norm(nn.Module):
 
             # # Apply hard bounds if requested
             # if self.hard_bounds is not None:
-            #     pre_clamping = angles.clone()
-            #     angles = torch.clamp(
             #         angles,
-            #         min=self.hard_bounds[0],
-            #         max=self.hard_bounds[1],
-            #         out=angles,
-            #     )
 
             # # Track how much clamping was done (can be used as a loss)
-            # self.clamping_error = (pre_clamping - angles).abs().sum().item()
 
             # Keep history if requested
             if self.angle_tracking:
@@ -407,7 +392,6 @@ class NaCPG_Norm(nn.Module):
         if np.any(np.isnan(angles.cpu().numpy())):
             msg = "NaN values detected in the angle signal.\n"
             msg += f"{angles.cpu().numpy()=}\n"
-            # msg += f"{self.clamping_error.cpu().numpy()=}\n"
             msg += f"{self.xy.cpu().numpy()=}\n"
             msg += f"{self.xy_dot_old.cpu().numpy()=}\n"
             msg += f"{self.ha.cpu().numpy()=}\n"

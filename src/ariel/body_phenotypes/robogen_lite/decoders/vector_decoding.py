@@ -137,12 +137,9 @@ class VectorDecoder(Blueprint):
             symbols=rot_types,
         )
 
-        # print(self.connection_vector)
-        # print(self.rotation_vector)
         sys.exit()
 
         # Initialize module types and rotations
-        # self.set_module_types_and_rotations()
 
         # Decode probability spaces into a graph
         self.decode_vector_to_graph()

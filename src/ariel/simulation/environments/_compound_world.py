@@ -198,4 +198,3 @@ class CompoundWorld(BaseWorld):
 
     def _expand_spec(self) -> None:
         self.spec.worldbody.add_geom(**self._floor_kwargs)
-        # self.spec = mjspec_deep_copy(self.spec)
