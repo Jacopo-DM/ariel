@@ -6,6 +6,7 @@ must run before that import.
 """
 
 import contextlib
+import importlib.metadata
 import json
 import os
 import sys
@@ -168,6 +169,35 @@ def configure_from_file(
     return apply_config(config, environ=environ, modules=modules)
 
 
+def mujoco_version() -> str:
+    """
+    Return the installed mujoco version without importing mujoco.
+
+    Returns
+    -------
+    str
+        The version, or ``"unknown"`` if the package is not installed.
+    """
+    try:
+        return importlib.metadata.version("mujoco")
+    except importlib.metadata.PackageNotFoundError:
+        return "unknown"
+
+
+def _current_config(path: Path) -> dict[str, Any] | None:
+    """Read the config; None if missing, invalid or from another setup."""
+    config = read_config(path)
+    if config is None:
+        return None
+    recorded_version = config.get("mujoco")
+    recorded_platform = config.get("platform")
+    if recorded_version is not None and recorded_version != mujoco_version():
+        return None
+    if recorded_platform is not None and recorded_platform != sys.platform:
+        return None
+    return config
+
+
 def _try_lock(lock: Path) -> bool:
     """Create the lock file; False if another process holds it."""
     try:
@@ -237,7 +267,7 @@ def ensure_gl_backend(
         return None
     try:
         path = path or config_path()
-        config = read_config(path)
+        config = _current_config(path)
         if config is None:
             config = _probe_once(path, run, console, lock_timeout, modules)
     except OSError as exc:
@@ -264,11 +294,11 @@ def _probe_once(
     lock = path.with_name(path.name + LOCK_SUFFIX)
     while not _try_lock(lock):
         _wait_for_lock(lock, lock_timeout)
-        config = read_config(path)
+        config = _current_config(path)
         if config is not None:
             return config
     try:
-        config = read_config(path)  # another process may have just finished
+        config = _current_config(path)  # someone may have just finished
         if config is not None:
             return config
         if run is None:

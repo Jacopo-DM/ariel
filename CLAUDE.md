@@ -23,7 +23,7 @@ From the repo root. Python 3.12 (`.python-version` 3.12.9), uv 0.13.1.
 |---|---|---|
 | Install everything | `uv sync --all-groups` | ~5 min first time, ~8.4 GB `.venv` |
 | Lockfile matches pyproject | `uv lock --check` | passes, ~2 s, read-only |
-| Unit tests | `uv run --no-sync pytest tests/unit -q -p no:cacheprovider` | 478 passed, ~6.6 s; add `--cov=ariel` for coverage (54% today, `fail_under = 54`, target 100) |
+| Unit tests | `uv run --no-sync pytest tests/unit -q -p no:cacheprovider` | 482 passed, ~6.6 s; add `--cov=ariel` for coverage (54% today, `fail_under = 54`, target 100) |
 | Lint | `uv run --no-sync ruff check src tests` | passes (src, tests), <1 s, read-only (`fix = false`) |
 | Format check | `uv run --no-sync ruff format --check src tests` | passes (141 files), <1 s, read-only; also covers notebooks under `tests/` |
 | Types (mypy) | `uv run --no-sync mypy src` | passes (96 files), ~40 s, read-only; 94 lines carry `# type: ignore[...]  # known bug`, listed in PLAN.md |
@@ -47,6 +47,7 @@ Ruff is pinned to 0.14.* and does not fix by default; `ruff check --fix` is opt-
 ## Data and secrets
 
 - Run outputs go to `__data__/` under the current working directory (`ariel.DATA`, git-ignored). Tests and dev tools must not write anywhere else or read other users' data.
+- `mujoco_user_config.json` (and a `.lock` file while probing) is written in the current working folder by `ariel.utils.gl_manager`; it is git-ignored and machine-specific. `MUJOCO_GL`, if set, always wins over it. Tests preset `MUJOCO_GL=glfw` in `tests/conftest.py` so they never probe.
 - No keys or environment variables are used, except `ARIEL_COMPILE_MYPYC=1` to opt in to the mypyc build (`setup.py`).
 
 ## Ignore list

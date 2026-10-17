@@ -4,7 +4,7 @@ Generated from `src/ariel/` on 2026-10-17. Ignore list: see CLAUDE.md.
 
 ## Entry points
 
-- Package `ariel` (`src/ariel/__init__.py`): exports `DATA`, `SEED`, `RNG`, `console`, `log`.
+- Package `ariel` (`src/ariel/__init__.py`): exports `DATA`, `SEED`, `RNG`, `console`, `log`; first reads `mujoco_user_config.json` to set `MUJOCO_GL` (before anything imports mujoco).
 - `examples/`: runnable scripts (`a_mujoco`, `b_robots`, `c_genotypes`, `re_book`, `z_ec_course`, `new_EC_engine_example.py`).
 - `tests/unit/` mirrors `src/ariel/`; `tests/functional/` is notebooks.
 
@@ -23,7 +23,7 @@ Generated from `src/ariel/` on 2026-10-17. Ignore list: see CLAUDE.md.
 | `ariel.simulation.tasks` | fitness functions | `targeted_locomotion`, `gait_learning`, `turning_in_place` |
 | `ariel.simulation` | MuJoCo worker base class | `mujoco_worker` |
 | `ariel.parameters` | shared types and params | `ariel_types`, `ariel_modules`, `mujoco_params` |
-| `ariel.utils` | helpers | `Tracker`, renderers, `VideoRecorder`, `file_ops`, `gl_backend`, `gl_manager` (OpenGL backend probe), `mujoco_ops`, `runners`, `noise_gen`, `morphological_descriptor`, `optimizers.RevDE` |
+| `ariel.utils` | helpers | `Tracker`, renderers, `VideoRecorder`, `file_ops`, `gl_backend` / `gl_manager` (OpenGL backend probe and `MUJOCO_GL` setup, import-order sensitive), `mujoco_ops`, `runners`, `noise_gen`, `morphological_descriptor`, `optimizers.RevDE` |
 | `ariel.visualisation` | analysis tooling (dashboards are on branch `feature-dashboard`) | `analysis/` |
 
 ## Import direction

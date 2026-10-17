@@ -8,7 +8,6 @@ manager carries on.
 """
 
 import contextlib
-import importlib.metadata
 import json
 import os
 import platform as platform_info
@@ -34,6 +33,7 @@ from ariel.utils.gl_backend import (
     CONFIG_NAME,
     CONFIG_VERSION,
     config_path,
+    mujoco_version,
     platform_backends,
 )
 
@@ -150,13 +150,6 @@ def select_backend(results: Mapping[str, BackendResult]) -> str | None:
     return min(working)[2] if working else None
 
 
-def _mujoco_version() -> str:
-    try:
-        return importlib.metadata.version("mujoco")
-    except importlib.metadata.PackageNotFoundError:
-        return "unknown"
-
-
 def _write_atomically(path: Path, config: dict[str, Any]) -> None:
     handle, name = tempfile.mkstemp(
         dir=path.parent, prefix=".gl-config-", suffix=".tmp"
@@ -229,7 +222,7 @@ def run(
         "version": CONFIG_VERSION,
         "platform": platform,
         "python": platform_info.python_version(),
-        "mujoco": _mujoco_version(),
+        "mujoco": mujoco_version(),
         "backends": {name: asdict(r) for name, r in results.items()},
         "selected": select_backend(results),
         "viewer_available": bool(glfw and glfw.ok),

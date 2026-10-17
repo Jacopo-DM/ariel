@@ -8,11 +8,11 @@
 | dashboards-out | Move the dashboards off `main` into a `feature-dashboard` branch | improvement | done 2026-10-17: commits matching `git log --grep '^T[45]:'`; measure: dashboard dir gone from main, branch holds it, pytest 437 passed unchanged | done | 2026-10-17 |
 | repo-hygiene | Remove the broken entry point, the stray file and the stale docs | improvement | done 2026-10-17: commits matching `git log --grep '^T[126]:'` and the housekeeping merges; console script, `generators copy.py`, placeholder docstrings (18 files to 0) and stale dev-doc claims fixed. Left: nox session names in root and docs CONTRIBUTING.md (see Known problems) | done | 2026-10-17 |
 | lint-types-policy | Settle the ruff, mypy, pyright and pre-commit policy, then make `src` and `tests` meet it | improvement | done 2026-10-17: commits matching `git log --grep '^T\(7\|8\|9\|1[0-8]\)'`; ruff 1330 -> 0, format 47 files -> clean, mypy 262 -> 0 (94 lines ignored as known bugs), pytest 437 passed, pre-commit passes, CI workflow added; pyright 331 -> 210 (informational) | done | 2026-10-17 |
-| gl-autodetect | ARIEL never crashes because the user's OpenGL backend is unsuitable: a manager probes glfw, egl and osmesa in one subprocess each, records the result in `mujoco_user_config.json` (working folder), and ARIEL applies it to `MUJOCO_GL` before `mujoco` is imported | new behaviour | 8 acceptance criteria in DESIGN.md (Specs, gl-autodetect): valid file written and manager exits 0 even when every backend fails; crashing or hanging worker recorded as failed; `import ariel` applies the file and never overrides a preset `MUJOCO_GL`; first import of `ariel.utils.renderers` probes once under a lock; corrupt or read-only cases only warn; tests, ruff, mypy and coverage 54% hold | in progress (G1-G3 done) | 2026-10-17 |
+| gl-autodetect | ARIEL never crashes because the user's OpenGL backend is unsuitable | new behaviour | done 2026-10-17: commits matching `git log --grep '^G[1-4]:'`; 8 acceptance criteria met by 45 new tests (pytest 437 -> 482); success path (a backend that works) and Windows/macOS not run, see Known problems | done | 2026-10-17 |
 
 ## Current state
 
-Phase: planning. test-env-green, dashboards-out, repo-hygiene and lint-types-policy are done. gl-autodetect is still a draft. Next step: agree gl-autodetect's acceptance criteria.
+Phase: all five goals done (test-env-green, dashboards-out, repo-hygiene, lint-types-policy, gl-autodetect). Next step: push main and feature-dashboard (needs the user's say-so), then plan the next goal.
 
 ## Baseline
 
@@ -32,17 +32,6 @@ Brownfield. Measured 2026-10-17 after `uv sync --all-groups` (Python 3.12.9, Lin
 
 No open tasks. Finished (see DESIGN.md Results for the numbers): T1-T6 (goals test-env-green, dashboards-out, repo-hygiene) and T7-T18 plus T15a-c (goal lint-types-policy). New tasks need approval.
 
-### gl-autodetect tasks (approved 2026-10-17; G1-G3 done)
-
-Vertical slices, each ending in something that runs and passes its tests; no new dependency (rich is already one). Tier 1 is the walking skeleton.
-
-**Tier 1**
-
-**Tier 2**
-- **G4. Staleness rule and docs.** Re-probe when the recorded mujoco version or platform differs; `.gitignore`, README note, CLAUDE.md and CODEMAP. Criterion 8. Risk low.
-
-**Tier 3 (not executed)**: running on Windows/macOS or on a machine where a backend works (needs a machine); fixing the 7 examples that import `mujoco` before `ariel`; a driver-change detector; a real render benchmark.
-
 ### Tier 3: left alone on purpose (not executed)
 
 - Raise unit coverage from 54% to the 100% target (`fail_under` is 54 now): large, and not part of an approved goal; areas with no tests are listed under Known problems.
@@ -55,19 +44,13 @@ Vertical slices, each ending in something that runs and passes its tests; no new
 
 ## Open questions
 
-- gl-autodetect: Windows and macOS cannot be tested here (decided: best-effort, glfw only); a machine with a working backend is needed to check the success path. Who can run `python -m ariel.utils.gl_manager` on one?
-
-Evidence for gl-autodetect (the spec is in DESIGN.md; the remaining question is the approval of the spec and tasks below) (checked 2026-10-17):
-- Nothing in `src/`, `examples/` or `tests/` sets `MUJOCO_GL` or `PYOPENGL_PLATFORM`, and `mujoco_user_config.json` does not exist.
-- `src/ariel/utils/renderers.py` constructs `Renderer(` in 3 places; 22 `mujoco.Renderer(` / `mj.Renderer(` calls in `examples/` (the request said about 15).
-- `examples/re_book/1_brain_evolution_multithreaded.py` line 366 documents a crash: an access violation in `glfwCreateWindow` when `mujoco.Renderer()` is created in a worker thread. So each backend must be probed in its own subprocess.
-- `MUJOCO_GL` must be set before `mujoco` is imported, so the config would be applied early; `ariel/__init__.py` already sets global state at import.
 
 ## Known problems
 
 Not run so far: the docs build (`uv run sphinx-build -b html docs docs/_build`, CI: `.github/workflows/sphinx.yml`; `nox -s docs` for live reload).
 
 Other problems:
+- gl-autodetect was only run on a machine where all three OpenGL backends fail (no display, no libEGL, no OSMesa). A run on a machine where a backend works, and any run on macOS or Windows, is still missing; `python -m ariel.utils.gl_manager` on such a machine would show it. The 7 examples that create a `mujoco.Renderer` after importing `mujoco` themselves keep MuJoCo's default backend.
 - `uv run pydoclint src` reports 166 findings (mostly DOC111/DOC301: type hints in docstrings, `__init__` docstrings). Its pre-commit hook was left out on purpose (user's choice, T17); `[tool.pydoclint]` in `pyproject.toml` is kept.
 - Pyright: 210 errors on `src tests` (331 when first measured in T7; the fall is a side effect of the mypy and annotation work); `pyrightconfig.json` still includes `examples/`. Informational in CI (`continue-on-error`).
 - Type errors that mark real or unfinished code, silenced with a line-level `# type: ignore[code]  # known bug` (94 lines in 23 files, 2026-10-17; behaviour unchanged). Remove an ignore by fixing the code it marks; `mypy` (strict, `warn_unused_ignores`) will report one that is no longer needed. By file (codes with counts, then lines):

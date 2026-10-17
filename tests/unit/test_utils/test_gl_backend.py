@@ -392,3 +392,60 @@ def test_import_renderers_probes_once_for_real(tmp_path: Path) -> None:
     )
     assert second.returncode == 0
     assert "One-off setup" not in second.stdout + second.stderr
+
+
+# --- stale results: reprobe when mujoco or the platform changed ----------- #
+
+
+def _stale_case(
+    tmp_path: Path, recorded: dict[str, object]
+) -> tuple[_FakeRun, str | None]:
+    _write(tmp_path, {"version": 1, "selected": "glfw", **recorded})
+    run = _FakeRun(selected="egl")
+    applied = gl_backend.ensure_gl_backend(
+        tmp_path / CONFIG_NAME,
+        run=run,
+        environ={},
+        modules={},
+        console=_quiet_console(),
+    )
+    return run, applied
+
+
+def test_ensure_reprobes_when_mujoco_version_changed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A file written for another mujoco version is probed again."""
+    monkeypatch.setattr(gl_backend, "mujoco_version", lambda: "9.9.9")
+    run, applied = _stale_case(
+        tmp_path, {"mujoco": "1.0.0", "platform": sys.platform}
+    )
+    assert run.calls == 1
+    assert applied == "egl"
+
+
+def test_ensure_reprobes_when_platform_changed(tmp_path: Path) -> None:
+    """A file copied from another platform is probed again."""
+    run, applied = _stale_case(
+        tmp_path,
+        {"mujoco": gl_backend.mujoco_version(), "platform": "other-os"},
+    )
+    assert run.calls == 1
+    assert applied == "egl"
+
+
+def test_ensure_keeps_a_current_file(tmp_path: Path) -> None:
+    """A file for this mujoco and platform is used without probing."""
+    run, applied = _stale_case(
+        tmp_path,
+        {"mujoco": gl_backend.mujoco_version(), "platform": sys.platform},
+    )
+    assert run.calls == 0
+    assert applied == "glfw"
+
+
+def test_ensure_keeps_a_file_without_versions(tmp_path: Path) -> None:
+    """A hand-written file that lacks the version fields is not discarded."""
+    run, applied = _stale_case(tmp_path, {})
+    assert run.calls == 0
+    assert applied == "glfw"
