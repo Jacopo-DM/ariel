@@ -2,7 +2,15 @@
 
 ## Specs
 
-None recorded.
+Proposed 2026-10-17 with the task list; recorded as agreed once the user approves the tasks. All three goals keep core behaviour unchanged.
+
+**test-env-green.** Users: anyone running `pytest tests/unit` on a Linux machine without `libGL.so.1`. Acceptance: `uv run --no-sync pytest tests/unit` reports 0 collection errors and 0 failures. Existing behaviour that must not regress: the 419 tests that pass today. Integration points: `pyproject.toml` (`opencv-python`), `uv.lock`, and the 8 files importing `cv2` (`utils/video_recorder.py`, `simulation/environments/heightmap_functions.py`, 5 examples, and the camera example). Non-goals: choosing the MuJoCo GL backend (that is gl-autodetect), fixing test failures unrelated to libGL, raising coverage. Measurement: one command, deterministic count; time 6.58-6.60 s over three runs.
+
+**dashboards-out.** Acceptance: branch `feature-dashboard` contains today's dashboards; `src/ariel/visualisation/dashboard/` is gone from `main`; no file on `main` except git history refers to it; pytest result identical before and after. Non-goals: consolidating the three dashboards, pushing the branch, touching `visualisation/analysis/`. Dependencies used only by dashboards are a separate step needing per-name approval.
+
+**repo-hygiene.** Acceptance: no `[project.scripts]` in `pyproject.toml`; `src/ariel/ec/generators copy.py` is gone (done, commit 95b6e86); root `CONTRIBUTING.md` states `uv sync` and Python >= 3.12 (done, commits 1632fc7, 27f0dc9); no `TODO(jmdm): description of script` placeholder docstring remains in `src/` (the real TODO at `morphological_descriptor.py:664` is kept); `.claude/dev/testing_and_tooling.md` makes no claim `noxfile.py` contradicts. Non-goals: adding a CLI, fixing lint or type findings.
+
+Architecture alternatives: none; these are removals and fixes, no new modules.
 
 ## Decisions
 

@@ -4,15 +4,15 @@
 
 | Name | Goal | Kind | Success measure | Status | Added |
 |---|---|---|---|---|---|
-| test-env-green | All unit tests can be collected and pass | improvement, behaviour unchanged | `uv run pytest tests/unit` reports 0 collection errors and 0 failures (today 2 collection errors, 419 passed) | draft | 2026-10-17 |
-| dashboards-out | Move the dashboards off `main` into a `feature-dashboard` branch | improvement, behaviour unchanged for the core | `feature-dashboard` branch holds the current `main`; on `main`, `src/ariel/visualisation/dashboard/` is gone, references in docs/README/.claude updated, dependencies used only by dashboards (panel, nicegui, plotly, kaleido, pyvista: none imported elsewhere in `.py` files) removed or listed as a decision; `pytest tests/unit` result is unchanged | draft | 2026-10-17 |
-| repo-hygiene | Remove the broken entry point, the stray file and the stale docs | improvement, behaviour unchanged | the `[project.scripts]` entry is removed from `pyproject.toml` (decided 2026-10-17; `ariel.__main__` does not exist); `src/ariel/ec/generators copy.py` removed (done 2026-10-17, user approved; unreferenced); `CONTRIBUTING.md` says `uv sync` and Python >= 3.12; placeholder `TODO(jmdm)` docstrings count in `src/` goes from 19 to 0 or each is listed as kept | draft | 2026-10-17 |
+| test-env-green | All unit tests can be collected and pass | improvement, behaviour unchanged | `uv run pytest tests/unit` reports 0 collection errors and 0 failures (today 2 collection errors, 419 passed) | approved | 2026-10-17 |
+| dashboards-out | Move the dashboards off `main` into a `feature-dashboard` branch | improvement, behaviour unchanged for the core | `feature-dashboard` branch holds the current `main`; on `main`, `src/ariel/visualisation/dashboard/` is gone, references in docs/README/.claude updated, dependencies used only by dashboards (panel, nicegui, plotly, kaleido, pyvista: none imported elsewhere in `.py` files) removed or listed as a decision; `pytest tests/unit` result is unchanged | approved | 2026-10-17 |
+| repo-hygiene | Remove the broken entry point, the stray file and the stale docs | improvement, behaviour unchanged | the `[project.scripts]` entry is removed from `pyproject.toml` (decided 2026-10-17; `ariel.__main__` does not exist); `src/ariel/ec/generators copy.py` removed (done 2026-10-17, user approved; unreferenced); `CONTRIBUTING.md` says `uv sync` and Python >= 3.12; placeholder `TODO(jmdm)` docstrings count in `src/` goes from 19 to 0 or each is listed as kept | approved | 2026-10-17 |
 | lint-types-policy | Decide which ruff/mypy/pyright/pre-commit rules are sensible, then make the code meet them | improvement | pending: measure set after the config review with the user (baseline: ruff 1858 findings, format 51 files, mypy 517 errors) | draft, blocked on config review | 2026-10-17 |
 | gl-autodetect | ARIEL never crashes because the user's OpenGL backend is unsuitable. A manager script runs one subprocess worker per backend (glfw, egl, osmesa), records which work and how fast in `mujoco_user_config.json`, and ARIEL reads that file at import to set `MUJOCO_GL`. | new behaviour | not set yet; acceptance criteria to be proposed and agreed (candidates: the manager writes a valid file on this Linux machine; a crashing backend is recorded as failed without killing the manager; importing `ariel` sets `MUJOCO_GL` from the file). Order: after test-env-green (both touch the rendering/cv2 environment). | draft | 2026-10-17 |
 
 ## Current state
 
-Phase: planning. Goals drafted (five), awaiting approval. Next step: user approves the goals in words (libGL and entry-point questions are answered).
+Phase: planning. Three goals approved 2026-10-17 (test-env-green, dashboards-out, repo-hygiene); lint-types-policy and gl-autodetect still draft. Task list below awaits approval. Next step: user approves the task list in words; no code changes before that.
 
 ## Baseline
 
@@ -29,7 +29,62 @@ Brownfield. Measured 2026-10-17 after `uv sync --all-groups` (Python 3.12.9, Lin
 
 ## Tasks
 
-None yet.
+Specs and measurements are in DESIGN.md (Specs). No task changes behaviour except removing the dashboards and the `ariel` console script, both approved. Every task: tests before and after (`pytest` line in CLAUDE.md), one task per commit, PLAN.md updated in the same commit. Pytest count and the grep counts are deterministic (no noise); pytest time was 6.58, 6.59, 6.60 s over three runs, so only a change over 0.1 s would count, and no goal claims a time.
+
+Order: Tier 1 first, in the order listed. T3 must come before T5 and T6. gl-autodetect waits for T2.
+
+### Tier 1: small diff, low risk
+
+**T1. Remove the broken console script** (repo-hygiene)
+- Changes: delete the `[project.scripts]` section (2 lines) in `pyproject.toml`.
+- Effect: a command that always failed (`ariel.__main__` does not exist) disappears. Estimate based on the file check done in setup.
+- Risk low. Cost: -2 lines, no new concepts or dependencies.
+- Verify: `uv lock --check` passes, `uv sync --all-groups` runs clean, pytest unchanged (419 passed). No tests cover the entry point (none needed).
+
+**T2. Fix stale developer docs** (repo-hygiene, "stale docs")
+- Changes: `.claude/dev/testing_and_tooling.md` (claims `nox --session=tests` and `nox --session=pre-commit` exist; `noxfile.py` has only `docs`; says pre-commit is installable through nox; mentions `uv venv` + `uv sync` flow) and CLAUDE.md "Things that bite" entries that T1 and the earlier fixes make obsolete.
+- Risk low. Cost: about +10/-10 lines of prose.
+- Verify: re-read each claim against `noxfile.py`, `pyproject.toml` and `.pre-commit-config.yaml`; pytest unchanged.
+
+### Tier 2: clear effect, more files or medium risk
+
+**T3. Switch to headless OpenCV** (test-env-green)
+- Changes: `pyproject.toml` (`opencv-python` to `opencv-python-headless`, same minimum version 4.11.0.86), `uv.lock` (regenerated with `uv lock`), `examples/a_mujoco/3_cameras_in_simulation.py` (lines ~92-100: replace `cv2.cvtColor`/`imshow`/`waitKey`/`destroyAllWindows` with a matplotlib `imshow` updated by `set_data` and `plt.pause`), README requirements note if needed.
+- Effect: the 2 collection errors (`test_environments.py`, `test_tracker.py`) disappear; target: 0 collection errors and 0 failures, test count above 419 (their tests are added to the 419; the exact number is measured after the change). Estimate based on the traceback, which stops at `import cv2` (`libGL.so.1`).
+- Risk medium: lockfile changes, and a previously hidden set of tests may fail once collected (they have never run on this machine). If tests fail for reasons unrelated to libGL, stop and record them under Known problems instead of fixing them under this goal. The example is untested; it needs a manual run.
+- Cost: about +8 lines in the example, 1 dependency swapped (download of `opencv-python-headless`, tens of MB, needs your approval by name at execution), no new concepts.
+- Verify: pytest as above, plus a manual run of the example. DESIGN.md already carries the performance hint about `cv2.imshow`.
+- Gap: the example has no test pinning its behaviour.
+
+**T4. Move dashboards off main** (dashboards-out)
+- Changes: create local branch `feature-dashboard` at current `main` (not pushed without your say-so); on `main` remove `src/ariel/visualisation/dashboard/` (4 dashboard files + `custom_plots.py` + `plot_registry.py`, about 5.8k lines); update `src/ariel/visualisation/__init__.py` docstring, README tree (line 110), `.claude/dev/repo_map.md` (line 23), `docs/source/contributing_guide/CONTRIBUTING.md` (line 111); keep `visualisation/analysis/`. Check `.claude/wiki/ariel_database.md`, `wiki/ariel_individual_db.md`, `wiki/ariel_db_pandas.md` (they mention plotly/panel); update only if they describe the removed code.
+- Effect: about -5.8k lines on main; `grep -rn "visualisation/dashboard"` finds nothing outside git history; pytest unchanged. Estimate from `wc -l` on the files.
+- Risk low-medium: nothing in `src/`, `tests/` or `examples/` imports the dashboards (checked); the dashboards have no tests.
+- Cost: -5.8k lines, no new concepts or dependencies.
+- Verify: pytest before and after identical; `feature-dashboard` contains the dashboards (`git ls-tree`).
+- Needs T3 first only because pytest counts change in T3; order T3 then T4.
+
+**T5. Drop dependencies used only by the dashboards** (dashboards-out)
+- Changes: `pyproject.toml`, `uv.lock`. Candidates: `panel`, `plotly` (imported only by dashboards); `nicegui`, `kaleido`, `pyvista` (imported nowhere in code, checked in `.py`, `.ipynb`, `.md`). `pandas` and `json5` are imported by the dashboards but declared nowhere (transitive). Each one removed only after you confirm by name.
+- Effect: smaller `.venv` (9.3 GB today; measured after), shorter `uv sync`. Estimate: unknown until measured; torch dominates.
+- Risk medium: a notebook or wiki code sample could use one (grep found none); `matplotlib`/`pandas` users may depend on them transitively.
+- Cost: -5 lines in `pyproject.toml`, lockfile churn.
+- Verify: pytest unchanged, `uv sync --all-groups` clean, `uv lock --check`, mypy error count not higher than 517 (T4 may lower it).
+
+**T6. Replace placeholder docstrings** (repo-hygiene)
+- Changes: the `TODO(jmdm): description of script` module docstrings in 17 files (recount after T4; list from `grep -rn "description of script" src`). Each gets a one-line real description read from the module. The single real TODO in `src/ariel/utils/morphological_descriptor.py:664` (normaliser check) is kept and listed, because it is a correctness question, not a placeholder.
+- Effect: count of placeholder TODOs in `src/`: 17 files to 0 (the real TODO at `morphological_descriptor.py:664` stays).
+- Risk low (docstrings only). Cost: about +40 lines of prose.
+- Verify: `grep -rn "description of script" src` empty; `ruff check --no-fix` count not higher than before; pytest unchanged.
+
+### Tier 3: left alone on purpose (not executed)
+
+- Raise unit coverage from about 45% to the 100% `fail_under`: outside the three approved goals; large; belongs with lint-types-policy.
+- Characterisation tests for the dashboards: they leave `main`; revisit on `feature-dashboard`.
+- Fix the 1858 ruff findings, 51 unformatted files and 517 mypy errors: goal lint-types-policy, blocked on the config review.
+- Install `pre-commit` and `pydoclint` so the hooks run: part of the config review.
+- Resolve the `morphological_descriptor.py:664` normaliser TODO: needs a behaviour decision.
+- Push `feature-dashboard` or `main` to origin: needs your say-so.
 
 ## Open questions
 
