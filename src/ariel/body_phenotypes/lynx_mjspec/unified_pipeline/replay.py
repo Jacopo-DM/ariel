@@ -53,9 +53,8 @@ def resolve_artifact_dir(artifact_dir: Path) -> Path:
         if path.is_dir() and (path / "metadata.json").exists()
     ]
     if not run_dirs:
-        raise FileNotFoundError(
-            f"No run directory with metadata.json found under: {artifact_dir}"
-        )
+        msg = f"No run directory with metadata.json found under: {artifact_dir}"
+        raise FileNotFoundError(msg)
 
     return max(run_dirs, key=lambda path: path.stat().st_mtime)
 
@@ -67,7 +66,8 @@ def load_artifacts(
 
     metadata_path = artifact_dir / "metadata.json"
     if not metadata_path.exists():
-        raise FileNotFoundError(f"Missing metadata file: {metadata_path}")
+        msg = f"Missing metadata file: {metadata_path}"
+        raise FileNotFoundError(msg)
 
     metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
     policy_dict = metadata.get("policy", {})

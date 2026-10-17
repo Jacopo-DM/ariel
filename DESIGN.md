@@ -54,6 +54,7 @@ Stack and architecture as found in the repo. Reasons are not recorded unless sta
 | 2026-10-17 | T8 `ruff format src tests` | lint-types-policy | format check: 47 files -> 0; ruff findings 976 -> 809 (line wrapping fixed some E501); pytest 437 passed. AST identical in all `.py` files except two docstrings with trailing whitespace removed (`tree/operators.py`, `utils/runners.py`); 5 notebooks in `tests/functional/` were reformatted too (cell source only, not run) |
 | 2026-10-17 | T9 `ruff check --fix` (safe fixes only) | lint-types-policy | ruff findings 809 -> 668; 43 files; format check clean; pytest 437 passed. Changes: unused imports, `Dict`/`Optional` to builtin generics and `X | None`, `IOError` to `OSError`, `timezone.utc` to `UTC`, dict comprehensions to `dict.fromkeys`, `zip(..., strict=False)` (same behaviour as before), quoted `cast` types, unused `noqa` comments removed. Reviewed in the diff; non-import code changes are only these |
 | 2026-10-17 | T10 delete commented-out code | lint-types-policy | 52 full-line comments removed from 8 files (still in git history); ruff 668 -> 608; format clean; pytest 437 passed. 2 findings in `tests/functional/cpg.ipynb` left. Found while doing it: real bug F821 in `vector_decoding.py:132` (see PLAN.md open questions) |
+| 2026-10-17 | T11 exception messages (EM101/EM102) | lint-types-policy | 16 messages moved into a `msg` variable in 7 files (ruff's own fix, then `ruff format`); ruff 608 -> 592; format clean; pytest 437 passed |
 
 ## Gotchas
 

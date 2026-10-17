@@ -53,9 +53,8 @@ class FastNumpyNetwork:
         b3_end = w3_end + output_size
 
         if len(weights) != b3_end:
-            raise ValueError(
-                f"Invalid weight size {len(weights)}, expected {b3_end}"
-            )
+            msg = f"Invalid weight size {len(weights)}, expected {b3_end}"
+            raise ValueError(msg)
 
         self.w1 = weights[0:w1_end].reshape(hidden_size, input_size)
         self.b1 = weights[w1_end:b1_end]
@@ -194,12 +193,12 @@ def build_model(
     tcp_sid = resolve_site_id(model, "tcp")
     tgt_sid = resolve_site_id(model, "target")
     if tcp_sid == -1 or tgt_sid == -1:
-        raise RuntimeError("Could not resolve tcp/target site IDs")
+        msg = "Could not resolve tcp/target site IDs"
+        raise RuntimeError(msg)
 
     joint_ids = get_actuated_joint_ids(model)
     if len(joint_ids) < NUM_JOINTS:
-        raise RuntimeError(
-            f"Expected at least {NUM_JOINTS} actuated joints, got {len(joint_ids)}"
-        )
+        msg = f"Expected at least {NUM_JOINTS} actuated joints, got {len(joint_ids)}"
+        raise RuntimeError(msg)
 
     return model, data, tcp_sid, tgt_sid, joint_ids

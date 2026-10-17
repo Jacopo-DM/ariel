@@ -278,14 +278,16 @@ class Genome:
         if connection not in self.connections.values():
             self.connections[connection.innov_id] = connection
         else:
-            raise ValueError("Connection already exists in genome.")
+            msg = "Connection already exists in genome."
+            raise ValueError(msg)
 
     def add_node(self, node: Node):
         """Adds a node gene to the genome."""
         if node not in self.nodes.values():
             self.nodes[node._id] = node
         else:
-            raise ValueError("Node already exists in genome.")
+            msg = "Node already exists in genome."
+            raise ValueError(msg)
 
     def get_node_ordering(self):
         """
@@ -327,9 +329,8 @@ class Genome:
         # this means there was a cycle in the graph (a recurrent connection).
         if len(sorted_order) != len(self.nodes):
             # For a feed-forward CPPN, this indicates an issue.
-            raise Exception(
-                "A cycle was detected in the genome's graph, cannot create a feed-forward order."
-            )
+            msg = "A cycle was detected in the genome's graph, cannot create a feed-forward order."
+            raise Exception(msg)
 
         return sorted_order
 
@@ -348,9 +349,8 @@ class Genome:
         ]
 
         if len(inputs) != len(input_node_ids):
-            raise ValueError(
-                f"Expected {len(input_node_ids)} inputs, got {len(inputs)}"
-            )
+            msg = f"Expected {len(input_node_ids)} inputs, got {len(inputs)}"
+            raise ValueError(msg)
 
         try:
             # --- STRATEGY A: FEED-FORWARD (Preferred) ---

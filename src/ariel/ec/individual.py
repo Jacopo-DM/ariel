@@ -90,7 +90,8 @@ class Individual(SQLModel, table=True):
             (i.e. ``fitness_`` is ``None``).
         """
         if self.fitness_ is None:
-            raise ValueError(f"fitness accessed before evaluation: {self.id=}")
+            msg = f"fitness accessed before evaluation: {self.id=}"
+            raise ValueError(msg)
         return self.fitness_
 
     @fitness.setter
@@ -126,9 +127,8 @@ class Individual(SQLModel, table=True):
             (i.e. ``genotype_`` is ``None``).
         """
         if self.genotype_ is None:
-            raise ValueError(
-                f"genotype accessed before initialization: {self.id=}"
-            )
+            msg = f"genotype accessed before initialization: {self.id=}"
+            raise ValueError(msg)
         return self.genotype_
 
     @genotype.setter

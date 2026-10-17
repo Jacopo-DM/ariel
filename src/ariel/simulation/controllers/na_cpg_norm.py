@@ -54,9 +54,8 @@ def create_fully_connected_adjacency(num_nodes: int) -> dict[int, list[int]]:
 class NaCPG_Norm(nn.Module):
     """Implements the Normalized Asymmetric CPG (NA-CPG)."""
 
-    raise NotImplementedError(
-        "This class is a work in progress and not ready for use."
-    )
+    msg = "This class is a work in progress and not ready for use."
+    raise NotImplementedError(msg)
 
     xy: torch.Tensor
     xy_dot_old: torch.Tensor

@@ -208,13 +208,15 @@ class SimpleCPG(nn.Module):
         safe_params = self.param_type_converter(params)
 
         if group_name not in self.parameter_groups:
-            raise ValueError(f"Parameter group '{group_name}' does not exist.")
+            msg = f"Parameter group '{group_name}' does not exist."
+            raise ValueError(msg)
 
         param = self.parameter_groups[group_name]
         if safe_params.numel() != param.numel():
-            raise ValueError(
+            msg = (
                 f"Parameter vector has incorrect size for group '{group_name}'."
             )
+            raise ValueError(msg)
         param.data = safe_params.view_as(param)
 
     def get_flat_params(self) -> torch.Tensor:
@@ -307,7 +309,8 @@ class SimpleCPG(nn.Module):
 
             # Check for NaN
             if torch.isnan(angles).any():
-                raise ValueError(f"NaN detected in angles: {angles}")
+                msg = f"NaN detected in angles: {angles}"
+                raise ValueError(msg)
 
             self.angles = angles
             return self.angles.clone()
