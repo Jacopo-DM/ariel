@@ -66,7 +66,7 @@ def test_generate_save_path_extension_from_file_name(tmp_path) -> None:
 
 def test_generate_save_path_all_none_raises() -> None:
     """Calling with all None arguments raises ValueError."""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="are `None`"):
         generate_save_path()
 
 

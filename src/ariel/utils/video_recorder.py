@@ -3,6 +3,7 @@
 # Standard library
 import datetime
 from pathlib import Path
+from typing import ClassVar
 
 # Third-party libraries
 import cv2
@@ -18,7 +19,7 @@ class VideoRecorder:
     _video_encoding: str = "mp4v"
     _add_timestamp_to_file_name: bool = True
     _file_extension: str = ".mp4"
-    _fallback_encoders: list[tuple[str, str]] = [
+    _fallback_encoders: ClassVar[list[tuple[str, str]]] = [
         ("avc1", ".mp4"),
         ("XVID", ".avi"),
         ("MJPG", ".avi"),

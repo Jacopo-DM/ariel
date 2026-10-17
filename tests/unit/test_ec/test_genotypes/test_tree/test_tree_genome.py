@@ -155,6 +155,6 @@ def test_save_json_valid_json() -> None:
     with tempfile.TemporaryDirectory() as tmpdir:
         path = str(Path(tmpdir) / "genome.json")
         genome.save_json(path)
-        with open(path) as fh:
+        with Path(path).open() as fh:
             data = json.load(fh)
     assert "nodes" in data

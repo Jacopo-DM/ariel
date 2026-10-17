@@ -106,3 +106,7 @@ max-args = 8
 [lint.per-file-ignores]
 "tests/**" = ["ANN", "D100", "D101", "D102", "D103", "D104", "D105", "D106", "D107"]
 "examples/**" = ["T201"]
+# Command-line and demo scripts that live inside the package
+"src/ariel/body_phenotypes/lynx_mjspec/unified_pipeline/**" = ["T201"]
+"src/ariel/body_phenotypes/robogen_lite/cppn_neat/tests.py" = ["T201"]
+"src/ariel/simulation/example_usage.py" = ["T201"]

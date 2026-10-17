@@ -65,21 +65,21 @@ def test_perlin_noise_normalize_clip_range() -> None:
 def test_perlin_noise_invalid_width_raises() -> None:
     """as_grid raises ValueError for non-positive width."""
     noise = PerlinNoise()
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="must be > 0"):
         noise.as_grid(width=0, height=32, scale=8.0)
 
 
 def test_perlin_noise_invalid_height_raises() -> None:
     """as_grid raises ValueError for non-positive height."""
     noise = PerlinNoise()
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="must be > 0"):
         noise.as_grid(width=32, height=0, scale=8.0)
 
 
 def test_perlin_noise_invalid_scale_raises() -> None:
     """as_grid raises ValueError for non-positive scale."""
     noise = PerlinNoise()
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="must be > 0"):
         noise.as_grid(width=32, height=32, scale=0.0)
 
 

@@ -56,7 +56,7 @@ def body_spider() -> CoreModule:
         h0 = attach(core, f, HingeModule(index=i), f"{f.name[0]}H")
         b0 = attach(h0, F, BrickModule(index=4 + i), "B")
         h1 = attach(b0, F, HingeModule(index=8 + i), "H", rotation=90)
-        b1 = attach(h1, F, BrickModule(index=12 + i), "B")
+        attach(h1, F, BrickModule(index=12 + i), "B")
 
     return core
 

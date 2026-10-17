@@ -44,7 +44,7 @@ def test_core_module_has_all_sites() -> None:
 
 def test_core_module_wrong_index_raises() -> None:
     """CoreModule raises ValueError if initialized with a non-zero index."""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="index must be 0"):
         CoreModule(index=1)
 
 

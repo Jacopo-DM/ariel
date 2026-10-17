@@ -488,9 +488,7 @@ def plot_all_runs(histories: list[torch.Tensor], dt: float) -> None:
 if __name__ == "__main__":
     import time
 
-    histories = []
-    for run_id in range(6):  # Run 6 times
-        histories.append(main(run_id))
+    histories = [main(run_id) for run_id in range(6)]  # Run 6 times
 
     # Plot all runs
     plot_all_runs(histories, dt=0.02)

@@ -12,8 +12,7 @@ def distance_to_target(
     final_position: np.ndarray, target_position: np.ndarray
 ) -> float:
     """Remaining planar distance to target (lower is better)."""
-    res = float(np.linalg.norm(final_position[:2] - target_position[:2]))
-    return res
+    return float(np.linalg.norm(final_position[:2] - target_position[:2]))
 
 
 def fitness_delta_distance(

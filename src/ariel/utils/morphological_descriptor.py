@@ -272,9 +272,12 @@ class MorphologicalMeasures:
                 on_plane += 1
             pos = self.symmetry_grid[x, y, cz + z]
             neg = self.symmetry_grid[x, y, cz - z]
-            if pos is not None and neg is not None:
-                if self._get_node_type(pos) == self._get_node_type(neg):
-                    off_sym += 2
+            if (
+                pos is not None
+                and neg is not None
+                and self._get_node_type(pos) == self._get_node_type(neg)
+            ):
+                off_sym += 2
         diff = self.num_modules - on_plane
         return off_sym / diff if diff > 0 else 0.0
 
@@ -290,9 +293,12 @@ class MorphologicalMeasures:
                 on_plane += 1
             pos = self.symmetry_grid[x, cy + y, z]
             neg = self.symmetry_grid[x, cy - y, z]
-            if pos is not None and neg is not None:
-                if self._get_node_type(pos) == self._get_node_type(neg):
-                    off_sym += 2
+            if (
+                pos is not None
+                and neg is not None
+                and self._get_node_type(pos) == self._get_node_type(neg)
+            ):
+                off_sym += 2
         diff = self.num_modules - on_plane
         return off_sym / diff if diff > 0 else 0.0
 
@@ -308,9 +314,12 @@ class MorphologicalMeasures:
                 on_plane += 1
             pos = self.symmetry_grid[cx + x, y, z]
             neg = self.symmetry_grid[cx - x, y, z]
-            if pos is not None and neg is not None:
-                if self._get_node_type(pos) == self._get_node_type(neg):
-                    off_sym += 2
+            if (
+                pos is not None
+                and neg is not None
+                and self._get_node_type(pos) == self._get_node_type(neg)
+            ):
+                off_sym += 2
         diff = self.num_modules - on_plane
         return off_sym / diff if diff > 0 else 0.0
 
@@ -687,7 +696,7 @@ class MorphologicalMeasures:
         float
             Value in (0, 1].
         """
-        # TODO: verify that bounding_box_volume is the right normaliser here
+        # TODO: verify that bounding_box_volume is the right normaliser here  # noqa: FIX002, TD002
         if self.bounding_box_volume == 0:
             return 0.0
         return self.num_modules / self.bounding_box_volume

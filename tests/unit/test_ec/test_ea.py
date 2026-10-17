@@ -64,8 +64,8 @@ def test_easettings_defaults() -> None:
 
 def test_easettings_db_file_path() -> None:
     """db_file_path computed field combines output_folder and db_file_name."""
-    s = EASettings(output_folder=Path("/tmp/ea"), db_file_name="run.db")
-    assert s.db_file_path == Path("/tmp/ea/run.db")
+    s = EASettings(output_folder=Path("/tmp/ea"), db_file_name="run.db")  # noqa: S108
+    assert s.db_file_path == Path("/tmp/ea/run.db")  # noqa: S108
 
 
 def test_easettings_override() -> None:

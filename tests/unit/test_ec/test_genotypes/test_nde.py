@@ -177,7 +177,7 @@ def test_nde_forward_no_nan() -> None:
 
 def test_nde_forward_deterministic_same_input() -> None:
     """Same genotype always produces the same outputs."""
-    nde = _nde(seed_unused := 4)
+    nde = _nde(4)
     g = _genotype()
     out1 = nde.forward(g)
     out2 = nde.forward(g)

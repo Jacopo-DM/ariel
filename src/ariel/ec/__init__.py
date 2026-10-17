@@ -21,12 +21,12 @@ from ariel.ec.individual import (
 from ariel.ec.population import Population
 
 __all__: list[str] = [
-    # Archive
-    "Archive",
     # EA engine
     "EA",
     # Shared
     "SEED",
+    # Archive
+    "Archive",
     # Crossover
     "Crossover",
     "DBHandlingMode",

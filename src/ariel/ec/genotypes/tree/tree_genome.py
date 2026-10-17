@@ -9,14 +9,14 @@ from __future__ import annotations
 import json
 import typing
 from dataclasses import dataclass, field
+from pathlib import Path
 
 import networkx as nx
 
 
 @dataclass
 class TreeGenome:
-    # nodes: mapping id -> dict with keys: type (Enum.name), rotation
-    # (Enum.name)
+    # nodes: mapping id -> dict with keys "type" and "rotation" (Enum names)
     """Tree genome: module nodes and the edges that connect them."""
 
     nodes: dict[int, dict[str, str]] = field(default_factory=dict)
@@ -60,12 +60,12 @@ class TreeGenome:
 
     def save_json(self, path: str) -> None:
         """Write the genome to `path` as JSON."""
-        with open(path, "w") as fh:
+        with Path(path).open("w") as fh:
             json.dump(self.to_dict(), fh, indent=2)
 
     @classmethod
     def load_json(cls, path: str) -> TreeGenome:
         """Read a genome from the JSON file at `path`."""
-        with open(path) as fh:
+        with Path(path).open() as fh:
             data = json.load(fh)
         return cls.from_dict(data)

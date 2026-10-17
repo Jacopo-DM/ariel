@@ -40,7 +40,7 @@ def test_tracker_custom_initialization() -> None:
 
 def test_tracker_setup_initializes_history() -> None:
     """setup() creates the history dict for tracked attributes."""
-    spec, model, data = _build_spider_in_world()
+    spec, _model, data = _build_spider_in_world()
     tracker = Tracker(quiet=True)
     tracker.setup(spec, data)
     assert "xpos" in tracker.history
@@ -48,7 +48,7 @@ def test_tracker_setup_initializes_history() -> None:
 
 def test_tracker_setup_finds_core_geom() -> None:
     """setup() binds at least one object when a 'core' geom exists."""
-    spec, model, data = _build_spider_in_world()
+    spec, _model, data = _build_spider_in_world()
     tracker = Tracker(quiet=True)
     tracker.setup(spec, data)
     assert len(tracker.to_track) >= 1

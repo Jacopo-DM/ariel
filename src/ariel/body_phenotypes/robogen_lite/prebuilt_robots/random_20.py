@@ -67,7 +67,6 @@ def random_spider20(seed: int = 1337) -> CoreModule:
         )
 
         # Only enqueue attachment faces that this module actually exposes.
-        for child_face in child.sites.keys():
-            open_sites.append((child, child_face))
+        open_sites.extend((child, child_face) for child_face in child.sites)
 
     return core

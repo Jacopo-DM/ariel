@@ -57,19 +57,19 @@ def test_n_point_valid_n() -> None:
 
 def test_n_point_n_zero_raises() -> None:
     """n_point with n=0 raises ValueError."""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="n must be in"):
         Crossover.n_point(_genes(6), _genes(6), n=0)
 
 
 def test_n_point_n_too_large_raises() -> None:
     """n_point with n >= len raises ValueError."""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="n must be in"):
         Crossover.n_point(_genes(6), _genes(6), n=6)
 
 
 def test_n_point_mismatched_shapes_raise() -> None:
     """n_point with mismatched parent lengths raises ValueError."""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="same shape"):
         Crossover.n_point(_genes(4), _genes(6), n=2)
 
 
@@ -97,7 +97,7 @@ def test_uniform_genes_come_from_parents() -> None:
 
 def test_uniform_invalid_probability_raises() -> None:
     """Uniform with swap_probability outside [0, 1] raises ValueError."""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="swap_probability"):
         Crossover.uniform(_genes(5), _genes(5), swap_probability=1.5)
 
 
@@ -144,5 +144,5 @@ def test_order_crossover_children_are_lists() -> None:
 
 def test_order_crossover_mismatched_length_raises() -> None:
     """order_crossover raises ValueError for parents of different lengths."""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="equal length"):
         Crossover.order_crossover([0, 1, 2], [0, 1, 2, 3])

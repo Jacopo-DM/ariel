@@ -33,7 +33,7 @@ def is_single_connected_tree(genome: dict[str, Any]) -> bool:
         return True  # Empty genome is trivially connected
 
     # normalize node IDs to ints so dicts with string keys (JSON) work correctly
-    node_ids = {_to_int_node_id(k) for k in nodes.keys()}
+    node_ids = {_to_int_node_id(k) for k in nodes}
 
     # Core must exist and be the root (no incoming edges)
     if IDX_OF_CORE not in node_ids:

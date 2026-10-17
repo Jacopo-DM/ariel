@@ -1,13 +1,14 @@
 """Plot training statistics parsed from evolution log files."""
 
 import re
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 
 
 def _parse_log(file_path: str) -> dict[str, list]:
-    with open(file_path) as f:
+    with Path(file_path).open() as f:
         content = f.read()
     gens = [int(m) for m in re.findall(r"gen=(\d+)", content)]
     bests = [float(m) for m in re.findall(r"best=([-\d\.]+)", content)]
@@ -57,18 +58,15 @@ def plot_training_logs(log_files: str | list[str]) -> None:
         r["bests"][:min_len] for r in runs
     ])  # (n_runs, n_gens)
     means_mat = np.array([r["means"][:min_len] for r in runs])
-    worsts_mat = np.array([r["worsts"][:min_len] for r in runs])
 
     agg_best_mean = bests_mat.mean(axis=0)
-    agg_best_std = bests_mat.std(axis=0)
     agg_mean_mean = means_mat.mean(axis=0)
     agg_mean_std = means_mat.std(axis=0)
-    agg_worst_mean = worsts_mat.mean(axis=0)
 
     n_runs = len(runs)
     plt.figure(figsize=(10, 5))
 
-    # Mean-of-best across runs with ±1σ band.
+    # Mean-of-best across runs.
     plt.plot(
         gens,
         agg_best_mean,
@@ -77,13 +75,8 @@ def plot_training_logs(log_files: str | list[str]) -> None:
         linewidth=2,
         linestyle="--",
     )
-    # plt.fill_between(gens,
-    #                  agg_best_mean - agg_best_std,
-    #                  agg_best_mean + agg_best_std,
-    #                  color='darkorange', alpha=0.2, label='Best ±1σ across
-    # runs')
 
-    # Mean-of-mean across runs with ±1σ band.
+    # Mean-of-mean across runs with ±1 sigma band.
     plt.plot(
         gens,
         agg_mean_mean,
@@ -97,12 +90,8 @@ def plot_training_logs(log_files: str | list[str]) -> None:
         agg_mean_mean + agg_mean_std,
         color="steelblue",
         alpha=0.2,
-        label="Mean ±1σ across runs",
+        label="Mean ±1σ across runs",  # noqa: RUF001
     )
-
-    # # Worst envelope (mean across runs) for context.
-    # plt.plot(gens, agg_worst_mean, label='Worst (mean across runs)',
-    #          color='gray', linewidth=1, linestyle=':')
 
     # Chart Formatting
     plt.title(f"Training Metrics — {n_runs} runs aggregated", fontsize=14)

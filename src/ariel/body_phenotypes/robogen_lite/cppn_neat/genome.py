@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import random
-from collections.abc import Callable
-from typing import Self
+from typing import TYPE_CHECKING, Self
 
 from .activations import ACTIVATION_FUNCTIONS, DEFAULT_ACTIVATION
 from .connection import Connection
 from .node import Node
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class Genome:
@@ -19,7 +21,7 @@ class Genome:
         nodes: dict[int, Node],
         connections: dict[int, Connection],
         fitness: float,
-        serialized: dict = None,
+        serialized: dict | None = None,
     ) -> None:
         """Create a genome from its nodes, connections and fitness."""
         self.nodes = nodes
@@ -76,7 +78,7 @@ class Genome:
 
         # 2. Create Output Nodes (starting ID after inputs)
         current_node_id = num_inputs
-        for o in range(num_outputs):
+        for _ in range(num_outputs):
             node = Node(
                 _id=current_node_id,
                 typ="output",
@@ -201,9 +203,7 @@ class Genome:
         )
         self.add_connection(conn2)
 
-    def crossover(
-        self, other: "Genome", is_maximisation: bool = True
-    ) -> "Genome":
+    def crossover(self, other: Genome, is_maximisation: bool = True) -> Genome:
         """Cross over this Genome (parent A) with another (parent B)."""
         # Determine the fitter parent
         if is_maximisation:
@@ -482,7 +482,7 @@ class Genome:
         }
 
     @classmethod
-    def from_dict(cls, data: dict, fitness: float = 0.0) -> "Genome":
+    def from_dict(cls, data: dict, fitness: float = 0.0) -> Genome:
         """Reconstructs a Genome object from a dictionary."""
         # 1. Rebuild Nodes
         nodes = {}

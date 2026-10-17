@@ -44,7 +44,7 @@ def test_fully_connected_adjacency_all_others() -> None:
     """Each node is connected to every other node."""
     n = 4
     adj = create_fully_connected_adjacency(n)
-    for node, neighbors in adj.items():
+    for neighbors in adj.values():
         assert len(neighbors) == n - 1
 
 
@@ -60,7 +60,7 @@ def test_simplecpg_initialization() -> None:
 
 
 def test_simplecpg_parameter_count() -> None:
-    """Total parameter count equals 5 groups × n."""
+    """Total parameter count equals 5 groups x n."""
     n = 4
     cpg = _cpg(n)
     assert cpg.num_of_parameters == 5 * n

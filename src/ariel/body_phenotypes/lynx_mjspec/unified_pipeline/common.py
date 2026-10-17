@@ -74,8 +74,7 @@ class FastNumpyNetwork:
         """Map an observation to an action in [-1, 1]^output_size."""
         x = np.tanh(self.w1 @ x + self.b1)
         x = np.tanh(self.w2 @ x + self.b2)
-        x = np.tanh(self.w3 @ x + self.b3)
-        return x
+        return cast("np.ndarray", np.tanh(self.w3 @ x + self.b3))
 
 
 def num_network_params(spec: PolicySpec) -> int:

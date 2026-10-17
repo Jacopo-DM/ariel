@@ -91,7 +91,7 @@ def subtree_swap(
         genome: TreeGenome, root: int
     ) -> tuple[dict[int, dict[str, str]], list[dict[str, Any]]]:
         g = genome.to_networkx()
-        subnodes = set([root] + list(nx.descendants(g, root)))
+        subnodes = {root, *nx.descendants(g, root)}
         internal_edges = [
             e
             for e in genome.edges
@@ -328,9 +328,7 @@ def mutate_subtree_replacement(
 
             if core_children:
                 root_child = random.choice(core_children)
-                branch_nodes = set(
-                    [root_child] + list(nx.descendants(g_sub, root_child))
-                )
+                branch_nodes = {root_child, *nx.descendants(g_sub, root_child)}
                 branch_node_dict = {
                     n: copy.deepcopy(new_subtree.nodes[n]) for n in branch_nodes
                 }
@@ -511,14 +509,14 @@ def random_tree(max_modules: int) -> TreeGenome:
     next_id = 1
     while next_id <= max_modules:
         # collect available (parent,face) positions
-        free = []
+        free: list[tuple[int, str]] = []
         for pid, pdata in g.nodes.items():
             ptype = ModuleType[pdata["type"]]
             allowed_faces = [f.name for f in ALLOWED_FACES[ptype]]
             used = {e["face"] for e in g.edges if e["parent"] == pid}
-            for face in allowed_faces:
-                if face not in used:
-                    free.append((pid, face))
+            free.extend(
+                (pid, face) for face in allowed_faces if face not in used
+            )
         if not free:
             break
         parent, face = random.choice(free)
@@ -550,8 +548,7 @@ def get_tree_depth(genome: TreeGenome) -> int:
         node, depth = stack.pop()
         max_depth = max(max_depth, depth)
 
-        for child in g.successors(node):
-            stack.append((child, depth + 1))
+        stack.extend((child, depth + 1) for child in g.successors(node))
 
     return max_depth
 

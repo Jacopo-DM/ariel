@@ -1,5 +1,7 @@
 """Prebuilt gecko robot body."""
 
+from pathlib import Path
+
 from ariel.body_phenotypes.robogen_lite.config import ModuleFaces
 from ariel.body_phenotypes.robogen_lite.modules.brick import BrickModule
 from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
@@ -150,9 +152,7 @@ def gecko() -> CoreModule:
 if __name__ == "__main__":
     gecko_rob = gecko()
     gecko_xml = gecko_rob.spec.to_xml()
-    with open(
+    with Path(
         "ariel/src/ariel/body_phenotypes/robogen_lite/prebuilt_robots/gecko.xml",
-        "w",
-        encoding="utf-8",
-    ) as f:
+    ).open("w", encoding="utf-8") as f:
         f.write(gecko_xml)
