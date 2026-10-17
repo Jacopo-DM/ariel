@@ -21,16 +21,12 @@ from ariel.ec.individual import (
 from ariel.ec.population import Population
 
 __all__: list[str] = [
-
     # Archive
     "Archive",
-
     # EA engine
     "EA",
-
     # Shared
     "SEED",
-
     # Crossover
     "Crossover",
     "DBHandlingMode",
@@ -38,21 +34,17 @@ __all__: list[str] = [
     "EASettings",
     "FloatMutator",
     "Floats",
-
     # Float generators / mutators
     "FloatsGenerator",
-
     # Data layer
     "Individual",
     "IntegerMutator",
     "Integers",
-
     # Integer generators / mutators
     "IntegersGenerator",
     "JSONIterable",
     "JSONPrimitive",
     "JSONType",
-
     # Population
     "Population",
     "config",

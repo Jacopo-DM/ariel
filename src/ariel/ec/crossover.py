@@ -178,7 +178,9 @@ class Crossover:
             )
 
         raw: NDArray[Any] = _rng.choice(
-            np.arange(1, length, dtype=np.intp), size=n, replace=False,
+            np.arange(1, length, dtype=np.intp),
+            size=n,
+            replace=False,
         )
         cuts: list[int] = [0, *sorted(raw.tolist()), length]
 
@@ -296,7 +298,9 @@ class Crossover:
             cast(
                 "list[int]",
                 _rng.choice(
-                    np.arange(n + 1, dtype=np.intp), size=2, replace=False,
+                    np.arange(n + 1, dtype=np.intp),
+                    size=2,
+                    replace=False,
                 ).tolist(),
             ),
         )
@@ -307,11 +311,13 @@ class Crossover:
             segment: set[int] = set(donor[lo:hi])
             child: list[int | None] = [None] * n
             child[lo:hi] = donor[lo:hi]
-            fill_positions: list[int] = [(hi + k) % n
-                                         for k in range(n - (hi - lo))]
+            fill_positions: list[int] = [
+                (hi + k) % n for k in range(n - (hi - lo))
+            ]
             fill_values: list[int] = [
-                gene for gene in (other[hi:] + other[:hi])
-                    if gene not in segment
+                gene
+                for gene in (other[hi:] + other[:hi])
+                if gene not in segment
             ]
             for pos, val in zip(fill_positions, fill_values, strict=False):
                 child[pos] = val

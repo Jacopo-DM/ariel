@@ -66,7 +66,9 @@ def _core_hinge_brick() -> TreeGenome:
 def test_add_node_appends_node() -> None:
     """add_node inserts a new node into the genome."""
     g = _core_only()
-    add_node(g, parent=0, face="FRONT", node_id=1, mtype="HINGE", rotation="DEG_0")
+    add_node(
+        g, parent=0, face="FRONT", node_id=1, mtype="HINGE", rotation="DEG_0"
+    )
     assert 1 in g.nodes
     assert g.nodes[1] == {"type": "HINGE", "rotation": "DEG_0"}
 
@@ -74,7 +76,9 @@ def test_add_node_appends_node() -> None:
 def test_add_node_appends_edge() -> None:
     """add_node appends a directed edge."""
     g = _core_only()
-    add_node(g, parent=0, face="BACK", node_id=1, mtype="BRICK", rotation="DEG_0")
+    add_node(
+        g, parent=0, face="BACK", node_id=1, mtype="BRICK", rotation="DEG_0"
+    )
     assert {"parent": 0, "child": 1, "face": "BACK"} in g.edges
 
 

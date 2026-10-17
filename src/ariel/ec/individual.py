@@ -1,4 +1,5 @@
 """ARIEL Individual."""
+
 from collections.abc import Hashable, Sequence
 
 from sqlalchemy import JSON, Column
@@ -125,7 +126,9 @@ class Individual(SQLModel, table=True):
             (i.e. ``genotype_`` is ``None``).
         """
         if self.genotype_ is None:
-            raise ValueError(f"genotype accessed before initialization: {self.id=}")
+            raise ValueError(
+                f"genotype accessed before initialization: {self.id=}"
+            )
         return self.genotype_
 
     @genotype.setter

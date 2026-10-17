@@ -36,7 +36,13 @@ class PolicySpec:
 class FastNumpyNetwork:
     """Three-layer MLP with tanh activations for deterministic replay."""
 
-    def __init__(self, input_size: int, hidden_size: int, output_size: int, weights: np.ndarray) -> None:
+    def __init__(
+        self,
+        input_size: int,
+        hidden_size: int,
+        output_size: int,
+        weights: np.ndarray,
+    ) -> None:
         w1_end = hidden_size * input_size
         b1_end = w1_end + hidden_size
 
@@ -47,7 +53,9 @@ class FastNumpyNetwork:
         b3_end = w3_end + output_size
 
         if len(weights) != b3_end:
-            raise ValueError(f"Invalid weight size {len(weights)}, expected {b3_end}")
+            raise ValueError(
+                f"Invalid weight size {len(weights)}, expected {b3_end}"
+            )
 
         self.w1 = weights[0:w1_end].reshape(hidden_size, input_size)
         self.b1 = weights[w1_end:b1_end]
@@ -85,7 +93,9 @@ def resolve_site_id(model: mujoco.MjModel, base_name: str) -> int:
     return -1
 
 
-def get_actuated_joint_ids(model: mujoco.MjModel, count: int = NUM_JOINTS) -> list[int]:
+def get_actuated_joint_ids(
+    model: mujoco.MjModel, count: int = NUM_JOINTS
+) -> list[int]:
     ids: list[int] = []
     for i in range(min(count, model.nu)):
         jid = int(model.actuator_trnid[i, 0])
@@ -94,7 +104,9 @@ def get_actuated_joint_ids(model: mujoco.MjModel, count: int = NUM_JOINTS) -> li
     return ids
 
 
-def get_joint_state(model: mujoco.MjModel, data: mujoco.MjData, joint_ids: list[int]) -> tuple[np.ndarray, np.ndarray]:
+def get_joint_state(
+    model: mujoco.MjModel, data: mujoco.MjData, joint_ids: list[int]
+) -> tuple[np.ndarray, np.ndarray]:
     q = np.zeros(NUM_JOINTS, dtype=np.float64)
     qd = np.zeros(NUM_JOINTS, dtype=np.float64)
 
@@ -107,7 +119,12 @@ def get_joint_state(model: mujoco.MjModel, data: mujoco.MjData, joint_ids: list[
     return q, qd
 
 
-def set_target_position(model: mujoco.MjModel, data: mujoco.MjData, target_site_id: int, target: np.ndarray) -> None:
+def set_target_position(
+    model: mujoco.MjModel,
+    data: mujoco.MjData,
+    target_site_id: int,
+    target: np.ndarray,
+) -> None:
     body_id = int(model.site_bodyid[target_site_id])
 
     # If the site is attached to worldbody, site_pos is already in world coordinates.
@@ -123,7 +140,13 @@ def set_target_position(model: mujoco.MjModel, data: mujoco.MjData, target_site_
     mujoco.mj_forward(model, data)
 
 
-def build_observation(model: mujoco.MjModel, data: mujoco.MjData, joint_ids: list[int], tcp_sid: int, tgt_sid: int) -> np.ndarray:
+def build_observation(
+    model: mujoco.MjModel,
+    data: mujoco.MjData,
+    joint_ids: list[int],
+    tcp_sid: int,
+    tgt_sid: int,
+) -> np.ndarray:
     q, qd = get_joint_state(model, data, joint_ids)
     rel_target = data.site_xpos[tgt_sid] - data.site_xpos[tcp_sid]
     return np.concatenate([q, qd, rel_target]).astype(np.float64)
@@ -149,7 +172,9 @@ def apply_position_delta_control(
     data.ctrl[:NUM_JOINTS] = desired
 
 
-def build_model(tube_lengths: np.ndarray) -> tuple[mujoco.MjModel, mujoco.MjData, int, int, list[int]]:
+def build_model(
+    tube_lengths: np.ndarray,
+) -> tuple[mujoco.MjModel, mujoco.MjData, int, int, list[int]]:
     config: dict[str, Any] = {
         "num_joints": NUM_JOINTS,
         "genotype_tube": [1] * NUM_TUBES,
@@ -173,6 +198,8 @@ def build_model(tube_lengths: np.ndarray) -> tuple[mujoco.MjModel, mujoco.MjData
 
     joint_ids = get_actuated_joint_ids(model)
     if len(joint_ids) < NUM_JOINTS:
-        raise RuntimeError(f"Expected at least {NUM_JOINTS} actuated joints, got {len(joint_ids)}")
+        raise RuntimeError(
+            f"Expected at least {NUM_JOINTS} actuated joints, got {len(joint_ids)}"
+        )
 
     return model, data, tcp_sid, tgt_sid, joint_ids

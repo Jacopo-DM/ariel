@@ -178,7 +178,11 @@ def test_validate_disallowed_face_for_type_raises() -> None:
         },
         "edges": [
             {"parent": 0, "child": 1, "face": "FRONT"},
-            {"parent": 1, "child": 2, "face": "BACK"},  # BACK not allowed on HINGE
+            {
+                "parent": 1,
+                "child": 2,
+                "face": "BACK",
+            },  # BACK not allowed on HINGE
         ],
     }
     with pytest.raises(ValueError, match="not allowed"):

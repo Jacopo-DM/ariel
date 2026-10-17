@@ -37,8 +37,8 @@ class LynxArm:
         c, s = np.cos(yaw), np.sin(yaw)
         R = np.array([
             [c, -s, 0],
-            [s,  c, 0],
-            [0,  0, 1],
+            [s, c, 0],
+            [0, 0, 1],
         ])
         return R @ axis
 
@@ -68,7 +68,7 @@ class LynxArm:
 
         # 2. ITERATIVE CHAIN
         for i in range(num_joints):
-            link_name = f"link_{i+1}"
+            link_name = f"link_{i + 1}"
             link_body = current_parent.add_body(
                 name=link_name,
                 pos=[0, 0, current_z_offset],
@@ -89,7 +89,7 @@ class LynxArm:
             joint_axis = self._rotate_axis_z(base_axis, yaw).tolist()
 
             # Add Joint
-            joint_name = f"joint_{i+1}"
+            joint_name = f"joint_{i + 1}"
             link_body.add_joint(
                 name=joint_name,
                 type=mujoco.mjtJoint.mjJNT_HINGE,
@@ -102,14 +102,14 @@ class LynxArm:
 
             # Add Actuator (PD position control)
             self.spec.add_actuator(
-                name=f"motor_{i+1}",
+                name=f"motor_{i + 1}",
                 trntype=mujoco.mjtTrn.mjTRN_JOINT,
                 target=joint_name,
                 ctrlrange=[-2.8, 2.8],
                 ctrllimited=True,
-                dynprm=[1, 0, 0] + [0]*7,
-                gainprm=[20, 0, 0] + [0]*7,
-                biasprm=[0, -20, 0] + [0]*7,
+                dynprm=[1, 0, 0] + [0] * 7,
+                gainprm=[20, 0, 0] + [0] * 7,
+                biasprm=[0, -20, 0] + [0] * 7,
             )
 
             # Joint visual (motor housing)

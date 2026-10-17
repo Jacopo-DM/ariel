@@ -2,6 +2,7 @@
 
 Functions here check required fields and enforce allowed faces/rotations.
 """
+
 from __future__ import annotations
 
 from typing import Any
@@ -97,7 +98,9 @@ def validate_genome_dict(genome: dict[str, Any]) -> None:
         face = e["face"]
         # face must be valid
         if face not in ModuleFaces.__members__:
-            msg = f"Edge parent={parent} child={child} has invalid face '{face}'"
+            msg = (
+                f"Edge parent={parent} child={child} has invalid face '{face}'"
+            )
             raise ValueError(msg)
         # skip edges whose parent node no longer exists (shouldn't happen
         # normally, but may after swaps); treat as invalid structure rather than
@@ -106,7 +109,11 @@ def validate_genome_dict(genome: dict[str, Any]) -> None:
             msg = f"Edge has missing parent node {parent}"
             raise ValueError(msg)
         # parent type must allow that face
-        ptype = nodes[str(parent)]["type"] if str(parent) in nodes else nodes[parent]["type"]
+        ptype = (
+            nodes[str(parent)]["type"]
+            if str(parent) in nodes
+            else nodes[parent]["type"]
+        )
         allowed = [f.name for f in ALLOWED_FACES[ModuleType[ptype]]]
         if face not in allowed:
             msg = f"Face '{face}' not allowed for parent type '{ptype}'"

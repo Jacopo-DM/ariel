@@ -16,7 +16,7 @@ class Tracker:
         mujoco_obj_to_find: mj.mjtObj | None = None,
         name_to_bind: str | None = None,
         observable_attributes: list[str] | None = None,
-        quiet : bool | None = False,
+        quiet: bool | None = False,
     ) -> None:
         """
         Track and log the state of specified MuJoCo objects.
@@ -43,7 +43,6 @@ class Tracker:
                 msg = "No tracking parameters provided, "
                 msg += "defaulting to tracking all geoms with 'core' in their name."
                 log.info(msg)
-            
 
         # Set default observable attributes
         if observable_attributes is None:

@@ -362,21 +362,19 @@ class EA:
                 )
                 raise ValueError(msg)
 
-            population = Population(
-                [
-                    Individual(
-                        alive=True,
-                        time_of_birth=ind.time_of_birth,
-                        time_of_death=-1,
-                        requires_eval=False,
-                        fitness_=ind.fitness_,
-                        requires_init=ind.requires_init,
-                        genotype_=ind.genotype_,
-                        tags_=dict(ind.tags_),
-                    )
-                    for ind in rows
-                ]
-            )
+            population = Population([
+                Individual(
+                    alive=True,
+                    time_of_birth=ind.time_of_birth,
+                    time_of_death=-1,
+                    requires_eval=False,
+                    fitness_=ind.fitness_,
+                    requires_init=ind.requires_init,
+                    genotype_=ind.genotype_,
+                    tags_=dict(ind.tags_),
+                )
+                for ind in rows
+            ])
             if first_generation_id is None:
                 first_generation_id = restart_gen + 1
 
@@ -600,9 +598,7 @@ class EA:
         """
         # pop[0] must be the *best* individual: highest fitness first when
         # maximising, lowest fitness first when minimising.
-        sort: Literal["asc", "desc"] = (
-            "desc" if self.is_maximisation else "asc"
-        )
+        sort: Literal["asc", "desc"] = "desc" if self.is_maximisation else "asc"
         pop = self._fetch(sort=sort, only_alive=only_alive, requires_eval=False)
 
         match mode:

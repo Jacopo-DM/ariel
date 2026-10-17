@@ -20,11 +20,12 @@ from ariel.simulation.mujoco_worker import EvalConfig, MuJoCoWorkerBase
 
 
 class _Network:
-    def __init__(self,
-                 input_size: int,
-                 hidden_size: int,
-                 output_size: int,
-                 ) -> None:
+    def __init__(
+        self,
+        input_size: int,
+        hidden_size: int,
+        output_size: int,
+    ) -> None:
         self.W1 = torch.randn(hidden_size, input_size)
         self.b1 = torch.zeros(hidden_size)
         self.W2 = torch.randn(output_size, hidden_size)
@@ -43,7 +44,7 @@ def _fill_parameters(net: _Network, params: np.ndarray) -> None:
     for p in net.parameters():
         numel = p.numel()
         p.data = torch.tensor(
-            params[offset: offset + numel], dtype=torch.float32
+            params[offset : offset + numel], dtype=torch.float32
         ).reshape(p.shape)
         offset += numel
 
@@ -51,6 +52,7 @@ def _fill_parameters(net: _Network, params: np.ndarray) -> None:
 # ---------------------------------------------------------------------------
 # Experiment-specific EvalConfig (optional — plain EvalConfig also works)
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class LocomotionConfig(EvalConfig):
@@ -68,6 +70,7 @@ class LocomotionConfig(EvalConfig):
 # ---------------------------------------------------------------------------
 # Worker subclass
 # ---------------------------------------------------------------------------
+
 
 class TargetedLocomotionWorker(MuJoCoWorkerBase):
     """Evaluates a robot on a targeted-locomotion task.
@@ -112,7 +115,11 @@ class TargetedLocomotionWorker(MuJoCoWorkerBase):
                     pos = d.qpos[:3].copy()
                     vec = np.array(target) - pos
                     dist = np.linalg.norm(vec) + 1e-6
-                    state = np.concatenate([d.qpos.copy(), d.qvel.copy(), vec / dist])
+                    state = np.concatenate([
+                        d.qpos.copy(),
+                        d.qvel.copy(),
+                        vec / dist,
+                    ])
                     ctrl = net.forward(torch.tensor(state, dtype=torch.float32))
                     d.ctrl[:] = ctrl.detach().numpy()[: m.nu]
 
@@ -132,6 +139,7 @@ class TargetedLocomotionWorker(MuJoCoWorkerBase):
 # ---------------------------------------------------------------------------
 # How to use it in an evolution loop
 # ---------------------------------------------------------------------------
+
 
 def evaluate_population(
     eval_args: list[tuple[str, EvalConfig]],

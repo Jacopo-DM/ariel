@@ -56,7 +56,9 @@ def test_genotype_setter_empty_keeps_requires_init() -> None:
 def test_genotype_before_init_raises() -> None:
     """Accessing genotype before initialization raises ValueError."""
     ind = Individual()
-    with pytest.raises(ValueError, match="genotype accessed before initialization"):
+    with pytest.raises(
+        ValueError, match="genotype accessed before initialization"
+    ):
         _ = ind.genotype
 
 

@@ -34,7 +34,9 @@ def double_pop(population: Population) -> Population:
     return Population(population.to_list() + population.to_list())
 
 
-def _ea(tmp_path: Path, pop: Population | None = None, ops=None, **kwargs) -> EA:
+def _ea(
+    tmp_path: Path, pop: Population | None = None, ops=None, **kwargs
+) -> EA:
     return EA(
         population=pop or _make_pop(),
         operations=ops or [noop],
@@ -87,6 +89,7 @@ def test_eaoperation_valid_decoration() -> None:
 def test_eaoperation_no_params_raises() -> None:
     """@EAOperation on a zero-parameter function raises TypeError."""
     with pytest.raises(TypeError, match="first argument"):
+
         @EAOperation
         def bad() -> Population:  # no params
             return Population([])
@@ -95,6 +98,7 @@ def test_eaoperation_no_params_raises() -> None:
 def test_eaoperation_wrong_first_param_type_raises() -> None:
     """First parameter not annotated as Population raises TypeError."""
     with pytest.raises(TypeError, match="Population"):
+
         @EAOperation
         def bad(x: int) -> Population:
             return Population([])
@@ -103,6 +107,7 @@ def test_eaoperation_wrong_first_param_type_raises() -> None:
 def test_eaoperation_wrong_return_type_raises() -> None:
     """Return annotation not Population raises TypeError."""
     with pytest.raises(TypeError, match="Population"):
+
         @EAOperation
         def bad(population: Population) -> list:
             return []
@@ -135,6 +140,7 @@ def test_eaoperation_call_result_is_population() -> None:
 
 def test_eaoperation_call_with_kwargs_returns_bound_op() -> None:
     """Calling with kwargs returns a new bound EAOperation (not executing)."""
+
     @EAOperation
     def with_param(population: Population, factor: float = 1.0) -> Population:
         return population
@@ -171,6 +177,7 @@ def test_eaoperation_repr() -> None:
 
 def test_eaoperation_repr_with_kwargs() -> None:
     """__repr__ includes bound kwargs."""
+
     @EAOperation
     def op(population: Population, k: int = 1) -> Population:
         return population
@@ -193,15 +200,23 @@ def test_ea_initializes(tmp_path) -> None:
 def test_ea_no_operations_raises(tmp_path) -> None:
     """EA raises ValueError when operations is None."""
     with pytest.raises(ValueError, match="operations"):
-        EA(population=_make_pop(), operations=None,
-           db_file_path=tmp_path / "db.db", quiet=True)
+        EA(
+            population=_make_pop(),
+            operations=None,
+            db_file_path=tmp_path / "db.db",
+            quiet=True,
+        )
 
 
 def test_ea_no_population_no_restart_raises(tmp_path) -> None:
     """EA raises ValueError when neither population nor restart is given."""
     with pytest.raises(ValueError, match="population"):
-        EA(population=None, operations=[noop],
-           db_file_path=tmp_path / "db.db", quiet=True)
+        EA(
+            population=None,
+            operations=[noop],
+            db_file_path=tmp_path / "db.db",
+            quiet=True,
+        )
 
 
 def test_ea_creates_database_file(tmp_path) -> None:
@@ -216,21 +231,36 @@ def test_ea_db_handling_halt_raises(tmp_path) -> None:
     db = tmp_path / "existing.db"
     db.touch()
     with pytest.raises(FileExistsError):
-        EA(population=_make_pop(), operations=[noop],
-           db_file_path=db, quiet=True, db_handling="halt")
+        EA(
+            population=_make_pop(),
+            operations=[noop],
+            db_file_path=db,
+            quiet=True,
+            db_handling="halt",
+        )
 
 
 def test_ea_db_handling_delete_overwrites(tmp_path) -> None:
     """db_handling='delete' recreates the db without raising."""
     db = tmp_path / "run.db"
-    ea1 = EA(population=_make_pop(), operations=[noop],
-             db_file_path=db, quiet=True, db_handling="delete")
+    ea1 = EA(
+        population=_make_pop(),
+        operations=[noop],
+        db_file_path=db,
+        quiet=True,
+        db_handling="delete",
+    )
     # Explicitly dispose the engine so Windows releases the file lock
     ea1.engine.dispose()
     del ea1
     # Second run on same path — should succeed
-    EA(population=_make_pop(), operations=[noop],
-       db_file_path=db, quiet=True, db_handling="delete")
+    EA(
+        population=_make_pop(),
+        operations=[noop],
+        db_file_path=db,
+        quiet=True,
+        db_handling="delete",
+    )
 
 
 def test_ea_population_stored(tmp_path) -> None:

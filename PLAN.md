@@ -23,7 +23,7 @@ Brownfield. Measured 2026-10-17 after `uv sync --all-groups` (Python 3.12.9, Lin
 | `uv lock --check` | pass | ~2 s |
 | `ruff check --no-fix src tests` | fail: 1858 errors; after T6: 1330 (461 auto-fixable); top: ANN001 331, E501 281, W505 105 | <1 s |
 | `pyright src tests` (added in T7) | fail: 331 errors | 15 s |
-| `ruff format --check src tests` | fail: 51 files would be reformatted, 96 formatted; after T6: 47 and 94 | <1 s |
+| `ruff format --check src tests` | fail: 51 files would be reformatted, 96 formatted; after T6: 47 and 94; after T8: pass (141 files) | <1 s |
 | `mypy src` (strict) | fail: 517 errors in 49 of 102 files; after T4: 262 errors in 44 of 96 files; after T7: 236 in 41 | ~40 s |
 | `pytest tests/unit` | 419 passed, 2 collection errors (before T3); after T3: 437 passed, 0 errors | 6.6 s (3 runs: 6.58, 6.59, 6.60) |
 | coverage, same run | 5033 statements, 2760 missed (about 45% line coverage; `fail_under` is 100) | with `--cov` ~10 s |
@@ -46,7 +46,6 @@ Policy and numbers are in DESIGN.md (Decisions: "Ruff rule policy" and "Lint/typ
 
 **Tier 1: small diff, low risk, tests unchanged**
 
-- **T8. Format-only commit.** `ruff format src tests` on 47 files. Effect: format check goes from 47 files to 0. Risk low (formatter, preview style as now). Verify: pytest unchanged and the diff contains whitespace/wrapping only (`git diff -w` shows no token changes outside wrapping; I check with `python -m tokenize`-level comparison or `ast` equality per file).
 - **T9. Safe auto-fixes.** `ruff check --fix` (safe fixes only) for I001 25, D403 39, D202 15, Q000 15, etc. (about 150 findings under the new config). Risk low-medium: each fix is mechanical, but review the diff before committing. Verify: pytest unchanged, ruff count down by the fixed number.
 
 **Tier 2: clear effect, more files or needs judgement (each its own commit, ordered by effect per cost)**

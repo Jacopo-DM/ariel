@@ -1,4 +1,5 @@
 """Table environment for MjSpec Lynx arm."""
+
 from dataclasses import dataclass
 import mujoco
 
@@ -55,7 +56,11 @@ class TableWorld:
             name="table_top",
             type=mujoco.mjtGeom.mjGEOM_BOX,
             pos=[0, 0, self.table_height + self.table_thickness / 2 + 1e-6],
-            size=[self.table_width / 2, self.table_depth / 2, self.table_thickness / 2],
+            size=[
+                self.table_width / 2,
+                self.table_depth / 2,
+                self.table_thickness / 2,
+            ],
             rgba=[0.95, 0.88, 0.7, 1],
             friction=[0.7, 0.1, 0.1],
             contype=1,
@@ -64,10 +69,22 @@ class TableWorld:
 
         # Table legs (4 corners)
         leg_positions = [
-            [self.table_width / 2 - self.leg_width / 2, self.table_depth / 2 - self.leg_width / 2],
-            [-self.table_width / 2 + self.leg_width / 2, self.table_depth / 2 - self.leg_width / 2],
-            [self.table_width / 2 - self.leg_width / 2, -self.table_depth / 2 + self.leg_width / 2],
-            [-self.table_width / 2 + self.leg_width / 2, -self.table_depth / 2 + self.leg_width / 2],
+            [
+                self.table_width / 2 - self.leg_width / 2,
+                self.table_depth / 2 - self.leg_width / 2,
+            ],
+            [
+                -self.table_width / 2 + self.leg_width / 2,
+                self.table_depth / 2 - self.leg_width / 2,
+            ],
+            [
+                self.table_width / 2 - self.leg_width / 2,
+                -self.table_depth / 2 + self.leg_width / 2,
+            ],
+            [
+                -self.table_width / 2 + self.leg_width / 2,
+                -self.table_depth / 2 + self.leg_width / 2,
+            ],
         ]
 
         for i, (x, y) in enumerate(leg_positions):
@@ -75,7 +92,11 @@ class TableWorld:
                 name=f"table_leg_{i + 1}",
                 type=mujoco.mjtGeom.mjGEOM_BOX,
                 pos=[x, y, self.table_height / 2],
-                size=[self.leg_width / 2, self.leg_width / 2, self.table_height / 2],
+                size=[
+                    self.leg_width / 2,
+                    self.leg_width / 2,
+                    self.table_height / 2,
+                ],
                 rgba=[0.3, 0.3, 0.3, 1],
                 friction=[0.7, 0.1, 0.1],
                 contype=1,

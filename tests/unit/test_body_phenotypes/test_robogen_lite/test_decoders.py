@@ -11,8 +11,12 @@ from ariel.body_phenotypes.robogen_lite.config import (
     ModuleRotationsIdx,
     ModuleType,
 )
-from ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding import HighProbabilityDecoder
-from ariel.body_phenotypes.robogen_lite.decoders.vector_decoding import VectorDecoder
+from ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding import (
+    HighProbabilityDecoder,
+)
+from ariel.body_phenotypes.robogen_lite.decoders.vector_decoding import (
+    VectorDecoder,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -61,7 +65,9 @@ def test_hi_prob_decoder_returns_digraph() -> None:
     """probability_matrices_to_graph returns a NetworkX DiGraph."""
     decoder = HighProbabilityDecoder(num_modules=NUM_MODULES)
     graph = decoder.probability_matrices_to_graph(
-        _type_space(), _conn_space(), _rot_space(),
+        _type_space(),
+        _conn_space(),
+        _rot_space(),
     )
     assert isinstance(graph, DiGraph)
 
@@ -70,7 +76,9 @@ def test_hi_prob_decoder_core_always_present() -> None:
     """The core node (index 0) always appears in the decoded graph."""
     decoder = HighProbabilityDecoder(num_modules=NUM_MODULES)
     graph = decoder.probability_matrices_to_graph(
-        _type_space(), _conn_space(), _rot_space(),
+        _type_space(),
+        _conn_space(),
+        _rot_space(),
     )
     assert 0 in graph.nodes
 
@@ -79,7 +87,9 @@ def test_hi_prob_decoder_core_type_correct() -> None:
     """The core node carries type='CORE'."""
     decoder = HighProbabilityDecoder(num_modules=NUM_MODULES)
     graph = decoder.probability_matrices_to_graph(
-        _type_space(), _conn_space(), _rot_space(),
+        _type_space(),
+        _conn_space(),
+        _rot_space(),
     )
     assert graph.nodes[0]["type"] == "CORE"
 
@@ -88,7 +98,9 @@ def test_hi_prob_decoder_nodes_have_rotation() -> None:
     """Every node carries a 'rotation' attribute."""
     decoder = HighProbabilityDecoder(num_modules=NUM_MODULES)
     graph = decoder.probability_matrices_to_graph(
-        _type_space(), _conn_space(), _rot_space(),
+        _type_space(),
+        _conn_space(),
+        _rot_space(),
     )
     for node in graph.nodes:
         assert "rotation" in graph.nodes[node]
@@ -98,7 +110,9 @@ def test_hi_prob_decoder_no_self_loops() -> None:
     """The decoded graph has no self-loops."""
     decoder = HighProbabilityDecoder(num_modules=NUM_MODULES)
     graph = decoder.probability_matrices_to_graph(
-        _type_space(), _conn_space(), _rot_space(),
+        _type_space(),
+        _conn_space(),
+        _rot_space(),
     )
     assert not any(u == v for u, v in graph.edges)
 
@@ -106,9 +120,13 @@ def test_hi_prob_decoder_no_self_loops() -> None:
 def test_hi_prob_decoder_zero_conn_stops_gracefully() -> None:
     """All-zero connection space produces a graph with at least the core."""
     decoder = HighProbabilityDecoder(num_modules=NUM_MODULES)
-    zero_conn = np.zeros((NUM_MODULES, NUM_MODULES, NUM_OF_FACES), dtype=np.float32)
+    zero_conn = np.zeros(
+        (NUM_MODULES, NUM_MODULES, NUM_OF_FACES), dtype=np.float32
+    )
     graph = decoder.probability_matrices_to_graph(
-        _type_space(), zero_conn, _rot_space(),
+        _type_space(),
+        zero_conn,
+        _rot_space(),
     )
     assert 0 in graph.nodes
 
@@ -299,9 +317,13 @@ def test_assign_symbols_with_weights() -> None:
     decoder = VectorDecoder(num_modules=NUM_MODULES)
     vector = [0.3, 0.7]
     symbols = ["X", "Y", "Z"]
-    result_no_weight = decoder.assign_symbols_from_range(vector=vector, symbols=symbols)
+    result_no_weight = decoder.assign_symbols_from_range(
+        vector=vector, symbols=symbols
+    )
     result_uniform = decoder.assign_symbols_from_range(
-        vector=vector, symbols=symbols, weight=[1.0, 1.0, 1.0],
+        vector=vector,
+        symbols=symbols,
+        weight=[1.0, 1.0, 1.0],
     )
     assert result_no_weight == result_uniform
 
@@ -310,7 +332,9 @@ def test_assign_symbols_numpy_input() -> None:
     """assign_symbols_from_range accepts numpy arrays as vector input."""
     decoder = VectorDecoder(num_modules=NUM_MODULES)
     vector = np.array([0.1, 0.5, 0.9])
-    result = decoder.assign_symbols_from_range(vector=vector, symbols=["A", "B", "C"])
+    result = decoder.assign_symbols_from_range(
+        vector=vector, symbols=["A", "B", "C"]
+    )
     assert len(result) == 3
 
 
@@ -410,7 +434,9 @@ def test_vector_decoder_decode_populates_edges() -> None:
 def test_vector_decoder_decode_zero_conn_only_core() -> None:
     """All-zero connection space after constraints leaves only the core."""
     decoder = VectorDecoder(num_modules=NUM_MODULES)
-    decoder.conn_p_space = np.zeros((NUM_MODULES, NUM_MODULES, NUM_OF_FACES), dtype=np.float32)
+    decoder.conn_p_space = np.zeros(
+        (NUM_MODULES, NUM_MODULES, NUM_OF_FACES), dtype=np.float32
+    )
     decoder.rot_p_space = _rot_space()
     decoder.type_p_space = _type_space()
     decoder.set_module_types_and_rotations()

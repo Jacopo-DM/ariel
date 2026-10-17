@@ -25,12 +25,20 @@ from ariel.body_phenotypes.lynx_mjspec.unified_pipeline.common import (
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Unified Lynx replay pipeline")
-    parser.add_argument("--artifact-dir", type=str, default="__data__/lynx_mjspec/unified")
+    parser.add_argument(
+        "--artifact-dir", type=str, default="__data__/lynx_mjspec/unified"
+    )
     parser.add_argument("--sim-steps", type=int, default=DEFAULT_SIM_STEPS)
     parser.add_argument("--ctrl-freq", type=int, default=DEFAULT_CTRL_FREQ)
-    parser.add_argument("--target-x", type=float, default=float(DEFAULT_TARGET[0]))
-    parser.add_argument("--target-y", type=float, default=float(DEFAULT_TARGET[1]))
-    parser.add_argument("--target-z", type=float, default=float(DEFAULT_TARGET[2]))
+    parser.add_argument(
+        "--target-x", type=float, default=float(DEFAULT_TARGET[0])
+    )
+    parser.add_argument(
+        "--target-y", type=float, default=float(DEFAULT_TARGET[1])
+    )
+    parser.add_argument(
+        "--target-z", type=float, default=float(DEFAULT_TARGET[2])
+    )
     parser.add_argument("--eval-only", action="store_true")
     return parser.parse_args()
 
@@ -39,14 +47,22 @@ def resolve_artifact_dir(artifact_dir: Path) -> Path:
     if (artifact_dir / "metadata.json").exists():
         return artifact_dir
 
-    run_dirs = [path for path in artifact_dir.iterdir() if path.is_dir() and (path / "metadata.json").exists()]
+    run_dirs = [
+        path
+        for path in artifact_dir.iterdir()
+        if path.is_dir() and (path / "metadata.json").exists()
+    ]
     if not run_dirs:
-        raise FileNotFoundError(f"No run directory with metadata.json found under: {artifact_dir}")
+        raise FileNotFoundError(
+            f"No run directory with metadata.json found under: {artifact_dir}"
+        )
 
     return max(run_dirs, key=lambda path: path.stat().st_mtime)
 
 
-def load_artifacts(artifact_dir: Path) -> tuple[np.ndarray, np.ndarray, PolicySpec, dict[str, object]]:
+def load_artifacts(
+    artifact_dir: Path,
+) -> tuple[np.ndarray, np.ndarray, PolicySpec, dict[str, object]]:
     artifact_dir = resolve_artifact_dir(artifact_dir)
 
     metadata_path = artifact_dir / "metadata.json"
@@ -60,7 +76,9 @@ def load_artifacts(artifact_dir: Path) -> tuple[np.ndarray, np.ndarray, PolicySp
         input_size=int(policy_dict.get("input_size", PolicySpec.input_size)),
         hidden_size=int(policy_dict.get("hidden_size", PolicySpec.hidden_size)),
         output_size=int(policy_dict.get("output_size", PolicySpec.output_size)),
-        action_scale=float(policy_dict.get("action_scale", PolicySpec.action_scale)),
+        action_scale=float(
+            policy_dict.get("action_scale", PolicySpec.action_scale)
+        ),
         max_delta=float(policy_dict.get("max_delta", PolicySpec.max_delta)),
     )
 
@@ -84,7 +102,9 @@ def run_rollout(
 ) -> tuple[float, float, float, float | None]:
     set_target_position(model, data, tgt_sid, target)
 
-    initial_distance = float(np.linalg.norm(data.site_xpos[tcp_sid] - data.site_xpos[tgt_sid]))
+    initial_distance = float(
+        np.linalg.norm(data.site_xpos[tcp_sid] - data.site_xpos[tgt_sid])
+    )
     min_distance = initial_distance
     final_distance = initial_distance
     first_touch_time: float | None = None
@@ -110,7 +130,9 @@ def run_rollout(
 
         mujoco.mj_step(model, data)
 
-        d = float(np.linalg.norm(data.site_xpos[tcp_sid] - data.site_xpos[tgt_sid]))
+        d = float(
+            np.linalg.norm(data.site_xpos[tcp_sid] - data.site_xpos[tgt_sid])
+        )
         final_distance = d
         min_distance = min(min_distance, d)
         if first_touch_time is None and d <= touch_threshold:
@@ -127,9 +149,15 @@ def main() -> None:
     artifact_dir = Path(args.artifact_dir)
     tubes, brain, policy, metadata = load_artifacts(artifact_dir)
 
-    default_target = np.array(metadata.get("target", DEFAULT_TARGET.tolist()), dtype=np.float64)
-    touch_threshold = float(metadata.get("touch_threshold", DEFAULT_TOUCH_THRESHOLD))
-    target = np.array([args.target_x, args.target_y, args.target_z], dtype=np.float64)
+    default_target = np.array(
+        metadata.get("target", DEFAULT_TARGET.tolist()), dtype=np.float64
+    )
+    touch_threshold = float(
+        metadata.get("touch_threshold", DEFAULT_TOUCH_THRESHOLD)
+    )
+    target = np.array(
+        [args.target_x, args.target_y, args.target_z], dtype=np.float64
+    )
     if np.allclose(target, DEFAULT_TARGET):
         target = default_target
 
@@ -173,7 +201,9 @@ def main() -> None:
         locked_ctrl = np.zeros(model.nu, dtype=np.float64)
         while viewer.is_running():
             if step % int(args.ctrl_freq) == 0 and not controls_locked:
-                obs = build_observation(model, data, joint_ids, tcp_sid, tgt_sid)
+                obs = build_observation(
+                    model, data, joint_ids, tcp_sid, tgt_sid
+                )
                 action = net.forward(obs)
                 apply_position_delta_control(
                     model=model,
@@ -188,7 +218,11 @@ def main() -> None:
             if controls_locked:
                 data.ctrl[:] = locked_ctrl
 
-            d = float(np.linalg.norm(data.site_xpos[tcp_sid] - data.site_xpos[tgt_sid]))
+            d = float(
+                np.linalg.norm(
+                    data.site_xpos[tcp_sid] - data.site_xpos[tgt_sid]
+                )
+            )
             if not controls_locked and d <= touch_threshold:
                 controls_locked = True
                 locked_ctrl[:] = data.ctrl[:]

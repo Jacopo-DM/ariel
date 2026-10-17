@@ -96,7 +96,9 @@ def test_integer_mutator_random_reset_prob_zero_unchanged() -> None:
 def test_integer_mutator_creep_same_length() -> None:
     """integer_creep returns a list of the same length."""
     individual = [1, 2, 3]
-    result = IntegerMutator.integer_creep(individual, span=2, mutation_probability=1.0)
+    result = IntegerMutator.integer_creep(
+        individual, span=2, mutation_probability=1.0
+    )
     assert len(result) == len(individual)
 
 
@@ -129,7 +131,9 @@ def test_integer_mutator_scramble_same_elements() -> None:
 def test_float_mutator_gaussian_same_length() -> None:
     """gaussian mutation returns a list of the same length."""
     individual = [0.1, 0.2, 0.3]
-    result = FloatMutator.gaussian(individual, std=0.01, mutation_probability=0.5)
+    result = FloatMutator.gaussian(
+        individual, std=0.01, mutation_probability=0.5
+    )
     assert len(result) == len(individual)
 
 
@@ -137,8 +141,11 @@ def test_float_mutator_gaussian_respects_bounds() -> None:
     """gaussian mutation with bounds clips results."""
     individual = [0.5] * 20
     result = FloatMutator.gaussian(
-        individual, std=100.0, mutation_probability=1.0,
-        lower_bound=0.0, upper_bound=1.0,
+        individual,
+        std=100.0,
+        mutation_probability=1.0,
+        lower_bound=0.0,
+        upper_bound=1.0,
     )
     assert all(0.0 <= v <= 1.0 for v in result)
 
@@ -160,14 +167,20 @@ def test_float_mutator_uniform_reset_prob_zero_unchanged() -> None:
 def test_float_mutator_boundary_only_extremes() -> None:
     """boundary mutation replaces genes with either low or high."""
     individual = [0.5] * 20
-    result = FloatMutator.boundary(individual, low=0.0, high=1.0, mutation_probability=1.0)
-    assert all(v == pytest.approx(0.0) or v == pytest.approx(1.0) for v in result)
+    result = FloatMutator.boundary(
+        individual, low=0.0, high=1.0, mutation_probability=1.0
+    )
+    assert all(
+        v == pytest.approx(0.0) or v == pytest.approx(1.0) for v in result
+    )
 
 
 def test_float_mutator_polynomial_within_bounds() -> None:
     """polynomial mutation keeps all genes within [low, high]."""
     individual = [0.5] * 10
-    result = FloatMutator.polynomial(individual, low=0.0, high=1.0, mutation_probability=1.0)
+    result = FloatMutator.polynomial(
+        individual, low=0.0, high=1.0, mutation_probability=1.0
+    )
     assert all(0.0 <= v <= 1.0 for v in result)
 
 

@@ -101,7 +101,9 @@ class MorphologicalMeasures:  # noqa: PLR0904
         self.filled_bricks = self._calculate_filled_bricks()
         self.filled_active_hinges = self._calculate_filled_active_hinges()
         self.single_neighbour_bricks = self._calculate_single_neighbour_bricks()
-        self.single_neighbour_modules = self._calculate_single_neighbour_modules()
+        self.single_neighbour_modules = (
+            self._calculate_single_neighbour_modules()
+        )
         self.double_neighbour_bricks = self._calculate_double_neighbour_bricks()
         self.double_neighbour_active_hinges = (
             self._calculate_double_neighbour_active_hinges()
@@ -124,7 +126,8 @@ class MorphologicalMeasures:  # noqa: PLR0904
 
     def _get_nodes_by_type(self, module_type: str) -> list:
         return [
-            n for n in self.graph.nodes()
+            n
+            for n in self.graph.nodes()
             if self.graph.nodes[n].get("type") == module_type
         ]
 
@@ -160,7 +163,8 @@ class MorphologicalMeasures:  # noqa: PLR0904
         return self.graph.in_degree(node) + self.graph.out_degree(node)
 
     def _graph_to_grid(
-        self, robot_graph: nx.DiGraph,
+        self,
+        robot_graph: nx.DiGraph,
     ) -> tuple[NDArray, np.ndarray]:
         if robot_graph.number_of_nodes() == 0:
             msg = "Cannot convert empty robot graph to grid"
@@ -168,7 +172,9 @@ class MorphologicalMeasures:  # noqa: PLR0904
 
         positions: dict[Any, np.ndarray] = {}
         core_node = self._find_core_node()
-        self._calculate_graph_positions(core_node, positions, np.array([0, 0, 0]))
+        self._calculate_graph_positions(
+            core_node, positions, np.array([0, 0, 0])
+        )
 
         if not positions:
             positions[core_node] = np.array([0, 0, 0])
@@ -183,15 +189,18 @@ class MorphologicalMeasures:  # noqa: PLR0904
         return grid, positions[core_node] - min_pos
 
     def _calculate_graph_positions(
-        self, node: Any, positions: dict, pos: np.ndarray,
+        self,
+        node: Any,
+        positions: dict,
+        pos: np.ndarray,
     ) -> None:
         positions[node] = pos.copy()
         face_directions = {
-            "FRONT":  np.array([1, 0, 0]),
-            "BACK":   np.array([-1, 0, 0]),
-            "RIGHT":  np.array([0, 1, 0]),
-            "LEFT":   np.array([0, -1, 0]),
-            "TOP":    np.array([0, 0, 1]),
+            "FRONT": np.array([1, 0, 0]),
+            "BACK": np.array([-1, 0, 0]),
+            "RIGHT": np.array([0, 1, 0]),
+            "LEFT": np.array([0, -1, 0]),
+            "TOP": np.array([0, 0, 1]),
             "BOTTOM": np.array([0, 0, -1]),
         }
         for child in self.graph.successors(node):
@@ -208,14 +217,18 @@ class MorphologicalMeasures:  # noqa: PLR0904
 
     def _calculate_filled_bricks(self) -> list:
         return [
-            b for b in self.bricks
-            if len(self._get_node_connections(b)) == len(self._get_allowed_faces(b))
+            b
+            for b in self.bricks
+            if len(self._get_node_connections(b))
+            == len(self._get_allowed_faces(b))
         ]
 
     def _calculate_filled_active_hinges(self) -> list:
         return [
-            h for h in self.active_hinges
-            if len(self._get_node_connections(h)) == len(self._get_allowed_faces(h))
+            h
+            for h in self.active_hinges
+            if len(self._get_node_connections(h))
+            == len(self._get_allowed_faces(h))
         ]
 
     def _calculate_single_neighbour_bricks(self) -> list:
@@ -223,8 +236,10 @@ class MorphologicalMeasures:  # noqa: PLR0904
 
     def _calculate_single_neighbour_modules(self) -> list:
         return [
-            n for n in self.modules
-            if self._get_node_type(n) != "CORE" and self._count_neighbors(n) == 1
+            n
+            for n in self.modules
+            if self._get_node_type(n) != "CORE"
+            and self._count_neighbors(n) == 1
         ]
 
     def _calculate_double_neighbour_bricks(self) -> list:
@@ -236,10 +251,11 @@ class MorphologicalMeasures:  # noqa: PLR0904
     def _pad_grid(self) -> None:
         x, y, z = self.grid.shape
         xo, yo, zo = self.core_grid_position
-        self.symmetry_grid = np.full((x + xo, y + yo, z + zo),
-                                     None,
-                                     dtype=object,
-                                     )
+        self.symmetry_grid = np.full(
+            (x + xo, y + yo, z + zo),
+            None,
+            dtype=object,
+        )
         self.symmetry_grid[:x, :y, :z] = self.grid
 
     def _calculate_xy_symmetry(self) -> float:
@@ -338,10 +354,11 @@ class MorphologicalMeasures:  # noqa: PLR0904
         -------
         int
         """
-        return (self.bounding_box_depth *
-                self.bounding_box_width *
-                self.bounding_box_height
-                )
+        return (
+            self.bounding_box_depth
+            * self.bounding_box_width
+            * self.bounding_box_height
+        )
 
     # ------------------------------------------------------------------
     # Raw counts
@@ -527,7 +544,8 @@ class MorphologicalMeasures:  # noqa: PLR0904
         if self.potential_double_neighbour_bricks_and_active_hinges == 0:
             return 0.0
         return (
-            self.num_double_neighbour_bricks + self.num_double_neighbour_active_hinges
+            self.num_double_neighbour_bricks
+            + self.num_double_neighbour_active_hinges
         ) / self.potential_double_neighbour_bricks_and_active_hinges
 
     @property
@@ -563,7 +581,8 @@ class MorphologicalMeasures:  # noqa: PLR0904
         if self.max_potential_single_neighbour_modules == 0:
             return 0.0
         return (
-            self.num_single_neighbour_modules / self.max_potential_single_neighbour_modules
+            self.num_single_neighbour_modules
+            / self.max_potential_single_neighbour_modules
         )
 
     @property
@@ -596,7 +615,8 @@ class MorphologicalMeasures:  # noqa: PLR0904
             min(depth, width) / max(depth, width), in (0, 1].
         """
         return min(self.bounding_box_depth, self.bounding_box_width) / max(
-            self.bounding_box_depth, self.bounding_box_width,
+            self.bounding_box_depth,
+            self.bounding_box_width,
         )
 
     @property

@@ -3,6 +3,7 @@
 This module provides a simple JSON-serializable tree genome that converts
 to a NetworkX DiGraph compatible with `construct_mjspec_from_graph`.
 """
+
 from __future__ import annotations
 
 import typing
@@ -29,7 +30,10 @@ class TreeGenome:
         return g
 
     def to_dict(self) -> Dict[str, typing.Any]:
-        return {"nodes": {str(k): v for k, v in self.nodes.items()}, "edges": self.edges}
+        return {
+            "nodes": {str(k): v for k, v in self.nodes.items()},
+            "edges": self.edges,
+        }
 
     @classmethod
     def from_dict(cls, data: Dict[str, typing.Any]) -> "TreeGenome":
@@ -42,7 +46,10 @@ class TreeGenome:
         elif isinstance(nodes_raw, list):
             for entry in nodes_raw:
                 nid = int(entry["id"])
-                nodes[nid] = {"type": entry["type"], "rotation": entry["rotation"]}
+                nodes[nid] = {
+                    "type": entry["type"],
+                    "rotation": entry["rotation"],
+                }
         edges = data.get("edges", [])
         return cls(nodes=nodes, edges=edges)
 

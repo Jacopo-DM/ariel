@@ -376,7 +376,8 @@ class IntegerMutator:
         )
         mask: NDArray[np.bool_] = _rng.random(shape) < mutation_probability
         return cast(
-            "Integers", np.where(mask, replacement, arr).astype(int).tolist(),
+            "Integers",
+            np.where(mask, replacement, arr).astype(int).tolist(),
         )
 
     @staticmethod
@@ -525,7 +526,8 @@ class IntegerMutator:
             np.array(segment)
         )  # shuffle produces NDArray; re-assign below
         shuffled: list[int] = cast(
-            "list[int]", _rng.permutation(segment).tolist(),
+            "list[int]",
+            _rng.permutation(segment).tolist(),
         )
         arr[lo:hi] = shuffled
         return arr

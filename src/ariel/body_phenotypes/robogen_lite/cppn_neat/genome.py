@@ -195,7 +195,9 @@ class Genome:
         )
         self.add_connection(conn2)
 
-    def crossover(self, other: "Genome", is_maximisation: bool=True) -> "Genome":
+    def crossover(
+        self, other: "Genome", is_maximisation: bool = True
+    ) -> "Genome":
         """
         Creates a new offspring Genome by crossing over this Genome (parent A)
         and another Genome (parent B).

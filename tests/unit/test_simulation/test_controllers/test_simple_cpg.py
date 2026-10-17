@@ -125,7 +125,6 @@ def test_simplecpg_forward_no_nan() -> None:
         assert not torch.isnan(output).any()
 
 
-
 def test_simplecpg_forward_with_angle_tracking() -> None:
     """angle_tracking=True appends to angle_history."""
     cpg = SimpleCPG(_adj(3), angle_tracking=True, seed=0)

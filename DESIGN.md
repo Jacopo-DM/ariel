@@ -51,6 +51,7 @@ Stack and architecture as found in the repo. Reasons are not recorded unless sta
 | 2026-10-17 | T5 drop `panel`, `plotly`, `nicegui`, `kaleido`, `pyvista` | dashboards-out | `uv.lock` 481 -> 437 packages (-1058 lines); `.venv` 9.3 GB -> 8.4 GB; `uv sync` 1.2 s; pytest 437 passed, mypy 262 errors (both unchanged by T5) |
 | 2026-10-17 | T6 placeholder docstrings | repo-hygiene | 18 files (not 17: counted again after T4) had `TODO(...): description of script`; now 0. One real TODO stays (`utils/morphological_descriptor.py:664`). ruff findings 1330 -> 1330 (the Baseline count of 1858 included files since removed); pytest 437 passed |
 | 2026-10-17 | T7 configs and dev dependencies | lint-types-policy | ruff 1330 -> 976 findings, mypy 262 -> 236 errors, format 47 files (unchanged), pytest 437 passed. Added dev deps `pre-commit` 4.7.0, `pydoclint` 0.11.1, `pyright` 1.1.414 and pinned `ruff==0.14.*`. Pyright baseline: 331 errors on `src tests`, 15 s (first run downloaded 229 MB into `~/.cache/pyright-python`) |
+| 2026-10-17 | T8 `ruff format src tests` | lint-types-policy | format check: 47 files -> 0; ruff findings 976 -> 809 (line wrapping fixed some E501); pytest 437 passed. AST identical in all `.py` files except two docstrings with trailing whitespace removed (`tree/operators.py`, `utils/runners.py`); 5 notebooks in `tests/functional/` were reformatted too (cell source only, not run) |
 
 ## Gotchas
 

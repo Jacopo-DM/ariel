@@ -3,7 +3,9 @@
 import mujoco
 import networkx as nx
 
-from ariel.body_phenotypes.robogen_lite.constructor import construct_mjspec_from_graph
+from ariel.body_phenotypes.robogen_lite.constructor import (
+    construct_mjspec_from_graph,
+)
 from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
 
 

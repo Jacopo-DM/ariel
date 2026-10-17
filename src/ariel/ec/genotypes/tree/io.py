@@ -1,4 +1,5 @@
 """I/O helpers for tree genomes (JSON load/save and networkx conversion)."""
+
 from __future__ import annotations
 
 from typing import Any

@@ -306,14 +306,18 @@ def test_tournament_population_size(archive) -> None:
 
 def test_tournament_population_min_winners_are_low_fitness(archive) -> None:
     """In min mode, tournament winners have low fitness."""
-    pop = archive.tournament_population(n=5, tournament_size=3, fitness_mode="min")
+    pop = archive.tournament_population(
+        n=5, tournament_size=3, fitness_mode="min"
+    )
     for ind in pop:
         assert ind.fitness_ <= 19.0
 
 
 def test_tournament_population_max_mode(archive) -> None:
     """In max mode, tournament winners have high fitness."""
-    pop = archive.tournament_population(n=5, tournament_size=3, fitness_mode="max")
+    pop = archive.tournament_population(
+        n=5, tournament_size=3, fitness_mode="max"
+    )
     for ind in pop:
         assert ind.fitness_ >= 0.0
 
@@ -321,7 +325,9 @@ def test_tournament_population_max_mode(archive) -> None:
 def test_tournament_size_exceeds_pool_raises(archive) -> None:
     """tournament_size larger than the pool raises AssertionError."""
     with pytest.raises(AssertionError, match="tournament_size"):
-        archive.tournament_population(n=1, tournament_size=9999, pool_multiplier=1)
+        archive.tournament_population(
+            n=1, tournament_size=9999, pool_multiplier=1
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -370,8 +376,11 @@ def test_fitness_percentile_in_band(archive) -> None:
     if len(pop) == 0:
         return
     fitnesses = [ind.fitness_ for ind in pop]
-    all_fitnesses = [ind.fitness_ for ind in archive._fetch_all(archive._base_query())]
+    all_fitnesses = [
+        ind.fitness_ for ind in archive._fetch_all(archive._base_query())
+    ]
     import numpy as np
+
     lo = float(np.percentile(all_fitnesses, 0.0))
     hi = float(np.percentile(all_fitnesses, 50.0))
     for f in fitnesses:
@@ -386,5 +395,7 @@ def test_fitness_percentile_with_n_sampling(archive) -> None:
 
 def test_fitness_percentile_impossible_birth_range_empty(archive) -> None:
     """Impossible birth_range returns an empty population."""
-    pop = archive.fitness_percentile_population(0.0, 100.0, birth_range=(9999, 9999))
+    pop = archive.fitness_percentile_population(
+        0.0, 100.0, birth_range=(9999, 9999)
+    )
     assert len(pop) == 0

@@ -3,7 +3,11 @@
 import numpy as np
 import pytest
 
-from ariel.simulation.tasks.gait_learning import x_speed, xy_displacement, y_speed
+from ariel.simulation.tasks.gait_learning import (
+    x_speed,
+    xy_displacement,
+    y_speed,
+)
 from ariel.simulation.tasks.targeted_locomotion import (
     distance_to_target,
     fitness_delta_distance,
@@ -96,7 +100,9 @@ def test_fitness_distance_and_efficiency_adds_effort_penalty() -> None:
     final = np.array([0.0, 0.0, 0.0])
     target = np.array([0.0, 0.0, 0.0])
     delta = fitness_delta_distance(initial, final, target)
-    with_effort = fitness_distance_and_efficiency(initial, final, target, total_control_effort=1000.0)
+    with_effort = fitness_distance_and_efficiency(
+        initial, final, target, total_control_effort=1000.0
+    )
     assert with_effort > delta
 
 
@@ -105,7 +111,9 @@ def test_fitness_survival_penalty_when_too_low() -> None:
     initial = np.array([0.0, 0.0, 0.0])
     final = np.array([1.0, 0.0, 0.0])
     target = np.array([5.0, 0.0, 0.0])
-    result = fitness_survival_and_locomotion(initial, final, target, min_z_height=0.01)
+    result = fitness_survival_and_locomotion(
+        initial, final, target, min_z_height=0.01
+    )
     assert result == pytest.approx(10.0)
 
 
@@ -114,20 +122,26 @@ def test_fitness_survival_normal_when_above_threshold() -> None:
     initial = np.array([5.0, 0.0, 0.0])
     final = np.array([0.0, 0.0, 0.0])
     target = np.array([0.0, 0.0, 0.0])
-    result = fitness_survival_and_locomotion(initial, final, target, min_z_height=0.1)
+    result = fitness_survival_and_locomotion(
+        initial, final, target, min_z_height=0.1
+    )
     expected = fitness_delta_distance(initial, final, target)
     assert result == pytest.approx(expected)
 
 
 def test_fitness_speed_to_target_reached() -> None:
     """fitness_speed_to_target returns value in [0, 1] when target reached."""
-    result = fitness_speed_to_target(time_to_target=5.0, duration=10.0, min_distance_to_target=0.0)
+    result = fitness_speed_to_target(
+        time_to_target=5.0, duration=10.0, min_distance_to_target=0.0
+    )
     assert 0.0 <= result <= 1.0
 
 
 def test_fitness_speed_to_target_not_reached() -> None:
     """fitness_speed_to_target returns > 1 when target was not reached."""
-    result = fitness_speed_to_target(time_to_target=None, duration=10.0, min_distance_to_target=2.0)
+    result = fitness_speed_to_target(
+        time_to_target=None, duration=10.0, min_distance_to_target=2.0
+    )
     assert result > 1.0
 
 
@@ -137,8 +151,12 @@ def test_fitness_direct_path_penalty_for_wasted_movement() -> None:
     final = np.array([5.0, 0.0, 0.0])
     target = np.array([5.0, 0.0, 0.0])
     # Large wasted movement should push score up (worse)
-    score_long = fitness_direct_path(initial, final, target, total_path_length=100.0)
-    score_short = fitness_direct_path(initial, final, target, total_path_length=5.0)
+    score_long = fitness_direct_path(
+        initial, final, target, total_path_length=100.0
+    )
+    score_short = fitness_direct_path(
+        initial, final, target, total_path_length=5.0
+    )
     assert score_long > score_short
 
 

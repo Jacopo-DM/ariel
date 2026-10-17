@@ -419,7 +419,8 @@ class Archive:
         hi_val = float(np.percentile(fitnesses, hi_pct))
 
         band = [
-            ind for ind in all_inds
+            ind
+            for ind in all_inds
             if ind.fitness_ is not None and lo_val <= ind.fitness_ <= hi_val
         ]
         if n is not None:

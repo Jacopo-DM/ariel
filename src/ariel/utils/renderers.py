@@ -247,14 +247,17 @@ def tracking_video_renderer(
         geom_to_track,
     )
     if core_body_id == -1:
-        msg = f"Body '{geom_to_track}' not found — scanning for any 'core' body."
+        msg = (
+            f"Body '{geom_to_track}' not found — scanning for any 'core' body."
+        )
         log.warning(msg)
         core_body_id = next(
             (
                 i
                 for i in range(model.nbody)
                 if (mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, i) or "")
-                and "core" in (mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, i) or "")
+                and "core"
+                in (mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, i) or "")
             ),
             None,
         )

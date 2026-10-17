@@ -37,16 +37,18 @@ def random_spider20(seed: int = 1337) -> CoreModule:
     ]
 
     # Queue of still-available attachment sites: (parent_module, parent_face)
-    open_sites: list[tuple[CoreModule | HingeModule | BrickModule, ModuleFaces]] = [
-        (core, face) for face in seed_faces if face in core.sites
-    ]
+    open_sites: list[
+        tuple[CoreModule | HingeModule | BrickModule, ModuleFaces]
+    ] = [(core, face) for face in seed_faces if face in core.sites]
 
     hinge_rotations = [0, 45, 90]
 
     # Create 19 submodules so total modules (including core) is exactly 20.
     for idx in range(1, 20):
         if not open_sites:
-            raise RuntimeError("No open attachment sites remain while building random_spider20")
+            raise RuntimeError(
+                "No open attachment sites remain while building random_spider20"
+            )
 
         site_idx = rng.randrange(len(open_sites))
         parent, attach_face = open_sites.pop(site_idx)

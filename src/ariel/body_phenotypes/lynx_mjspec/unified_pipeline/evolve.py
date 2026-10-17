@@ -39,28 +39,51 @@ def make_run_name() -> str:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Unified Lynx evolution pipeline")
+    parser = argparse.ArgumentParser(
+        description="Unified Lynx evolution pipeline"
+    )
     parser.add_argument("--generations", type=int, default=10)
     parser.add_argument("--population", type=int, default=32)
     parser.add_argument("--workers", type=int, default=4)
     parser.add_argument("--weight-sigma", type=float, default=0.10)
-    parser.add_argument("--optimizer", type=str, default="CMA",
-                        choices=["CMA", "TBPSA", "TwoPointsDE", "NGOpt"])
+    parser.add_argument(
+        "--optimizer",
+        type=str,
+        default="CMA",
+        choices=["CMA", "TBPSA", "TwoPointsDE", "NGOpt"],
+    )
     parser.add_argument("--sim-steps", type=int, default=DEFAULT_SIM_STEPS)
     parser.add_argument("--ctrl-freq", type=int, default=DEFAULT_CTRL_FREQ)
     parser.add_argument("--hidden-size", type=int, default=4)
     parser.add_argument("--action-scale", type=float, default=0.25)
     parser.add_argument("--max-delta", type=float, default=0.12)
-    parser.add_argument("--target-x", type=float, default=float(DEFAULT_TARGET[0]))
-    parser.add_argument("--target-y", type=float, default=float(DEFAULT_TARGET[1]))
-    parser.add_argument("--target-z", type=float, default=float(DEFAULT_TARGET[2]))
+    parser.add_argument(
+        "--target-x", type=float, default=float(DEFAULT_TARGET[0])
+    )
+    parser.add_argument(
+        "--target-y", type=float, default=float(DEFAULT_TARGET[1])
+    )
+    parser.add_argument(
+        "--target-z", type=float, default=float(DEFAULT_TARGET[2])
+    )
     parser.add_argument("--seed", type=int, default=0)
-    parser.add_argument("--out-dir", type=str, default="__data__/lynx_mjspec/unified")
-    parser.add_argument("--touch-threshold", type=float, default=DEFAULT_TOUCH_THRESHOLD)
-    parser.add_argument("--hold-threshold", type=float, default=DEFAULT_HOLD_THRESHOLD)
-    parser.add_argument("--hold-steps-to-stop", type=int, default=DEFAULT_HOLD_STEPS_TO_STOP)
-    parser.add_argument("--time-bonus-weight", type=float, default=DEFAULT_TIME_BONUS_WEIGHT)
+    parser.add_argument(
+        "--out-dir", type=str, default="__data__/lynx_mjspec/unified"
+    )
+    parser.add_argument(
+        "--touch-threshold", type=float, default=DEFAULT_TOUCH_THRESHOLD
+    )
+    parser.add_argument(
+        "--hold-threshold", type=float, default=DEFAULT_HOLD_THRESHOLD
+    )
+    parser.add_argument(
+        "--hold-steps-to-stop", type=int, default=DEFAULT_HOLD_STEPS_TO_STOP
+    )
+    parser.add_argument(
+        "--time-bonus-weight", type=float, default=DEFAULT_TIME_BONUS_WEIGHT
+    )
     return parser.parse_args()
+
 
 def evaluate_candidate(
     genome: np.ndarray,
@@ -81,7 +104,9 @@ def evaluate_candidate(
         # Per CMA-ES tutorial (B.5): simple repair violates distributional assumptions.
         # Evaluate at repaired point, add penalty proportional to violation distance.
         tube_lengths = np.clip(tube_lengths_raw, TUBE_MIN, TUBE_MAX)
-        boundary_penalty = 2.0 * float(np.sum((tube_lengths_raw - tube_lengths) ** 2))
+        boundary_penalty = 2.0 * float(
+            np.sum((tube_lengths_raw - tube_lengths) ** 2)
+        )
 
         model, data, tcp_sid, tgt_sid, joint_ids = build_model(tube_lengths)
         set_target_position(model, data, tgt_sid, target)
@@ -102,7 +127,9 @@ def evaluate_candidate(
 
         for step in range(sim_steps):
             if step % ctrl_freq == 0:
-                obs = build_observation(model, data, joint_ids, tcp_sid, tgt_sid)
+                obs = build_observation(
+                    model, data, joint_ids, tcp_sid, tgt_sid
+                )
                 action = net.forward(obs)
                 apply_position_delta_control(
                     model=model,
@@ -115,7 +142,11 @@ def evaluate_candidate(
 
             mujoco.mj_step(model, data)
             executed_steps = step + 1
-            d = float(np.linalg.norm(data.site_xpos[tcp_sid] - data.site_xpos[tgt_sid]))
+            d = float(
+                np.linalg.norm(
+                    data.site_xpos[tcp_sid] - data.site_xpos[tgt_sid]
+                )
+            )
             final_distance = d
             min_distance = min(min_distance, d)
 
@@ -128,12 +159,18 @@ def evaluate_candidate(
             if d <= touch_threshold and first_touch_step == sim_steps:
                 first_touch_step = step
 
-            if not np.isfinite(data.qpos).all() or not np.isfinite(data.qvel).all():
+            if (
+                not np.isfinite(data.qpos).all()
+                or not np.isfinite(data.qvel).all()
+            ):
                 # Return progress-aware penalty so CMA-ES can still rank diverging candidates.
                 return min_distance + 1.0
 
             # End the rollout early once the policy has reached and stably held near target.
-            if d <= touch_threshold and consecutive_hold_steps >= hold_steps_to_stop:
+            if (
+                d <= touch_threshold
+                and consecutive_hold_steps >= hold_steps_to_stop
+            ):
                 break
 
         touched = first_touch_step < sim_steps
@@ -154,11 +191,14 @@ def evaluate_candidate(
     except Exception:
         return INVALID_FITNESS
 
+
 def main() -> None:
     args = parse_args()
 
     rng = np.random.default_rng(args.seed)
-    target = np.array([args.target_x, args.target_y, args.target_z], dtype=np.float64)
+    target = np.array(
+        [args.target_x, args.target_y, args.target_z], dtype=np.float64
+    )
 
     policy_spec = PolicySpec(
         hidden_size=int(args.hidden_size),
@@ -168,7 +208,9 @@ def main() -> None:
 
     num_weights = num_network_params(policy_spec)
 
-    tubes_init   = rng.uniform(TUBE_MIN, TUBE_MAX, size=NUM_TUBES).astype(np.float64)
+    tubes_init = rng.uniform(TUBE_MIN, TUBE_MAX, size=NUM_TUBES).astype(
+        np.float64
+    )
     weights_init = rng.uniform(-0.1, 0.1, size=num_weights).astype(np.float64)
 
     # Split parametrization so tubes and weights get independent sigma values.
@@ -180,7 +222,9 @@ def main() -> None:
         .set_bounds(TUBE_MIN, TUBE_MAX, method="clipping")
         .set_mutation(sigma=0.27)
     )
-    weights_p = ng.p.Array(init=weights_init).set_mutation(sigma=float(args.weight_sigma))
+    weights_p = ng.p.Array(init=weights_init).set_mutation(
+        sigma=float(args.weight_sigma)
+    )
     parametrization = ng.p.Tuple(tubes_p, weights_p)
 
     # num_workers must equal population so the optimizer's internal λ matches the batch size.
@@ -195,7 +239,10 @@ def main() -> None:
         for gen in range(1, int(args.generations) + 1):
             candidates = [optimizer.ask() for _ in range(int(args.population))]
             genomes = [
-                np.concatenate([np.asarray(c.value[0]), np.asarray(c.value[1])]).astype(np.float64)
+                np.concatenate([
+                    np.asarray(c.value[0]),
+                    np.asarray(c.value[1]),
+                ]).astype(np.float64)
                 for c in candidates
             ]
 
@@ -234,8 +281,8 @@ def main() -> None:
 
     rec = optimizer.provide_recommendation()
     best_tube_lengths = np.asarray(rec.value[0], dtype=np.float64)
-    best_weights      = np.asarray(rec.value[1], dtype=np.float64)
-    best_genome       = np.concatenate([best_tube_lengths, best_weights])
+    best_weights = np.asarray(rec.value[1], dtype=np.float64)
+    best_genome = np.concatenate([best_tube_lengths, best_weights])
 
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -261,7 +308,9 @@ def main() -> None:
         "time_bonus_weight": float(args.time_bonus_weight),
     }
 
-    (run_dir / "metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
+    (run_dir / "metadata.json").write_text(
+        json.dumps(metadata, indent=2), encoding="utf-8"
+    )
 
     print(f"Saved unified artifacts to: {run_dir}")
 

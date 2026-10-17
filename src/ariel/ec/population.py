@@ -166,7 +166,7 @@ class Population:  # noqa: PLR0904
         """
         self.population.extend(
             other.population if isinstance(other, Population) else other,
-            )
+        )
 
     def to_list(self) -> list[Individual]:
         """Return a plain Python list of the individuals.
@@ -198,10 +198,12 @@ class Population:  # noqa: PLR0904
             A new population containing ``min(n, len(self))`` individuals
             drawn uniformly at random without replacement.
         """
-        return Population(random.sample(self.population,
-                                        min(n, len(self.population)),
-                                        ),
-                                            )
+        return Population(
+            random.sample(
+                self.population,
+                min(n, len(self.population)),
+            ),
+        )
 
     def sort(
         self,
@@ -213,6 +215,7 @@ class Population:  # noqa: PLR0904
 
         def key(ind: Individual) -> float:
             return _safe_attr(ind, attribute)
+
         return Population(sorted(self.population, key=key, reverse=reverse))
 
     def best(
@@ -256,6 +259,7 @@ class Population:  # noqa: PLR0904
 
         def key(ind: Individual) -> float:
             return _safe_attr(ind, attribute)
+
         return Population(sorted(self.population, key=key, reverse=reverse)[:n])
 
     def shuffle(self) -> "Population":

@@ -57,6 +57,7 @@ def test_controller_set_control_runs() -> None:
 
 def test_controller_set_control_clips_output() -> None:
     """set_control clips control values to [-pi/2, pi/2]."""
+
     def large_output(model: mujoco.MjModel, data: mujoco.MjData) -> list[float]:
         return [999.0] * model.nu
 
@@ -74,6 +75,7 @@ def test_controller_set_control_clips_output() -> None:
 
 def test_controller_nan_output_raises() -> None:
     """set_control raises ValueError when the callback returns NaN."""
+
     def nan_callback(model: mujoco.MjModel, data: mujoco.MjData) -> list[float]:
         return [float("nan")] * model.nu
 
