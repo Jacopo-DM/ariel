@@ -1,4 +1,4 @@
-"""TODO(jmdm): description of script.
+"""MuJoCo helpers: quaternion conversion, self-collision check and spec copy.
 
 Notes
 -----

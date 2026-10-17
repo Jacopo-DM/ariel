@@ -1,4 +1,4 @@
-"""TODO(jmdm): description of script."""
+"""Core module: the root of a RoboGen-lite robot body."""
 
 # Third-party libraries
 import mujoco

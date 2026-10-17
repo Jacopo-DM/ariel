@@ -1,4 +1,4 @@
-"""TODO(jmdm): description of script.
+"""Abstract base class for RoboGen-lite body modules.
 
 Todo:
 ----

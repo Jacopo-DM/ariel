@@ -1,4 +1,4 @@
-"""TODO(jmdm): description of script.
+"""Configuration of the RoboGen-lite modules and the SER0019 servo.
 
 Notes
 -----

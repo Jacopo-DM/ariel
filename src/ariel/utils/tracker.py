@@ -1,4 +1,4 @@
-"""TODO(jmdm): description of script."""
+"""Track and log the state of MuJoCo objects during a simulation."""
 
 # Standard library
 from typing import Any

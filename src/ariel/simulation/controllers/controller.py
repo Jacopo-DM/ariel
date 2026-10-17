@@ -1,4 +1,4 @@
-"""TODO(jmdm): description of script."""
+"""Controller that applies a callback to a MuJoCo simulation."""
 
 # Standard library
 from collections.abc import Callable

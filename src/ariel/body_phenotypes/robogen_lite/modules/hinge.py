@@ -1,4 +1,4 @@
-"""TODO(jmdm): description of script.
+"""Hinge module: an actuated joint of a RoboGen-lite robot body.
 
 Todo:
 ----

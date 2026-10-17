@@ -1,4 +1,4 @@
-"""TODO(jmdm): description of script."""
+"""Simple video recorder that writes rendered frames to a video file."""
 
 # Standard library
 import datetime

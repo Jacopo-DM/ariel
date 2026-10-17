@@ -1,4 +1,4 @@
-"""TODO(jmdm): description of script.
+"""Brick module: a rigid block of a RoboGen-lite robot body.
 
 Todo:
 ----

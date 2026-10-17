@@ -1,5 +1,5 @@
 """
-TODO(jmdm): description of script.
+Normalized Asymmetric central pattern generator (NA-CPG) as a PyTorch module.
 
 Notes
 -----

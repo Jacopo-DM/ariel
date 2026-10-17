@@ -1,4 +1,4 @@
-"""TODO(A-lamo): description of script."""
+"""Prebuilt spider robot body."""
 
 from ariel.body_phenotypes.robogen_lite.config import ModuleFaces
 from ariel.body_phenotypes.robogen_lite.modules.brick import BrickModule

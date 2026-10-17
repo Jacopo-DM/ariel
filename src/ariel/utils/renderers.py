@@ -1,4 +1,4 @@
-"""TODO(jmdm): description of script.
+"""Render MuJoCo scenes to single frames and videos.
 
 Todo:
 ----

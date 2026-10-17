@@ -1,5 +1,5 @@
 """
-TODO(jmdm): description of script.
+NA-CPG variant with beta parameters (BetaParams), as a PyTorch module.
 
 Notes
 -----

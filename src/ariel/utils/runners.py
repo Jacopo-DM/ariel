@@ -1,4 +1,4 @@
-"""TODO(jmdm): description of script."""
+"""Headless runners that step a MuJoCo simulation for a set duration."""
 
 # Third-party libraries
 import mujoco

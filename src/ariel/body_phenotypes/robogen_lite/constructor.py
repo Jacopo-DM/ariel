@@ -1,4 +1,4 @@
-"""TODO(jmdm): description of script."""
+"""Build a MuJoCo robot specification from a graph of modules."""
 
 # Handle forward references in type hints
 from __future__ import annotations

@@ -1,5 +1,5 @@
 """
-TODO(jmdm): description of script.
+NA-CPG variant (NaCPG_Norm, work in progress), as a PyTorch module.
 
 Notes
 -----

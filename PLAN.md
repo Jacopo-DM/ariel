@@ -4,15 +4,15 @@
 
 | Name | Goal | Kind | Success measure | Status | Added |
 |---|---|---|---|---|---|
-| test-env-green | All unit tests can be collected and pass | improvement, behaviour unchanged | `uv run pytest tests/unit` reports 0 collection errors and 0 failures (today 2 collection errors, 419 passed) | approved | 2026-10-17 |
+| test-env-green | All unit tests can be collected and pass | improvement | done 2026-10-17: commits matching `git log --grep '^T3:'`; pytest 419 passed + 2 collection errors -> 437 passed, 0 errors | done | 2026-10-17 |
 | dashboards-out | Move the dashboards off `main` into a `feature-dashboard` branch | improvement | done 2026-10-17: commits matching `git log --grep '^T[45]:'`; measure: dashboard dir gone from main, branch holds it, pytest 437 passed unchanged | done | 2026-10-17 |
-| repo-hygiene | Remove the broken entry point, the stray file and the stale docs | improvement, behaviour unchanged | the `[project.scripts]` entry is removed from `pyproject.toml` (decided 2026-10-17; `ariel.__main__` does not exist); `src/ariel/ec/generators copy.py` removed (done 2026-10-17, user approved; unreferenced); `CONTRIBUTING.md` says `uv sync` and Python >= 3.12; placeholder `TODO(jmdm)` docstrings count in `src/` goes from 19 to 0 or each is listed as kept | approved | 2026-10-17 |
+| repo-hygiene | Remove the broken entry point, the stray file and the stale docs | improvement | done 2026-10-17: commits matching `git log --grep '^T[126]:'` and the housekeeping merges; console script, `generators copy.py`, placeholder docstrings (18 files to 0) and stale dev-doc claims fixed. Left: nox session names in root and docs CONTRIBUTING.md (see Known problems) | done | 2026-10-17 |
 | lint-types-policy | Decide which ruff/mypy/pyright/pre-commit rules are sensible, then make the code meet them | improvement | pending: measure set after the config review with the user (baseline: ruff 1858 findings, format 51 files, mypy 517 errors) | draft, blocked on config review | 2026-10-17 |
 | gl-autodetect | ARIEL never crashes because the user's OpenGL backend is unsuitable. A manager script runs one subprocess worker per backend (glfw, egl, osmesa), records which work and how fast in `mujoco_user_config.json`, and ARIEL reads that file at import to set `MUJOCO_GL`. | new behaviour | not set yet; acceptance criteria to be proposed and agreed (candidates: the manager writes a valid file on this Linux machine; a crashing backend is recorded as failed without killing the manager; importing `ariel` sets `MUJOCO_GL` from the file). Order: after test-env-green (both touch the rendering/cv2 environment). | draft | 2026-10-17 |
 
 ## Current state
 
-Phase: planning. Three goals approved 2026-10-17 (test-env-green, dashboards-out, repo-hygiene); lint-types-policy and gl-autodetect still draft. Task list below awaits approval. Next step: user approves the task list in words; no code changes before that.
+Phase: planning. test-env-green, dashboards-out and repo-hygiene are done. lint-types-policy and gl-autodetect are still draft. Next step: the config review with the user (lint-types-policy), then gl-autodetect acceptance criteria.
 
 ## Baseline
 
@@ -31,17 +31,13 @@ Brownfield. Measured 2026-10-17 after `uv sync --all-groups` (Python 3.12.9, Lin
 
 Specs and measurements are in DESIGN.md (Specs). No task changes behaviour except removing the dashboards and the `ariel` console script, both approved. Every task: tests before and after (`pytest` line in CLAUDE.md), one task per commit, PLAN.md updated in the same commit. Pytest count and the grep counts are deterministic (no noise); pytest time was 6.58, 6.59, 6.60 s over three runs, so only a change over 0.1 s would count, and no goal claims a time.
 
-Order: Tier 1 first, in the order listed. T1 to T5 done (see DESIGN.md Results). T6 is next. gl-autodetect no longer waits (T3 done).
+Order: Tier 1 first, in the order listed. T1 to T6 done (see DESIGN.md Results). gl-autodetect no longer waits (T3 done).
 
 ### Tier 1: small diff, low risk
 
 ### Tier 2: clear effect, more files or medium risk
 
-**T6. Replace placeholder docstrings** (repo-hygiene)
-- Changes: the `TODO(jmdm): description of script` module docstrings in 17 files (recount after T4; list from `grep -rn "description of script" src`). Each gets a one-line real description read from the module. The single real TODO in `src/ariel/utils/morphological_descriptor.py:664` (normaliser check) is kept and listed, because it is a correctness question, not a placeholder.
-- Effect: count of placeholder TODOs in `src/`: 17 files to 0 (the real TODO at `morphological_descriptor.py:664` stays).
-- Risk low (docstrings only). Cost: about +40 lines of prose.
-- Verify: `grep -rn "description of script" src` empty; `ruff check --no-fix` count not higher than before; pytest unchanged.
+None left.
 
 ### Tier 3: left alone on purpose (not executed)
 

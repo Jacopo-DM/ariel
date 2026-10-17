@@ -1,4 +1,4 @@
-"""TODO(jmdm): description of script.
+"""MuJoCo compiler, option and simulation settings as a Pydantic config.
 
 Notes
 -----

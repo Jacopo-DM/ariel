@@ -47,6 +47,7 @@ Stack and architecture as found in the repo. Reasons are not recorded unless sta
 | 2026-10-17 | T3 `opencv-python-headless==4.11.0.86` | test-env-green | `pytest tests/unit`: 0 collection errors, 437 passed, 0 failed (was 419 passed + 2 collection errors); `cv2` 4.11.0. `uv.lock` diff is large (1102 lines changed) but names changed: opencv-python -> opencv-python-headless and one added macOS-only package (`pyobjc-framework-pubsub`). Camera example edited, not run (no display) |
 | 2026-10-17 | T4 dashboards off main | dashboards-out | branch `feature-dashboard` (local, not pushed) holds the 5 dashboard files; `main` no longer has `src/ariel/visualisation/dashboard/` (5,539 lines removed); pytest 437 passed (unchanged); mypy errors 517 -> 262 (a side effect, the dashboards were the untyped-call hotspot) |
 | 2026-10-17 | T5 drop `panel`, `plotly`, `nicegui`, `kaleido`, `pyvista` | dashboards-out | `uv.lock` 481 -> 437 packages (-1058 lines); `.venv` 9.3 GB -> 8.4 GB; `uv sync` 1.2 s; pytest 437 passed, mypy 262 errors (both unchanged by T5) |
+| 2026-10-17 | T6 placeholder docstrings | repo-hygiene | 18 files (not 17: counted again after T4) had `TODO(...): description of script`; now 0. One real TODO stays (`utils/morphological_descriptor.py:664`). ruff findings 1330 -> 1330 (the Baseline count of 1858 included files since removed); pytest 437 passed |
 
 ## Gotchas
 

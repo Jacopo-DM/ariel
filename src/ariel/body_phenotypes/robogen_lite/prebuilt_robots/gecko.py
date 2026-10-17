@@ -1,4 +1,4 @@
-"""TODO(jmdm): description of script."""
+"""Prebuilt gecko robot body."""
 
 from ariel.body_phenotypes.robogen_lite.config import ModuleFaces
 from ariel.body_phenotypes.robogen_lite.modules.brick import BrickModule
