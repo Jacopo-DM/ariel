@@ -11,7 +11,7 @@
 * Container manager:
   * [podman desktop](https://podman.io/)
   * [docker desktop](https://www.docker.com/products/docker-desktop/)
-  
+
 * [vscode containers tut](https://code.visualstudio.com/docs/devcontainers/tutorial)
 
 --- -->

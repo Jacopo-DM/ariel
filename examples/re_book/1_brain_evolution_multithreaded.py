@@ -37,8 +37,8 @@ from ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider_with_blocks impor
 from ariel.simulation.controllers.utils.data_get import get_state_from_data as get_robot_state
 from ariel.utils.renderers import VideoRecorder, video_renderer
 from ariel.simulation.tasks.targeted_locomotion import (
-    fitness_delta_distance, 
-    fitness_distance_and_efficiency, 
+    fitness_delta_distance,
+    fitness_distance_and_efficiency,
     fitness_survival_and_locomotion,
     fitness_direct_path,
     distance_to_target,
@@ -64,13 +64,13 @@ REACH_RADIUS = max(0.01, args.reach_radius)
 NUM_WORKERS = max(1, args.workers)
 
 # 1. Defined 3 target positions to prevent overfitting
-# TARGET_POSITIONS = [ 
+# TARGET_POSITIONS = [
 #     [-0.5 , -2, 0.1],  # Left
 #     [0.0, -2, 0.1],    # Center
 #     [0.5, -2, 0.1]     # Right
 # ]
 
-TARGET_POSITIONS = [ 
+TARGET_POSITIONS = [
     [0.5, -2, 0.1]  # Right
 ]
 
@@ -144,38 +144,38 @@ def fill_parameters(net: nn.Module, vector: torch.Tensor):
 # ============================================================================ #
 #                         Camera frame processing                              #
 # ============================================================================ #
-    
+
 def isolate_green(frame):
     # Convert to HSV color space
     # Enhances colours, makes it easier to detect target colour
     hsv = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
-    
+
     # Define range for green color
     # At the moment hardcoding seems to work best
     lower_green = np.array([35, 40, 40])
     upper_green = np.array([85, 255, 255])
-    
+
     # Create mask for green color
     green_mask = cv2.inRange(hsv, lower_green, upper_green)
-    
+
     return green_mask
 
 def analyze_sections(green_mask):
     sections = np.array_split(green_mask, 3, axis=1)
     left_section, middle_section, right_section = sections[0], sections[1], sections[2]
-    
+
     # Calculate percentage of green pixels in each section
     def get_green_percentage(section):
         total_pixels = section.size
         if total_pixels == 0:
             return 0.0
         green_pixels = cv2.countNonZero(section)
-        return (green_pixels / total_pixels) 
-    
+        return (green_pixels / total_pixels)
+
     left_percent = get_green_percentage(left_section)
     middle_percent = get_green_percentage(middle_section)
     right_percent = get_green_percentage(right_section)
-    
+
     return [left_percent, middle_percent, right_percent]
 
 
@@ -184,17 +184,17 @@ def analyze_sections(green_mask):
 #                  Custom simulation runner with camera                        #
 # ============================================================================ #
 
-def run_vision_simulation(model, 
-                          data, 
-                          network:Network, 
-                          duration:int, 
+def run_vision_simulation(model,
+                          data,
+                          network:Network,
+                          duration:int,
                           target_position: Optional[np.ndarray] = None,
-                          renderer=None, 
+                          renderer=None,
                           cam_name=None,
-                          control_step_freq=50 
+                          control_step_freq=50
                           ):
     """Custom runner that processes vision."""
-    
+
     # Setup Renderer if not passed (creates a new context)
     owns_renderer = renderer is None
     if renderer is None:
@@ -222,20 +222,20 @@ def run_vision_simulation(model,
             if step % control_step_freq == 0:
                 renderer.update_scene(data, camera=cam_name)
                 img = renderer.render()
-                
+
                 # 2. Process Vision
                 mask = isolate_green(img)
                 vision_inputs = analyze_sections(mask)
 
                 # 3. Prepare Inputs
                 robot_state = get_robot_state(data)
-                
+
                 # Using both sin and cos gives the network a smooth, circular sense of time
                 phase_inputs = [
-                    2*np.sin(data.time * 2.0 * np.pi), 
+                    2*np.sin(data.time * 2.0 * np.pi),
                     2*np.cos(data.time * 2.0 * np.pi)
                 ]
-                
+
                 state_input = np.concatenate([
                     robot_state,
                     vision_inputs,
@@ -245,10 +245,10 @@ def run_vision_simulation(model,
                 # 4. Network Forward Pass
                 current_action = network.forward(model, data, state_input)
                 trajectory.append((data.qpos[0], data.qpos[1]))
-            
+
             # 5. Apply Control (Hold previous action if not a control step)
             data.ctrl[:] = current_action
-            
+
             # 6. Step Physics
             mujoco.mj_step(model, data)
             step += 1
@@ -275,7 +275,7 @@ def run_vision_simulation(model,
         "min_distance_to_target": min_distance_to_target,
         "time_to_target": time_to_target,
         }
-        
+
 # ============================================================================ #
 #                         Define evolutionary loop                             #
 # ============================================================================ #
@@ -457,16 +457,16 @@ def evolve(world, model, data) -> tuple[np.ndarray, int]:
 
     dummy_net = Network(input_size=input_dim, output_size=model.nu, hidden_size=32)
     num_params = sum(p.numel() for p in dummy_net.parameters())
-    
+
     initial_guess = np.random.uniform(low=-0.5, high=0.5, size=num_params)
     param = ng.p.Array(init=initial_guess)
-    param.set_mutation(sigma=0.075) 
-    
+    param.set_mutation(sigma=0.075)
+
     cma_config = ng.optimizers.ParametrizedCMA(popsize=POP_SIZE)
     optimizer = cma_config(
         parametrization=param,
         budget=(BUDGET * POP_SIZE),
-        num_workers=POP_SIZE, 
+        num_workers=POP_SIZE,
     )
 
     console.log(f"Population size: {POP_SIZE} | Workers: {NUM_WORKERS}")
@@ -503,39 +503,39 @@ def main():
 
     # Initialise world
     world = SimpleFlatWorld()
-    
+
     # Add Green Target Object
     target_pos = TARGET_POSITIONS[0] # left
     target_body = world.spec.worldbody.add_body(name="green_target", mocap=True, pos=target_pos)
     target_body.add_geom(
-        type=mujoco.mjtGeom.mjGEOM_BOX, 
-        size=[0.1, 0.1, 0.1], 
+        type=mujoco.mjtGeom.mjGEOM_BOX,
+        size=[0.1, 0.1, 0.1],
         rgba=[0, 1, 0, 1]
-    ) 
-    
+    )
+
     # Add Global Camera for Video Recording
     world.spec.worldbody.add_camera(
-        name="video_cam", 
-        pos=[0, -1, 3], 
+        name="video_cam",
+        pos=[0, -1, 3],
         xyaxes=[1, 0, 0, 0, 3, 0]
     )
 
     # Spawn Spider
     spider_core = body_spider45()
     world.spawn(spider_core.spec, position=[0, 0, 0.1])
-    
+
     model = world.spec.compile()
     data = mujoco.MjData(model)
 
     best_weights, final_input_dim = evolve(world, model, data)
-    
+
     return model, data, best_weights, world, final_input_dim
 
 if __name__ == "__main__":
     start = time.time()
     model, data, best_weights, world, input_dim = main()
     gc.disable()
-    
+
     end = time.time()
 
     console.log(f"Evolution took {(end-start)/60:.2f} minutes")
@@ -553,8 +553,8 @@ if __name__ == "__main__":
 #                           for video recording                                #
 # ============================================================================ #
     network = Network(
-        input_size=input_dim, 
-        output_size=model.nu, 
+        input_size=input_dim,
+        output_size=model.nu,
         hidden_size=32
     )
     fill_parameters(network, torch.Tensor(best_weights))
@@ -570,15 +570,15 @@ if __name__ == "__main__":
 
     path_to_video_folder = str(DATA / "videos")
     os.makedirs(path_to_video_folder, exist_ok=True) # Ensure folder exists
-    
+
     # Reset Simulation & Target
     mujoco.mj_resetData(model, data)
     target_mocap_id = model.body("green_target").mocapid[0]
     data.mocap_pos[target_mocap_id] = TARGET_POSITIONS[0]
-    
+
     # 1. Setup separate renderer for the Robot's Vision (Low Res)
     control_renderer = mujoco.Renderer(model, height=24, width=32)
-    
+
     def get_vision_control_signal(m, d):
         if robot_cam_name:
             control_renderer.update_scene(d, camera=robot_cam_name)
@@ -587,28 +587,28 @@ if __name__ == "__main__":
             vision_inputs = analyze_sections(mask)
         else:
             vision_inputs = [0,0,0]
-            
+
         robot_state = get_robot_state(d)
-        
+
         phase_inputs = [
-            2*np.sin(d.time * 2.0 * np.pi), 
+            2*np.sin(d.time * 2.0 * np.pi),
             2*np.cos(d.time * 2.0 * np.pi)
         ]
-        
+
         state = np.concatenate([
             robot_state,
             vision_inputs,
             phase_inputs
         ]).astype(np.float32)
-        
+
         return network.forward(m, d, state)
 
 # --- REPLAY BEST & RECORD VIDEO ---
     console.log("[cyan]Rendering Best Video...[/cyan]")
-    
+
     # Setup VideoRecorder
     video_recorder = VideoRecorder(
-        file_name="spider_vision_best", 
+        file_name="spider_vision_best",
         output_folder=path_to_video_folder
     )
 
@@ -650,8 +650,8 @@ if __name__ == "__main__":
 
             # OUTER LOOP: Render Frame (Once per 1/30th second)
             renderer.update_scene(
-                data, 
-                scene_option=viz_options, 
+                data,
+                scene_option=viz_options,
                 camera=camera_id
             )
             video_recorder.write(frame=renderer.render())
@@ -664,47 +664,47 @@ if __name__ == "__main__":
 #                           Plotting the Trajectory                            #
 # ============================================================================ #
     console.log("[cyan]Generating Trajectory Plot...[/cyan]")
-    
+
     # Pick one target position to test on (e.g., the first one)
     test_target = TARGET_POSITIONS[0]
     mujoco.mj_resetData(model, data)
     data.mocap_pos[target_mocap_id] = test_target
-    
+
     # Run the simulation once more to get the path
     metrics = run_vision_simulation(
-        model, 
-        data, 
-        network=network, 
-        duration=DURATION, 
+        model,
+        data,
+        network=network,
+        duration=DURATION,
         target_position=np.asarray(test_target),
         renderer=None, # No need to render video for this
-        cam_name=robot_cam_name, 
+        cam_name=robot_cam_name,
         control_step_freq=50
     )
-    
+
     # Extract X and Y coordinates
     path = metrics["trajectory"]
     x_coords = [p[0] for p in path]
     y_coords = [p[1] for p in path]
-    
+
     # Create the plot
     plt.figure(figsize=(8, 8))
-    
+
     # Plot the robot's starting position
     plt.plot(x_coords[0], y_coords[0], 'go', markersize=10, label='Start')
-    
+
     # Plot the Target position
     plt.plot(test_target[0], test_target[1], 'r*', markersize=15, label='Target')
-    
+
     # Plot the actual path
     plt.plot(x_coords, y_coords, 'b-', linewidth=2, label='Robot Path')
-    
+
     plt.title(f"Robot Trajectory Map (Fitness: {args.fitness})")
     plt.xlabel("X Position (meters)")
     plt.ylabel("Y Position (meters)")
     plt.legend()
     plt.grid(True)
-    
+
     # Save the plot next to your videos
     plot_path = os.path.join(path_to_video_folder, f"trajectory_{args.fitness}.png")
     plt.savefig(plot_path)

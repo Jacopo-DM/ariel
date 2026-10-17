@@ -425,16 +425,16 @@ class JointTreeNNLearningEvolution:
                 hidden_size=32,
             )
             num_params = sum(p.numel() for p in net.parameters())
-            
+
             initial_guess = np.random.uniform(low=-0.5, high=0.5, size=num_params)
             param = ng.p.Array(init=initial_guess)
-            param.set_mutation(sigma=0.075) 
-            
+            param.set_mutation(sigma=0.075)
+
             cma_config = ng.optimizers.ParametrizedCMA(popsize=POP_SIZE)
             learner = cma_config(
                 parametrization=param,
                 budget=(BUDGET * POP_SIZE),
-                num_workers=POP_SIZE, 
+                num_workers=POP_SIZE,
             )
 
             tracker = Tracker(

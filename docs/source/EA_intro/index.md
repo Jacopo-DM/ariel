@@ -1,6 +1,6 @@
 # This section contains some EA examples using ARIEL.
 
-### Examples: 
+### Examples:
 ```{toctree}
 :maxdepth: 2
 

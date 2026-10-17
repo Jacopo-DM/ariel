@@ -128,7 +128,7 @@ def run_simulation(mode: ViewerTypes, ind: Individual, duration: float, out_dir:
     )
     ctrl.tracker.setup(world.spec, data)
     mujoco.set_mjcb_control(lambda m, d: ctrl.set_control(m, d, duration=duration))
-    
+
     # Set seed for reproducible physics simulation.
     sim_seed = ind.tags.get("seed", hash(ind.id) % (2**31))
     np.random.seed(sim_seed)
@@ -162,16 +162,16 @@ def run_simulation(mode: ViewerTypes, ind: Individual, duration: float, out_dir:
     else:
         start_idx = int(np.ceil(delay_time / sample_dt))
     start_idx = min(max(0, start_idx), max(0, len(traj) - 1))
-    
+
     # Evaluate sustained locomotion, not just final position.
     # Split post-delay period in half to measure consistency.
     mid_idx = start_idx + (len(traj) - start_idx) // 2
     mid_idx = min(max(start_idx + 1, mid_idx), len(traj) - 1)
-    
+
     pos_start = np.array(traj[start_idx])
     pos_mid = np.array(traj[mid_idx])
     pos_final = np.array(traj[-1])
-    
+
     # Target direction from starting position after settling.
     to_target_xy = TARGET_POSITION[:2] - pos_start[:2]
     target_norm = float(np.linalg.norm(to_target_xy))
@@ -179,26 +179,26 @@ def run_simulation(mode: ViewerTypes, ind: Individual, duration: float, out_dir:
         target_dir = np.array([1.0, 0.0])
     else:
         target_dir = to_target_xy / target_norm
-    
+
     # Measure progress in both halves of the active period.
     move1_xy = pos_mid[:2] - pos_start[:2]
     move2_xy = pos_final[:2] - pos_mid[:2]
-    
+
     progress1 = float(np.dot(move1_xy, target_dir))
     progress2 = float(np.dot(move2_xy, target_dir))
-    
+
     # Penalize robots that move in first half but stop/reverse in second half.
     sustained_progress = min(progress1, progress2)
     total_progress = progress1 + progress2
-    
+
     # Lateral deviation from straight line to target.
     total_move_xy = pos_final[:2] - pos_start[:2]
     total_forward = float(np.dot(total_move_xy, target_dir))
     lateral_drift = float(np.linalg.norm(total_move_xy - total_forward * target_dir))
-    
+
     # Distance to target at end.
     dist_final = float(np.linalg.norm(pos_final[:2] - TARGET_POSITION[:2]))
-    
+
     # Fitness (minimize): prioritize sustained forward gait over final position.
     fitness = dist_final - 1.0 * total_progress - 1.5 * max(0.0, sustained_progress) + 0.3 * lateral_drift
     return fitness

@@ -8,14 +8,14 @@ Running experiments with GUI
 This section contains information more directed towards the use of ARIEL for the Evolutionary Computing course. Here you can find installation information, basic functions needed for the assignments, and tips on how some things are done using ARIEL.
 
 ## Run the example files
-After following the normal ARIEL installation guide you can come here for the following steps. We highly recommend you use a virtual environment alongside uv, this will help significantly with requirement conflicts. 
+After following the normal ARIEL installation guide you can come here for the following steps. We highly recommend you use a virtual environment alongside uv, this will help significantly with requirement conflicts.
 
 ### uv version
 Things are a bit simpler if you are using uv. In your terminal simply run the following commands one by one:
 ```bash
 uv venv
 uv sync
-uv run examples/0_render_single_frame.py 
+uv run examples/0_render_single_frame.py
 ```
 
 These commands will automatically create the virtual environment, activate it, install all the requirements with their respective versions to avoid any conflicts and then run the example file. After you create the venv you can activate it again like you would with a normal one using:
@@ -28,13 +28,13 @@ Deactivate venv:
 ```  
 
 ### Pip version
-If you are using pip then you can create a normal virtual environment with: 
+If you are using pip then you can create a normal virtual environment with:
 ```bash
 python -m venv C:/path/to/new/virtual/environment
 ```
-or create it with the IDE you are using. For example, in VS Code just press `ctrl+shift+p` and select `Python: Create Environment`. Then run one of the example files in the examples module. For example `python examples/0_render_single_frame.py`, this file starts a simulation and takes a screenshot of a single frame of a red cube. 
+or create it with the IDE you are using. For example, in VS Code just press `ctrl+shift+p` and select `Python: Create Environment`. Then run one of the example files in the examples module. For example `python examples/0_render_single_frame.py`, this file starts a simulation and takes a screenshot of a single frame of a red cube.
 
-It should look something like this: 
+It should look something like this:
 
 ![image](../resources/example_image.jpg)
 
@@ -53,7 +53,7 @@ import ariel.ec as ec
 The starting guide intends to help you start your first ARIEL experiment. This can be done in two ways. By running the experiments manually from a python file or using the GUI [`HYPERLINK TO GUI PAGE ON THE DOCS`].
 
 ### Run Experiments Manually
-To run an experiment manually you just need to define all the necessary parameters and run the file. Here is an example: 
+To run an experiment manually you just need to define all the necessary parameters and run the file. Here is an example:
 
 ```python
 # Third-party libraries

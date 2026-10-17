@@ -289,7 +289,7 @@ function createCoreModule(position) {
   group.updateMatrixWorld(true);
 
   const geo = new THREE.BoxGeometry(CORE_HALF * 2, CORE_HALF * 2, CORE_HALF * 2);
-  
+
   // Define materials for all 6 faces in Three.js order:
   // [ +X (Right), -X (Left), +Y (Top), -Y (Bottom), +Z (Front), -Z (Back) ]
   const hexColor = '#' + new THREE.Color(COLORS.core).getHexString();
@@ -351,7 +351,7 @@ function createCoreModule(position) {
 //   ctx.font = 'bold 40px Segoe UI, Arial, sans-serif';
 //   ctx.textAlign = 'center';
 //   ctx.textBaseline = 'middle';
-  
+
 //   // Draw the text in the center
 //   ctx.fillText(text.toUpperCase(), 128, 128);
 
@@ -369,14 +369,14 @@ function createTextTexture(text, backgroundColor) {
 
   ctx.fillStyle = '#ffffff'; ctx.font = 'bold 40px Segoe UI, Arial, sans-serif';
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  
+
   ctx.save();
   ctx.translate(128, 128);
   // Rotate side text so it remains upright in our new Z-up world
   if (text === 'right') ctx.rotate(-Math.PI / 2);
   if (text === 'left') ctx.rotate(Math.PI / 2);
   if (text === 'front') ctx.rotate(Math.PI);
-  
+
   ctx.fillText(text.toUpperCase(), 0, 0);
   ctx.restore();
 

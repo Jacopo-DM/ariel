@@ -5,10 +5,10 @@ on: push
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     permissions:
       contents: write
-      
+
     steps:
     - name: Check-out the Repository
       uses: actions/checkout@v5
@@ -18,8 +18,8 @@ jobs:
     - name: Set-up Python
       uses: actions/setup-python@v6
       with:
-        python-version: '3.12.9' 
-    
+        python-version: '3.12.9'
+
     - name: Install uv
       uses: astral-sh/setup-uv@v5
 
@@ -43,7 +43,7 @@ jobs:
 
     - name: Delete _autoapi Folder
       run: rm -rf docs/_autoapi
-    
+
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v4
       if: github.ref == 'refs/heads/main'

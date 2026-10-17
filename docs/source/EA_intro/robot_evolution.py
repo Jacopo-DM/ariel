@@ -253,7 +253,7 @@ def gene_to_robot(genotype, num_modules: int = 20) -> mj.MjSpec:
 def parent_selection(population: Population) -> Population:
     """Tournament Selection.
 
-    Selects parents for the next generation using a tournament selection 
+    Selects parents for the next generation using a tournament selection
     mechanism. Tags the winners with 'ps' (parent selection).
 
     Parameters
@@ -298,8 +298,8 @@ def parent_selection(population: Population) -> Population:
 def crossover(population: Population) -> Population:
     """One point crossover.
 
-    Performs one-point crossover on individuals tagged for parent 
-    selection ('ps'). Generates children and appends them to the 
+    Performs one-point crossover on individuals tagged for parent
+    selection ('ps'). Generates children and appends them to the
     population with a 'mut' tag.
 
     Parameters
@@ -377,7 +377,7 @@ def mutation(population: Population) -> Population:
 def survivor_selection(population: Population) -> Population:
     """Tournament Survivor Selection.
 
-    Kills off individuals based on a tournament selection until the 
+    Kills off individuals based on a tournament selection until the
     population size is reduced back to the target size.
 
     Parameters
@@ -572,7 +572,7 @@ def get_best_individual_from_db(
 def evolve() -> EA:
     """Entry point for the evolutionary algorithm.
 
-    Initializes the population, evaluates it, defines the evolutionary 
+    Initializes the population, evaluates it, defines the evolutionary
     steps (parent selection, crossover, mutation, learning, survivor selection),
     and runs the EA.
 
@@ -628,7 +628,7 @@ def visualize_individual(
     console.log("\n[bold cyan]Visualizing best robot morphology...[/bold cyan]")
 
     console.log(f"{title.capitalize()} robot fitness: {individual.fitness:.3f}")
-    
+
     # Decode morphology
     p_matrices = NDE.forward(np.array(individual.genotype))
     hpd = HighProbabilityDecoder(num_modules=20)
@@ -638,7 +638,7 @@ def visualize_individual(
         p_matrices[2],
     )
     robot_spec = construct_mjspec_from_graph(robot_graph).spec
-    
+
     # Setup simulation
     mj.set_mjcb_control(None)
     world = SimpleFlatWorld()
@@ -647,28 +647,28 @@ def visualize_individual(
         position=(0.0, 0.0, 0.1),
         correct_collision_with_floor=True,
     )
-    
+
     model = world.spec.compile()
     data = mj.MjData(model)
-    
+
     # Create network with randomized weights (no learning)
     net = Network(
         input_size=len(get_state_from_data(data)),
         output_size=model.nu,
         hidden_size=32,
     )
-    
+
     tracker = Tracker(
         name_to_bind="core",
         observable_attributes=["xpos"],
         quiet=True,
     )
     tracker.setup(world.spec, data)
-    
+
     controller = Controller(
         controller_callback_function=net.forward, tracker=tracker
     )
-    
+
     # Run simulation with basic controller (no re-learning)
     mj.mj_resetData(model, data)
     mj.set_mjcb_control(controller.set_control)
@@ -693,18 +693,18 @@ def visualize_individual(
     else:
         console.log(f"Running best robot for {duration:.1f}s...")
         simple_runner(model, data, duration=duration)
-    
+
     # Render and save final frame
     renderer = mj.Renderer(model)
     mj.mj_forward(model, data)
     pixels = renderer.render()
-    
+
     # Save visualization
     img = Image.fromarray(pixels)
     output_path = DATA / "best_robot_visualization.png"
     img.save(output_path)
     console.log(f"✅ Visualization saved to: {output_path}")
-    
+
     # Print final position
     xc, yc, zc = data.qpos[0:3].copy()
     console.log(f"Final position: ({xc:.3f}, {yc:.3f}, {zc:.3f})")

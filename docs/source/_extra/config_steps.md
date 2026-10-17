@@ -34,7 +34,7 @@ git commit -m "Add: project init"
 git add .gitignore
 git commit -m "Update: gitignore from template"
 
-uv add mypy ruff rich 
+uv add mypy ruff rich
 touch mypy.ini pyrightconfig.json ruff.toml
 git add mypy.ini pyrightconfig.json ruff.toml
 git commit -m "Add: configuration files for linters"
@@ -47,7 +47,7 @@ git commit -m "Update: config files from template"
 ### Docs (Files)
 
 ```bash
-mkdir -p docs/source docs/_build 
+mkdir -p docs/source docs/_build
 uv add --group=docs shibuya myst-parser sphinx_design sphinx-autodoc2
 uv pip compile --group=docs -o docs/requirements.txt
 touch docs/conf.py

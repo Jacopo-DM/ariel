@@ -134,7 +134,7 @@ Todo
 ```
 
 This is a [`numpydoc` style] header, with some extra info; such as
-the `Status:` of the file, and the original author(s). 
+the `Status:` of the file, and the original author(s).
 
 The purpose of this header is two fold, to indicate if the file you are looking
 at is considered complete, to see how long ago it was created, and if you have

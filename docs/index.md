@@ -1,18 +1,18 @@
 :layout: landing
- 
+
 # ARIEL — A Robot Evolution Framework
- 
+
 ![Ariel Logo](resources/ariel_logo.svg)
- 
+
 **ARIEL** is a Python package that provides efficient and easy-to-use tools for evolutionary computing and evolutionary robotics.
 Designed with a clear API, sensible defaults, and support for both beginners and advanced users, ARIEL lets you go from idea to evolving robot with minimal boilerplate.
- 
+
 ---
- 
+
 ## Why ARIEL?
- 
+
 ARIEL brings together the full evolutionary robotics pipeline in a single, cohesive package:
- 
+
 - **End-to-end**: genome encoding → evolution → simulation → result analysis.
 - **Batteries included**: pre-built robot bodies, CPG controllers, and EA operators so you spend time on science, not scaffolding.
 - **Flexible**: swap genotype representations (NDE, CPPN, Tree, Vector) or optimisers without rewriting your experiment.
@@ -49,9 +49,9 @@ ARIEL brings together the full evolutionary robotics pipeline in a single, cohes
 | [MuJoCo Integration](source/Mujoco_docs)          | Full access to MuJoCo data variables — forces, sensors, spatial transforms, and more.         |
 
 ---
- 
+
 ## Installation
- 
+
 See the [Installation Guide](source/installation_guide) for full details, including:
 
 - Supported platforms and prerequisites

@@ -51,7 +51,7 @@ def fitness_landscape_plot():
     # Show the plot
     plt.tight_layout()
     plt.show()
-    
+
 def plot_fit_per_gen():
     data = pd.read_sql("SELECT * FROM individual", sqlite3.connect("__data__/database.db"))
 
@@ -98,7 +98,7 @@ def plot_fit_per_gen():
             means.append(np.nan)
             stds.append(np.nan)
             maxs.append(np.nan)
-        
+
         # If there is data, add it to the list
         else:
             means.append(float(np.mean(fits))) #type: ignore
@@ -113,7 +113,7 @@ def plot_fit_per_gen():
     # Create a copy of dataframe
     df = pop_df.copy()
 
-    # Create mask to avoid missing data 
+    # Create mask to avoid missing data
     # if the evolution process was done correctly this should not change anything.
     # This mask could be used to get custom data out of the dataframe
     mask = df['fitness_mean'].notna()

@@ -61,11 +61,11 @@ DATA.mkdir(exist_ok=True, parents=True)
 SEED = 42
 NUM_MODULES = 20
 MAX_DEPTH = 12
-POP_SIZE = 16 
+POP_SIZE = 16
 NUM_GENERATIONS = 5
 
 LEARNING_POP_SIZE = 6  # Slightly bumped for better CMA-ES distribution
-LEARNING_BUDGET = 8 
+LEARNING_BUDGET = 8
 SIMULATION_DURATION = 5
 # EVAL_WORKERS = max(1, min(8, os.cpu_count() or 1))
 EVAL_WORKERS = 8
@@ -97,13 +97,13 @@ class Network(nn.Module):
         # Reduced to a single hidden layer. Smaller parameter space = faster learning!
         self.fc1 = nn.Linear(input_size, hidden_size)
         self.fc2 = nn.Linear(hidden_size, output_size)
-        
+
         self.hidden_activation = nn.ELU()
         self.output_activation = nn.Tanh()
-        
+
         for param in self.parameters():
             param.requires_grad = False
-    
+
     @torch.inference_mode()
     def forward(self, x: torch.Tensor) -> np.ndarray:
         x = self.hidden_activation(self.fc1(x))
@@ -145,12 +145,12 @@ def get_module_count(genome: TreeGenome) -> int:
 def mutate_morphology(genome: TreeGenome) -> TreeGenome:
     new = copy.deepcopy(genome)
     mutation_type = RNG.choice(["point", "subtree", "shrink", "hoist"], p=[0.4, 0.4, 0.1, 0.1])
-    
+
     if mutation_type == "point": mutate_replace_node(new)
     elif mutation_type == "subtree": mutate_subtree_replacement(new, max_modules=NUM_MODULES)
     elif mutation_type == "shrink": mutate_shrink(new)
     elif mutation_type == "hoist": mutate_hoist(new)
-    
+
     if RNG.random() < 0.2:
         noncore = [nid for nid in new.nodes if nid != IDX_OF_CORE]
         if noncore:
@@ -159,7 +159,7 @@ def mutate_morphology(genome: TreeGenome) -> TreeGenome:
             rots = [r.name for r in ALLOWED_ROTATIONS[mtype]]
             if rots:
                 new.nodes[nid]["rotation"] = random.choice(rots)
-    
+
     _prune_invalid_edges(new)
     with contextlib.suppress(ValueError):
         validate_genome_dict(new.to_dict())
@@ -168,10 +168,10 @@ def mutate_morphology(genome: TreeGenome) -> TreeGenome:
 def crossover_morphologies(parent1: Individual, parent2: Individual) -> TreeGenome:
     t1 = TreeGenome.from_dict(parent1.genotype) if isinstance(parent1.genotype, dict) else parent1.genotype
     t2 = TreeGenome.from_dict(parent2.genotype) if isinstance(parent2.genotype, dict) else parent2.genotype
-    
+
     child1, child2 = crossover_subtree(t1, t2)
     chosen = child1 if RNG.random() < 0.5 else child2
-    
+
     if not is_connected_tree(chosen):
         return TreeGenome.from_dict(random.choice([t1, t2]).to_dict())
     return chosen
@@ -190,19 +190,19 @@ def parent_selection(population: Population) -> Population:
 def reproduction(population: Population) -> Population:
     parents = [ind for ind in population if ind.tags.get("ps", False)]
     if not parents: parents = population
-    
+
     new_offspring: list[Individual] = []
     target_pool = config.target_population_size * 2
-    
+
     while len(population) + len(new_offspring) < target_pool:
         if len(parents) >= 2 and RNG.random() < 0.5:
             p1, p2 = random.sample(parents, 2)
             c_morph = crossover_morphologies(p1, p2)
         else:
             c_morph = TreeGenome.from_dict(random.choice(parents).genotype)
-        
+
         c_morph = mutate_morphology(c_morph)
-        
+
         valid_child = False
         attempts = 0
         while not valid_child and attempts < 20:
@@ -211,76 +211,76 @@ def reproduction(population: Population) -> Population:
             else:
                 c_morph = mutate_morphology(c_morph)
             attempts += 1
-        
+
         ind = Individual()
         ind.genotype = c_morph.to_dict()
         ind.tags["valid"] = True
         ind.requires_eval = True
         new_offspring.append(ind)
-    
+
     population.extend(new_offspring)
     return population
 
 def evaluate_single_individual(ind: Individual) -> tuple[float, list | None]:
     """Evaluates a single robot morphology by training its brain using CMA-ES."""
     genome = TreeGenome.from_dict(ind.genotype)
-    
+
     try:
         robot_graph = genome.to_networkx()
         if robot_graph.number_of_nodes() == 0:
             return float("inf"), None
-        
+
         spec = construct_mjspec_from_graph(robot_graph).spec
         world = SimpleFlatWorld()
         world.spawn(spec, position=(0.0, 0.0, 0.1), correct_collision_with_floor=True)
         model = world.spec.compile()
         data = mj.MjData(model)
-        
+
         # Determine sizes and initialize small network
         state_size = len(get_state_from_data(data))
         net = Network(input_size=state_size + 2, output_size=model.nu, hidden_size=16)
-        
+
         # Setup modern ParametrizedCMA
         num_vars = sum(p.numel() for p in net.parameters())
         param = ng.p.Array(init=np.zeros(num_vars))
         param.set_mutation(sigma=0.1) # Smaller steps for stable NN weight tuning
-        
+
         cma_config = ng.optimizers.ParametrizedCMA(popsize=LEARNING_POP_SIZE)
         optimizer = cma_config(parametrization=param, budget=(LEARNING_POP_SIZE * LEARNING_BUDGET))
-        
+
         min_fit = float("inf")
         best_weights = None
 
         with _LOG_LOCK:
             console.log("[blue]Worker started one individual evaluation[/blue]")
-        
+
         # Standard batched CMA-ES Loop
         for learning_step in range(LEARNING_BUDGET):
             candidates = [optimizer.ask() for _ in range(LEARNING_POP_SIZE)]
             fitnesses = []
-            
+
             for candidate in candidates:
                 fill_parameters(net, candidate.value)
                 mj.mj_resetData(model, data)
-                
+
                 # Raw, highly optimized simulation loop
                 while data.time < SIMULATION_DURATION:
                     state = get_state_from_data(data)
                     phase = np.array([np.sin(data.time * 2.0 * np.pi), np.cos(data.time * 2.0 * np.pi)], dtype=np.float32)
                     x = torch.Tensor(np.concatenate([state, phase]))
-                    
+
                     data.ctrl[:] = net.forward(x)
                     mj.mj_step(model, data)
-                
+
                 # Planar 2D Fitness (Distance to 2.0, 0.0)
                 xc, yc = data.qpos[0:2]
                 fitness = float(np.sqrt((2.0 - xc)**2 + (0.0 - yc)**2))
                 fitnesses.append(fitness)
-                
+
                 if fitness < min_fit:
                     min_fit = fitness
                     best_weights = np.array(candidate.value, copy=True)
-            
+
             # Batch tell
             for cand, fit in zip(candidates, fitnesses):
                 optimizer.tell(cand, fit)
@@ -296,16 +296,16 @@ def evaluate_single_individual(ind: Individual) -> tuple[float, list | None]:
                         f"{learning_step + 1}/{LEARNING_BUDGET} "
                         f"learning batches | best fit: {min_fit:.4f}"
                     )
-                
+
         return min_fit, best_weights.tolist() if best_weights is not None else None
-        
+
     except Exception as e:
         return float("inf"), None
 
 def evaluate(population: Population) -> Population:
     to_eval = [ind for ind in population if ind.alive and ind.tags.get("valid") and ind.requires_eval]
     if not to_eval: return population
-    
+
     console.log(
         f"[cyan]Dispatching {len(to_eval)} evaluations to ThreadPool "
         f"(workers={EVAL_WORKERS})...[/cyan]"
@@ -361,7 +361,7 @@ def evaluate(population: Population) -> Population:
         ind.fitness = fitness
         ind.tags["best_weights"] = best_weights
         ind.requires_eval = False
-    
+
     return population
 
 def survivor_selection(population: Population) -> Population:
@@ -370,7 +370,7 @@ def survivor_selection(population: Population) -> Population:
     for ind in population:
         if ind not in survivors:
             ind.alive = False
-            
+
     valid_fitnesses = [ind.fitness_ for ind in survivors if ind.fitness_ is not None and ind.fitness_ != float("inf")]
     if valid_fitnesses:
         console.log(f"[green]Survivor Selection:[/green] Avg={np.mean(valid_fitnesses):.4f}, Min={min(valid_fitnesses):.4f}, Max={max(valid_fitnesses):.4f}")
@@ -389,17 +389,17 @@ def evolve() -> EA:
         ind.tags["valid"] = True
         ind.requires_eval = True
         population.append(ind)
-    
+
     population = Population(population)
     population = evaluate(population)
-    
+
     ops = [
         EAOperation(parent_selection),
         EAOperation(reproduction),
         EAOperation(evaluate),
         EAOperation(survivor_selection),
     ]
-    
+
     ea = EA(
         population,
         operations=ops,
@@ -412,44 +412,44 @@ def evolve() -> EA:
 
 def main() -> EA:
     console.rule("[bold purple]Starting Fast Robot Evolution with TreeGenome[/bold purple]")
-    
+
     start_time = time.time()
     ea = evolve()
     elapsed = time.time() - start_time
-    
+
     best_individual = ea.get_solution("best", only_alive=False)
     if best_individual:
         console.rule("[bold green]Final Best Result[/bold green]")
         console.log(f"Best Fitness: {best_individual.fitness_:.4f}")
         console.log(f"Runtime: {elapsed/60:.2f} minutes")
-        
+
         try:
             genome = TreeGenome.from_dict(best_individual.genotype)
             robot_graph = genome.to_networkx()
             spec = construct_mjspec_from_graph(robot_graph).spec
-            
+
             mj.set_mjcb_control(None)
             world = SimpleFlatWorld()
             world.spawn(spec, position=(0.0, 0.0, 0.1), correct_collision_with_floor=True)
             model = world.spec.compile()
             data = mj.MjData(model)
-            
+
             net = Network(input_size=len(get_state_from_data(data)) + 2, output_size=model.nu, hidden_size=16)
-            
+
             if best_individual.tags.get("best_weights") is not None:
                 fill_parameters(net, np.array(best_individual.tags.get("best_weights"), dtype=np.float64))
                 console.log("[cyan]Loaded learned controller weights[/cyan]")
-            
+
             console.log("[cyan]Launching MuJoCo viewer for best morphology...[/cyan]")
             with viewer.launch_passive(model, data) as v:
                 while v.is_running():
                     state = get_state_from_data(data)
                     phase = np.array([np.sin(data.time * 2.0 * np.pi), np.cos(data.time * 2.0 * np.pi)], dtype=np.float32)
                     x = torch.Tensor(np.concatenate([state, phase]))
-                    
+
                     data.ctrl[:] = net.forward(x)
                     mj.mj_step(model, data)
-                    
+
                     v.sync()
                     time.sleep(model.opt.timestep)
 

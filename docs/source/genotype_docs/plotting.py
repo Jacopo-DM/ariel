@@ -22,7 +22,7 @@ def plot_matrices(matrices):
              1 : "Back",
              2 : "Right",
              3 : "Left",
-             4 : "Top", 
+             4 : "Top",
              5 : "Bottom"}
 
     for ch in range(6):

@@ -86,7 +86,7 @@ uv run examples/re_book/1_brain_evolution.py
 
 If you want to add a dependency to the environment, you can do so using two methods.
 
-1. Add dependency to the environment 
+1. Add dependency to the environment
 This option adds the dependency to the uv.lock file. This means that it will remain part of your environment until you uninstall it.
 ```bash
 uv add <dependency>
@@ -142,7 +142,7 @@ uv run examples/a_mujoco/0_render_single_frame.py
 
 A successful run should execute without import errors and produce either rendered output or logged evolutionary progress, depending on the example.
 
-The output of the `0_render_single_frame.py` should look something like this: 
+The output of the `0_render_single_frame.py` should look something like this:
 
 ![Example](../resources/example_image.jpg)
 

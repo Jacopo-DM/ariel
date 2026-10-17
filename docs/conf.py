@@ -31,7 +31,7 @@ autosectionlabel_prefix_document = True
 # --------- SHIBUYA --------- #
 templates_path = ["_templates"]
 # html_title =
-# html_logo = 
+# html_logo =
 html_favicon = "resources/ariel_favicon.ico"
 
 # --------- MYST --------- #
@@ -145,7 +145,7 @@ autosectionlabel_prefix_document = True
 html_theme_options = {
     # -- Sidebar --
     "sidebar_hide_name": False,  # Show project name in sidebar
-    
+
     # -- Top of page announcement banner --
     "announcement": "<b>🚀 New release coming soon!</b> Check out what's new in v0.1",
 

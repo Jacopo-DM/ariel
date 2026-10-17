@@ -63,19 +63,19 @@ def main() -> None:
     ctrl = Controller(controller_callback_function=lambda _, d: na_cpg_mat.forward(d.time),
                       tracker=tracker)
     ctrl.tracker.setup(world.spec, data)
-    
+
     mujoco.set_mjcb_control(ctrl.set_control)
     mujoco.mj_resetData(model, data)
 
     # Render a single frame
     found_camera_name = None
     all_cameras = [model.camera(i).name for i in range(model.ncam)]
-    
+
     for cam_name in all_cameras:
         if "mycamera" in cam_name:
             found_camera_name = cam_name
             break
-    
+
     renderer = mujoco.Renderer(model, height=240, width=240)
 
     # Inset camera window (matplotlib; opencv is installed headless)
@@ -87,13 +87,13 @@ def main() -> None:
     with mujoco.viewer.launch_passive(model, data) as viewer:
         while viewer.is_running():
             step_start = time.time()
-            
+
             mujoco.mj_step(model, data)
             viewer.sync()
 
             renderer.update_scene(data, camera=found_camera_name)
             pixels = renderer.render()
-            
+
             image.set_data(pixels)
             plt.pause(0.001)
 

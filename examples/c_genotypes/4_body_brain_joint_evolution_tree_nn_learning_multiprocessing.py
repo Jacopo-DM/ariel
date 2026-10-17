@@ -331,7 +331,7 @@ def _evaluate_individual_process(task: tuple[dict, float, float, int, int, float
             delta = iter_score - prev_score
             deltas.append(delta)
             prev_score = iter_score
-        
+
         return fit, best_vec, deltas
     except Exception:
         return float("inf"), [], []

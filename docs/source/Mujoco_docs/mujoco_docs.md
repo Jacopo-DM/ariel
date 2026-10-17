@@ -2,7 +2,7 @@
 This page holds the general information about some Mujoco variables used in ARIEL. This info is, in general, the same as what can be found on the [Mujoco documentation](https://mujoco.readthedocs.io/en/stable/APIreference/APItypes.html#tydataenums). But some things have been added for better understanding.  
 
 ## Matrix-Related Variables
-- `bind`: Class variable for binding operations. can be used to get data in each step of the simulation. Example: 
+- `bind`: Class variable for binding operations. can be used to get data in each step of the simulation. Example:
 ```python
 geoms = world.spec.worldbody.find_all(mujoco.mjtObj.mjOBJ_GEOM)
 to_track = [data.bind(geom) for geom in geoms if "core" in geom.name]
@@ -73,14 +73,14 @@ to_track = [data.bind(geom) for geom in geoms if "core" in geom.name]
 ## State Variables
 - **`qpos`**: Generalized position state vector.  
   Contains the positions of the core and all hinge joints, in the order they are defined in the XML.  
-  - **Core (free joint)**:   
+  - **Core (free joint)**:  
     - `[x, y, z]` : 3D position of the core body frame  
     - `[qw, qx, qy, qz]` : Orientation quaternion of the core  
   - **Hinge joints (bricks)**: `[angle]` for each hinge, representing the rotation angle in radians  
-  
+
   Actuator inputs and states are *not* stored here (see `data.ctrl` and `data.act` instead).
 
-- `qvel`: Velocity state vector. Holds the current velocity of each actuator. 
+- `qvel`: Velocity state vector. Holds the current velocity of each actuator.
 - `qacc`: Acceleration state vector
 <!--- `qDeriv`: Position derivatives
 - `qH`, `qHDiagInv`: Matrices for numerical optimization
@@ -118,4 +118,3 @@ to_track = [data.bind(geom) for geom in geoms if "core" in geom.name]
 <!--- `ximat`, `xipos`: Internal orientation matrices and positions-->
 - `xmat`, `xpos`: Orientation matrices and positions
 - `xquat`: Quaternion orientations
-

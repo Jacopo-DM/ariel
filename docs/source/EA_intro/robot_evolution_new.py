@@ -110,7 +110,7 @@ engine_config.db_file_name = config.db_file_name
 
 class Network(nn.Module):
     """Neural network controller with phase inputs for rhythmic gaits."""
-    
+
     def __init__(
         self,
         input_size: int,
@@ -121,34 +121,34 @@ class Network(nn.Module):
         self.fc1 = nn.Linear(input_size, hidden_size)
         self.fc2 = nn.Linear(hidden_size, hidden_size)
         self.fc3 = nn.Linear(hidden_size, output_size)
-        
+
         self.hidden_activation = nn.ELU()
         self.output_activation = nn.Tanh()
-        
+
         # Disable gradients for all parameters
         for param in self.parameters():
             param.requires_grad = False
-    
+
     @torch.inference_mode()
     def forward(self, model, data):
         """Forward pass with phase inputs for temporal awareness."""
         # Get robot state (proprioceptive feedback)
         state = get_state_from_data(data)
-        
+
         # Add phase inputs (sina and cosine provides a circular sense of time)
         # This allows the network to learn rhythmic gaits
         phase_inputs = np.array([
             2 * np.sin(data.time * 2.0 * np.pi),
             2 * np.cos(data.time * 2.0 * np.pi)
         ], dtype=np.float32)
-        
+
         # Concatenate state with phase inputs
         x = torch.Tensor(np.concatenate([state, phase_inputs]))
-        
+
         x = self.hidden_activation(self.fc1(x))
         x = self.hidden_activation(self.fc2(x))
         x = self.output_activation(self.fc3(x)) * (torch.pi / 2)
-        
+
         return x.detach().numpy()
 
 
@@ -199,12 +199,12 @@ def get_module_count(genome: TreeGenome) -> int:
 def mutate_morphology(genome: TreeGenome) -> TreeGenome:
     """Apply mutations to morphology with multiple GP operators."""
     new = copy.deepcopy(genome)
-    
+
     # Choose mutation type (standard GP mutation operators)
     mutation_type = RNG.choice(
         ["point", "subtree", "shrink", "hoist"], p=[0.4, 0.4, 0.1, 0.1],
     )
-    
+
     if mutation_type == "point":
         # Point mutation: change node type/rotation
         mutate_replace_node(new)
@@ -217,7 +217,7 @@ def mutate_morphology(genome: TreeGenome) -> TreeGenome:
     elif mutation_type == "hoist":
         # Hoist mutation: promote child to replace parent
         mutate_hoist(new)
-    
+
     # Additional rotation mutation (20% chance)
     if RNG.random() < 0.2:
         noncore = [nid for nid in new.nodes if nid != IDX_OF_CORE]
@@ -228,7 +228,7 @@ def mutate_morphology(genome: TreeGenome) -> TreeGenome:
             rots = [r.name for r in ALLOWED_ROTATIONS[mtype]]
             if rots:
                 new.nodes[nid]["rotation"] = random.choice(rots)
-    
+
     # prune any invalid edges before returning
     _prune_invalid_edges(new)
     with contextlib.suppress(ValueError):
@@ -244,16 +244,16 @@ def crossover_morphologies(parent1: Individual, parent2: Individual) -> TreeGeno
         t1 = TreeGenome.from_dict(t1)
     if isinstance(t2, dict):
         t2 = TreeGenome.from_dict(t2)
-    
+
     child1, child2 = crossover_subtree(t1, t2)
-    
+
     # Return first valid child, otherwise fallback to asexual copy
     chosen = child1 if RNG.random() < 0.5 else child2
-    
+
     # If disconnected, return copy of a parent instead
     if not is_connected_tree(chosen):
         return TreeGenome.from_dict(random.choice([t1, t2]).to_dict())
-    
+
     return chosen
 
 
@@ -282,7 +282,7 @@ def reproduction(population: Population) -> Population:
             "[yellow]Warning: No ps-tagged individuals, using entire population[/yellow]",
         )
         parents = population
-    
+
     new_offspring: list[Individual] = []
     target_pool = config.target_population_size * 2
     while len(population) + len(new_offspring) < target_pool:
@@ -293,10 +293,10 @@ def reproduction(population: Population) -> Population:
         else:
             parent = random.choice(parents)
             c_morph = TreeGenome.from_dict(parent.genotype)
-        
+
         # mutate morphology
         c_morph = mutate_morphology(c_morph)
-        
+
         # body validation loop: ensure valid morphology
         valid_child = False
         attempts = 0
@@ -308,13 +308,13 @@ def reproduction(population: Population) -> Population:
             else:
                 c_morph = mutate_morphology(c_morph)
             attempts += 1
-        
+
         ind = Individual()
         ind.genotype = c_morph.to_dict()
         ind.tags["valid"] = True
         ind.requires_eval = True
         new_offspring.append(ind)
-    
+
     population.extend(new_offspring)
     return population
 
@@ -328,10 +328,10 @@ def evaluate(population: Population) -> Population:
     ]
     if not to_eval:
         return population
-    
+
     for ind in track(to_eval, description="Evaluating..."):
         genome = TreeGenome.from_dict(ind.genotype)
-        
+
         # Get morphology from genome
         try:
             robot_graph = genome.to_networkx()
@@ -339,34 +339,34 @@ def evaluate(population: Population) -> Population:
                 ind.fitness = float("inf")
                 ind.requires_eval = False
                 continue
-            
+
             spec = construct_mjspec_from_graph(robot_graph).spec
-            
+
             # Set up world and robot
             mj.set_mjcb_control(None)
             world = SimpleFlatWorld()
             world.spawn(spec, position=(0.0, 0.0, 0.1), correct_collision_with_floor=True)
-            
+
             model = world.spec.compile()
             data = mj.MjData(model)
-            
+
             # Create neural network controller
             net = Network(
                 input_size=len(get_state_from_data(data)) + 2,  # +2 for phase inputs
                 output_size=model.nu,
                 hidden_size=32,
             )
-            
+
             # Get number of network parameters
             num_vars = sum(p.numel() for p in net.parameters())
-            
+
             # Initialize CMA-ES optimizer
             param = ng.p.Array(shape=(num_vars,))
             optimizer = ng.optimizers.registry["CMA"](
                 parametrization=param,
                 budget=(LEARNING_POP_SIZE * LEARNING_BUDGET),
             )
-            
+
             # Set up tracker and controller
             tracker = Tracker(
                 name_to_bind="core",
@@ -374,52 +374,52 @@ def evaluate(population: Population) -> Population:
                 quiet=True,
             )
             tracker.setup(world.spec, data)
-            
+
             controller = Controller(
                 controller_callback_function=net.forward,
                 tracker=tracker,
             )
-            
+
             # CMA-ES learning loop
             min_fit = np.inf
             best_weights = None
             for _ in range(LEARNING_BUDGET):
                 candidates = [optimizer.ask() for _ in range(LEARNING_POP_SIZE)]
-                
+
                 for candidate in candidates:
                     weights = candidate.value
                     fill_parameters(net, weights)
-                    
+
                     # Reset simulation
                     mj.mj_resetData(model, data)
                     mj.set_mjcb_control(controller.set_control)
-                    
+
                     # Run simulation
                     simple_runner(model, data, duration=SIMULATION_DURATION)
-                    
+
                     # Calculate fitness (distance to target)
                     xc, yc, zc = data.qpos[0:3].copy()
                     xt, yt, zt = (2.0, 0.0, 0.1)
                     fitness = np.sqrt((xt - xc) ** 2 + (yt - yc) ** 2 + (zt - zc) ** 2)
-                    
+
                     optimizer.tell(candidate, fitness)
                     if fitness < min_fit:
                         min_fit = fitness
                         best_weights = np.array(weights, copy=True)
-            
+
             ind.fitness = min_fit
             # Store best weights as list (numpy array can't be JSON serialized)
             if best_weights is not None:
                 ind.tags["best_weights"] = best_weights.tolist()
             else:
                 ind.tags["best_weights"] = None
-            
+
         except Exception as e:
             console.log(f"[yellow]Evaluation error: {e}[/yellow]")
             ind.fitness = float("inf")
-        
+
         ind.requires_eval = False
-    
+
     return population
 
 
@@ -430,7 +430,7 @@ def survivor_selection(population: Population) -> Population:
     for ind in population:
         if ind not in survivors:
             ind.alive = False
-    
+
     # Print statistics
     avg_fitness = np.mean([
         ind.fitness_
@@ -447,7 +447,7 @@ def survivor_selection(population: Population) -> Population:
         for ind in survivors
         if ind.fitness_ is not None and ind.fitness_ != float("inf")
     )
-    
+
     console.log(
         f"[green]Survivor Selection:[/green] "
         f"Avg={avg_fitness:.4f}, Min={min_fitness:.4f}, Max={max_fitness:.4f}",
@@ -462,7 +462,7 @@ def survivor_selection(population: Population) -> Population:
 def evolve() -> EA:
     """Entry point for the evolutionary algorithm.
 
-    Initializes the population, evaluates it, defines the evolutionary 
+    Initializes the population, evaluates it, defines the evolutionary
     steps (parent selection, reproduction, evaluation, survivor selection),
     and runs the EA.
 
@@ -472,7 +472,7 @@ def evolve() -> EA:
         The completed EA object containing the run history and solutions.
     """
     console.log("Initializing population...")
-    
+
     # Create initial population with random tree genomes
     population = []
     for _ in range(POP_SIZE):
@@ -482,10 +482,10 @@ def evolve() -> EA:
         ind.requires_eval = True
         population.append(ind)
     population = Population(population)
-    
+
     # Initial evaluation
     population = evaluate(population)
-    
+
     # Define evolutionary operators
     ops = [
         EAOperation(parent_selection),
@@ -493,7 +493,7 @@ def evolve() -> EA:
         EAOperation(evaluate),
         EAOperation(survivor_selection),
     ]
-    
+
     # Initialize and run EA
     ea = EA(
         population,
@@ -503,7 +503,7 @@ def evolve() -> EA:
         db_handling=config.db_handling,
     )
     ea.run()
-    
+
     return ea
 
 
@@ -516,37 +516,37 @@ def main() -> EA:
         f"Population: {POP_SIZE}, Generations: {NUM_GENERATIONS}, "
         f"Modules: {NUM_MODULES}, Learning Budget: {LEARNING_BUDGET}",
     )
-    
+
     start_time = time.time()
     ea = evolve()
     elapsed = time.time() - start_time
-    
+
     # Get and visualize best solution
     best_individual = ea.get_solution("best", only_alive=False)
     if best_individual:
         console.rule("[bold green]Final Best Result[/bold green]")
         console.log(f"Best Fitness: {best_individual.fitness_:.4f}")
         console.log(f"Runtime: {elapsed/60:.2f} minutes")
-        
+
         # Visualize best morphology
         try:
             genome = TreeGenome.from_dict(best_individual.genotype)
             robot_graph = genome.to_networkx()
             spec = construct_mjspec_from_graph(robot_graph).spec
-            
+
             mj.set_mjcb_control(None)
             world = SimpleFlatWorld()
             world.spawn(spec, position=(0.0, 0.0, 0.1), correct_collision_with_floor=True)
             model = world.spec.compile()
             data = mj.MjData(model)
-            
+
             # Create and initialize neural network with learned weights
             net = Network(
                 input_size=len(get_state_from_data(data)) + 2,
                 output_size=model.nu,
                 hidden_size=32,
             )
-            
+
             # Load best learned weights if available
             best_weights = best_individual.tags.get("best_weights")
             if best_weights is not None:
@@ -556,7 +556,7 @@ def main() -> EA:
                 console.log(f"[cyan]Loaded learned controller weights[/cyan]")
             else:
                 console.log(f"[yellow]No learned weights available, using random initialization[/yellow]")
-            
+
             # Set up controller
             tracker = Tracker(
                 name_to_bind="core",
@@ -564,13 +564,13 @@ def main() -> EA:
                 quiet=True,
             )
             tracker.setup(world.spec, data)
-            
+
             controller = Controller(
                 controller_callback_function=net.forward,
                 tracker=tracker,
             )
             mj.set_mjcb_control(controller.set_control)
-            
+
             console.log(f"[cyan]Launching MuJoCo viewer for best morphology[/cyan]")
             viewer.launch(model=model, data=data)
         except Exception as e:
