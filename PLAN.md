@@ -12,7 +12,7 @@
 
 ## Current state
 
-Phase: all five goals done (test-env-green, dashboards-out, repo-hygiene, lint-types-policy, gl-autodetect). Nothing is pushed: `main` is ahead of `origin/main` (`git rev-list --count origin/main..main`, about 42, linear since the rebase) and `feature-dashboard` is local only. The user said "not yet, I will review the history first" (`git log --oneline origin/main..main`). Next step: the user reviews; then push `main` and `feature-dashboard` on their say-so (the first GitHub run of `.github/workflows/checks.yml` happens then); then plan the next goal with `/zz-project-plan`.
+Phase: all five goals done (test-env-green, dashboards-out, repo-hygiene, lint-types-policy, gl-autodetect). Nothing is pushed: `main` is ahead of `origin/main` (`git rev-list --count origin/main..main`, about 44, linear since the rebase) and `feature-dashboard` is local only. The user said "not yet, I will review the history first" (`git log --oneline origin/main..main`). Next step: the user reviews; then push `main` and `feature-dashboard` to `fork` on their say-so (the first GitHub run of `.github/workflows/checks.yml` happens then); then plan the next goal with `/zz-project-plan`.
 
 ## Baseline
 
@@ -42,12 +42,12 @@ No open tasks. Finished (see DESIGN.md Results for the numbers): T1-T6 (goals te
 - Pyright to zero (211 errors, informational in CI), `pydoclint` (166 findings, hook left out): not worked on.
 - The 94 `# type: ignore[...]  # known bug` lines (see Known problems): each marks unfinished or inconsistent code; fixing them changes behaviour, so each needs a decision.
 - Resolve the `morphological_descriptor.py` normaliser TODO (`# TODO: verify that bounding_box_volume ...`): needs a behaviour decision.
-- Push `feature-dashboard` or `main` to origin: needs your say-so.
+- Push `feature-dashboard` or `main` to `fork`: needs your say-so.
 - gl-autodetect extras that the spec lists as non-goals: a detector for driver changes (only a mujoco version or platform change triggers a re-probe; `python -m ariel.utils.gl_manager` covers the rest), a real render benchmark, fixing the 7 examples that import `mujoco` before `ariel`, and a setting to turn the probe off.
 
 ## Open questions
 
-- Push `main` and `feature-dashboard` to origin? Waiting for the user's review (see Current state). `main` was rebased to a linear history on 2026-10-17 (user's choice; author stays `jmdm <jacopo.michele.dimatteo@gmail.com>`, confirmed). The tag `backup/pre-linear` holds the old tip with the merge commits; delete it on the user's say-so once the history is accepted. `feature-dashboard` still sits on the old hashes, so it does not share history with the rebased `main` until it is rebased or recut (decide before pushing it).
+- Push `main` and `feature-dashboard` to the `fork` remote (`Jacopo-DM/ariel`; `origin` is `ci-group/ariel`, not ours)? Waiting for the user's review (see Current state). `main` was rebased to a linear history on 2026-10-17 (user's choice; author stays `jmdm <jacopo.michele.dimatteo@gmail.com>`, confirmed). The tag `backup/pre-linear` holds the old tip with the merge commits; delete it on the user's say-so once the history is accepted. `feature-dashboard` still sits on the old hashes, so it does not share history with the rebased `main` until it is rebased or recut (decide before pushing it).
 
 ## Known problems
 
