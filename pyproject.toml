@@ -28,7 +28,7 @@ dependencies = [
   "numpy>=2.0.2",
   "numpy-quaternion>=2023.0.3",
   "omegaconf>=2.3.0",
-  "opencv-python>=4.11.0.86",
+  "opencv-python-headless==4.11.0.86",
   "panel>=1.8.9",
   "pillow>=11.3.0",
   "plotly>=6.6.0",

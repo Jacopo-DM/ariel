@@ -4,8 +4,8 @@
 from pathlib import Path
 
 # Third-party libraries
-import cv2
 import time
+import matplotlib.pyplot as plt
 import mujoco
 import numpy as np
 from mujoco import viewer
@@ -78,6 +78,12 @@ def main() -> None:
     
     renderer = mujoco.Renderer(model, height=240, width=240)
 
+    # Inset camera window (matplotlib; opencv is installed headless)
+    plt.ion()
+    figure, axis = plt.subplots(num="Inset Camera View")
+    image = axis.imshow(np.zeros((240, 240, 3), dtype=np.uint8))
+    axis.axis("off")
+
     with mujoco.viewer.launch_passive(model, data) as viewer:
         while viewer.is_running():
             step_start = time.time()
@@ -88,16 +94,15 @@ def main() -> None:
             renderer.update_scene(data, camera=found_camera_name)
             pixels = renderer.render()
             
-            bgr_pixels = cv2.cvtColor(pixels, cv2.COLOR_RGB2BGR)
-            cv2.imshow("Inset Camera View", bgr_pixels)
-            cv2.waitKey(1)
+            image.set_data(pixels)
+            plt.pause(0.001)
 
             # Sync time
             time_until_next_step = model.opt.timestep - (time.time() - step_start)
             if time_until_next_step > 0:
                 time.sleep(time_until_next_step)
 
-    cv2.destroyAllWindows()
+    plt.close(figure)
 
 
 if __name__ == "__main__":

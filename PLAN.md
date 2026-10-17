@@ -24,26 +24,18 @@ Brownfield. Measured 2026-10-17 after `uv sync --all-groups` (Python 3.12.9, Lin
 | `ruff check --no-fix src tests` | fail: 1858 errors (461 auto-fixable); top: ANN001 331, E501 281, W505 105 | <1 s |
 | `ruff format --check src tests` | fail: 51 files would be reformatted, 96 formatted | <1 s |
 | `mypy src` (strict) | fail: 517 errors in 49 of 102 files | ~40 s |
-| `pytest tests/unit` | 419 passed, 2 collection errors (see Known problems) | 6.6 s (3 runs: 6.58, 6.59, 6.60) |
+| `pytest tests/unit` | 419 passed, 2 collection errors (before T3); after T3: 437 passed, 0 errors | 6.6 s (3 runs: 6.58, 6.59, 6.60) |
 | coverage, same run | 5033 statements, 2760 missed (about 45% line coverage; `fail_under` is 100) | with `--cov` ~10 s |
 
 ## Tasks
 
 Specs and measurements are in DESIGN.md (Specs). No task changes behaviour except removing the dashboards and the `ariel` console script, both approved. Every task: tests before and after (`pytest` line in CLAUDE.md), one task per commit, PLAN.md updated in the same commit. Pytest count and the grep counts are deterministic (no noise); pytest time was 6.58, 6.59, 6.60 s over three runs, so only a change over 0.1 s would count, and no goal claims a time.
 
-Order: Tier 1 first, in the order listed. T1 and T2 done (see DESIGN.md Results). T4 must come before T5 and T6. gl-autodetect waits for T3.
+Order: Tier 1 first, in the order listed. T1, T2 and T3 done (see DESIGN.md Results). T4 must come before T5 and T6. gl-autodetect no longer waits (T3 done).
 
 ### Tier 1: small diff, low risk
 
 ### Tier 2: clear effect, more files or medium risk
-
-**T3. Switch to headless OpenCV** (test-env-green)
-- Changes: `pyproject.toml` (`opencv-python` to `opencv-python-headless`, same minimum version 4.11.0.86), `uv.lock` (regenerated with `uv lock`), `examples/a_mujoco/3_cameras_in_simulation.py` (lines ~92-100: replace `cv2.cvtColor`/`imshow`/`waitKey`/`destroyAllWindows` with a matplotlib `imshow` updated by `set_data` and `plt.pause`), README requirements note if needed.
-- Effect: the 2 collection errors (`test_environments.py`, `test_tracker.py`) disappear; target: 0 collection errors and 0 failures, test count above 419 (their tests are added to the 419; the exact number is measured after the change). Estimate based on the traceback, which stops at `import cv2` (`libGL.so.1`).
-- Risk medium: lockfile changes, and a previously hidden set of tests may fail once collected (they have never run on this machine). If tests fail for reasons unrelated to libGL, stop and record them under Known problems instead of fixing them under this goal. The example is untested; it needs a manual run.
-- Cost: about +8 lines in the example, 1 dependency swapped (download of `opencv-python-headless`, tens of MB, needs your approval by name at execution), no new concepts.
-- Verify: pytest as above, plus a manual run of the example. DESIGN.md already carries the performance hint about `cv2.imshow`.
-- Gap: the example has no test pinning its behaviour.
 
 **T4. Move dashboards off main** (dashboards-out)
 - Changes: create local branch `feature-dashboard` at current `main` (not pushed without your say-so); on `main` remove `src/ariel/visualisation/dashboard/` (4 dashboard files + `custom_plots.py` + `plot_registry.py`, about 5.8k lines); update `src/ariel/visualisation/__init__.py` docstring, README tree (line 110), `.claude/dev/repo_map.md` (line 23), `docs/source/contributing_guide/CONTRIBUTING.md` (line 111); keep `visualisation/analysis/`. Check `.claude/wiki/ariel_database.md`, `wiki/ariel_individual_db.md`, `wiki/ariel_db_pandas.md` (they mention plotly/panel); update only if they describe the removed code.
@@ -97,8 +89,8 @@ Commands from config and CI. Ran on 2026-10-17 (results in Baseline); not yet mo
 - `nox --session=tests` and `nox --session=pre-commit` are named in `.claude/dev/testing_and_tooling.md`, but `noxfile.py` defines only a `docs` session.
 
 Other problems:
+- `examples/a_mujoco/3_cameras_in_simulation.py` was changed in T3 (cv2 window replaced by matplotlib) but not run: this machine has no display, and the script fails earlier at `mujoco.Renderer(...)` (`AttributeError: ... _mjr_context`, no OpenGL context). Needs a manual run on a machine with a display. The Renderer failure is further evidence for gl-autodetect.
 - Root `CONTRIBUTING.md` (lines 80, 103) and `docs/source/contributing_guide/CONTRIBUTING.md` (line 228) still name nox sessions `tests` and `pre-commit` that `noxfile.py` does not define. Not in T2's file list; add to a task if wanted.
-- `tests/unit/test_simulation/test_environments/test_environments.py` and `tests/unit/test_utils/test_tracker.py` fail at collection: `import cv2` raises `libGL.so.1: cannot open shared object file` (system library missing on this machine; the dependency is `opencv-python`, not headless). Their tests are not in the 419.
 - `.pre-commit-config.yaml` hooks use `language: system`, but `pre-commit`, `pydoclint` and the hook tools are in no dependency group, so the hooks cannot run from the venv (checked 2026-10-17).
 - No tests for: `visualisation/`, `body_phenotypes/lynx_mjspec/`, `simulation/mujoco_worker.py`, `simulation/example_usage.py`, `utils/renderers.py`, `utils/video_recorder.py`, `utils/morphological_descriptor.py`, `utils/noise_gen.py`. Behaviour of `examples/` is pinned by nothing; `tests/functional/` holds only notebooks. (From the file layout; not confirmed by coverage.)
 - Not-owned files: none; the tree was clean.
