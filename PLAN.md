@@ -49,7 +49,6 @@ Policy and numbers are in DESIGN.md (Decisions: "Ruff rule policy" and "Lint/typ
 
 **Tier 2: clear effect, more files or needs judgement (each its own commit, ordered by effect per cost)**
 
-- **T17. Make pre-commit run from the venv.** Replace `language: system` reliance with installed tools (T7 adds them); update prettier from v2.6.0. Verify: `pre-commit run --all-files` on a clean copy (the hooks edit files, so run it on a scratch branch and inspect the diff). Medium.
 - **T18. CI workflow** `.github/workflows/checks.yml` running pytest, `ruff check --no-fix`, `ruff format --check`, `mypy src`, non-blocking until each reaches zero. Cannot be verified without pushing; validate locally with `actionlint` if you want it installed, otherwise a first run after you push. Medium. Coverage `fail_under` set to the measured value (about 45%, exact figure measured then), with the target 100% kept in DESIGN.md.
 
 **Tier 3 (not executed)**
@@ -88,6 +87,8 @@ Commands from config and CI. Ran on 2026-10-17 (results in Baseline); not yet mo
 - `nox --session=tests` and `nox --session=pre-commit` are named in `.claude/dev/testing_and_tooling.md`, but `noxfile.py` defines only a `docs` session.
 
 Other problems:
+- `uv run pydoclint src` reports 166 findings (mostly DOC111/DOC301: type hints in docstrings, `__init__` docstrings). Its pre-commit hook was left out on purpose (user's choice, T17); `[tool.pydoclint]` in `pyproject.toml` is kept.
+- Pyright: 331 errors on `src tests` (measured in T7), not worked on; `pyrightconfig.json` still includes `examples/`.
 - Type errors that mark real or unfinished code, silenced with a line-level `# type: ignore[code]  # known bug` (94 lines in 23 files, 2026-10-17; behaviour unchanged). Remove an ignore by fixing the code it marks; `mypy` (strict, `warn_unused_ignores`) will report one that is no longer needed. By file (codes with counts, then lines):
   - `body_phenotypes/lynx_mjspec/unified_pipeline/evolve.py`: 1 line(s): attr-defined 1 (lines 282)
   - `body_phenotypes/lynx_mjspec/unified_pipeline/replay.py`: 1 line(s): arg-type 1 (lines 163)
