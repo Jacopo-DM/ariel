@@ -24,8 +24,8 @@ From the repo root. Python 3.12 (`.python-version` 3.12.9), uv 0.13.1.
 | Install everything | `uv sync --all-groups` | ~5 min first time, ~8.4 GB `.venv` |
 | Lockfile matches pyproject | `uv lock --check` | passes, ~2 s, read-only |
 | Unit tests | `uv run --no-sync pytest tests/unit -q -p no:cacheprovider` | 437 passed, ~6.6 s |
-| Lint | `uv run --no-sync ruff check --no-fix src tests` | fails today (1858 findings), <1 s, read-only |
-| Format check | `uv run --no-sync ruff format --check src tests` | fails today (51 files), <1 s, read-only |
+| Lint | `uv run --no-sync ruff check --no-fix src tests` | fails today (1330 findings), <1 s, read-only |
+| Format check | `uv run --no-sync ruff format --check src tests` | fails today (47 files), <1 s, read-only |
 | Types | `uv run --no-sync mypy src` | fails today (262 errors), ~40 s, read-only |
 
 `ruff.toml` sets `fix = true` and `unsafe-fixes = true`, so a bare `ruff check` rewrites files: always pass `--no-fix` to check. Pytest with `--cov=ariel` adds ~4 s and writes `.coverage`. Failing results are listed in PLAN.md.

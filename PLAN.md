@@ -21,8 +21,8 @@ Brownfield. Measured 2026-10-17 after `uv sync --all-groups` (Python 3.12.9, Lin
 | Check | Result | Time |
 |---|---|---|
 | `uv lock --check` | pass | ~2 s |
-| `ruff check --no-fix src tests` | fail: 1858 errors (before T4; not re-measured) (461 auto-fixable); top: ANN001 331, E501 281, W505 105 | <1 s |
-| `ruff format --check src tests` | fail: 51 files would be reformatted, 96 formatted | <1 s |
+| `ruff check --no-fix src tests` | fail: 1858 errors; after T6: 1330 (461 auto-fixable); top: ANN001 331, E501 281, W505 105 | <1 s |
+| `ruff format --check src tests` | fail: 51 files would be reformatted, 96 formatted; after T6: 47 and 94 | <1 s |
 | `mypy src` (strict) | fail: 517 errors in 49 of 102 files; after T4: 262 errors in 44 of 96 files | ~40 s |
 | `pytest tests/unit` | 419 passed, 2 collection errors (before T3); after T3: 437 passed, 0 errors | 6.6 s (3 runs: 6.58, 6.59, 6.60) |
 | coverage, same run | 5033 statements, 2760 missed (about 45% line coverage; `fail_under` is 100) | with `--cov` ~10 s |
