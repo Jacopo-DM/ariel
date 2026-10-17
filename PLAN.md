@@ -46,7 +46,7 @@ Evidence for gl-autodetect (checked 2026-10-17):
 
 ## Known problems
 
-Commands from config and CI. Ran on 2026-10-17 (results in Baseline); not yet moved into CLAUDE.md. Not run: pydoclint, sphinx, nox.
+Commands from config and CI. Ran on 2026-10-17 (results in Baseline); not yet moved into CLAUDE.md. Not run: sphinx; pydoclint and pre-commit are not installed.
 - Fast tests: `uv run pytest tests/unit` (pytest, pytest-cov, pytest-modern; coverage `fail_under = 100`).
 - Lint: `uv run ruff check --no-fix .` and `uv run ruff format --check .`.
 - Types: `uv run mypy src` (strict); `pyrightconfig.json` also exists.
@@ -57,8 +57,8 @@ Commands from config and CI. Ran on 2026-10-17 (results in Baseline); not yet mo
 Other problems:
 - `tests/unit/test_simulation/test_environments/test_environments.py` and `tests/unit/test_utils/test_tracker.py` fail at collection: `import cv2` raises `libGL.so.1: cannot open shared object file` (system library missing on this machine; the dependency is `opencv-python`, not headless). Their tests are not in the 419.
 - `uv run ariel` fails: `src/ariel/__main__.py` is missing.
-- `src/ariel/ec/generators copy.py` has a space in the filename and looks like a stray copy of `generators.py`.
-- `CONTRIBUTING.md` is out of date (`uv install`, Python 3.9+, and the source/issue links point to a personal fork).
-- `.pre-commit-config.yaml` hooks use `language: system`, so they need the tools on PATH.
+- `src/ariel/ec/generators copy.py` has a space in the filename, is referenced nowhere, and differs from `generators.py` (790 vs 797 lines, 53 diff lines); added in merge 3ec7711. Deletion awaits the user's say-so.
+- Root `CONTRIBUTING.md` source/issue/PR links point to the personal fork `Jacopo-DM/ariel`; the git remote and `docs/source/contributing_guide/CONTRIBUTING.md` use `ci-group/ariel`. Awaiting the user's call on whether that is intentional.
+- `.pre-commit-config.yaml` hooks use `language: system`, but `pre-commit`, `pydoclint` and the hook tools are in no dependency group, so the hooks cannot run from the venv (checked 2026-10-17).
 - No tests for: `visualisation/`, `body_phenotypes/lynx_mjspec/`, `simulation/mujoco_worker.py`, `simulation/example_usage.py`, `utils/renderers.py`, `utils/video_recorder.py`, `utils/morphological_descriptor.py`, `utils/noise_gen.py`. Behaviour of `examples/` is pinned by nothing; `tests/functional/` holds only notebooks. (From the file layout; not confirmed by coverage.)
 - Not-owned files: none; the tree was clean.

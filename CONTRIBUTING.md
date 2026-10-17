@@ -37,7 +37,7 @@ Request features on the [Issue Tracker].
 
 ## How to set up your development environment
 
-You need Python 3.9+ and the following tools:
+You need Python 3.12+ and the following tools:
 
 - [uv]
 - [Nox]
@@ -45,7 +45,7 @@ You need Python 3.9+ and the following tools:
 Install the package with development requirements:
 
 ```console
-$ uv install
+$ uv sync --all-groups
 ```
 
 You can now run an interactive Python session,
