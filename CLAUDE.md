@@ -23,10 +23,11 @@ From the repo root. Python 3.12 (`.python-version` 3.12.9), uv 0.13.1.
 |---|---|---|
 | Install everything | `uv sync --all-groups` | ~5 min first time, ~8.4 GB `.venv` |
 | Lockfile matches pyproject | `uv lock --check` | passes, ~2 s, read-only |
-| Unit tests | `uv run --no-sync pytest tests/unit -q -p no:cacheprovider` | 437 passed, ~6.6 s; add `--cov=ariel` for coverage (54% today, `fail_under = 54`, target 100) |
+| Unit tests | `uv run --no-sync pytest tests/unit -q -p no:cacheprovider` | 452 passed, ~6.6 s; add `--cov=ariel` for coverage (54% today, `fail_under = 54`, target 100) |
 | Lint | `uv run --no-sync ruff check src tests` | passes (src, tests), <1 s, read-only (`fix = false`) |
 | Format check | `uv run --no-sync ruff format --check src tests` | passes (141 files), <1 s, read-only; also covers notebooks under `tests/` |
 | Types (mypy) | `uv run --no-sync mypy src` | passes (96 files), ~40 s, read-only; 94 lines carry `# type: ignore[...]  # known bug`, listed in PLAN.md |
+| Probe OpenGL backends | `uv run --no-sync python -m ariel.utils.gl_manager` | writes `mujoco_user_config.json` in the current folder, ~2 s here (all three backends fail on this machine); rerun after a driver change |
 | Pre-commit (all hooks) | `uv run --no-sync pre-commit run --all-files` | passes; first run clones `pre-commit/pre-commit-hooks` into `~/.cache/pre-commit`; the whitespace/EOF hooks edit files, ruff hooks cover `src` and `tests` only |
 | Types (pyright) | `uv run --no-sync pyright src tests` | fails today (210 errors), ~15 s, read-only; first run downloads Node into `~/.cache/pyright-python` (229 MB) |
 

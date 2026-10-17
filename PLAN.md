@@ -8,7 +8,7 @@
 | dashboards-out | Move the dashboards off `main` into a `feature-dashboard` branch | improvement | done 2026-10-17: commits matching `git log --grep '^T[45]:'`; measure: dashboard dir gone from main, branch holds it, pytest 437 passed unchanged | done | 2026-10-17 |
 | repo-hygiene | Remove the broken entry point, the stray file and the stale docs | improvement | done 2026-10-17: commits matching `git log --grep '^T[126]:'` and the housekeeping merges; console script, `generators copy.py`, placeholder docstrings (18 files to 0) and stale dev-doc claims fixed. Left: nox session names in root and docs CONTRIBUTING.md (see Known problems) | done | 2026-10-17 |
 | lint-types-policy | Settle the ruff, mypy, pyright and pre-commit policy, then make `src` and `tests` meet it | improvement | done 2026-10-17: commits matching `git log --grep '^T\(7\|8\|9\|1[0-8]\)'`; ruff 1330 -> 0, format 47 files -> clean, mypy 262 -> 0 (94 lines ignored as known bugs), pytest 437 passed, pre-commit passes, CI workflow added; pyright 331 -> 210 (informational) | done | 2026-10-17 |
-| gl-autodetect | ARIEL never crashes because the user's OpenGL backend is unsuitable: a manager probes glfw, egl and osmesa in one subprocess each, records the result in `mujoco_user_config.json` (working folder), and ARIEL applies it to `MUJOCO_GL` before `mujoco` is imported | new behaviour | 8 acceptance criteria in DESIGN.md (Specs, gl-autodetect): valid file written and manager exits 0 even when every backend fails; crashing or hanging worker recorded as failed; `import ariel` applies the file and never overrides a preset `MUJOCO_GL`; first import of `ariel.utils.renderers` probes once under a lock; corrupt or read-only cases only warn; tests, ruff, mypy and coverage 54% hold | draft, spec awaiting approval | 2026-10-17 |
+| gl-autodetect | ARIEL never crashes because the user's OpenGL backend is unsuitable: a manager probes glfw, egl and osmesa in one subprocess each, records the result in `mujoco_user_config.json` (working folder), and ARIEL applies it to `MUJOCO_GL` before `mujoco` is imported | new behaviour | 8 acceptance criteria in DESIGN.md (Specs, gl-autodetect): valid file written and manager exits 0 even when every backend fails; crashing or hanging worker recorded as failed; `import ariel` applies the file and never overrides a preset `MUJOCO_GL`; first import of `ariel.utils.renderers` probes once under a lock; corrupt or read-only cases only warn; tests, ruff, mypy and coverage 54% hold | in progress (G1 done) | 2026-10-17 |
 
 ## Current state
 
@@ -32,12 +32,11 @@ Brownfield. Measured 2026-10-17 after `uv sync --all-groups` (Python 3.12.9, Lin
 
 No open tasks. Finished (see DESIGN.md Results for the numbers): T1-T6 (goals test-env-green, dashboards-out, repo-hygiene) and T7-T18 plus T15a-c (goal lint-types-policy). New tasks need approval.
 
-### gl-autodetect tasks (awaiting approval)
+### gl-autodetect tasks (approved 2026-10-17; G1 done)
 
 Vertical slices, each ending in something that runs and passes its tests; no new dependency (rich is already one). Tier 1 is the walking skeleton.
 
 **Tier 1**
-- **G1. Probe worker and manager (walking skeleton).** New `utils/_gl_probe_worker.py`, `utils/gl_manager.py` (+ `__main__` entry), tests with a fake worker (crash, hang, error, success). Criteria 1, 2. Risk low-medium: subprocess handling and timeouts; cost about 150 lines + 150 lines of tests, no new concepts beyond the config schema. Verify: tests, and a real run on this machine (all three fail, `selected: null`).
 - **G2. Read and apply at `import ariel`.** New `utils/gl_backend.py` (read, validate, apply, no mujoco import) and a call in `ariel/__init__.py`. Criterion 3 (subprocess tests with `python -c`). Risk medium: import-time side effect, must never raise; cost about 80 lines + 100 lines of tests.
 
 **Tier 2**
