@@ -1,12 +1,16 @@
 """Test: reading the OpenGL config and applying it to MUJOCO_GL."""
 
+import io
 import json
 import os
 import subprocess
 import sys
+import threading
+import time
 from pathlib import Path
 
 import pytest
+from rich.console import Console
 
 from ariel.utils import gl_backend
 from ariel.utils.gl_backend import CONFIG_NAME
@@ -161,3 +165,230 @@ def test_import_ariel_without_file(tmp_path: Path) -> None:
     done = _import_ariel(tmp_path)
     assert done.returncode == 0
     assert done.stdout.split() == ["False", "None"]
+
+
+# --- ensure_gl_backend: probe once when the file is missing --------------- #
+
+
+class _FakeRun:
+    """Stand-in for the manager: writes a config and counts its calls."""
+
+    def __init__(self, selected: str | None = "egl", delay: float = 0.0):
+        self.calls = 0
+        self.selected = selected
+        self.delay = delay
+
+    def __call__(self, path: Path) -> dict[str, object]:
+        self.calls += 1
+        time.sleep(self.delay)
+        config: dict[str, object] = {
+            "version": 1,
+            "selected": self.selected,
+        }
+        path.write_text(json.dumps(config), encoding="utf-8")
+        return config
+
+
+def _quiet_console() -> Console:
+    return Console(file=io.StringIO(), width=120)
+
+
+def test_ensure_probes_once_when_file_missing(tmp_path: Path) -> None:
+    """A missing file triggers one probe; the next call reuses the file."""
+    run = _FakeRun()
+    path = tmp_path / CONFIG_NAME
+    environ: dict[str, str] = {}
+    first = gl_backend.ensure_gl_backend(
+        path, run=run, environ=environ, modules={}, console=_quiet_console()
+    )
+    second = gl_backend.ensure_gl_backend(
+        path, run=run, environ={}, modules={}, console=_quiet_console()
+    )
+    assert run.calls == 1
+    assert first == second == "egl"
+    assert environ == {"MUJOCO_GL": "egl"}
+    assert not (tmp_path / (CONFIG_NAME + ".lock")).exists()
+
+
+def test_ensure_does_nothing_when_environment_is_set(tmp_path: Path) -> None:
+    """A preset MUJOCO_GL makes any probe pointless, so none runs."""
+    run = _FakeRun()
+    applied = gl_backend.ensure_gl_backend(
+        tmp_path / CONFIG_NAME,
+        run=run,
+        environ={"MUJOCO_GL": "glfw"},
+        modules={},
+        console=_quiet_console(),
+    )
+    assert applied is None
+    assert run.calls == 0
+
+
+def test_ensure_when_mujoco_already_imported(tmp_path: Path) -> None:
+    """The probe still runs and is saved, but applies from the next run."""
+    run = _FakeRun()
+    console = _quiet_console()
+    environ: dict[str, str] = {}
+    applied = gl_backend.ensure_gl_backend(
+        tmp_path / CONFIG_NAME,
+        run=run,
+        environ=environ,
+        modules={"mujoco": object()},
+        console=console,
+    )
+    assert applied is None
+    assert run.calls == 1
+    assert environ == {}
+    assert "next time" in console.file.getvalue()  # type: ignore[attr-defined]
+
+
+def test_ensure_reprobes_a_corrupt_file(tmp_path: Path) -> None:
+    """A corrupt file warns and is replaced by a fresh probe."""
+    _write(tmp_path, "{broken")
+    run = _FakeRun(selected="osmesa")
+    with pytest.warns(UserWarning, match=CONFIG_NAME):
+        applied = gl_backend.ensure_gl_backend(
+            tmp_path / CONFIG_NAME,
+            run=run,
+            environ={},
+            modules={},
+            console=_quiet_console(),
+        )
+    assert applied == "osmesa"
+    assert run.calls == 1
+
+
+def test_ensure_threads_probe_once(tmp_path: Path) -> None:
+    """Concurrent callers wait for the first probe instead of repeating it."""
+    run = _FakeRun(delay=0.5)
+    path = tmp_path / CONFIG_NAME
+    results: list[str | None] = []
+
+    def call() -> None:
+        results.append(
+            gl_backend.ensure_gl_backend(
+                path,
+                run=run,
+                environ={},
+                modules={},
+                console=_quiet_console(),
+            )
+        )
+
+    threads = [threading.Thread(target=call) for _ in range(3)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+    assert run.calls == 1
+    assert results == ["egl", "egl", "egl"]
+
+
+_PROCESS_SCRIPT = """
+import io, json, sys, time
+from pathlib import Path
+from rich.console import Console
+from ariel.utils import gl_backend
+
+folder = Path(sys.argv[1])
+def fake(path):
+    with (folder / "calls.txt").open("a") as f:
+        f.write("probe\\n")
+    time.sleep(1.0)
+    config = {"version": 1, "selected": "egl"}
+    path.write_text(json.dumps(config))
+    return config
+
+gl_backend.ensure_gl_backend(
+    folder / "mujoco_user_config.json", run=fake, environ={}, modules={},
+    console=Console(file=io.StringIO()),
+)
+"""
+
+
+def test_ensure_two_processes_probe_once(tmp_path: Path) -> None:
+    """Two processes starting together produce one probe and one file."""
+    procs = [
+        subprocess.Popen(  # noqa: S603
+            [sys.executable, "-c", _PROCESS_SCRIPT, str(tmp_path)]
+        )
+        for _ in range(2)
+    ]
+    assert [p.wait(timeout=120) for p in procs] == [0, 0]
+    calls = (tmp_path / "calls.txt").read_text().splitlines()
+    assert calls == ["probe"]
+    assert (tmp_path / CONFIG_NAME).is_file()
+
+
+def test_ensure_removes_a_stale_lock(tmp_path: Path) -> None:
+    """A lock left by a dead process does not block forever."""
+    lock = tmp_path / (CONFIG_NAME + ".lock")
+    lock.write_text("dead process")
+    old = time.time() - 3600
+    os.utime(lock, (old, old))
+    run = _FakeRun()
+    applied = gl_backend.ensure_gl_backend(
+        tmp_path / CONFIG_NAME,
+        run=run,
+        environ={},
+        modules={},
+        console=_quiet_console(),
+        lock_timeout=5.0,
+    )
+    assert applied == "egl"
+    assert run.calls == 1
+
+
+@pytest.mark.skipif(
+    not hasattr(os, "geteuid") or os.geteuid() == 0,
+    reason="read-only folders cannot be simulated as root",
+)
+def test_ensure_in_read_only_folder_only_warns(tmp_path: Path) -> None:
+    """If the result cannot be saved, ARIEL warns and carries on."""
+    folder = tmp_path / "ro"
+    folder.mkdir()
+    folder.chmod(0o500)
+    run = _FakeRun()
+    try:
+        with pytest.warns(UserWarning, match="cannot save"):
+            applied = gl_backend.ensure_gl_backend(
+                folder / CONFIG_NAME,
+                run=run,
+                environ={},
+                modules={},
+                console=_quiet_console(),
+            )
+    finally:
+        folder.chmod(0o700)
+    assert applied is None
+    assert run.calls == 0
+
+
+def test_import_renderers_probes_once_for_real(tmp_path: Path) -> None:
+    """Importing ariel.utils.renderers creates the file the first time only."""
+    env = {k: v for k, v in os.environ.items() if k != "MUJOCO_GL"}
+    command = [sys.executable, "-c", "import ariel.utils.renderers"]
+    first = subprocess.run(  # noqa: S603
+        command,
+        cwd=tmp_path,
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=300,
+        check=False,
+    )
+    assert first.returncode == 0
+    assert "One-off setup" in first.stdout + first.stderr
+    config = json.loads((tmp_path / CONFIG_NAME).read_text(encoding="utf-8"))
+    assert set(config["backends"]) == {"glfw", "egl", "osmesa"}
+    second = subprocess.run(  # noqa: S603
+        command,
+        cwd=tmp_path,
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=300,
+        check=False,
+    )
+    assert second.returncode == 0
+    assert "One-off setup" not in second.stdout + second.stderr

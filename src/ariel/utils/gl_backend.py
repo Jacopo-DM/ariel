@@ -5,19 +5,29 @@ reads ``MUJOCO_GL`` when it is imported, so code that decides the backend
 must run before that import.
 """
 
+import contextlib
 import json
 import os
 import sys
+import time
 import warnings
-from collections.abc import Mapping, MutableMapping
+from collections.abc import Callable, Mapping, MutableMapping
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from rich.console import Console
 
 CONFIG_NAME = "mujoco_user_config.json"
 CONFIG_VERSION = 1
 
 # Order of preference when two backends render equally fast.
 BACKEND_ORDER = ("glfw", "egl", "osmesa")
+
+LOCK_SUFFIX = ".lock"
+# A probe takes at most three backends x 30 s; a lock older than this is stale.
+LOCK_TIMEOUT = 120.0
+_POLL_SECONDS = 0.1
 
 
 def platform_backends(platform: str) -> tuple[str, ...]:
@@ -156,3 +166,131 @@ def configure_from_file(
     if config is None:
         return None
     return apply_config(config, environ=environ, modules=modules)
+
+
+def _try_lock(lock: Path) -> bool:
+    """Create the lock file; False if another process holds it."""
+    try:
+        handle = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+    except FileExistsError:
+        return False
+    os.write(handle, str(os.getpid()).encode())
+    os.close(handle)
+    return True
+
+
+def _wait_for_lock(lock: Path, timeout: float) -> None:
+    """Wait until the lock is gone; remove it if it is stale."""
+    deadline = time.monotonic() + timeout
+    while lock.exists():
+        try:
+            age = time.time() - lock.stat().st_mtime
+        except OSError:  # released between exists() and stat()
+            return
+        if age > timeout or time.monotonic() > deadline:
+            with contextlib.suppress(OSError):
+                lock.unlink()
+            return
+        time.sleep(_POLL_SECONDS)
+
+
+def ensure_gl_backend(
+    path: Path | None = None,
+    *,
+    run: Callable[[Path], dict[str, Any]] | None = None,
+    environ: MutableMapping[str, str] | None = None,
+    modules: Mapping[str, object] | None = None,
+    console: "Console | None" = None,
+    lock_timeout: float = LOCK_TIMEOUT,
+) -> str | None:
+    """
+    Make sure the OpenGL probe result exists and apply it; never raises.
+
+    If ``MUJOCO_GL`` is set, nothing is done: the variable wins, so a probe
+    would be pointless. If the config file is missing (or corrupt), the
+    backends are probed once; processes that start at the same time wait for
+    that probe instead of repeating it. Call this before ``import mujoco``.
+
+    Parameters
+    ----------
+    path
+        The config file; ``<cwd>/mujoco_user_config.json`` by default.
+    run
+        Runs the probe and writes the file; the OpenGL manager by default.
+    environ
+        The environment to change; ``os.environ`` by default.
+    modules
+        The imported modules; ``sys.modules`` by default.
+    console
+        Where to tell the user about the probe; a new console by default.
+    lock_timeout
+        Seconds after which a lock file counts as stale.
+
+    Returns
+    -------
+    str | None
+        The backend that was set, or None.
+    """
+    environ = os.environ if environ is None else environ
+    modules = sys.modules if modules is None else modules
+    if "MUJOCO_GL" in environ:
+        return None
+    try:
+        path = path or config_path()
+        config = read_config(path)
+        if config is None:
+            config = _probe_once(path, run, console, lock_timeout, modules)
+    except OSError as exc:
+        warnings.warn(
+            f"cannot save {CONFIG_NAME}: {exc}. The default MuJoCo OpenGL "
+            "backend is used.",
+            UserWarning,
+            stacklevel=2,
+        )
+        return None
+    if config is None:
+        return None
+    return apply_config(config, environ=environ, modules=modules)
+
+
+def _probe_once(
+    path: Path,
+    run: Callable[[Path], dict[str, Any]] | None,
+    console: "Console | None",
+    lock_timeout: float,
+    modules: Mapping[str, object],
+) -> dict[str, Any] | None:
+    """Probe under a lock; return the config or None if it is unavailable."""
+    lock = path.with_name(path.name + LOCK_SUFFIX)
+    while not _try_lock(lock):
+        _wait_for_lock(lock, lock_timeout)
+        config = read_config(path)
+        if config is not None:
+            return config
+    try:
+        config = read_config(path)  # another process may have just finished
+        if config is not None:
+            return config
+        if run is None:
+            from ariel.utils.gl_manager import (  # noqa: PLC0415
+                run as manager_run,
+            )
+
+            def run(target: Path) -> dict[str, Any]:
+                return manager_run(target, console=console)
+
+        config = run(path)
+        if "mujoco" in modules:
+            if console is None:
+                from rich.console import Console  # noqa: PLC0415
+
+                console = Console()
+            console.print(
+                "The OpenGL choice was saved but mujoco is already imported "
+                "in this process, so it applies the next time you start "
+                "Python."
+            )
+    finally:
+        with contextlib.suppress(OSError):
+            lock.unlink()
+    return config

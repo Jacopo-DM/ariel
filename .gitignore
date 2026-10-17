@@ -274,3 +274,7 @@ RECYCLE.BIN/
 *.msp
 # Windows shortcuts
 *.lnk
+
+# OpenGL probe result, created per machine and working folder
+mujoco_user_config.json
+mujoco_user_config.json.lock
