@@ -2,7 +2,7 @@
 target-version = "py312"
 
 # Exclude a variety of commonly ignored directories.
-exclude = [".venv", ".git", ".typings", "examples", "docs"]
+exclude = [".venv", ".git", ".typings", ".claude/wiki", "examples", "docs"]
 
 # Customization of the linter and formatter
 fix = false               # Auto-fixes are opt-in (see CLAUDE.md)

@@ -123,10 +123,12 @@ class Population:  # ruff: ignore[too-many-public-methods]  # public signature o
         return Population(self.population + other.population)
 
     @overload
-    def __getitem__(self, index: int) -> Individual: ...
+    def __getitem__(  # pragma: no cover  # typing stub, never runs
+        self, index: int
+    ) -> Individual: ...
 
     @overload
-    def __getitem__(
+    def __getitem__(  # pragma: no cover  # typing stub, never runs
         self, index: slice[int | None, int | None, int | None]
     ) -> Population: ...
 

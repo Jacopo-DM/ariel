@@ -114,7 +114,8 @@ class HighProbabilityDecoder(Blueprint):
         # Available faces for connections
         available_faces = np.zeros_like(self.conn_p_space)
         available_faces[IDX_OF_CORE, :, :] = 1.0
-        for _ in range(len(pre_nodes)):
+        # A tree of n nodes has at most n - 1 edges
+        for _ in range(len(pre_nodes) - 1):
             # Get the current state of the connection probability space
             current_state = self.conn_p_space * available_faces
 
