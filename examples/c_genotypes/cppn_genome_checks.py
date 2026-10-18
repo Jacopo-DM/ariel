@@ -1,7 +1,12 @@
-"""Manual checks of the CPPN genome (prints the genome)."""
+"""Manual checks of the CPPN genome (prints the genome).
 
-from .genome import Genome
-from .id_manager import IdManager
+Moved here from ``src`` on 2026-10-18. ``Genome.crossover`` has a known
+bug (it can raise UnboundLocalError, see PLAN.md); the planned goal
+"CPPN working" fixes it.
+"""
+
+from ariel.body_phenotypes.robogen_lite.cppn_neat.genome import Genome
+from ariel.body_phenotypes.robogen_lite.cppn_neat.id_manager import IdManager
 
 
 def display_genome(genome: Genome, title: str) -> None:
@@ -12,7 +17,8 @@ def display_genome(genome: Genome, title: str) -> None:
     print("   Nodes:")
     # Sort nodes by ID for consistent display order
     for node in sorted(genome.nodes.values(), key=lambda n: n._id):  # ruff: ignore[private-member-access]
-        act_func = node.activation.__name__ if node.activation else "None"  # type: ignore[truthy-function,redundant-expr]  # known bug
+        act = node.activation
+        act_func = getattr(act, "__name__", str(act))
         print(
             f"     - Node {node._id} (type: {node.typ}, "  # ruff: ignore[private-member-access]
             f"bias: {node.bias:.3f}, act: {act_func})"
@@ -28,7 +34,7 @@ def display_genome(genome: Genome, title: str) -> None:
     print("-" * 40 + "\n")
 
 
-def test_mutation() -> None:
+def check_mutation() -> None:
     """Tests the add_node and add_connection mutations."""
     print("=" * 60)
     print("🧪 T E S T I N G   M U T A T I O N 🧪")
@@ -63,7 +69,7 @@ def test_mutation() -> None:
     display_genome(genome, "Mutated Genome (Corrected)")
 
 
-def test_crossover() -> None:
+def check_crossover() -> None:
     """Tests the crossover of two parent genomes."""
     print("=" * 60)
     print(" T E S T I N G   C R O S S O V E R ")
@@ -105,5 +111,5 @@ def test_crossover() -> None:
 
 # --- Main Execution ---
 if __name__ == "__main__":
-    test_mutation()
-    test_crossover()
+    check_mutation()
+    check_crossover()
