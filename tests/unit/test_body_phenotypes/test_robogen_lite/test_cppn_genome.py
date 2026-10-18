@@ -50,7 +50,7 @@ def _ids() -> IdManager:
     return IdManager(node_start=10, innov_start=FIRST_INNOV)
 
 
-# --- construction --------------------------------------------------------- #
+# --- construction ----------------------------------------------------------- #
 
 
 def test_random_genome_is_fully_connected() -> None:
@@ -89,7 +89,7 @@ def test_node_and_connection_copy() -> None:
     assert vars(conn_copy) == vars(conn)
 
 
-# --- adding genes ---------------------------------------------------------- #
+# --- adding genes ----------------------------------------------------------- #
 
 
 def test_add_connection_and_node_reject_duplicates() -> None:
@@ -111,7 +111,7 @@ def test_add_node_registers_by_id() -> None:
     assert genome.nodes[7] is hidden
 
 
-# --- mutation -------------------------------------------------------------- #
+# --- mutation --------------------------------------------------------------- #
 
 
 def test_mutate_add_node_splits_a_connection() -> None:
@@ -199,7 +199,7 @@ def test_mutate_add_connection_swaps_when_destination_is_input() -> None:
     ]
 
 
-# --- crossover ------------------------------------------------------------- #
+# --- crossover -------------------------------------------------------------- #
 
 
 def _parent_with_extra_gene(fitness: float) -> Genome:
@@ -277,7 +277,7 @@ def test_crossover_maximisation_self_worse_known_bug() -> None:
         worse.crossover(better)
 
 
-# --- ordering and activation ---------------------------------------------- #
+# --- ordering and activation ------------------------------------------------ #
 
 
 def test_node_ordering_puts_inputs_before_outputs() -> None:
@@ -332,7 +332,7 @@ def test_activate_recurrent_genome_uses_relaxation() -> None:
     assert math.isfinite(out[0])
 
 
-# --- serialisation --------------------------------------------------- #
+# --- serialisation ---------------------------------------------------------- #
 
 
 def test_to_dict_from_dict_roundtrip() -> None:
@@ -350,7 +350,7 @@ def test_from_dict_rejects_bad_data() -> None:
         Genome.from_dict({"connections": []})
 
 
-# --- id manager ------------------------------------------------------ #
+# --- id manager ------------------------------------------------------------- #
 
 
 def test_id_manager_counts_up_in_memory() -> None:

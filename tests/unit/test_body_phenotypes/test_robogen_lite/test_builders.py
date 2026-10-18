@@ -70,7 +70,7 @@ def _small_graph() -> nx.DiGraph[int]:
     return graph
 
 
-# --- blueprint IO and drawing ---------------------------------------------- #
+# --- blueprint IO and drawing ----------------------------------------------- #
 
 
 def test_save_graph_without_a_path_does_nothing(tmp_path: Path) -> None:
@@ -134,7 +134,7 @@ def test_module_rotate_default_raises() -> None:
         _Complete().rotate(0.0)
 
 
-# --- prebuilt robots ------------------------------------------------------- #
+# --- prebuilt robots -------------------------------------------------------- #
 
 
 def test_random_body_has_twenty_modules() -> None:
