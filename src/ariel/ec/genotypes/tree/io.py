@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING
 
 from .tree_genome import TreeGenome
+
+if TYPE_CHECKING:
+    from pydantic import JsonValue
 
 
 def load_genome(path: str) -> TreeGenome:
@@ -34,7 +37,7 @@ def save_genome(genome: TreeGenome, path: str) -> None:
     """
 
 
-def genome_to_networkx_dict(genome: TreeGenome) -> dict[str, Any]:
+def genome_to_networkx_dict(genome: TreeGenome) -> dict[str, JsonValue]:
     """Convert a TreeGenome to a dictionary format compatible with networkx.
 
     Parameters
@@ -44,7 +47,7 @@ def genome_to_networkx_dict(genome: TreeGenome) -> dict[str, Any]:
 
     Returns
     -------
-    dict[str, Any]
+    dict[str, JsonValue]
         A dictionary representation of the genome suitable for networkx.
     """
     return genome.to_dict()

@@ -84,7 +84,7 @@ class PerlinNoise:
         # Ensure non-negative and wrap
         xi &= 255
         yi &= 255
-        return cast("np.ndarray", self._perm[(self._perm[xi] + yi) & 255])
+        return cast("IntArray", self._perm[(self._perm[xi] + yi) & 255])
 
     def _grad_at_corner(self, xi: IntArray, yi: IntArray) -> FloatArray:
         """
@@ -102,7 +102,7 @@ class PerlinNoise:
             array with shape xi.shape + (2,)
         """
         h = self._hash2(xi, yi) % self._grad_lut.shape[0]
-        return cast("np.ndarray", self._grad_lut[h])
+        return cast("FloatArray", self._grad_lut[h])
 
     def as_grid(  # ruff: ignore[too-many-locals]  # long routine kept as written; splitting it is a refactor outside this goal
         self,

@@ -10,7 +10,11 @@ import pytest
 from rich.console import Console
 
 from ariel.utils import gl_manager
-from ariel.utils.gl_backend import CONFIG_NAME, platform_backends
+from ariel.utils.gl_backend import (
+    CONFIG_NAME,
+    BackendResult,
+    platform_backends,
+)
 
 _OK = (
     "import json, sys;"
@@ -113,9 +117,9 @@ def test_probe_backend_missing_executable() -> None:
 def test_select_backend_prefers_fastest() -> None:
     """The working backend with the lowest render time is selected."""
     results = {
-        "glfw": gl_manager.BackendResult(ok=True, render_ms=40.0),
-        "egl": gl_manager.BackendResult(ok=True, render_ms=10.0),
-        "osmesa": gl_manager.BackendResult(ok=True, render_ms=300.0),
+        "glfw": BackendResult(ok=True, render_ms=40.0),
+        "egl": BackendResult(ok=True, render_ms=10.0),
+        "osmesa": BackendResult(ok=True, render_ms=300.0),
     }
     assert gl_manager.select_backend(results) == "egl"
 
@@ -123,16 +127,16 @@ def test_select_backend_prefers_fastest() -> None:
 def test_select_backend_ties_follow_priority_order() -> None:
     """Equal render times resolve in the order glfw, egl, osmesa."""
     results = {
-        "osmesa": gl_manager.BackendResult(ok=True, render_ms=5.0),
-        "egl": gl_manager.BackendResult(ok=True, render_ms=5.0),
-        "glfw": gl_manager.BackendResult(ok=False, error="x"),
+        "osmesa": BackendResult(ok=True, render_ms=5.0),
+        "egl": BackendResult(ok=True, render_ms=5.0),
+        "glfw": BackendResult(ok=False, error="x"),
     }
     assert gl_manager.select_backend(results) == "egl"
 
 
 def test_select_backend_none_working() -> None:
     """No working backend means no selection."""
-    results = {"glfw": gl_manager.BackendResult(ok=False, error="x")}
+    results = {"glfw": BackendResult(ok=False, error="x")}
     assert gl_manager.select_backend(results) is None
 
 
@@ -151,7 +155,7 @@ def test_run_writes_valid_config(tmp_path: Path) -> None:
         path, command=command, timeout=20, console=_quiet(), platform="linux"
     )
     on_disk = json.loads(path.read_text(encoding="utf-8"))
-    assert on_disk == config
+    assert on_disk == config.model_dump(mode="json")
     assert on_disk["version"] == 1
     assert on_disk["platform"] == "linux"
     assert set(on_disk) >= {"python", "mujoco", "backends", "selected"}
@@ -176,9 +180,9 @@ def test_run_when_every_backend_fails(tmp_path: Path) -> None:
         console=_quiet(),
         platform="linux",
     )
-    assert config["selected"] is None
-    assert config["viewer_available"] is False
-    assert all(not b["ok"] for b in config["backends"].values())
+    assert config.selected is None
+    assert config.viewer_available is False
+    assert all(not b.ok for b in config.backends.values())
 
 
 def test_run_viewer_available_when_glfw_works(tmp_path: Path) -> None:
@@ -191,7 +195,7 @@ def test_run_viewer_available_when_glfw_works(tmp_path: Path) -> None:
         console=_quiet(),
         platform="linux",
     )
-    assert config["viewer_available"] is True
+    assert config.viewer_available is True
 
 
 def test_run_leaves_no_temporary_files(tmp_path: Path) -> None:

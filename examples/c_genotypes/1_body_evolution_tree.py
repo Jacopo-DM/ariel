@@ -269,10 +269,10 @@ class MorphologyEvolution:
             if noncore:
                 nid = random.choice(noncore)
                 # choose a new rotation allowed for its type
-                mtype = ModuleType[new.nodes[nid]["type"]]
+                mtype = ModuleType[new.nodes[nid].type]
                 rots = [r.name for r in ALLOWED_ROTATIONS[mtype]]
                 if rots:
-                    new.nodes[nid]["rotation"] = random.choice(rots)
+                    new.nodes[nid].rotation = random.choice(rots)
 
         # prune any invalid edges before returning
         _prune_invalid_edges(new)

@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import random
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Self
+
+from pydantic import BaseModel, ConfigDict, Field
 
 from .activations import ACTIVATION_FUNCTIONS, DEFAULT_ACTIVATION
 from .connection import Connection
@@ -13,7 +15,35 @@ from .node import Node
 MIN_NODES_FOR_CONNECTION = 2
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Mapping
+
+
+class _NodeRecord(BaseModel):
+    """A node as stored by `Genome.to_dict`."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    node_id: int = Field(alias="_id")
+    typ: str
+    activation: str
+    bias: float
+
+
+class _ConnectionRecord(BaseModel):
+    """A connection as stored by `Genome.to_dict`."""
+
+    in_id: int
+    out_id: int
+    weight: float
+    enabled: bool
+    innov_id: int
+
+
+class _GenomeRecord(BaseModel):
+    """A genome as stored by `Genome.to_dict`."""
+
+    nodes: dict[str, _NodeRecord]
+    connections: list[_ConnectionRecord]
 
 
 class Genome:
@@ -24,7 +54,7 @@ class Genome:
         nodes: dict[int, Node],
         connections: dict[int, Connection],
         fitness: float,
-        serialized: dict[str, Any] | None = None,
+        serialized: dict[str, object] | None = None,
     ) -> None:
         """Create a genome from its nodes, connections and fitness."""
         self.nodes = nodes
@@ -519,12 +549,12 @@ class Genome:
 
             return [current_values[node_id] for node_id in output_node_ids]
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> dict[str, object]:
         """Serialize the Genome to a dictionary.
 
         Returns
         -------
-        dict[str, Any]
+        dict[str, object]
             The genome as a JSON-serialisable dict.
         """
         return {
@@ -553,7 +583,11 @@ class Genome:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any], fitness: float = 0.0) -> Genome:  # ruff: ignore[unused-class-method-argument]
+    def from_dict(
+        cls,
+        data: Mapping[str, object],
+        fitness: float = 0.0,  # ruff: ignore[unused-class-method-argument]
+    ) -> Genome:
         """Reconstructs a Genome object from a dictionary.
 
         Returns
@@ -561,26 +595,29 @@ class Genome:
         Genome
             The rebuilt genome.
         """
+        record = _GenomeRecord.model_validate(data)
+
         # 1. Rebuild Nodes
-        nodes = {}
-        for nid, props in data["nodes"].items():
-            nodes[int(nid)] = Node(
-                _id=props["_id"],
-                typ=props["typ"],
-                activation=props["activation"],
-                bias=props["bias"],
+        nodes = {
+            int(nid): Node(
+                _id=props.node_id,
+                typ=props.typ,
+                activation=props.activation,  # type: ignore[arg-type]  # known bug
+                bias=props.bias,
             )
+            for nid, props in record.nodes.items()
+        }
 
         # 2. Rebuild Connections
-        connections = {}
-        for c in data["connections"]:
-            new_conn = Connection(
-                in_id=c["in_id"],
-                out_id=c["out_id"],
-                weight=c["weight"],
-                enabled=c["enabled"],
-                innov_id=c["innov_id"],
+        connections = {
+            c.innov_id: Connection(
+                in_id=c.in_id,
+                out_id=c.out_id,
+                weight=c.weight,
+                enabled=c.enabled,
+                innov_id=c.innov_id,
             )
-            connections[new_conn.innov_id] = new_conn
+            for c in record.connections
+        }
         # 3. Return new Genome instance
         return cls(nodes=nodes, connections=connections, fitness=0.0)

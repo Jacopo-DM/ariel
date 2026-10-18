@@ -7,14 +7,14 @@ multiprocessing.Pool.imap — it is picklable because it is a named class.
 
 import os
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 
 import mujoco as mj
 import torch
 
+from ariel.parameters import FrozenModel
 
-@dataclass
-class EvalConfig:
+
+class EvalConfig(FrozenModel):
     """Minimal config passed to each worker process.
 
     Users may subclass this to carry additional experiment-specific fields.

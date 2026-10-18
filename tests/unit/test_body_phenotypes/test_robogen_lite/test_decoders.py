@@ -3,6 +3,7 @@
 import numpy as np
 import pytest
 from networkx import DiGraph
+from numpy.typing import NDArray
 
 from ariel.body_phenotypes.robogen_lite.config import (
     NUM_OF_FACES,
@@ -27,12 +28,12 @@ NUM_SYMBOLS = 3
 NUM_MODULES = 4
 
 
-def _type_space(num_modules: int = NUM_MODULES) -> np.ndarray:
+def _type_space(num_modules: int = NUM_MODULES) -> NDArray[np.float32]:
     """Type probability space with core forced at index 0, no NONE elsewhere.
 
     Returns
     -------
-    np.ndarray
+    NDArray[np.float32]
         The probability space.
     """
     space = np.ones((num_modules, NUM_OF_TYPES_OF_MODULES), dtype=np.float32)
@@ -44,11 +45,11 @@ def _type_space(num_modules: int = NUM_MODULES) -> np.ndarray:
     return space
 
 
-def _conn_space(num_modules: int = NUM_MODULES) -> np.ndarray:
+def _conn_space(num_modules: int = NUM_MODULES) -> NDArray[np.float32]:
     return np.ones((num_modules, num_modules, NUM_OF_FACES), dtype=np.float32)
 
 
-def _rot_space(num_modules: int = NUM_MODULES) -> np.ndarray:
+def _rot_space(num_modules: int = NUM_MODULES) -> NDArray[np.float32]:
     return np.ones((num_modules, NUM_OF_ROTATIONS), dtype=np.float32)
 
 

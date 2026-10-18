@@ -4,13 +4,13 @@ Shows how to subclass MuJoCoWorkerBase for a targeted-locomotion task
 with a CMA-ES-optimised ANN controller, then run it through a process pool.
 """
 
-from dataclasses import dataclass
 from multiprocessing import get_context
 
 import mujoco as mj
 import nevergrad as ng
 import numpy as np
 import torch
+from numpy.typing import NDArray
 
 from ariel.simulation.mujoco_worker import EvalConfig, MuJoCoWorkerBase
 
@@ -39,7 +39,7 @@ class _Network:
         return [self.W1, self.b1, self.W2, self.b2]
 
 
-def _fill_parameters(net: _Network, params: np.ndarray) -> None:
+def _fill_parameters(net: _Network, params: NDArray[np.float64]) -> None:
     offset = 0
     for p in net.parameters():
         numel = p.numel()
@@ -54,7 +54,6 @@ def _fill_parameters(net: _Network, params: np.ndarray) -> None:
 # ---------------------------------------------------------------------------
 
 
-@dataclass
 class LocomotionConfig(EvalConfig):
     """Experiment-specific config for the targeted-locomotion task.
 

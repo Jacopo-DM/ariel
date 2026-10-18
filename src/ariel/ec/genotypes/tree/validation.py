@@ -5,7 +5,9 @@ Functions here check required fields and enforce allowed faces/rotations.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING
+
+from pydantic import BaseModel, Field
 
 from ariel.body_phenotypes.robogen_lite.config import (
     ALLOWED_FACES,
@@ -15,12 +17,33 @@ from ariel.body_phenotypes.robogen_lite.config import (
     ModuleType,
 )
 
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
-def _to_int_node_id(node_id: int | str) -> int:
-    return int(node_id) if isinstance(node_id, str) else node_id
+
+class _RawNode(BaseModel):
+    """A node of a genome dict; the type and rotation are checked later."""
+
+    type: str = ""
+    rotation: str = ""
 
 
-def is_single_connected_tree(genome: dict[str, Any]) -> bool:
+class _RawEdge(BaseModel):
+    """An edge of a genome dict; the face is checked later."""
+
+    parent: int
+    child: int
+    face: str
+
+
+class _RawGenome(BaseModel):
+    """A genome dict with string or integer node ids."""
+
+    nodes: dict[int, _RawNode] = Field(default_factory=dict)
+    edges: list[_RawEdge] = Field(default_factory=list)
+
+
+def is_single_connected_tree(genome: Mapping[str, object]) -> bool:
     """Verify that the genome forms a single connected tree with core as root.
 
     In this domain, the core (IDX_OF_CORE) must be the root and all nodes
@@ -31,14 +54,13 @@ def is_single_connected_tree(genome: dict[str, Any]) -> bool:
     bool
         True if the genome is one connected tree rooted at the core.
     """
-    nodes = genome.get("nodes", {})
-    edges = genome.get("edges", [])
+    raw = _RawGenome.model_validate(genome)
 
-    if not nodes:
+    if not raw.nodes:
         return True  # Empty genome is trivially connected
 
-    # normalize node IDs to ints so dicts with string keys (JSON) work correctly
-    node_ids = {_to_int_node_id(k) for k in nodes}
+    # node ids are ints even when the dict came from JSON with string keys
+    node_ids = set(raw.nodes)
 
     # Core must exist and be the root (no incoming edges)
     if IDX_OF_CORE not in node_ids:
@@ -48,12 +70,10 @@ def is_single_connected_tree(genome: dict[str, Any]) -> bool:
     adj_list: dict[int, list[int]] = {nid: [] for nid in node_ids}
     has_parent = dict.fromkeys(node_ids, False)
 
-    for e in edges:
-        parent = _to_int_node_id(e["parent"])
-        child = _to_int_node_id(e["child"])
-        if parent in adj_list and child in adj_list:
-            adj_list[parent].append(child)
-            has_parent[child] = True
+    for e in raw.edges:
+        if e.parent in adj_list and e.child in adj_list:
+            adj_list[e.parent].append(e.child)
+            has_parent[e.child] = True
 
     # Core must have no parent
     if has_parent[IDX_OF_CORE]:
@@ -74,7 +94,7 @@ def is_single_connected_tree(genome: dict[str, Any]) -> bool:
     return len(visited) == len(node_ids)
 
 
-def validate_genome_dict(genome: dict[str, Any]) -> None:  # ruff: ignore[complex-structure]
+def validate_genome_dict(genome: Mapping[str, object]) -> None:  # ruff: ignore[complex-structure]
     """Check a genome dict for consistency; raise ValueError if invalid.
 
     Raises
@@ -83,60 +103,50 @@ def validate_genome_dict(genome: dict[str, Any]) -> None:  # ruff: ignore[comple
         If the genome has no core, a bad type, rotation or face, a missing
         parent, a repeated face, or is not one connected tree.
     """
-    nodes = genome.get("nodes", {})
-    edges = genome.get("edges", [])
+    raw = _RawGenome.model_validate(genome)
 
     # nodes must include core at IDX_OF_CORE
-    if str(IDX_OF_CORE) not in nodes and IDX_OF_CORE not in nodes:
+    if IDX_OF_CORE not in raw.nodes:
         msg = f"Genome must contain core node with index {IDX_OF_CORE}"
         raise ValueError(msg)
 
     # Validate node fields
-    for k, v in list(nodes.items()):
-        nid = int(k) if isinstance(k, str) else k
-        t = v.get("type")
-        rot = v.get("rotation")
-        if t not in ModuleType.__members__:
-            msg = f"Node {nid} has invalid type '{t}'"
+    for nid, node in raw.nodes.items():
+        if node.type not in ModuleType.__members__:
+            msg = f"Node {nid} has invalid type '{node.type}'"
             raise ValueError(msg)
-        if rot not in ModuleRotationsIdx.__members__:
-            msg = f"Node {nid} has invalid rotation '{rot}'"
+        if node.rotation not in ModuleRotationsIdx.__members__:
+            msg = f"Node {nid} has invalid rotation '{node.rotation}'"
             raise ValueError(msg)
 
     # Validate edges
-    occupied = {}  # (parent, face) -> child
-    for e in edges:
-        parent = e["parent"]
-        child = e["child"]
-        face = e["face"]
+    occupied: dict[tuple[int, str], int] = {}  # (parent, face) -> child
+    for e in raw.edges:
         # face must be valid
-        if face not in ModuleFaces.__members__:
+        if e.face not in ModuleFaces.__members__:
             msg = (
-                f"Edge parent={parent} child={child} has invalid face '{face}'"
+                f"Edge parent={e.parent} child={e.child} "
+                f"has invalid face '{e.face}'"
             )
             raise ValueError(msg)
         # skip edges whose parent node no longer exists (shouldn't happen
         # normally, but may after swaps); treat as invalid structure rather than
         # raising KeyError.
-        if str(parent) not in nodes and parent not in nodes:
-            msg = f"Edge has missing parent node {parent}"
+        if e.parent not in raw.nodes:
+            msg = f"Edge has missing parent node {e.parent}"
             raise ValueError(msg)
         # parent type must allow that face
-        ptype = (
-            nodes[str(parent)]["type"]
-            if str(parent) in nodes
-            else nodes[parent]["type"]
-        )
+        ptype = raw.nodes[e.parent].type
         allowed = [f.name for f in ALLOWED_FACES[ModuleType[ptype]]]
-        if face not in allowed:
-            msg = f"Face '{face}' not allowed for parent type '{ptype}'"
+        if e.face not in allowed:
+            msg = f"Face '{e.face}' not allowed for parent type '{ptype}'"
             raise ValueError(msg)
         # ensure a face is not occupied twice
-        key = (parent, face)
+        key = (e.parent, e.face)
         if key in occupied:
-            msg = f"Parent {parent} already has child at face '{face}'"
+            msg = f"Parent {e.parent} already has child at face '{e.face}'"
             raise ValueError(msg)
-        occupied[key] = child
+        occupied[key] = e.child
 
     # Validate connectivity: must form a single connected tree with core as root
     if not is_single_connected_tree(genome):

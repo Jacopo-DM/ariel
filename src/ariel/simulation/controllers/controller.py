@@ -1,9 +1,8 @@
 """Controller that applies a callback to a MuJoCo simulation."""
 
 # Standard library
-from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Protocol
 
 # Third-party libraries
 import mujoco as mj
@@ -13,12 +12,27 @@ import numpy as np
 from ariel.utils.tracker import Tracker
 
 
+class ControlCallback(Protocol):
+    """A function that returns the control values for one control step."""
+
+    def __call__(
+        self,
+        model: mj.MjModel,
+        data: mj.MjData,
+        /,
+        *args: object,
+        **kwargs: object,
+    ) -> object:
+        """Return the control values for the current simulation state."""
+        ...
+
+
 @dataclass
 class Controller:
     # Function that executes the actual control step
     """Apply a control callback to a MuJoCo simulation, optionally tracked."""
 
-    controller_callback_function: Callable[..., Any]
+    controller_callback_function: ControlCallback
 
     # How often to call the controller (for every simulation step)
     time_steps_per_ctrl_step: int = 50  # control frequency
@@ -37,7 +51,7 @@ class Controller:
         model: mj.MjModel,
         data: mj.MjData,
         *args: object,
-        **kwargs: dict[Any, Any] | None,
+        **kwargs: object,
     ) -> None:
         """Set the controller callback function and gives additional arguments.
 
@@ -49,9 +63,9 @@ class Controller:
         data : mj.MjData
             The Mujoco data of the simulation. This will be used to access
             simulation variables, such as the current time and control values.
-        *args : Any
+        *args : object
             Additional arguments to pass to the controller callback function.
-        **kwargs : dict[Any, Any]
+        **kwargs : object
             Additional keyword arguments to pass to the controller callback
             function.
 

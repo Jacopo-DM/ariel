@@ -1,7 +1,7 @@
 """ARIEL Default Crossover Functions."""
 
 from collections.abc import Sequence
-from typing import Any, cast
+from typing import cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -11,17 +11,17 @@ from .individual import JSONIterable
 
 
 def _validate_same_shape(
-    arr_i: NDArray[Any],
-    arr_j: NDArray[Any],
+    arr_i: NDArray[np.float64],
+    arr_j: NDArray[np.float64],
 ) -> None:
     """
     Assert that two arrays share the same shape.
 
     Parameters
     ----------
-    arr_i : NDArray[Any]
+    arr_i : NDArray[np.float64]
         First parent array.
-    arr_j : NDArray[Any]
+    arr_j : NDArray[np.float64]
         Second parent array.
 
     Raises
@@ -42,7 +42,7 @@ def _validate_same_shape(
 def _load(
     parent_i: JSONIterable,
     parent_j: JSONIterable,
-) -> tuple[tuple[int, ...], NDArray[Any], NDArray[Any]]:
+) -> tuple[tuple[int, ...], NDArray[np.float64], NDArray[np.float64]]:
     """
     Convert two parent genotypes into flat NumPy arrays ready for crossover.
 
@@ -61,9 +61,9 @@ def _load(
     -------
     shape : tuple[int, ...]
         The original shape of the parent arrays (used for repacking).
-    flat_i : NDArray[Any]
+    flat_i : NDArray[np.float64]
         Flattened copy of ``parent_i`` cast to ``float64``.
-    flat_j : NDArray[Any]
+    flat_j : NDArray[np.float64]
         Flattened copy of ``parent_j`` cast to ``float64``.
     """
     arr_i = np.array(parent_i, dtype=float)
@@ -72,7 +72,7 @@ def _load(
     return arr_i.shape, arr_i.flatten().copy(), arr_j.flatten().copy()
 
 
-def _pack(flat: NDArray[Any], shape: tuple[int, ...]) -> JSONIterable:
+def _pack(flat: NDArray[np.float64], shape: tuple[int, ...]) -> JSONIterable:
     """Reshape to original shape.
 
     Reshape a flat array back to the original genotype shape and convert to a
@@ -80,7 +80,7 @@ def _pack(flat: NDArray[Any], shape: tuple[int, ...]) -> JSONIterable:
 
     Parameters
     ----------
-    flat : NDArray[Any]
+    flat : NDArray[np.float64]
         One-dimensional array to reshape.
     shape : tuple[int, ...]
         Target shape, as returned by ``_load``.
@@ -180,7 +180,7 @@ class Crossover:
                 msg,
             )
 
-        raw: NDArray[Any] = _rng.choice(
+        raw: NDArray[np.intp] = _rng.choice(
             np.arange(1, length, dtype=np.intp),
             size=n,
             replace=False,
@@ -241,7 +241,7 @@ class Crossover:
             raise ValueError(msg)
 
         shape, flat_i, flat_j = _load(parent_i, parent_j)
-        mask: NDArray[Any] = _rng.random(len(flat_i)) < swap_probability
+        mask: NDArray[np.bool_] = _rng.random(len(flat_i)) < swap_probability
 
         c1, c2 = flat_i.copy(), flat_j.copy()
         c1[mask] = flat_j[mask]

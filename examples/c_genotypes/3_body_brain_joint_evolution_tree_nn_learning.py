@@ -302,10 +302,10 @@ class JointTreeNNLearningEvolution:
             noncore = [nid for nid in new.nodes if nid != IDX_OF_CORE]
             if noncore:
                 nid = random.choice(noncore)
-                mtype = ModuleType[new.nodes[nid]["type"]]
+                mtype = ModuleType[new.nodes[nid].type]
                 rots = [r.name for r in ALLOWED_ROTATIONS[mtype]]
                 if rots:
-                    new.nodes[nid]["rotation"] = random.choice(rots)
+                    new.nodes[nid].rotation = random.choice(rots)
 
         _prune_invalid_edges(new)
         with contextlib.suppress(ValueError):

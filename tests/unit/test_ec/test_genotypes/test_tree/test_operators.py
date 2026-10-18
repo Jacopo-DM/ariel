@@ -16,7 +16,11 @@ from ariel.ec.genotypes.tree.operators import (
     subtree_swap,
     validate_tree_depth,
 )
-from ariel.ec.genotypes.tree.tree_genome import TreeGenome
+from ariel.ec.genotypes.tree.tree_genome import (
+    TreeEdge,
+    TreeGenome,
+    TreeNode,
+)
 from ariel.ec.genotypes.tree.validation import validate_genome_dict
 
 BRICK_ID = 2
@@ -33,7 +37,7 @@ CHAIN_DEPTH = 2
 
 def _core_only() -> TreeGenome:
     g = TreeGenome()
-    g.nodes = {0: {"type": "CORE", "rotation": "DEG_0"}}
+    g.nodes = {0: TreeNode(type="CORE", rotation="DEG_0")}
     g.edges = []
     return g
 
@@ -41,23 +45,23 @@ def _core_only() -> TreeGenome:
 def _core_hinge() -> TreeGenome:
     g = TreeGenome()
     g.nodes = {
-        0: {"type": "CORE", "rotation": "DEG_0"},
-        1: {"type": "HINGE", "rotation": "DEG_0"},
+        0: TreeNode(type="CORE", rotation="DEG_0"),
+        1: TreeNode(type="HINGE", rotation="DEG_0"),
     }
-    g.edges = [{"parent": 0, "child": 1, "face": "FRONT"}]
+    g.edges = [TreeEdge(parent=0, child=1, face="FRONT")]
     return g
 
 
 def _core_hinge_brick() -> TreeGenome:
     g = TreeGenome()
     g.nodes = {
-        0: {"type": "CORE", "rotation": "DEG_0"},
-        1: {"type": "HINGE", "rotation": "DEG_0"},
-        2: {"type": "BRICK", "rotation": "DEG_0"},
+        0: TreeNode(type="CORE", rotation="DEG_0"),
+        1: TreeNode(type="HINGE", rotation="DEG_0"),
+        2: TreeNode(type="BRICK", rotation="DEG_0"),
     }
     g.edges = [
-        {"parent": 0, "child": 1, "face": "FRONT"},
-        {"parent": 1, "child": 2, "face": "FRONT"},
+        TreeEdge(parent=0, child=1, face="FRONT"),
+        TreeEdge(parent=1, child=2, face="FRONT"),
     ]
     return g
 
@@ -74,7 +78,7 @@ def test_add_node_appends_node() -> None:
         g, parent=0, face="FRONT", node_id=1, mtype="HINGE", rotation="DEG_0"
     )
     assert 1 in g.nodes
-    assert g.nodes[1] == {"type": "HINGE", "rotation": "DEG_0"}
+    assert g.nodes[1] == TreeNode(type="HINGE", rotation="DEG_0")
 
 
 def test_add_node_appends_edge() -> None:
@@ -83,7 +87,7 @@ def test_add_node_appends_edge() -> None:
     add_node(
         g, parent=0, face="BACK", node_id=1, mtype="BRICK", rotation="DEG_0"
     )
-    assert {"parent": 0, "child": 1, "face": "BACK"} in g.edges
+    assert TreeEdge(parent=0, child=1, face="BACK") in g.edges
 
 
 # ---------------------------------------------------------------------------
@@ -96,7 +100,7 @@ def test_remove_subtree_removes_node_and_edge() -> None:
     g = _core_hinge()
     remove_subtree(g, node_id=1)
     assert 1 not in g.nodes
-    assert all(e["child"] != 1 for e in g.edges)
+    assert all(e.child != 1 for e in g.edges)
 
 
 def test_remove_subtree_removes_descendants() -> None:
@@ -141,7 +145,7 @@ def test_random_tree_has_core() -> None:
     """random_tree always contains the core node."""
     g = random_tree(5)
     assert 0 in g.nodes
-    assert g.nodes[0]["type"] == "CORE"
+    assert g.nodes[0].type == "CORE"
 
 
 def test_random_tree_within_budget() -> None:
@@ -205,7 +209,7 @@ def test_mutate_replace_node_preserves_core() -> None:
     g = _core_hinge()
     for _ in range(20):
         mutate_replace_node(g)
-    assert g.nodes[0]["type"] == "CORE"
+    assert g.nodes[0].type == "CORE"
 
 
 def test_mutate_replace_node_core_only_is_noop() -> None:

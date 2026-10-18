@@ -6,6 +6,7 @@ from typing import cast
 # Third-party libraries
 import mujoco
 import numpy as np
+from numpy.typing import NDArray
 
 # Local libraries
 from ariel.simulation.environments import BaseWorld
@@ -142,7 +143,7 @@ class OlympicArena(BaseWorld):
         # Build the world specification
         self._extend_spec()
 
-    def _generate_heightmap(self) -> np.ndarray:
+    def _generate_heightmap(self) -> NDArray[np.float64]:
         size = self.rugged_resolution
         hill = self.rugged_hillyness
 
@@ -182,7 +183,7 @@ class OlympicArena(BaseWorld):
         mask = t * t * (3.0 - 2.0 * t)  # smoothstep(0,1,t)
 
         # Apply mask so edges fade to 0 smoothly
-        return cast("np.ndarray", noise * mask)
+        return cast("NDArray[np.float64]", noise * mask)
 
     def _extend_spec(self) -> None:
         # --- Assets --- #

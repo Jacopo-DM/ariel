@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 # Standard library
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 # Third-party libraries
 # Local libraries
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from ariel.body_phenotypes.robogen_lite.modules.module import Module
 
 
-def construct_mjspec_from_graph(graph: DiGraph[Any]) -> CoreModule:
+def construct_mjspec_from_graph(graph: DiGraph[int]) -> CoreModule:
     """
     Construct a MuJoCo specification from a graph representation.
 
@@ -68,7 +68,7 @@ def construct_mjspec_from_graph(graph: DiGraph[Any]) -> CoreModule:
                 raise ValueError(msg)
 
         # Check that the module is not None
-        if module:
+        if module:  # type: ignore[truthy-bool]  # known bug
             rotation_angle = ModuleRotationsTheta[module_rotation].value
             module.rotate(rotation_angle)
             modules[node] = module
@@ -83,7 +83,7 @@ def construct_mjspec_from_graph(graph: DiGraph[Any]) -> CoreModule:
         face = graph.edges[edge]["face"]
 
         # Check if both modules exist (not 'None')
-        if modules[to_module]:
+        if modules[to_module]:  # type: ignore[truthy-bool]  # known bug
             modules[from_module].sites[ModuleFaces[face]].attach_body(  # type: ignore[attr-defined]  # known bug
                 body=modules[to_module].body,  # type: ignore[attr-defined]  # known bug
                 prefix=f"{modules[from_module].index}-{modules[to_module].index}-{ModuleFaces[face].value}-",  # type: ignore[attr-defined]  # known bug

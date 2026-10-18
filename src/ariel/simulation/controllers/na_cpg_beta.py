@@ -26,6 +26,7 @@ from typing import NamedTuple
 # Third-party libraries
 import numpy as np
 import torch
+from numpy.typing import NDArray
 from rich.console import Console
 from rich.traceback import install
 from torch import nn
@@ -314,7 +315,7 @@ class NaCPGBeta(nn.Module):
 
     def param_type_converter(  # ruff: ignore[no-self-use]  # keeps the interface shared with the sibling classes
         self,
-        params: list[float] | np.ndarray | torch.Tensor,
+        params: list[float] | NDArray[np.float64] | torch.Tensor,
     ) -> torch.Tensor:
         """Convert input parameters to torch.Tensor if needed.
 
@@ -437,8 +438,8 @@ class NaCPGBeta(nn.Module):
 
     def set_state(
         self,
-        xy: list[float] | np.ndarray | torch.Tensor,
-        xy_dot_old: list[float] | np.ndarray | torch.Tensor,
+        xy: list[float] | NDArray[np.float64] | torch.Tensor,
+        xy_dot_old: list[float] | NDArray[np.float64] | torch.Tensor,
     ) -> None:
         """Set the CPG state (xy) and the previous derivative (xy_dot_old)."""
         self.xy = self.param_type_converter(xy)

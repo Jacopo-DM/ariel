@@ -13,6 +13,9 @@ from ariel.parameters.ariel_types import (
 )
 from ariel.utils.noise_gen import NormMethod, PerlinNoise
 
+if typing.TYPE_CHECKING:
+    from numpy.typing import NDArray
+
 
 def flat_heightmap(
     dims: tuple[int, int],
@@ -105,7 +108,7 @@ def smooth_edges_heightmap(
             interpolation=cv2.INTER_CUBIC,
         )
 
-    return typing.cast("np.ndarray", mask.astype(ND_FLOAT_PRECISION))
+    return typing.cast("NDArray[np.float64]", mask.astype(ND_FLOAT_PRECISION))
 
 
 def amphitheater_heightmap(
@@ -187,4 +190,6 @@ def crater_heightmap(
             dsize=(dims[1], dims[0]),
             interpolation=cv2.INTER_CUBIC,
         )
-    return typing.cast("np.ndarray", heightmap.astype(ND_FLOAT_PRECISION))
+    return typing.cast(
+        "NDArray[np.float64]", heightmap.astype(ND_FLOAT_PRECISION)
+    )

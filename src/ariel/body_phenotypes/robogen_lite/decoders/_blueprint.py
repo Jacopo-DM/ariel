@@ -20,7 +20,6 @@ from __future__ import annotations
 # Standard library
 import json
 from pathlib import Path
-from typing import Any
 
 # Third-party libraries
 import matplotlib.pyplot as plt
@@ -53,7 +52,7 @@ class Blueprint:
         self._graph: dict[int, ModuleInstance] = {}
 
         # NetworkX graph
-        self.graph: DiGraph[Any] = nx.DiGraph()
+        self.graph: DiGraph[int] = nx.DiGraph()
 
     def generate_networkx_graph(self) -> None:
         """Generate a NetworkX graph from the decoded graph."""
@@ -73,7 +72,7 @@ class Blueprint:
 
 
 def save_graph_as_json(
-    graph: DiGraph[Any],
+    graph: DiGraph[int],
     save_file: Path | str | None = None,
 ) -> None:
     """
@@ -97,7 +96,7 @@ def save_graph_as_json(
 
 def load_graph_from_json(
     load_file: Path | str,
-) -> DiGraph[Any]:
+) -> DiGraph[int]:
     """
     Load a directed graph from a JSON file.
 
@@ -113,7 +112,7 @@ def load_graph_from_json(
     """
     with Path(load_file).open("r", encoding="utf-8") as f:
         data = json.load(f)
-    graph: DiGraph[Any] = json_graph.node_link_graph(
+    graph: DiGraph[int] = json_graph.node_link_graph(
         data,
         directed=True,
         multigraph=False,
@@ -123,7 +122,7 @@ def load_graph_from_json(
 
 
 def draw_graph(
-    graph: DiGraph[Any],
+    graph: DiGraph[int],
     title: str = "NetworkX Directed Graph",
     save_file: Path | str | None = None,
     *,

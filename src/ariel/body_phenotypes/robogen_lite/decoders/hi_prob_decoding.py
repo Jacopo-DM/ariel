@@ -9,8 +9,6 @@ Todo
 from __future__ import annotations
 
 # Standard library
-from typing import Any
-
 # Third-party libraries
 import networkx as nx
 import numpy as np
@@ -42,7 +40,7 @@ class HighProbabilityDecoder(Blueprint):
         type_probability_space: npt.NDArray[np.float32],
         connection_probability_space: npt.NDArray[np.float32],
         rotation_probability_space: npt.NDArray[np.float32],
-    ) -> DiGraph[Any]:
+    ) -> DiGraph[int]:
         """
         Convert probability matrices to a graph.
 
@@ -62,7 +60,7 @@ class HighProbabilityDecoder(Blueprint):
         """
         # Reset the graph
         self._graph: dict[int, ModuleInstance] = {}
-        self.graph: DiGraph[Any] = nx.DiGraph()
+        self.graph: DiGraph[int] = nx.DiGraph()
 
         # Store the probability spaces
         self.conn_p_space = connection_probability_space.copy()

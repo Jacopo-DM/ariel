@@ -7,21 +7,60 @@ to a NetworkX DiGraph compatible with `construct_mjspec_from_graph`.
 from __future__ import annotations
 
 import json
-import typing
-from dataclasses import dataclass, field
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import networkx as nx
+from pydantic import BaseModel, ConfigDict, Field, JsonValue
+
+from ariel.parameters import MutableModel
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
 
-@dataclass
-class TreeGenome:
-    # nodes: mapping id -> dict with keys "type" and "rotation" (Enum names)
+class TreeNode(MutableModel):
+    """A module of the body: its type and rotation (``Enum`` member names)."""
+
+    type: str
+    rotation: str
+
+
+class TreeEdge(MutableModel):
+    """A connection from a parent module to a child on one parent face.
+
+    Extra keys that come with an edge are kept and written back unchanged.
+    """
+
+    model_config = ConfigDict(extra="allow")
+
+    parent: int
+    child: int
+    face: str  # ``ModuleFaces`` member name
+
+
+class _SerializedNode(BaseModel):
+    """A node as stored in a dict or JSON file; unknown keys are dropped."""
+
+    id: int | None = None
+    type: str
+    rotation: str
+
+
+class _SerializedGenome(BaseModel):
+    """A genome as stored: nodes keyed by id, or listed with an ``id`` each."""
+
+    nodes: dict[int, _SerializedNode] | list[_SerializedNode] = Field(
+        default_factory=dict
+    )
+    edges: list[TreeEdge] = Field(default_factory=list)
+
+
+class TreeGenome(MutableModel):
     """Tree genome: module nodes and the edges that connect them."""
 
-    nodes: dict[int, dict[str, str]] = field(default_factory=dict)
-    # edges: list of {"parent": int, "child": int, "face": ModuleFaces.name}
-    edges: list[dict[str, typing.Any]] = field(default_factory=list)
+    nodes: dict[int, TreeNode] = Field(default_factory=dict)
+    edges: list[TreeEdge] = Field(default_factory=list)
 
     def to_networkx(self) -> nx.DiGraph[int]:
         """Return the genome as a networkx DiGraph.
@@ -33,48 +72,53 @@ class TreeGenome:
         """
         g: nx.DiGraph[int] = nx.DiGraph()
         for nid, nobj in self.nodes.items():
-            g.add_node(nid, type=nobj["type"], rotation=nobj["rotation"])
+            g.add_node(nid, type=nobj.type, rotation=nobj.rotation)
         for e in self.edges:
-            g.add_edge(e["parent"], e["child"], face=e["face"])
+            g.add_edge(e.parent, e.child, face=e.face)
         return g
 
-    def to_dict(self) -> dict[str, typing.Any]:
+    def to_dict(self) -> dict[str, JsonValue]:
         """Return the genome as a JSON-serialisable dict.
 
         Returns
         -------
-        dict[str, typing.Any]
+        dict[str, JsonValue]
             The genome as a JSON-serialisable dict.
         """
         return {
-            "nodes": {str(k): v for k, v in self.nodes.items()},
-            "edges": self.edges,
+            "nodes": {str(k): v.model_dump() for k, v in self.nodes.items()},
+            "edges": [e.model_dump() for e in self.edges],
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, typing.Any]) -> TreeGenome:
+    def from_dict(cls, data: Mapping[str, object]) -> TreeGenome:
         """Create a genome from a dict as returned by `to_dict`.
 
         Returns
         -------
         TreeGenome
             The new genome.
+
+        Raises
+        ------
+        ValueError
+            If a listed node has no id.
         """
-        nodes_raw = data.get("nodes", {})
+        raw = _SerializedGenome.model_validate(data)
+        nodes: dict[int, TreeNode] = {}
         # accept both string-keyed mapping and list
-        nodes: dict[int, dict[str, str]] = {}
-        if isinstance(nodes_raw, dict):
-            for k, v in nodes_raw.items():
-                nodes[int(k)] = {"type": v["type"], "rotation": v["rotation"]}
-        elif isinstance(nodes_raw, list):
-            for entry in nodes_raw:
-                nid = int(entry["id"])
-                nodes[nid] = {
-                    "type": entry["type"],
-                    "rotation": entry["rotation"],
-                }
-        edges = data.get("edges", [])
-        return cls(nodes=nodes, edges=edges)
+        if isinstance(raw.nodes, dict):
+            for nid, entry in raw.nodes.items():
+                nodes[nid] = TreeNode(type=entry.type, rotation=entry.rotation)
+        else:
+            for entry in raw.nodes:
+                if entry.id is None:
+                    msg = "Every listed node needs an 'id'"
+                    raise ValueError(msg)
+                nodes[entry.id] = TreeNode(
+                    type=entry.type, rotation=entry.rotation
+                )
+        return cls(nodes=nodes, edges=raw.edges)
 
     def save_json(self, path: str) -> None:
         """Write the genome to `path` as JSON."""

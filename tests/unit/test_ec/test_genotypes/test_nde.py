@@ -5,6 +5,7 @@ from itertools import starmap
 import numpy as np
 import torch
 from networkx import DiGraph
+from numpy.typing import NDArray
 
 from ariel.body_phenotypes.robogen_lite.config import (
     NUM_OF_FACES,
@@ -29,12 +30,12 @@ def _nde(n: int = 5) -> NeuralDevelopmentalEncoding:
     return NeuralDevelopmentalEncoding(number_of_modules=n)
 
 
-def _genotype(n: int = 5, seed: int = 0) -> list[np.ndarray]:  # ruff: ignore[unused-function-argument]
+def _genotype(n: int = 5, seed: int = 0) -> list[NDArray[np.float32]]:  # ruff: ignore[unused-function-argument]
     """Three float32 chromosomes (type, connection, rotation), fixed length.
 
     Returns
     -------
-    list[np.ndarray]
+    list[NDArray[np.float32]]
         The three chromosomes.
     """
     rng = np.random.default_rng(seed)

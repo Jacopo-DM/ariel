@@ -2,14 +2,17 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Any, cast
+from typing import TYPE_CHECKING, cast
 
 import mujoco
 import numpy as np
 
-from ariel.body_phenotypes.lynx_mjspec.lynx_arm import LynxArm
+from ariel.body_phenotypes.lynx_mjspec.lynx_arm import ArmConfig, LynxArm
 from ariel.body_phenotypes.lynx_mjspec.table import TableWorld
+from ariel.parameters import FrozenModel
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
 
 NUM_JOINTS = 6
 NUM_TUBES = 5
@@ -26,8 +29,7 @@ DEFAULT_ACTION_SCALE = 0.25
 DEFAULT_MAX_DELTA = 0.12
 
 
-@dataclass(frozen=True)
-class PolicySpec:
+class PolicySpec(FrozenModel):
     """Sizes and action limits of the policy network."""
 
     input_size: int = NUM_JOINTS + NUM_JOINTS + 3
@@ -45,7 +47,7 @@ class FastNumpyNetwork:
         input_size: int,
         hidden_size: int,
         output_size: int,
-        weights: np.ndarray,
+        weights: NDArray[np.float64],
     ) -> None:
         """Create a three-layer tanh network with zero-initialised weights.
 
@@ -76,17 +78,17 @@ class FastNumpyNetwork:
         self.w3 = weights[b2_end:w3_end].reshape(output_size, hidden_size)
         self.b3 = weights[w3_end:b3_end]
 
-    def forward(self, x: np.ndarray) -> np.ndarray:
+    def forward(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         """Map an observation to an action in [-1, 1]^output_size.
 
         Returns
         -------
-        np.ndarray
+        NDArray[np.float64]
             The action, one value per output unit, in [-1, 1].
         """
         x = np.tanh(self.w1 @ x + self.b1)
         x = np.tanh(self.w2 @ x + self.b2)
-        return cast("np.ndarray", np.tanh(self.w3 @ x + self.b3))
+        return cast("NDArray[np.float64]", np.tanh(self.w3 @ x + self.b3))
 
 
 def num_network_params(spec: PolicySpec) -> int:
@@ -143,12 +145,12 @@ def get_actuated_joint_ids(
 
 def get_joint_state(
     model: mujoco.MjModel, data: mujoco.MjData, joint_ids: list[int]
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Return the positions and velocities of the given joints.
 
     Returns
     -------
-    tuple[np.ndarray, np.ndarray]
+    tuple[NDArray[np.float64], NDArray[np.float64]]
         The joint positions and the joint velocities.
     """
     q = np.zeros(NUM_JOINTS, dtype=np.float64)
@@ -167,7 +169,7 @@ def set_target_position(
     model: mujoco.MjModel,
     data: mujoco.MjData,
     target_site_id: int,
-    target: np.ndarray,
+    target: NDArray[np.float64],
 ) -> None:
     """Move the target site to the world position `target`."""
     body_id = int(model.site_bodyid[target_site_id])
@@ -193,18 +195,19 @@ def build_observation(
     joint_ids: list[int],
     tcp_sid: int,
     tgt_sid: int,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """Return joint positions, velocities and target relative to the TCP.
 
     Returns
     -------
-    np.ndarray
+    NDArray[np.float64]
         The observation vector for the policy.
     """
     q, qd = get_joint_state(model, data, joint_ids)
     rel_target = data.site_xpos[tgt_sid] - data.site_xpos[tcp_sid]
     return cast(
-        "np.ndarray", np.concatenate([q, qd, rel_target]).astype(np.float64)
+        "NDArray[np.float64]",
+        np.concatenate([q, qd, rel_target]).astype(np.float64),
     )
 
 
@@ -212,7 +215,7 @@ def apply_position_delta_control(
     model: mujoco.MjModel,
     data: mujoco.MjData,
     joint_ids: list[int],
-    action: np.ndarray,
+    action: NDArray[np.float64],
     action_scale: float,
     max_delta: float,
 ) -> None:
@@ -230,7 +233,7 @@ def apply_position_delta_control(
 
 
 def build_model(
-    tube_lengths: np.ndarray,
+    tube_lengths: NDArray[np.float64],
 ) -> tuple[mujoco.MjModel, mujoco.MjData, int, int, list[int]]:
     """Compile the arm on a table; return model, data and ids.
 
@@ -245,14 +248,14 @@ def build_model(
     RuntimeError
         If a site id cannot be resolved or too few joints are actuated.
     """
-    config: dict[str, Any] = {
-        "num_joints": NUM_JOINTS,
-        "genotype_tube": [1] * NUM_TUBES,
-        "genotype_joints": NUM_JOINTS,
-        "tube_lengths": np.clip(tube_lengths, TUBE_MIN, TUBE_MAX).tolist(),
-        "rotation_angles": [0.0, -1.57, 0.0, 0.0, 0.0, 0.0],
-        "task": "reach",
-    }
+    config = ArmConfig(
+        num_joints=NUM_JOINTS,
+        genotype_tube=[1] * NUM_TUBES,
+        genotype_joints=NUM_JOINTS,
+        tube_lengths=np.clip(tube_lengths, TUBE_MIN, TUBE_MAX).tolist(),
+        rotation_angles=[0.0, -1.57, 0.0, 0.0, 0.0, 0.0],
+        task="reach",
+    )
 
     arm = LynxArm(config=config)
     world = TableWorld()

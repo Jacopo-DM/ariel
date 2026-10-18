@@ -13,7 +13,7 @@ import pytest
 from rich.console import Console
 
 from ariel.utils import gl_backend
-from ariel.utils.gl_backend import CONFIG_NAME
+from ariel.utils.gl_backend import CONFIG_NAME, BackendName, GLConfig
 
 
 def _write(folder: Path, content: object) -> None:
@@ -27,10 +27,10 @@ def test_read_config_missing_returns_none(tmp_path: Path) -> None:
 
 
 def test_read_config_valid(tmp_path: Path) -> None:
-    """A valid file is returned as a dict."""
+    """A valid file is returned as a GLConfig."""
     _write(tmp_path, {"version": 1, "selected": "egl"})
     config = gl_backend.read_config(tmp_path / CONFIG_NAME)
-    assert config == {"version": 1, "selected": "egl"}
+    assert config == GLConfig(version=1, selected="egl")
 
 
 @pytest.mark.parametrize(
@@ -48,7 +48,7 @@ def test_apply_config_sets_selected_backend() -> None:
     """With MUJOCO_GL unset and mujoco not imported, selected is applied."""
     environ: dict[str, str] = {}
     applied = gl_backend.apply_config(
-        {"selected": "osmesa"}, environ=environ, modules={}
+        GLConfig(selected="osmesa"), environ=environ, modules={}
     )
     assert applied == "osmesa"
     assert environ == {"MUJOCO_GL": "osmesa"}
@@ -58,7 +58,7 @@ def test_apply_config_never_overrides_environment() -> None:
     """A preset MUJOCO_GL wins over the file."""
     environ = {"MUJOCO_GL": "egl"}
     applied = gl_backend.apply_config(
-        {"selected": "osmesa"}, environ=environ, modules={}
+        GLConfig(selected="osmesa"), environ=environ, modules={}
     )
     assert applied is None
     assert environ == {"MUJOCO_GL": "egl"}
@@ -68,7 +68,9 @@ def test_apply_config_too_late_when_mujoco_already_imported() -> None:
     """Once mujoco is imported the variable would be ignored: do nothing."""
     environ: dict[str, str] = {}
     applied = gl_backend.apply_config(
-        {"selected": "osmesa"}, environ=environ, modules={"mujoco": object()}
+        GLConfig(selected="osmesa"),
+        environ=environ,
+        modules={"mujoco": object()},
     )
     assert applied is None
     assert environ == {}
@@ -78,7 +80,9 @@ def test_apply_config_nothing_selected() -> None:
     """selected=null leaves MuJoCo's default alone."""
     environ: dict[str, str] = {}
     assert (
-        gl_backend.apply_config({"selected": None}, environ=environ, modules={})
+        gl_backend.apply_config(
+            GLConfig(selected=None), environ=environ, modules={}
+        )
         is None
     )
     assert environ == {}
@@ -175,19 +179,18 @@ def test_import_ariel_without_file(tmp_path: Path) -> None:
 class _FakeRun:
     """Stand-in for the manager: writes a config and counts its calls."""
 
-    def __init__(self, selected: str | None = "egl", delay: float = 0.0):
+    def __init__(
+        self, selected: BackendName | None = "egl", delay: float = 0.0
+    ):
         self.calls = 0
         self.selected = selected
         self.delay = delay
 
-    def __call__(self, path: Path) -> dict[str, object]:
+    def __call__(self, path: Path) -> GLConfig:
         self.calls += 1
         time.sleep(self.delay)
-        config: dict[str, object] = {
-            "version": 1,
-            "selected": self.selected,
-        }
-        path.write_text(json.dumps(config), encoding="utf-8")
+        config = GLConfig(version=1, selected=self.selected)
+        path.write_text(config.model_dump_json(), encoding="utf-8")
         return config
 
 
@@ -291,14 +294,15 @@ import io, json, sys, time
 from pathlib import Path
 from rich.console import Console
 from ariel.utils import gl_backend
+from ariel.utils.gl_backend import GLConfig
 
 folder = Path(sys.argv[1])
 def fake(path):
     with (folder / "calls.txt").open("a") as f:
         f.write("probe\\n")
     time.sleep(1.0)
-    config = {"version": 1, "selected": "egl"}
-    path.write_text(json.dumps(config))
+    config = GLConfig(version=1, selected="egl")
+    path.write_text(config.model_dump_json())
     return config
 
 gl_backend.ensure_gl_backend(

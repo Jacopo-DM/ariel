@@ -1,9 +1,9 @@
 """EA class and EAOperation."""
 
 import inspect
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from pathlib import Path
-from typing import Concatenate, Literal, ParamSpec
+from typing import Concatenate, Literal, ParamSpec, Protocol
 
 from pydantic import computed_field
 from pydantic_settings import BaseSettings
@@ -97,6 +97,21 @@ config: EASettings = EASettings()
 
 
 # -- Step wrapper --------------------------------------------------------------
+
+
+class Operation(Protocol):
+    """What the EA needs from an element of its pipeline.
+
+    Every ``EAOperation``, whatever its bound arguments, fits this shape.
+    """
+
+    name: str
+
+    def __call__(
+        self, *args: object, **kwargs: object
+    ) -> "Population | Operation":
+        """Run on a population, or bind configuration arguments."""
+        ...
 
 
 class EAOperation[**P]:
@@ -338,7 +353,7 @@ class EA:
     def __init__(  # ruff: ignore[too-many-arguments]
         self,
         population: Population | None = None,
-        operations: list[EAOperation[...]] | None = None,
+        operations: Sequence[Operation] | None = None,
         *,
         restart: "tuple[Path | str, int] | Path | str | None" = None,
         num_steps: int | None = None,
@@ -419,7 +434,7 @@ class EA:
             msg = "Provide either 'population' or 'restart'."
             raise ValueError(msg)
 
-        self.operations: list[EAOperation[...]] = operations
+        self.operations: Sequence[Operation] = operations
         self.is_maximisation: bool = (
             is_maximisation
             if is_maximisation is not None

@@ -1,12 +1,30 @@
 """Lynxmotion arm body built as a MuJoCo MjSpec."""
 
-from typing import Any, cast
+from typing import cast
 
 import mujoco
 import mujoco.viewer
 import numpy as np
+from numpy.typing import NDArray
+from pydantic import Field
 
 from ariel.body_phenotypes.lynx_mjspec.table import TableWorld
+from ariel.parameters import FrozenModel
+
+
+class ArmConfig(FrozenModel):
+    """Joint count, tube lengths and angles that define one arm."""
+
+    num_joints: int = 6
+    genotype_tube: list[int] = Field(default_factory=lambda: [1, 1, 1, 1, 1])
+    genotype_joints: int = 6
+    tube_lengths: list[float] = Field(
+        default_factory=lambda: [0.1, 0.1, 0.1, 0.1, 0.1]
+    )
+    rotation_angles: list[float] = Field(
+        default_factory=lambda: [0.0, -1.57, 0.0, 0.0, 0.0, 0.0]
+    )
+    task: str = "reach"
 
 
 class LynxArm:
@@ -17,20 +35,13 @@ class LynxArm:
 
     """
 
-    def __init__(self, config: dict[str, Any] | None = None) -> None:
+    def __init__(self, config: ArmConfig | None = None) -> None:
         """Create the arm spec from `config` (a default arm if None)."""
         self.spec = mujoco.MjSpec()
         self.spec.compiler.degree = False
 
         # Default configuration
-        self.config = config or {
-            "num_joints": 6,
-            "genotype_tube": [1, 1, 1, 1, 1],
-            "genotype_joints": 6,
-            "tube_lengths": [0.1, 0.1, 0.1, 0.1, 0.1],
-            "rotation_angles": [0.0, -1.57, 0.0, 0.0, 0.0, 0.0],
-            "task": "reach",
-        }
+        self.config = config or ArmConfig()
 
         self.base_height = 0.1
         self.joint_radius = 0.04
@@ -38,12 +49,14 @@ class LynxArm:
 
         self._build_robot()
 
-    def _rotate_axis_z(self, axis: np.ndarray, yaw: float) -> np.ndarray:  # ruff: ignore[no-self-use]  # keeps the interface shared with the sibling classes
+    def _rotate_axis_z(  # ruff: ignore[no-self-use]  # keeps the interface shared with the sibling classes
+        self, axis: NDArray[np.float64], yaw: float
+    ) -> NDArray[np.float64]:
         """Rotate a vector around Z axis.
 
         Returns
         -------
-        np.ndarray
+        NDArray[np.float64]
             The rotated vector.
         """
         c, s = np.cos(yaw), np.sin(yaw)
@@ -52,7 +65,7 @@ class LynxArm:
             [s, c, 0],
             [0, 0, 1],
         ])
-        return cast("np.ndarray", rotation @ axis)
+        return cast("NDArray[np.float64]", rotation @ axis)
 
     def _build_robot(self) -> None:
         """Construct the kinematic chain hierarchically."""
@@ -73,9 +86,7 @@ class LynxArm:
         current_parent = base_link
         current_z_offset = self.base_height
 
-        num_joints = min(
-            self.config["num_joints"], self.config["genotype_joints"]
-        )
+        num_joints = min(self.config.num_joints, self.config.genotype_joints)
 
         # 2. ITERATIVE CHAIN
         for i in range(num_joints):
@@ -92,8 +103,8 @@ class LynxArm:
 
             # Apply yaw rotation to axis instead of body
             yaw = (
-                self.config["rotation_angles"][i]
-                if i < len(self.config["rotation_angles"])
+                self.config.rotation_angles[i]
+                if i < len(self.config.rotation_angles)
                 else 0.0
             )
 
@@ -136,10 +147,10 @@ class LynxArm:
             # Tube (if enabled)
             tube_length = 0.0
             if (
-                i < len(self.config["genotype_tube"])
-                and self.config["genotype_tube"][i] == 1
+                i < len(self.config.genotype_tube)
+                and self.config.genotype_tube[i] == 1
             ):
-                tube_length = self.config["tube_lengths"][i]
+                tube_length = self.config.tube_lengths[i]
 
                 link_body.add_geom(
                     type=mujoco.mjtGeom.mjGEOM_CYLINDER,

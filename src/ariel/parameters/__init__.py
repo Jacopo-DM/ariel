@@ -4,6 +4,10 @@
 # Third-party libraries
 from pydantic_settings import BaseSettings
 
+from ariel.parameters.base_model import FrozenModel, MutableModel
+
+__all__ = ["ArielConfig", "FrozenModel", "MutableModel"]
+
 
 class ArielConfig(BaseSettings):
     """Global ARIEL settings."""

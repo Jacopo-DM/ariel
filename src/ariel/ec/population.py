@@ -1,10 +1,14 @@
 """Population Class for the EC module."""
 
-import random
-from collections.abc import Callable, Iterator
-from typing import Literal, overload
+from __future__ import annotations
 
-from ariel.ec.individual import Individual
+import random
+from typing import TYPE_CHECKING, Literal, overload
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterator
+
+    from ariel.ec.individual import Individual
 
 
 def _safe_attr(individual: Individual, attribute: str) -> float:
@@ -102,7 +106,7 @@ class Population:  # ruff: ignore[too-many-public-methods]  # public signature o
         """
         return bool(self.population)
 
-    def __add__(self, other: "Population") -> "Population":
+    def __add__(self, other: Population) -> Population:
         """Concatenate two populations into a new one.
 
         Parameters
@@ -122,9 +126,13 @@ class Population:  # ruff: ignore[too-many-public-methods]  # public signature o
     def __getitem__(self, index: int) -> Individual: ...
 
     @overload
-    def __getitem__(self, index: slice) -> "Population": ...
+    def __getitem__(
+        self, index: slice[int | None, int | None, int | None]
+    ) -> Population: ...
 
-    def __getitem__(self, index: int | slice) -> "Individual | Population":
+    def __getitem__(
+        self, index: int | slice[int | None, int | None, int | None]
+    ) -> Individual | Population:
         """Retrieve an individual or a slice of the population.
 
         Parameters
@@ -156,7 +164,7 @@ class Population:  # ruff: ignore[too-many-public-methods]  # public signature o
         """
         self.population.append(individual)
 
-    def extend(self, other: "Population | list[Individual]") -> None:
+    def extend(self, other: Population | list[Individual]) -> None:
         """Extend the population in place with another population or list.
 
         Parameters
@@ -181,7 +189,7 @@ class Population:  # ruff: ignore[too-many-public-methods]  # public signature o
 
     # -- Chainable query API ---------------------------------------------------
 
-    def sample(self, n: int) -> "Population":
+    def sample(self, n: int) -> Population:
         """Return a new population of up to ``n`` randomly drawn individuals.
 
         Sampling is performed without replacement. If ``n`` exceeds the
@@ -211,7 +219,7 @@ class Population:  # ruff: ignore[too-many-public-methods]  # public signature o
         *,
         sort: Literal["max", "min"] = "max",
         attribute: str = "fitness_",
-    ) -> "Population":
+    ) -> Population:
         """Return a new population sorted by `attribute`.
 
         Returns
@@ -232,7 +240,7 @@ class Population:  # ruff: ignore[too-many-public-methods]  # public signature o
         sort: Literal["max", "min"] = "max",
         attribute: str = "fitness_",
         n: int = 1,
-    ) -> "Population":
+    ) -> Population:
         """Return the top ``n`` individuals sorted by a numeric attribute.
 
         Uses ``_safe_attr`` to retrieve values, so unevaluated individuals
@@ -270,7 +278,7 @@ class Population:  # ruff: ignore[too-many-public-methods]  # public signature o
 
         return Population(sorted(self.population, key=key, reverse=reverse)[:n])
 
-    def shuffle(self) -> "Population":
+    def shuffle(self) -> Population:
         """Return a new population with individuals in a random order.
 
         The original population is not modified.
@@ -285,7 +293,7 @@ class Population:  # ruff: ignore[too-many-public-methods]  # public signature o
         random.shuffle(data)
         return Population(data)
 
-    def where(self, predicate: Callable[[Individual], bool]) -> "Population":
+    def where(self, predicate: Callable[[Individual], bool]) -> Population:
         """Query the current population.
 
         Return a new population containing only
@@ -313,7 +321,7 @@ class Population:  # ruff: ignore[too-many-public-methods]  # public signature o
     # -- Convenience filter properties -----------------------------------------
 
     @property
-    def alive(self) -> "Population":
+    def alive(self) -> Population:
         """All individuals with ``alive=True``.
 
         Returns
@@ -324,7 +332,7 @@ class Population:  # ruff: ignore[too-many-public-methods]  # public signature o
         return self.where(lambda ind: ind.alive)
 
     @property
-    def dead(self) -> "Population":
+    def dead(self) -> Population:
         """All individuals with ``alive=False``.
 
         Returns
@@ -335,7 +343,7 @@ class Population:  # ruff: ignore[too-many-public-methods]  # public signature o
         return self.where(lambda ind: not ind.alive)
 
     @property
-    def unevaluated(self) -> "Population":
+    def unevaluated(self) -> Population:
         """All individuals where ``requires_eval=True``.
 
         Returns
@@ -346,7 +354,7 @@ class Population:  # ruff: ignore[too-many-public-methods]  # public signature o
         return self.where(lambda ind: ind.requires_eval)
 
     @property
-    def evaluated(self) -> "Population":
+    def evaluated(self) -> Population:
         """All individuals where ``requires_eval=False``.
 
         Returns
@@ -372,7 +380,7 @@ class Population:  # ruff: ignore[too-many-public-methods]  # public signature o
     # -- Constructors ----------------------------------------------------------
 
     @classmethod
-    def empty(cls) -> "Population":
+    def empty(cls) -> Population:
         """Construct an empty population.
 
         Returns

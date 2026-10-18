@@ -1,10 +1,11 @@
 """Test: EASettings, EAOperation, and EA classes."""
 
+from collections.abc import Sequence
 from pathlib import Path
 
 import pytest
 
-from ariel.ec.ea import EA, EAOperation, EASettings
+from ariel.ec.ea import EA, EAOperation, EASettings, Operation
 from ariel.ec.individual import Individual
 from ariel.ec.population import Population
 
@@ -47,7 +48,7 @@ def double_pop(population: Population) -> Population:
 def _ea(
     tmp_path: Path,
     pop: Population | None = None,
-    ops: list[EAOperation[...]] | None = None,
+    ops: Sequence[Operation] | None = None,
     *,
     num_steps: int | None = None,
     first_generation_id: int | None = None,

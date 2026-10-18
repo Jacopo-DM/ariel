@@ -8,12 +8,12 @@ Todo:
 # Third-party libraries
 import mujoco
 import numpy as np
-import quaternion as qnp
 
 # Local libraries
 from ariel.body_phenotypes.robogen_lite.config import ModuleFaces, ModuleType
 from ariel.body_phenotypes.robogen_lite.modules.module import Module
 from ariel.parameters.ariel_modules import ArielModulesConfig
+from ariel.utils import quaternions as qnp
 
 # Global functions
 ariel_modules_config = ArielModulesConfig()

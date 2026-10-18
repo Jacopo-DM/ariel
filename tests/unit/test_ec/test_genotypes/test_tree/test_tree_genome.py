@@ -1,4 +1,4 @@
-"""Test: TreeGenome dataclass — construction, conversion, serialization."""
+"""Test: TreeGenome model — construction, conversion, serialization."""
 
 import json
 import tempfile
@@ -6,7 +6,11 @@ from pathlib import Path
 
 import networkx as nx
 
-from ariel.ec.genotypes.tree.tree_genome import TreeGenome
+from ariel.ec.genotypes.tree.tree_genome import (
+    TreeEdge,
+    TreeGenome,
+    TreeNode,
+)
 
 NODE_COUNT = 2
 CHILD_ID = 2
@@ -26,10 +30,10 @@ def _simple_genome() -> TreeGenome:
     """
     g = TreeGenome()
     g.nodes = {
-        0: {"type": "CORE", "rotation": "DEG_0"},
-        1: {"type": "HINGE", "rotation": "DEG_0"},
+        0: TreeNode(type="CORE", rotation="DEG_0"),
+        1: TreeNode(type="HINGE", rotation="DEG_0"),
     }
-    g.edges = [{"parent": 0, "child": 1, "face": "FRONT"}]
+    g.edges = [TreeEdge(parent=0, child=1, face="FRONT")]
     return g
 
 
@@ -102,8 +106,10 @@ def test_to_dict_keys() -> None:
 def test_to_dict_nodes_string_keyed() -> None:
     """to_dict converts integer node IDs to strings."""
     d = _simple_genome().to_dict()
-    assert "0" in d["nodes"]
-    assert "1" in d["nodes"]
+    nodes = d["nodes"]
+    assert isinstance(nodes, dict)
+    assert "0" in nodes
+    assert "1" in nodes
 
 
 def test_from_dict_roundtrip() -> None:
@@ -138,8 +144,8 @@ def test_from_dict_list_nodes() -> None:
         "edges": [],
     }
     g = TreeGenome.from_dict(data)
-    assert g.nodes[0]["type"] == "CORE"
-    assert g.nodes[1]["type"] == "HINGE"
+    assert g.nodes[0].type == "CORE"
+    assert g.nodes[1].type == "HINGE"
 
 
 # ---------------------------------------------------------------------------

@@ -1,8 +1,8 @@
 """Names and paths shared by the OpenGL backend probe and its readers.
 
-This module imports neither ``mujoco`` nor any other ARIEL package: MuJoCo
-reads ``MUJOCO_GL`` when it is imported, so code that decides the backend
-must run before that import.
+This module imports neither ``mujoco`` nor any ARIEL module that does:
+MuJoCo reads ``MUJOCO_GL`` when it is imported, so code that decides the
+backend must run before that import.
 """
 
 import contextlib
@@ -14,7 +14,9 @@ import time
 import warnings
 from collections.abc import Callable, Mapping, MutableMapping
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Literal
+
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 if TYPE_CHECKING:
     from rich.console import Console
@@ -22,8 +24,10 @@ if TYPE_CHECKING:
 CONFIG_NAME = "mujoco_user_config.json"
 CONFIG_VERSION = 1
 
+type BackendName = Literal["glfw", "egl", "osmesa"]
+
 # Order of preference when two backends render equally fast.
-BACKEND_ORDER = ("glfw", "egl", "osmesa")
+BACKEND_ORDER: tuple[BackendName, ...] = ("glfw", "egl", "osmesa")
 
 LOCK_SUFFIX = ".lock"
 # A probe takes at most three backends x 30 s; a lock older than this is stale.
@@ -31,7 +35,35 @@ LOCK_TIMEOUT = 120.0
 _POLL_SECONDS = 0.1
 
 
-def platform_backends(platform: str) -> tuple[str, ...]:
+class BackendResult(BaseModel):
+    """Outcome of probing one backend."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    ok: bool
+    render_ms: float | None = None
+    error: str | None = None
+
+
+class GLConfig(BaseModel):
+    """The probe result as it is saved in ``mujoco_user_config.json``.
+
+    The file is read back from disk, possibly written by another version, so
+    unknown keys are ignored instead of rejected.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="ignore")
+
+    version: int = CONFIG_VERSION
+    platform: str | None = None
+    python: str | None = None
+    mujoco: str | None = None
+    backends: dict[str, BackendResult] = Field(default_factory=dict)
+    selected: BackendName | None = None
+    viewer_available: bool = False
+
+
+def platform_backends(platform: str) -> tuple[BackendName, ...]:
     """
     Return the MuJoCo OpenGL backends worth probing on a platform.
 
@@ -42,7 +74,7 @@ def platform_backends(platform: str) -> tuple[str, ...]:
 
     Returns
     -------
-    tuple[str, ...]
+    tuple[BackendName, ...]
         ``glfw``, ``egl`` and ``osmesa`` on Linux, only ``glfw`` elsewhere.
     """
     if platform.startswith("linux"):
@@ -71,7 +103,7 @@ def _warn(path: Path, problem: str) -> None:
     )
 
 
-def read_config(path: Path) -> dict[str, Any] | None:
+def read_config(path: Path) -> GLConfig | None:
     """
     Read the probe result; never raises.
 
@@ -82,28 +114,26 @@ def read_config(path: Path) -> dict[str, Any] | None:
 
     Returns
     -------
-    dict[str, Any] | None
+    GLConfig | None
         The configuration, or None if the file is missing, unreadable or
         malformed (the last two also emit a ``UserWarning``).
     """
     if not path.is_file():
         return None
     try:
-        config = json.loads(path.read_text(encoding="utf-8"))
+        raw = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError) as exc:
         _warn(path, f"cannot be read ({exc})")
         return None
-    selected = config.get("selected") if isinstance(config, dict) else 0
-    if not isinstance(config, dict) or not (
-        selected is None or selected in BACKEND_ORDER
-    ):
+    try:
+        return GLConfig.model_validate(raw)
+    except ValidationError:
         _warn(path, "unexpected content")
         return None
-    return config
 
 
 def apply_config(
-    config: Mapping[str, Any],
+    config: GLConfig,
     *,
     environ: MutableMapping[str, str] | None = None,
     modules: Mapping[str, object] | None = None,
@@ -129,7 +159,7 @@ def apply_config(
     """
     environ = os.environ if environ is None else environ
     modules = sys.modules if modules is None else modules
-    selected = config.get("selected")
+    selected = config.selected
     if selected is None or "MUJOCO_GL" in environ or "mujoco" in modules:
         return None
     environ["MUJOCO_GL"] = selected
@@ -184,19 +214,19 @@ def mujoco_version() -> str:
         return "unknown"
 
 
-def _current_config(path: Path) -> dict[str, Any] | None:
+def _current_config(path: Path) -> GLConfig | None:
     """Read the config; None if missing, invalid or from another setup.
 
     Returns
     -------
-    dict[str, Any] | None
+    GLConfig | None
         The config, or None if it is missing, invalid or from another setup.
     """
     config = read_config(path)
     if config is None:
         return None
-    recorded_version = config.get("mujoco")
-    recorded_platform = config.get("platform")
+    recorded_version = config.mujoco
+    recorded_platform = config.platform
     if recorded_version is not None and recorded_version != mujoco_version():
         return None
     if recorded_platform is not None and recorded_platform != sys.platform:
@@ -239,7 +269,7 @@ def _wait_for_lock(lock: Path, timeout: float) -> None:
 def ensure_gl_backend(
     path: Path | None = None,
     *,
-    run: Callable[[Path], dict[str, Any]] | None = None,
+    run: Callable[[Path], GLConfig] | None = None,
     environ: MutableMapping[str, str] | None = None,
     modules: Mapping[str, object] | None = None,
     console: "Console | None" = None,
@@ -297,16 +327,16 @@ def ensure_gl_backend(
 
 def _probe_once(
     path: Path,
-    run: Callable[[Path], dict[str, Any]] | None,
+    run: Callable[[Path], GLConfig] | None,
     console: "Console | None",
     lock_timeout: float,
     modules: Mapping[str, object],
-) -> dict[str, Any] | None:
+) -> GLConfig | None:
     """Probe under a lock; return the config or None if it is unavailable.
 
     Returns
     -------
-    dict[str, Any] | None
+    GLConfig | None
         The config, or None if no backend works.
     """
     lock = path.with_name(path.name + LOCK_SUFFIX)
@@ -324,7 +354,7 @@ def _probe_once(
                 run as manager_run,
             )
 
-            def run(target: Path) -> dict[str, Any]:
+            def run(target: Path) -> GLConfig:
                 return manager_run(target, console=console)
 
         config = run(path)

@@ -15,9 +15,7 @@ import subprocess  # ruff: ignore[suspicious-subprocess-import]  # runs fixed lo
 import sys
 import tempfile
 from collections.abc import Callable, Mapping
-from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any
 
 from rich.console import Console
 from rich.progress import (
@@ -32,6 +30,9 @@ from ariel.utils.gl_backend import (
     BACKEND_ORDER,
     CONFIG_NAME,
     CONFIG_VERSION,
+    BackendName,
+    BackendResult,
+    GLConfig,
     config_path,
     mujoco_version,
     platform_backends,
@@ -40,15 +41,6 @@ from ariel.utils.gl_backend import (
 DEFAULT_TIMEOUT = 30.0
 
 CommandFactory = Callable[[str], list[str]]
-
-
-@dataclass(frozen=True)
-class BackendResult:
-    """Outcome of probing one backend."""
-
-    ok: bool
-    render_ms: float | None = None
-    error: str | None = None
 
 
 def default_command(backend: str) -> list[str]:
@@ -127,7 +119,9 @@ def probe_backend(
     return _parse_worker_output(done.stdout)
 
 
-def select_backend(results: Mapping[str, BackendResult]) -> str | None:
+def select_backend(
+    results: Mapping[str, BackendResult],
+) -> BackendName | None:
     """
     Pick the working backend that renders fastest.
 
@@ -138,7 +132,7 @@ def select_backend(results: Mapping[str, BackendResult]) -> str | None:
 
     Returns
     -------
-    str | None
+    BackendName | None
         The backend name, or None if none works. Ties follow the order
         glfw, egl, osmesa.
     """
@@ -150,14 +144,14 @@ def select_backend(results: Mapping[str, BackendResult]) -> str | None:
     return min(working)[2] if working else None
 
 
-def _write_atomically(path: Path, config: dict[str, Any]) -> None:
+def _write_atomically(path: Path, config: GLConfig) -> None:
     handle, name = tempfile.mkstemp(
         dir=path.parent, prefix=".gl-config-", suffix=".tmp"
     )
     tmp = Path(name)
     try:
         with os.fdopen(handle, "w", encoding="utf-8") as stream:
-            json.dump(config, stream, indent=2)
+            stream.write(config.model_dump_json(indent=2))
             stream.write("\n")
         tmp.replace(path)
     except BaseException:
@@ -173,7 +167,7 @@ def run(
     timeout: float = DEFAULT_TIMEOUT,
     console: Console | None = None,
     platform: str | None = None,
-) -> dict[str, Any]:
+) -> GLConfig:
     """
     Probe every backend of the platform and write the config file.
 
@@ -192,7 +186,7 @@ def run(
 
     Returns
     -------
-    dict[str, Any]
+    GLConfig
         The configuration that was written.
     """
     console = console or Console()
@@ -218,15 +212,15 @@ def run(
             progress.advance(task)
         progress.update(task, description="Done")
     glfw = results.get("glfw")
-    config: dict[str, Any] = {
-        "version": CONFIG_VERSION,
-        "platform": platform,
-        "python": platform_info.python_version(),
-        "mujoco": mujoco_version(),
-        "backends": {name: asdict(r) for name, r in results.items()},
-        "selected": select_backend(results),
-        "viewer_available": bool(glfw and glfw.ok),
-    }
+    config = GLConfig(
+        version=CONFIG_VERSION,
+        platform=platform,
+        python=platform_info.python_version(),
+        mujoco=mujoco_version(),
+        backends=results,
+        selected=select_backend(results),
+        viewer_available=bool(glfw and glfw.ok),
+    )
     _write_atomically(path, config)
     return config
 
@@ -243,10 +237,10 @@ def main() -> int:
     """
     console = Console()
     config = run(config_path(), console=console)
-    selected = config["selected"]
+    selected = config.selected
     console.print(
         f"Selected backend: [bold]{selected or 'none (using MuJoCo default)'}"
-        f"[/bold]; viewer available: {config['viewer_available']}. "
+        f"[/bold]; viewer available: {config.viewer_available}. "
         f"Saved to {CONFIG_NAME}."
     )
     return 0

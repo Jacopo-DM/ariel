@@ -3,7 +3,6 @@
 # Third-party libraries
 import mujoco
 import numpy as np
-import quaternion as qnp
 
 # Local libraries
 from ariel.body_phenotypes.robogen_lite.config import (
@@ -12,6 +11,7 @@ from ariel.body_phenotypes.robogen_lite.config import (
     ModuleType,
 )
 from ariel.body_phenotypes.robogen_lite.modules.module import Module
+from ariel.utils import quaternions as qnp
 
 # Type Aliases
 type WeightType = float

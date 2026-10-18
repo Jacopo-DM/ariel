@@ -25,6 +25,7 @@ from pathlib import Path
 # Third-party libraries
 import numpy as np
 import torch
+from numpy.typing import NDArray
 from rich.console import Console
 from rich.traceback import install
 from torch import nn
@@ -221,7 +222,7 @@ class NaCPG_Norm(nn.Module):  # ruff: ignore[invalid-class-name]
 
     def param_type_converter(  # ruff: ignore[no-self-use]  # keeps the interface shared with the sibling classes
         self,
-        params: list[float] | np.ndarray | torch.Tensor,
+        params: list[float] | NDArray[np.float64] | torch.Tensor,
     ) -> torch.Tensor:
         """Convert input parameters to torch.Tensor if needed.
 

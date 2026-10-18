@@ -1,11 +1,12 @@
 """Targeted locomotion."""
 
 import numpy as np
+from numpy.typing import NDArray
 
 MIN_SURVIVAL_Z_HEIGHT = 0.05
 
 
-def _xy_distance(a: np.ndarray, b: np.ndarray) -> float:
+def _xy_distance(a: NDArray[np.float64], b: NDArray[np.float64]) -> float:
     """Euclidean distance in the horizontal plane (x, y).
 
     Returns
@@ -17,7 +18,7 @@ def _xy_distance(a: np.ndarray, b: np.ndarray) -> float:
 
 
 def distance_to_target(
-    final_position: np.ndarray, target_position: np.ndarray
+    final_position: NDArray[np.float64], target_position: NDArray[np.float64]
 ) -> float:
     """Remaining planar distance to target (lower is better).
 
@@ -30,7 +31,9 @@ def distance_to_target(
 
 
 def fitness_delta_distance(
-    initial_pos: np.ndarray, final_pos: np.ndarray, target_pos: np.ndarray
+    initial_pos: NDArray[np.float64],
+    final_pos: NDArray[np.float64],
+    target_pos: NDArray[np.float64],
 ) -> float:
     """Reward closing distance; flipped so lower is better.
 
@@ -46,9 +49,9 @@ def fitness_delta_distance(
 
 
 def fitness_distance_and_efficiency(
-    initial_pos: np.ndarray,
-    final_pos: np.ndarray,
-    target_pos: np.ndarray,
+    initial_pos: NDArray[np.float64],
+    final_pos: NDArray[np.float64],
+    target_pos: NDArray[np.float64],
     total_control_effort: float,
 ) -> float:
     """Return the distance fitness plus a penalty on control effort.
@@ -66,9 +69,9 @@ def fitness_distance_and_efficiency(
 
 
 def fitness_survival_and_locomotion(
-    initial_pos: np.ndarray,
-    final_pos: np.ndarray,
-    target_pos: np.ndarray,
+    initial_pos: NDArray[np.float64],
+    final_pos: NDArray[np.float64],
+    target_pos: NDArray[np.float64],
     min_z_height: float,
 ) -> float:
     """Return distance fitness, or a penalty if the robot sank too low.
@@ -85,9 +88,9 @@ def fitness_survival_and_locomotion(
 
 
 def fitness_direct_path(
-    initial_pos: np.ndarray,
-    final_pos: np.ndarray,
-    target_pos: np.ndarray,
+    initial_pos: NDArray[np.float64],
+    final_pos: NDArray[np.float64],
+    target_pos: NDArray[np.float64],
     total_path_length: float,
 ) -> float:
     """Return the distance fitness adjusted by the path length travelled.

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import operator
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 import networkx as nx
 import numpy as np
@@ -19,6 +19,7 @@ from ariel.body_phenotypes.robogen_lite.config import (
     ModuleRotationsIdx,
     ModuleType,
 )
+from ariel.parameters import FrozenModel
 
 if TYPE_CHECKING:
     from ariel.body_phenotypes.robogen_lite.cppn_neat.genome import Genome
@@ -35,7 +36,26 @@ def softmax(raw_scores: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
         The softmax values; they sum to 1.
     """
     e_x = np.exp(raw_scores - np.max(raw_scores))
-    return cast("np.ndarray", e_x / e_x.sum())
+    return cast("npt.NDArray[np.float32]", e_x / e_x.sum())
+
+
+class _PlacedModule(FrozenModel):
+    """A module that is already part of the robot."""
+
+    pos: tuple[int, int, int]
+    type: ModuleType
+    rot: ModuleRotationsIdx
+
+
+class _Candidate(FrozenModel):
+    """A possible next module: where it attaches and how well it scores."""
+
+    score: float
+    parent_id: int
+    child_pos: tuple[int, int, int]
+    child_type: ModuleType
+    child_rot: ModuleRotationsIdx
+    face: ModuleFaces
 
 
 class MorphologyDecoderBestFirst:
@@ -64,17 +84,17 @@ class MorphologyDecoderBestFirst:
             parent_pos[2] + delta[2],
         )
 
-    def decode(self) -> nx.DiGraph[Any]:  # ruff: ignore[too-many-locals]  # long routine kept as written; splitting it is a refactor outside this goal
+    def decode(self) -> nx.DiGraph[int]:  # ruff: ignore[too-many-locals]  # long routine kept as written; splitting it is a refactor outside this goal
         """Grow the robot graph from the core, best-scoring connection first.
 
         Returns
         -------
-        nx.DiGraph[Any]
+        nx.DiGraph[int]
             The robot graph.
         """
-        robot_graph: nx.DiGraph[Any] = nx.DiGraph()
-        occupied_coords = {}
-        module_data = {}
+        robot_graph: nx.DiGraph[int] = nx.DiGraph()
+        occupied_coords: dict[tuple[int, int, int], int] = {}
+        module_data: dict[int, _PlacedModule] = {}
 
         core_id, core_pos, core_type, core_rot = (
             IDX_OF_CORE,
@@ -86,11 +106,9 @@ class MorphologyDecoderBestFirst:
             core_id, type=core_type.name, rotation=core_rot.name
         )
         occupied_coords[core_pos] = core_id
-        module_data[core_id] = {
-            "pos": core_pos,
-            "type": core_type,
-            "rot": core_rot,
-        }
+        module_data[core_id] = _PlacedModule(
+            pos=core_pos, type=core_type, rot=core_rot
+        )
 
         # The frontier now contains ALL modules with potential open faces.
         frontier = [core_id]
@@ -98,23 +116,23 @@ class MorphologyDecoderBestFirst:
 
         # Check for the max module count.
         while len(robot_graph) < self.max_modules:
-            potential_connections = []
+            potential_connections: list[_Candidate] = []
 
             # At each step, we check the ENTIRE frontier of all existing
             # modules.
             for parent_id in frontier:
-                parent_pos = module_data[parent_id]["pos"]
-                parent_type = module_data[parent_id]["type"]
+                parent_pos = module_data[parent_id].pos
+                parent_type = module_data[parent_id].type
                 for face in ModuleFaces:
-                    if face not in ALLOWED_FACES[parent_type]:  # type: ignore[index]  # known bug
+                    if face not in ALLOWED_FACES[parent_type]:
                         continue
 
-                    child_pos = self._get_child_coords(parent_pos, face)  # type: ignore[arg-type]  # known bug
+                    child_pos = self._get_child_coords(parent_pos, face)
 
                     if child_pos in occupied_coords:
                         continue
 
-                    cppn_inputs = list(parent_pos) + list(child_pos)  # type: ignore[call-overload]  # known bug
+                    cppn_inputs: list[float] = [*parent_pos, *child_pos]
                     raw_outputs = self.cppn_genome.activate(cppn_inputs)
 
                     conn_score = raw_outputs[0]
@@ -143,14 +161,16 @@ class MorphologyDecoderBestFirst:
                         face in ALLOWED_FACES[child_type]
                         and child_rot in ALLOWED_ROTATIONS[child_type]
                     ):
-                        potential_connections.append({
-                            "score": conn_score,
-                            "parent_id": parent_id,
-                            "child_pos": child_pos,
-                            "child_type": child_type,
-                            "child_rot": child_rot,
-                            "face": face,
-                        })
+                        potential_connections.append(
+                            _Candidate(
+                                score=conn_score,
+                                parent_id=parent_id,
+                                child_pos=child_pos,
+                                child_type=child_type,
+                                child_rot=child_rot,
+                                face=face,
+                            )
+                        )
 
             if not potential_connections:
                 console.log(
@@ -160,27 +180,27 @@ class MorphologyDecoderBestFirst:
                 break
 
             best_conn = max(
-                potential_connections, key=operator.itemgetter("score")
+                potential_connections, key=operator.attrgetter("score")
             )
 
             child_id = next_module_id
             robot_graph.add_node(
                 child_id,
-                type=best_conn["child_type"].name,  # type: ignore[attr-defined]  # known bug
-                rotation=best_conn["child_rot"].name,  # type: ignore[attr-defined]  # known bug
+                type=best_conn.child_type.name,
+                rotation=best_conn.child_rot.name,
             )
             robot_graph.add_edge(
-                best_conn["parent_id"],
+                best_conn.parent_id,
                 child_id,
-                face=best_conn["face"].name,  # type: ignore[attr-defined]  # known bug
+                face=best_conn.face.name,
             )
 
-            occupied_coords[best_conn["child_pos"]] = child_id  # type: ignore[index]  # known bug
-            module_data[child_id] = {
-                "pos": best_conn["child_pos"],
-                "type": best_conn["child_type"],
-                "rot": best_conn["child_rot"],
-            }
+            occupied_coords[best_conn.child_pos] = child_id
+            module_data[child_id] = _PlacedModule(
+                pos=best_conn.child_pos,
+                type=best_conn.child_type,
+                rot=best_conn.child_rot,
+            )
 
             # I no longer remove the parent, I just add the new child.
             # (I think this makes snakes less likely)

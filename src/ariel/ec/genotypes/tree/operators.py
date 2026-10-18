@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import copy
 import random
-from typing import Any
 
 import networkx as nx
 
@@ -19,7 +18,7 @@ from ariel.body_phenotypes.robogen_lite.config import (
     ModuleType,
 )
 
-from .tree_genome import TreeGenome
+from .tree_genome import TreeEdge, TreeGenome, TreeNode
 from .validation import validate_genome_dict
 
 
@@ -33,8 +32,8 @@ def add_node(
 ) -> None:
     # add node and edge if allowed; caller should ensure face is free
     """Add node `node_id` and an edge from `parent` on `face`."""
-    genome.nodes[node_id] = {"type": mtype, "rotation": rotation}
-    genome.edges.append({"parent": parent, "child": node_id, "face": face})
+    genome.nodes[node_id] = TreeNode(type=mtype, rotation=rotation)
+    genome.edges.append(TreeEdge(parent=parent, child=node_id, face=face))
 
 
 def remove_subtree(genome: TreeGenome, node_id: int) -> None:
@@ -50,8 +49,45 @@ def remove_subtree(genome: TreeGenome, node_id: int) -> None:
     genome.edges = [
         e
         for e in genome.edges
-        if e["child"] not in descendants and e["parent"] not in descendants
+        if e.child not in descendants and e.parent not in descendants
     ]
+
+
+def _reassign_ids(
+    nodes: dict[int, TreeNode],
+    edges: list[TreeEdge],
+    existing_ids: set[int],
+) -> tuple[dict[int, TreeNode], list[TreeEdge], dict[int, int]]:
+    """Return copies of *nodes* and *edges* with fresh identifiers.
+
+    IDs are remapped to the smallest integers greater than any value in
+    *existing_ids*.  A mapping dict is also returned but only callers that
+    need to translate external references will use it.
+
+    Returns
+    -------
+    tuple[dict[int, TreeNode], list[TreeEdge], dict[int, int]]
+        The new nodes, the new edges and the map from old to new ids.
+    """
+    if not nodes:
+        return {}, [], {}
+    mapping: dict[int, int] = {}
+    next_id = max(existing_ids, default=-1) + 1
+    for old in sorted(nodes):
+        mapping[old] = next_id
+        next_id += 1
+    new_nodes = {
+        mapping[old]: attr.model_copy(deep=True) for old, attr in nodes.items()
+    }
+    # model_copy keeps any additional keys (face/rotation/etc.)
+    new_edges = [
+        e.model_copy(
+            update={"parent": mapping[e.parent], "child": mapping[e.child]},
+            deep=True,
+        )
+        for e in edges
+    ]
+    return new_nodes, new_edges, mapping
 
 
 def get_top_ancestor(genome: TreeGenome, node_id: int) -> int:
@@ -95,51 +131,16 @@ def subtree_swap(
 
     def extract_subtree(
         genome: TreeGenome, root: int
-    ) -> tuple[dict[int, dict[str, str]], list[dict[str, Any]]]:
+    ) -> tuple[dict[int, TreeNode], list[TreeEdge]]:
         g = genome.to_networkx()
         subnodes = {root, *nx.descendants(g, root)}
         internal_edges = [
             e
             for e in genome.edges
-            if e["parent"] in subnodes and e["child"] in subnodes
+            if e.parent in subnodes and e.child in subnodes
         ]
         nodes = {n: genome.nodes[n] for n in subnodes}
         return nodes, internal_edges
-
-    def reassign_ids(
-        nodes: dict[int, dict[str, str]],
-        edges: list[dict[str, Any]],
-        existing_ids: set[int],
-    ) -> tuple[dict[int, dict[str, str]], list[dict[str, Any]], dict[int, int]]:
-        """Return copies of *nodes* and *edges* with fresh identifiers.
-
-        IDs are remapped to the smallest integers greater than any value in
-        *existing_ids*.  A mapping dict is also returned but only callers that
-        need to translate external references will use it.
-
-        Returns
-        -------
-        tuple[dict[int, dict[str, str]], list[dict[str, Any]], dict[int, int]]
-            The new nodes, the new edges and the map from old to new ids.
-        """
-        if not nodes:
-            return {}, [], {}
-        mapping: dict[int, int] = {}
-        next_id = max(existing_ids, default=-1) + 1
-        for old in sorted(nodes):
-            mapping[old] = next_id
-            next_id += 1
-        new_nodes = {
-            mapping[old]: copy.deepcopy(attr) for old, attr in nodes.items()
-        }
-        new_edges: list[dict[str, Any]] = []
-        for e in edges:
-            # preserve any additional keys (face/rotation/etc.)
-            edge_copy = {k: copy.deepcopy(v) for k, v in e.items()}
-            edge_copy["parent"] = mapping[e["parent"]]
-            edge_copy["child"] = mapping[e["child"]]
-            new_edges.append(edge_copy)
-        return new_nodes, new_edges, mapping
 
     a_nodes, a_edges = extract_subtree(a, a_node)
     b_nodes, b_edges = extract_subtree(b, b_node)
@@ -153,8 +154,8 @@ def subtree_swap(
     b_existing = set(b.nodes.keys())
 
     # reassign identifiers before inserting into the other genome
-    b_nodes_new, b_edges_new, _ = reassign_ids(b_nodes, b_edges, a_existing)
-    a_nodes_new, a_edges_new, _ = reassign_ids(a_nodes, a_edges, b_existing)
+    b_nodes_new, b_edges_new, _ = _reassign_ids(b_nodes, b_edges, a_existing)
+    a_nodes_new, a_edges_new, _ = _reassign_ids(a_nodes, a_edges, b_existing)
 
     a.nodes.update(b_nodes_new)
     a.edges.extend(b_edges_new)
@@ -234,7 +235,7 @@ def mutate_replace_node(genome: TreeGenome) -> None:
         return
 
     nid = random.choice(candidates)
-    old_type = genome.nodes[nid]["type"]
+    old_type = genome.nodes[nid].type
 
     # choose a new type different from current; exclude CORE/NONE
     types = [
@@ -248,16 +249,16 @@ def mutate_replace_node(genome: TreeGenome) -> None:
     # choose a rotation allowed for the new type
     rotations = [r.name for r in ALLOWED_ROTATIONS[ModuleType[new_type]]]
     new_rot = (
-        random.choice(rotations) if rotations else genome.nodes[nid]["rotation"]
+        random.choice(rotations) if rotations else genome.nodes[nid].rotation
     )
 
-    genome.nodes[nid] = {"type": new_type, "rotation": new_rot}
+    genome.nodes[nid] = TreeNode(type=new_type, rotation=new_rot)
 
     # drop any children on now-disallowed faces
     allowed = [f.name for f in ALLOWED_FACES[ModuleType[new_type]]]
     for e in list(genome.edges):
-        if e["parent"] == nid and e["face"] not in allowed:
-            remove_subtree(genome, e["child"])
+        if e.parent == nid and e.face not in allowed:
+            remove_subtree(genome, e.child)
 
     # validate
     try:
@@ -268,7 +269,7 @@ def mutate_replace_node(genome: TreeGenome) -> None:
         genome.edges = old_edges
 
 
-def mutate_subtree_replacement(  # ruff: ignore[complex-structure, too-many-locals]
+def mutate_subtree_replacement(  # ruff: ignore[too-many-locals]  # long routine kept as written; splitting it is a refactor outside this goal
     genome: TreeGenome, max_modules: int = 10
 ) -> None:
     """
@@ -278,37 +279,6 @@ def mutate_subtree_replacement(  # ruff: ignore[complex-structure, too-many-loca
     with a new randomly generated subtree. This is the primary mutation operator
     in canonical GP (Koza, 1992).
     """
-
-    def reassign_ids(
-        nodes: dict[int, dict[str, str]],
-        edges: list[dict[str, Any]],
-        existing_ids: set[int],
-    ) -> tuple[dict[int, dict[str, str]], list[dict[str, Any]], dict[int, int]]:
-        """Return copies of *nodes* and *edges* with fresh identifiers.
-
-        Returns
-        -------
-        tuple[dict[int, dict[str, str]], list[dict[str, Any]], dict[int, int]]
-            The new nodes, the new edges and the map from old to new ids.
-        """
-        if not nodes:
-            return {}, [], {}
-        mapping: dict[int, int] = {}
-        next_id = max(existing_ids, default=-1) + 1
-        for old in sorted(nodes):
-            mapping[old] = next_id
-            next_id += 1
-        new_nodes = {
-            mapping[old]: copy.deepcopy(attr) for old, attr in nodes.items()
-        }
-        new_edges: list[dict[str, Any]] = []
-        for e in edges:
-            edge_copy = {k: copy.deepcopy(v) for k, v in e.items()}
-            edge_copy["parent"] = mapping[e["parent"]]
-            edge_copy["child"] = mapping[e["child"]]
-            new_edges.append(edge_copy)
-        return new_nodes, new_edges, mapping
-
     # transactional backup: restore if mutation cannot be validated
     old_nodes = copy.deepcopy(genome.nodes)
     old_edges = copy.deepcopy(genome.edges)
@@ -324,9 +294,9 @@ def mutate_subtree_replacement(  # ruff: ignore[complex-structure, too-many-loca
     parent_id = None
     parent_face = None
     for e in genome.edges:
-        if e["child"] == node_id:
-            parent_id = e["parent"]
-            parent_face = e["face"]
+        if e.child == node_id:
+            parent_id = e.parent
+            parent_face = e.face
             break
 
     # Remove the old subtree
@@ -343,36 +313,36 @@ def mutate_subtree_replacement(  # ruff: ignore[complex-structure, too-many-loca
         if IDX_OF_CORE in new_subtree.nodes:
             g_sub = new_subtree.to_networkx()
             core_children = [
-                e["child"]
-                for e in new_subtree.edges
-                if e["parent"] == IDX_OF_CORE
+                e.child for e in new_subtree.edges if e.parent == IDX_OF_CORE
             ]
 
             if core_children:
                 root_child = random.choice(core_children)
                 branch_nodes = {root_child, *nx.descendants(g_sub, root_child)}
                 branch_node_dict = {
-                    n: copy.deepcopy(new_subtree.nodes[n]) for n in branch_nodes
+                    n: new_subtree.nodes[n].model_copy(deep=True)
+                    for n in branch_nodes
                 }
                 branch_edges = [
                     copy.deepcopy(e)
                     for e in new_subtree.edges
-                    if e["parent"] in branch_nodes
-                    and e["child"] in branch_nodes
+                    if e.parent in branch_nodes and e.child in branch_nodes
                 ]
 
                 existing_ids = set(genome.nodes.keys())
-                new_nodes, new_edges, mapping = reassign_ids(
+                new_nodes, new_edges, mapping = _reassign_ids(
                     branch_node_dict, branch_edges, existing_ids
                 )
 
                 genome.nodes.update(new_nodes)
                 genome.edges.extend(new_edges)
-                genome.edges.append({
-                    "parent": parent_id,
-                    "child": mapping[root_child],
-                    "face": parent_face,
-                })
+                genome.edges.append(
+                    TreeEdge(
+                        parent=parent_id,
+                        child=mapping[root_child],
+                        face=parent_face,
+                    )
+                )
 
     # Clean up and validate
     _prune_invalid_edges(genome)
@@ -405,12 +375,12 @@ def mutate_shrink(genome: TreeGenome) -> None:
     parent_id = None
     parent_face = None
     for e in genome.edges:
-        if e["child"] == node_id:
-            parent_id = e["parent"]
-            parent_face = e["face"]
+        if e.child == node_id:
+            parent_id = e.parent
+            parent_face = e.face
             break
 
-    if parent_id is None:
+    if parent_id is None or parent_face is None:
         return  # Shouldn't happen for valid trees
 
     # Remove the entire subtree
@@ -424,12 +394,10 @@ def mutate_shrink(genome: TreeGenome) -> None:
     rotations = [r.name for r in ALLOWED_ROTATIONS[ModuleType[new_type]]]
     new_rot = random.choice(rotations) if rotations else "DEG_0"
 
-    genome.nodes[node_id] = {"type": new_type, "rotation": new_rot}
-    genome.edges.append({
-        "parent": parent_id,
-        "child": node_id,
-        "face": parent_face,
-    })
+    genome.nodes[node_id] = TreeNode(type=new_type, rotation=new_rot)
+    genome.edges.append(
+        TreeEdge(parent=parent_id, child=node_id, face=parent_face)
+    )
 
     # Clean up and validate
     _prune_invalid_edges(genome)
@@ -452,7 +420,7 @@ def mutate_hoist(genome: TreeGenome) -> None:
     old_edges = copy.deepcopy(genome.edges)
 
     # Find nodes that have children
-    nodes_with_children = {e["parent"] for e in genome.edges}
+    nodes_with_children = {e.parent for e in genome.edges}
 
     candidates = [nid for nid in nodes_with_children if nid != IDX_OF_CORE]
     if not candidates:
@@ -461,7 +429,7 @@ def mutate_hoist(genome: TreeGenome) -> None:
     parent_id = random.choice(candidates)
 
     # Get all children of this parent
-    children = [e["child"] for e in genome.edges if e["parent"] == parent_id]
+    children = [e.child for e in genome.edges if e.parent == parent_id]
     if not children:
         return
 
@@ -472,12 +440,12 @@ def mutate_hoist(genome: TreeGenome) -> None:
     grandparent_id = None
     parent_face = None
     for e in genome.edges:
-        if e["child"] == parent_id:
-            grandparent_id = e["parent"]
-            parent_face = e["face"]
+        if e.child == parent_id:
+            grandparent_id = e.parent
+            parent_face = e.face
             break
 
-    if grandparent_id is None:
+    if grandparent_id is None or parent_face is None:
         return  # Can't hoist root
 
     # Remove the parent and all its other children (except the one being
@@ -490,22 +458,18 @@ def mutate_hoist(genome: TreeGenome) -> None:
     if parent_id in genome.nodes:
         del genome.nodes[parent_id]
     genome.edges = [
-        e
-        for e in genome.edges
-        if e["child"] != parent_id and e["parent"] != parent_id
+        e for e in genome.edges if parent_id not in {e.child, e.parent}
     ]
 
     # Connect the hoisted child directly to the grandparent
     genome.edges = [
         e
         for e in genome.edges
-        if not (e["parent"] == grandparent_id and e["face"] == parent_face)
+        if not (e.parent == grandparent_id and e.face == parent_face)
     ]
-    genome.edges.append({
-        "parent": grandparent_id,
-        "child": child_to_hoist,
-        "face": parent_face,
-    })
+    genome.edges.append(
+        TreeEdge(parent=grandparent_id, child=child_to_hoist, face=parent_face)
+    )
 
     # Clean up and validate
     _prune_invalid_edges(genome)
@@ -528,7 +492,7 @@ def random_tree(max_modules: int) -> TreeGenome:
         The new tree genome.
     """
     g = TreeGenome()
-    g.nodes = {IDX_OF_CORE: {"type": "CORE", "rotation": "DEG_0"}}
+    g.nodes = {IDX_OF_CORE: TreeNode(type="CORE", rotation="DEG_0")}
     g.edges = []
 
     next_id = 1
@@ -536,9 +500,9 @@ def random_tree(max_modules: int) -> TreeGenome:
         # collect available (parent,face) positions
         free: list[tuple[int, str]] = []
         for pid, pdata in g.nodes.items():
-            ptype = ModuleType[pdata["type"]]
+            ptype = ModuleType[pdata.type]
             allowed_faces = [f.name for f in ALLOWED_FACES[ptype]]
-            used = {e["face"] for e in g.edges if e["parent"] == pid}
+            used = {e.face for e in g.edges if e.parent == pid}
             free.extend(
                 (pid, face) for face in allowed_faces if face not in used
             )
@@ -605,22 +569,22 @@ def _prune_invalid_edges(genome: TreeGenome) -> None:
     during iteration.
     """
     seen = set()  # (parent, face) tuples
-    valid_edges: list[dict[str, Any]] = []
+    valid_edges: list[TreeEdge] = []
     to_prune: list[int] = []
 
     # iterate over a snapshot of edges to safely modify genome later
     for e in list(genome.edges):
-        parent_id = e["parent"]
-        child_id = e["child"]
+        parent_id = e.parent
+        child_id = e.child
         # drop edges whose parent or child no longer exist
         if parent_id not in genome.nodes or child_id not in genome.nodes:
             continue
-        parent_type = ModuleType[genome.nodes[parent_id]["type"]]
+        parent_type = ModuleType[genome.nodes[parent_id].type]
         allowed = [f.name for f in ALLOWED_FACES[parent_type]]
-        edge_key = (parent_id, e["face"])
+        edge_key = (parent_id, e.face)
 
         # Check 1: face must be allowed for parent type
-        if e["face"] not in allowed:
+        if e.face not in allowed:
             to_prune.append(child_id)
             continue
 
@@ -640,5 +604,5 @@ def _prune_invalid_edges(genome: TreeGenome) -> None:
     genome.edges = [
         e
         for e in valid_edges
-        if e["parent"] in genome.nodes and e["child"] in genome.nodes
+        if e.parent in genome.nodes and e.child in genome.nodes
     ]

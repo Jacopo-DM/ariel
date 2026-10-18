@@ -1,13 +1,18 @@
 """Track and log the state of MuJoCo objects during a simulation."""
 
 # Standard library
-from typing import Any
 
 # Third-party libraries
+from typing import TYPE_CHECKING
+
 import mujoco as mj
 
 # Local libraries
 from ariel import log
+
+if TYPE_CHECKING:
+    import numpy as np
+    from numpy.typing import NDArray
 
 
 class Tracker:
@@ -60,7 +65,7 @@ class Tracker:
         self.mujoco_obj_to_find = mujoco_obj_to_find
         self.name_to_bind = name_to_bind
         self.observable_attributes = observable_attributes
-        self.history: dict[str, dict[int, list[Any]]] = {}
+        self.history: dict[str, dict[int, list[NDArray[np.float64]]]] = {}
 
     def setup(
         self,

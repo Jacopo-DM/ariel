@@ -53,9 +53,16 @@ def run(robot: CoreModule, *, with_viewer: bool = False) -> None:
     adj_dict = create_fully_connected_adjacency(len(data.ctrl.copy()))
     na_cpg_mat = NaCPG(adj_dict)
 
-    ctrl = Controller(
-        controller_callback_function=lambda _, d: na_cpg_mat.forward(d.time)
-    )
+    def callback(
+        _model: mujoco.MjModel,
+        data: mujoco.MjData,
+        /,
+        *_args: object,
+        **_kwargs: object,
+    ) -> object:
+        return na_cpg_mat.forward(data.time)
+
+    ctrl = Controller(controller_callback_function=callback)
     ctrl.tracker.setup(world.spec, data)
 
     mujoco.set_mjcb_control(ctrl.set_control)

@@ -6,6 +6,7 @@ import argparse
 import json
 import time
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import mujoco
 import mujoco.viewer
@@ -23,6 +24,9 @@ from ariel.body_phenotypes.lynx_mjspec.unified_pipeline.common import (
     build_observation,
     set_target_position,
 )
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
 
 
 def parse_args() -> argparse.Namespace:
@@ -82,12 +86,14 @@ def resolve_artifact_dir(artifact_dir: Path) -> Path:
 
 def load_artifacts(
     artifact_dir: Path,
-) -> tuple[np.ndarray, np.ndarray, PolicySpec, dict[str, object]]:
+) -> tuple[
+    NDArray[np.float64], NDArray[np.float64], PolicySpec, dict[str, object]
+]:
     """Load the best genome, policy spec and metadata of a run.
 
     Returns
     -------
-    tuple[np.ndarray, np.ndarray, PolicySpec, dict[str, object]]
+    tuple
         The best genome, the policy weights, the policy spec and the metadata.
 
     Raises
@@ -105,15 +111,7 @@ def load_artifacts(
     metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
     policy_dict = metadata.get("policy", {})
 
-    policy = PolicySpec(
-        input_size=int(policy_dict.get("input_size", PolicySpec.input_size)),
-        hidden_size=int(policy_dict.get("hidden_size", PolicySpec.hidden_size)),
-        output_size=int(policy_dict.get("output_size", PolicySpec.output_size)),
-        action_scale=float(
-            policy_dict.get("action_scale", PolicySpec.action_scale)
-        ),
-        max_delta=float(policy_dict.get("max_delta", PolicySpec.max_delta)),
-    )
+    policy = PolicySpec.model_validate(policy_dict)
 
     tubes = np.load(artifact_dir / "best_tube_lengths.npy")
     brain = np.load(artifact_dir / "best_brain_weights.npy")
@@ -128,7 +126,7 @@ def run_rollout(  # ruff: ignore[too-many-arguments, too-many-positional-argumen
     tcp_sid: int,
     tgt_sid: int,
     joint_ids: list[int],
-    target: np.ndarray,
+    target: NDArray[np.float64],
     sim_steps: int,
     ctrl_freq: int,
     touch_threshold: float,

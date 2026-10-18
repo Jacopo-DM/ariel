@@ -5,9 +5,9 @@ from __future__ import annotations
 import argparse
 import json
 from concurrent.futures import ProcessPoolExecutor
-from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import mujoco
 import nevergrad as ng
@@ -29,6 +29,9 @@ from ariel.body_phenotypes.lynx_mjspec.unified_pipeline.common import (
     num_network_params,
     set_target_position,
 )
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
 
 INVALID_FITNESS = 999.0
 DEFAULT_HOLD_THRESHOLD = 0.02
@@ -102,9 +105,9 @@ def parse_args() -> argparse.Namespace:
 
 
 def evaluate_candidate(  # ruff: ignore[too-many-arguments, too-many-locals, too-many-positional-arguments]
-    genome: np.ndarray,
+    genome: NDArray[np.float64],
     policy_spec: PolicySpec,
-    target: np.ndarray,
+    target: NDArray[np.float64],
     sim_steps: int,
     ctrl_freq: int,
     touch_threshold: float,
@@ -331,7 +334,7 @@ def main() -> None:  # ruff: ignore[too-many-locals]  # long routine kept as wri
     np.save(run_dir / "best_brain_weights.npy", best_weights)
 
     metadata = {
-        "policy": asdict(policy_spec),
+        "policy": policy_spec.model_dump(),
         "target": target.tolist(),
         "sim_steps": int(args.sim_steps),
         "ctrl_freq": int(args.ctrl_freq),

@@ -6,7 +6,7 @@ from __future__ import annotations
 import sys
 
 # Standard library
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, TypeVar
 
 # Third-party libraries
 import networkx as nx
@@ -41,7 +41,7 @@ class VectorDecoder(Blueprint):
 
     def assign_symbols_from_range(  # ruff: ignore[no-self-use]  # keeps the interface shared with the sibling classes
         self,
-        vector: npt.NDArray[Any] | Sequence[float],
+        vector: npt.NDArray[np.float64] | Sequence[float],
         symbols: Sequence[T] | Sequence[Sequence[T]],
         weight: Sequence[float] | Sequence[Sequence[float]] | None = None,
     ) -> list[T]:
@@ -99,10 +99,10 @@ class VectorDecoder(Blueprint):
 
     def vectors_to_graph(
         self,
-        type_vector: npt.NDArray[Any],
-        connection_vector: npt.NDArray[Any],
-        rotation_vector: npt.NDArray[Any],
-    ) -> DiGraph[Any]:
+        type_vector: npt.NDArray[np.float64],
+        connection_vector: npt.NDArray[np.float64],
+        rotation_vector: npt.NDArray[np.float64],
+    ) -> DiGraph[int]:
         """
         Convert vector to a graph.
 
@@ -122,7 +122,7 @@ class VectorDecoder(Blueprint):
         """
         # Reset the graph
         self._graph: dict[int, ModuleInstance] = {}
-        self.graph: DiGraph[Any] = nx.DiGraph()
+        self.graph: DiGraph[int] = nx.DiGraph()
 
         # Store the vectors
         self.type_vector = type_vector.copy()

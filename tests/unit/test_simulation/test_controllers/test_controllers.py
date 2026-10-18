@@ -14,7 +14,13 @@ CUSTOM_CTRL_STEP = 10
 CUSTOM_SAVE_STEP = 100
 
 
-def _zero_callback(model: mujoco.MjModel, _data: mujoco.MjData) -> list[float]:
+def _zero_callback(
+    model: mujoco.MjModel,
+    _data: mujoco.MjData,
+    /,
+    *_args: object,
+    **_kwargs: object,
+) -> list[float]:
     """Control callback that always outputs zeros.
 
     Returns
@@ -70,7 +76,11 @@ def test_controller_set_control_clips_output() -> None:
     """set_control clips control values to [-pi/2, pi/2]."""
 
     def large_output(
-        model: mujoco.MjModel, _data: mujoco.MjData
+        model: mujoco.MjModel,
+        _data: mujoco.MjData,
+        /,
+        *_args: object,
+        **_kwargs: object,
     ) -> list[float]:
         return [999.0] * model.nu
 
@@ -90,7 +100,11 @@ def test_controller_nan_output_raises() -> None:
     """set_control raises ValueError when the callback returns NaN."""
 
     def nan_callback(
-        model: mujoco.MjModel, _data: mujoco.MjData
+        model: mujoco.MjModel,
+        _data: mujoco.MjData,
+        /,
+        *_args: object,
+        **_kwargs: object,
     ) -> list[float]:
         return [float("nan")] * model.nu
 
