@@ -1,4 +1,4 @@
-"""ARIEL visualisation component.
+"""ARIEL visualization component.
 
-The dashboards live on the `feature-dashboard` branch.
+Good panel is dashboard_new.py
 """
