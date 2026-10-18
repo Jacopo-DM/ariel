@@ -278,3 +278,6 @@ RECYCLE.BIN/
 # OpenGL probe result, created per machine and working folder
 mujoco_user_config.json
 mujoco_user_config.json.lock
+
+# Obsidian window state (personal)
+.obsidian/
