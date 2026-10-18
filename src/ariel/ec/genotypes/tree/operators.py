@@ -1,3 +1,4 @@
+# ruff: file-ignore[suspicious-non-cryptographic-random-usage]  # pseudo-random numbers drive the search, no security use
 """Genetic operators for tree genomes.
 
 Simple, conservative operators that preserve core node and face constraints.
@@ -222,7 +223,7 @@ def mutate_replace_node(genome: TreeGenome) -> None:
 
     # choose a new type different from current; exclude CORE/NONE
     types = [
-        t for t in ModuleType if t not in (ModuleType.CORE, ModuleType.NONE)
+        t for t in ModuleType if t not in {ModuleType.CORE, ModuleType.NONE}
     ]
     types = [t for t in types if t.name != old_type]
     if not types:
@@ -252,7 +253,7 @@ def mutate_replace_node(genome: TreeGenome) -> None:
         genome.edges = old_edges
 
 
-def mutate_subtree_replacement(  # ruff: ignore[complex-structure]
+def mutate_subtree_replacement(  # ruff: ignore[complex-structure, too-many-locals]
     genome: TreeGenome, max_modules: int = 10
 ) -> None:
     """
@@ -396,7 +397,7 @@ def mutate_shrink(genome: TreeGenome) -> None:
 
     # Replace with a single new node
     types = [
-        t for t in ModuleType if t not in (ModuleType.CORE, ModuleType.NONE)
+        t for t in ModuleType if t not in {ModuleType.CORE, ModuleType.NONE}
     ]
     new_type = random.choice(types).name
     rotations = [r.name for r in ALLOWED_ROTATIONS[ModuleType[new_type]]]
@@ -418,7 +419,7 @@ def mutate_shrink(genome: TreeGenome) -> None:
         genome.edges = old_edges
 
 
-def mutate_hoist(genome: TreeGenome) -> None:  # ruff: ignore[complex-structure]
+def mutate_hoist(genome: TreeGenome) -> None:
     """Hoist mutation: replace a parent node with one of its children.
 
     Selects a random node that has children, then replaces it with one of its
@@ -430,9 +431,7 @@ def mutate_hoist(genome: TreeGenome) -> None:  # ruff: ignore[complex-structure]
     old_edges = copy.deepcopy(genome.edges)
 
     # Find nodes that have children
-    nodes_with_children = set()
-    for e in genome.edges:
-        nodes_with_children.add(e["parent"])
+    nodes_with_children = {e["parent"] for e in genome.edges}
 
     candidates = [nid for nid in nodes_with_children if nid != IDX_OF_CORE]
     if not candidates:
@@ -522,7 +521,7 @@ def random_tree(max_modules: int) -> TreeGenome:
         parent, face = random.choice(free)
         # choose random module type/rotation
         types = [
-            t for t in ModuleType if t not in (ModuleType.CORE, ModuleType.NONE)
+            t for t in ModuleType if t not in {ModuleType.CORE, ModuleType.NONE}
         ]
         mtype = random.choice(types).name
         rotations = [r.name for r in ALLOWED_ROTATIONS[ModuleType[mtype]]]

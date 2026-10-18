@@ -9,8 +9,7 @@ import numpy as np
 
 
 def _parse_log(file_path: str) -> dict[str, list[Any]]:
-    with Path(file_path).open() as f:
-        content = f.read()
+    content = Path(file_path).read_text(encoding="utf-8")
     gens = [int(m) for m in re.findall(r"gen=(\d+)", content)]
     bests = [float(m) for m in re.findall(r"best=([-\d\.]+)", content)]
     means = [float(m) for m in re.findall(r"mean=([-\d\.]+)", content)]

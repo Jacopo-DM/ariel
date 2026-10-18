@@ -15,7 +15,7 @@ Todo
 """
 
 # Standard library
-import datetime
+import datetime as dt
 from pathlib import Path
 
 # Local libraries
@@ -68,9 +68,9 @@ def generate_save_path(
 
     # Generate unique string using the date and time
     format_string = "%Y-%m-%d_%H-%M-%S-%f"
-    time_zone = datetime.UTC
+    time_zone = dt.UTC
     date_time_str = str(
-        datetime.datetime.now(tz=time_zone).strftime(format_string),
+        dt.datetime.now(tz=time_zone).strftime(format_string),
     )
 
     # Check if 'file path' is a string or None

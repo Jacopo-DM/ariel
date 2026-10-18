@@ -29,8 +29,8 @@ def test_one_point_children_are_recombinations() -> None:
     p_i = [0.0] * 6
     p_j = [1.0] * 6
     c1, c2 = Crossover.one_point(p_i, p_j)
-    assert all(v in (0.0, 1.0) for v in c1)
-    assert all(v in (0.0, 1.0) for v in c2)
+    assert all(v in {0.0, 1.0} for v in c1)
+    assert all(v in {0.0, 1.0} for v in c2)
 
 
 def test_one_point_symmetric() -> None:
@@ -95,8 +95,8 @@ def test_uniform_genes_come_from_parents() -> None:
     p_i = [0.0] * 8
     p_j = [1.0] * 8
     c1, c2 = Crossover.uniform(p_i, p_j)
-    assert all(v in (0.0, 1.0) for v in c1)
-    assert all(v in (0.0, 1.0) for v in c2)
+    assert all(v in {0.0, 1.0} for v in c1)
+    assert all(v in {0.0, 1.0} for v in c2)
 
 
 def test_uniform_invalid_probability_raises() -> None:

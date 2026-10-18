@@ -156,7 +156,7 @@ def test_hi_prob_apply_constraints_removes_self_connections() -> None:
     decoder.apply_connection_constraints()
     for face_idx in range(NUM_OF_FACES):
         for i in range(NUM_MODULES):
-            assert decoder.conn_p_space[i, i, face_idx] == 0.0
+            assert decoder.conn_p_space[i, i, face_idx] == 0
 
 
 def test_hi_prob_apply_constraints_core_never_child() -> None:
@@ -166,7 +166,7 @@ def test_hi_prob_apply_constraints_core_never_child() -> None:
     decoder.rot_p_space = _rot_space()
     decoder.type_p_space = _type_space()
     decoder.apply_connection_constraints()
-    assert np.all(decoder.conn_p_space[:, 0, :] == 0.0)
+    assert np.all(decoder.conn_p_space[:, 0, :] == 0)
 
 
 # ---------------------------------------------------------------------------
@@ -253,7 +253,7 @@ def test_assign_symbols_basic() -> None:
     )
     assert isinstance(result, list)
     assert len(result) == 3
-    assert all(s in ("A", "B", "C") for s in result)
+    assert all(s in {"A", "B", "C"} for s in result)
 
 
 def test_assign_symbols_out_of_range_raises() -> None:
@@ -307,8 +307,8 @@ def test_assign_symbols_per_element_symbols() -> None:
         vector=[0.2, 0.8],
         symbols=[["A", "B"], ["C", "D"]],
     )
-    assert result[0] in ("A", "B")
-    assert result[1] in ("C", "D")
+    assert result[0] in {"A", "B"}
+    assert result[1] in {"C", "D"}
 
 
 def test_assign_symbols_with_weights() -> None:
@@ -344,7 +344,7 @@ def test_assign_symbols_integer_symbols() -> None:
         vector=[0.0, 0.5, 1.0],
         symbols=[0, 1, 2],
     )
-    assert all(s in (0, 1, 2) for s in result)
+    assert all(s in {0, 1, 2} for s in result)
 
 
 # ---------------------------------------------------------------------------
@@ -387,7 +387,7 @@ def test_vector_decoder_apply_constraints_no_self_connections() -> None:
     decoder.apply_connection_constraints()
     for face_idx in range(NUM_OF_FACES):
         for i in range(NUM_MODULES):
-            assert decoder.conn_p_space[i, i, face_idx] == 0.0  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
+            assert decoder.conn_p_space[i, i, face_idx] == 0  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
 
 
 def test_vector_decoder_apply_constraints_core_never_child() -> None:
@@ -397,7 +397,7 @@ def test_vector_decoder_apply_constraints_core_never_child() -> None:
     decoder.rot_p_space = _rot_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
     decoder.type_p_space = _type_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
     decoder.apply_connection_constraints()
-    assert np.all(decoder.conn_p_space[:, 0, :] == 0.0)  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
+    assert np.all(decoder.conn_p_space[:, 0, :] == 0)  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
 
 
 # ---------------------------------------------------------------------------

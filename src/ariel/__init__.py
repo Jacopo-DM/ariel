@@ -1,3 +1,4 @@
+# ruff: file-ignore[non-empty-init-module]  # package entry point: runs setup code before the re-exports (see CODEMAP.md)
 """
 ARIEL: Autonomous Robots through Integrated Evolution and Learning.
 

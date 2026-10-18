@@ -3,7 +3,7 @@
 import io
 import json
 import os
-import subprocess
+import subprocess  # ruff: ignore[suspicious-subprocess-import]  # runs fixed local probe commands only
 import sys
 import threading
 import time
@@ -112,12 +112,14 @@ def _import_ariel(
     env = {k: v for k, v in os.environ.items() if k != "MUJOCO_GL"}
     if preset is not None:
         env["MUJOCO_GL"] = preset
-    return subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true]
+    return subprocess.run(
         [
             sys.executable,
             "-c",
-            "import os, sys; import ariel;"
-            "print('mujoco' in sys.modules, os.environ.get('MUJOCO_GL'))",
+            (
+                "import os, sys; import ariel;"
+                "print('mujoco' in sys.modules, os.environ.get('MUJOCO_GL'))"
+            ),
         ],
         cwd=folder,
         env=env,

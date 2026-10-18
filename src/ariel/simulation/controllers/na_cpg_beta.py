@@ -252,13 +252,13 @@ class NaCPGBeta(nn.Module):
             "angles": self.angles.clone(),
         }
 
-    def init_state(
+    def init_state(  # ruff: ignore[no-self-use]  # keeps the interface shared with the sibling classes
         self, value: float, size: int | list[int] | tuple[int, ...]
     ) -> torch.Tensor:
         """Sample an initial state with random signs and magnitude `value`."""
         return torch.Tensor(RNG.choice([-value, value], size=size))
 
-    def scaled_beta(
+    def scaled_beta(  # ruff: ignore[no-self-use]  # keeps the interface shared with the sibling classes
         self,
         beta_params: BetaParams,
         size: int | list[int] | tuple[int, ...],
@@ -287,7 +287,7 @@ class NaCPGBeta(nn.Module):
             return torch.Tensor(sample * reflection_mask)
         return torch.Tensor(sample)
 
-    def param_type_converter(
+    def param_type_converter(  # ruff: ignore[no-self-use]  # keeps the interface shared with the sibling classes
         self,
         params: list[float] | np.ndarray | torch.Tensor,
     ) -> torch.Tensor:
@@ -384,7 +384,7 @@ class NaCPGBeta(nn.Module):
         self.angles.data = self.initial_state["angles"].clone()
         self.angle_history = []
 
-    def constraint_function(
+    def constraint_function(  # ruff: ignore[no-self-use]  # keeps the interface shared with the sibling classes
         self,
         coefficients: tuple[float, float, float, float],
         w: float,
@@ -422,7 +422,7 @@ class NaCPGBeta(nn.Module):
         self.b.data = loaded["b"]
         console.log(f"[green]Loaded parameters from {path}[/green]")
 
-    def forward(  # ruff: ignore[complex-structure, too-many-statements]
+    def forward(  # ruff: ignore[complex-structure, too-many-locals, too-many-statements]
         self,
         time: float | None = None,
     ) -> torch.Tensor:

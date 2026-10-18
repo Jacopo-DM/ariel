@@ -1,5 +1,7 @@
 """Test: NeuralDevelopmentalEncoding — init, forward shapes, and value range."""
 
+from itertools import starmap
+
 import numpy as np
 import torch
 from networkx import DiGraph
@@ -195,7 +197,7 @@ def test_nde_forward_different_inputs_differ() -> None:
     out1 = nde.forward(_genotype(seed=0))
     out2 = nde.forward(_genotype(seed=99))
     # At least one output array must differ
-    assert not all(np.allclose(a, b) for a, b in zip(out1, out2, strict=False))
+    assert not all(starmap(np.allclose, zip(out1, out2, strict=False)))
 
 
 # ---------------------------------------------------------------------------

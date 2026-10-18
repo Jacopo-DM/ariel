@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 #   This class is a collection of measures, so many properties are expected
 
 
-class MorphologicalMeasures:
+class MorphologicalMeasures:  # ruff: ignore[too-many-public-methods]  # public signature or class shape kept as is; changing it changes the API
     """Modular robot morphological measures computed from a tree (blueprint).
 
     Works with a NetworkX directed graph representation of a robot.
@@ -42,11 +42,6 @@ class MorphologicalMeasures:
     robot_graph : nx.DiGraph
         Directed graph of the robot phenotype.  Nodes require ``'type'`` and
         ``'rotation'`` attributes; edges require a ``'face'`` attribute.
-
-    Raises
-    ------
-    ValueError
-        If robot_graph is empty or contains more than one root node.
 
     Attributes
     ----------
@@ -89,6 +84,11 @@ class MorphologicalMeasures:
         Degree of symmetry across the XZ plane (Y-axis mirror), in [0, 1].
     yz_symmetry : float
         Degree of symmetry across the YZ plane (X-axis mirror), in [0, 1].
+
+    Raises
+    ------
+    ValueError
+        If robot_graph is empty or contains more than one root node.
     """
 
     def __init__(self, robot_graph: nx.DiGraph[Any]) -> None:

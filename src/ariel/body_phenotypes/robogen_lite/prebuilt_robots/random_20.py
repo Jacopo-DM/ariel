@@ -1,3 +1,4 @@
+# ruff: file-ignore[suspicious-non-cryptographic-random-usage]  # pseudo-random numbers drive the search, no security use
 """Randomized 20-module prebuilt morphology.
 
 This module exposes a reproducible random morphology generator that creates

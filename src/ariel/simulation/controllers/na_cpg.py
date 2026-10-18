@@ -195,7 +195,7 @@ class NaCPG(nn.Module):
             "angles": self.angles.clone(),
         }
 
-    def param_type_converter(
+    def param_type_converter(  # ruff: ignore[no-self-use]  # keeps the interface shared with the sibling classes
         self,
         params: list[float] | np.ndarray | torch.Tensor,
     ) -> torch.Tensor:
@@ -319,7 +319,7 @@ class NaCPG(nn.Module):
         self.angles.data = self.initial_state["angles"].clone()
         self.angle_history = []
 
-    def forward(self, time: float | None = None) -> torch.Tensor:  # ruff: ignore[complex-structure, too-many-statements]
+    def forward(self, time: float | None = None) -> torch.Tensor:  # ruff: ignore[complex-structure, too-many-locals, too-many-statements]
         """
         Perform a forward pass: update CPG states, compute output angles.
 

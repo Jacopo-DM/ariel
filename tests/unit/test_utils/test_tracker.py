@@ -3,7 +3,7 @@
 import mujoco
 
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider import spider
-from ariel.simulation.environments._simple_flat import SimpleFlatWorld
+from ariel.simulation.environments import SimpleFlatWorld
 from ariel.utils.tracker import Tracker
 
 

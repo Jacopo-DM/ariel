@@ -104,15 +104,15 @@ def mjspec_deep_copy(spec: mujoco.MjSpec) -> mujoco.MjSpec:
     spec
         The original MuJoCo specification to duplicate.
 
+    Returns
+    -------
+    mujoco.MjSpec
+        A deep copy of the provided MuJoCo specification.
+
     Notes
     -----
     It is MUCH faster to use the MuJoCo function `spec.copy()`, at no loss of
     functionality as far as the author can tell. If you need to make EXTRA sure
     you have a deep copy, use this function.
-
-    Returns
-    -------
-    mujoco.MjSpec
-        A deep copy of the provided MuJoCo specification.
     """
     return mujoco.MjSpec.from_string(spec.to_xml())

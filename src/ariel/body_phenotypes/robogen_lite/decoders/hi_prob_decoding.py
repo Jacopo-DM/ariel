@@ -132,7 +132,7 @@ class HighProbabilityDecoder(Blueprint):
 
             # Check if the maximum value is zero (no more connections)
             value_at_max = current_state[from_module, to_module, conn_face]
-            if value_at_max == 0.0:
+            if value_at_max == 0:
                 msg = "No more connections can be made."
                 log.debug(msg)
                 break

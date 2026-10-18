@@ -60,12 +60,12 @@ class TreeGenome:
 
     def save_json(self, path: str) -> None:
         """Write the genome to `path` as JSON."""
-        with Path(path).open("w") as fh:
+        with Path(path).open("w", encoding="utf-8") as fh:
             json.dump(self.to_dict(), fh, indent=2)
 
     @classmethod
     def load_json(cls, path: str) -> TreeGenome:
         """Read a genome from the JSON file at `path`."""
-        with Path(path).open() as fh:
+        with Path(path).open(encoding="utf-8") as fh:
             data = json.load(fh)
         return cls.from_dict(data)

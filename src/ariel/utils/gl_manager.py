@@ -11,7 +11,7 @@ import contextlib
 import json
 import os
 import platform as platform_info
-import subprocess
+import subprocess  # ruff: ignore[suspicious-subprocess-import]  # runs fixed local probe commands only
 import sys
 import tempfile
 from collections.abc import Callable, Mapping

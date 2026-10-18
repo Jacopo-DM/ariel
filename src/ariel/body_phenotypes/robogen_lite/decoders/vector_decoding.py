@@ -39,7 +39,7 @@ T = TypeVar("T")
 class VectorDecoder(Blueprint):
     """Implements the vector-decoding algorithm."""
 
-    def assign_symbols_from_range(
+    def assign_symbols_from_range(  # ruff: ignore[no-self-use]  # keeps the interface shared with the sibling classes
         self,
         vector: npt.NDArray[Any] | Sequence[float],
         symbols: Sequence[T] | Sequence[Sequence[T]],
@@ -205,7 +205,7 @@ class VectorDecoder(Blueprint):
 
             # Check if the maximum value is zero (no more connections)
             value_at_max = current_state[from_module, to_module, conn_face]
-            if value_at_max == 0.0:
+            if value_at_max == 0:
                 msg = "No more connections can be made."
                 log.debug(msg)
                 break

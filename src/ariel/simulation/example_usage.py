@@ -79,7 +79,7 @@ class TargetedLocomotionWorker(MuJoCoWorkerBase):
     (lower is better).
     """
 
-    def evaluate(
+    def evaluate(  # ruff: ignore[no-self-use]  # keeps the interface shared with the sibling classes
         self,
         model: mj.MjModel,
         data: mj.MjData,

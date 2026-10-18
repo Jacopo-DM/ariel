@@ -35,7 +35,7 @@ def _safe_attr(individual: Individual, attribute: str) -> float:
         return float("-inf")
 
 
-class Population:
+class Population:  # ruff: ignore[too-many-public-methods]  # public signature or class shape kept as is; changing it changes the API
     """
     Ordered, mutable container of ``Individual`` objects.
 

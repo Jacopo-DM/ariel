@@ -38,7 +38,7 @@ class HingeModule(Module):
     index: int | None = None
     module_type: ModuleType = ModuleType.HINGE
 
-    def __init__(self, index: int) -> None:
+    def __init__(self, index: int) -> None:  # ruff: ignore[too-many-locals]  # long routine kept as written; splitting it is a refactor outside this goal
         """Initialize the hinge module.
 
         Parameters

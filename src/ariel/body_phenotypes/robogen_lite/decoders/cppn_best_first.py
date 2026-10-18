@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import operator
 from typing import TYPE_CHECKING, Any, cast
 
 import networkx as nx
@@ -57,7 +58,7 @@ class MorphologyDecoderBestFirst:
             parent_pos[2] + delta[2],
         )
 
-    def decode(self) -> nx.DiGraph[Any]:
+    def decode(self) -> nx.DiGraph[Any]:  # ruff: ignore[too-many-locals]  # long routine kept as written; splitting it is a refactor outside this goal
         """Grow the robot graph from the core, best-scoring connection first."""
         robot_graph: nx.DiGraph[Any] = nx.DiGraph()
         occupied_coords = {}
@@ -146,7 +147,9 @@ class MorphologyDecoderBestFirst:
                 )
                 break
 
-            best_conn = max(potential_connections, key=lambda x: x["score"])  # type: ignore[arg-type,return-value]  # known bug
+            best_conn = max(
+                potential_connections, key=operator.itemgetter("score")
+            )
 
             child_id = next_module_id
             robot_graph.add_node(

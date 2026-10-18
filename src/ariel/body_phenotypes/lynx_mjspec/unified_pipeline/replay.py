@@ -92,7 +92,7 @@ def load_artifacts(
     return tubes, brain, policy, metadata
 
 
-def run_rollout(  # ruff: ignore[too-many-arguments]
+def run_rollout(  # ruff: ignore[too-many-arguments, too-many-positional-arguments]
     model: mujoco.MjModel,
     data: mujoco.MjData,
     net: FastNumpyNetwork,
@@ -149,7 +149,7 @@ def run_rollout(  # ruff: ignore[too-many-arguments]
     return initial_distance, min_distance, final_distance, first_touch_time
 
 
-def main() -> None:
+def main() -> None:  # ruff: ignore[too-many-locals]  # long routine kept as written; splitting it is a refactor outside this goal
     """Load a saved run and replay it."""
     args = parse_args()
 

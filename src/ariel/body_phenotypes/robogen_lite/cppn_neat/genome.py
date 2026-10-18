@@ -1,3 +1,4 @@
+# ruff: file-ignore[suspicious-non-cryptographic-random-usage]  # pseudo-random numbers drive the search, no security use
 """CPPN genome: nodes, connections, mutation, crossover and activation."""
 
 from __future__ import annotations
@@ -45,7 +46,9 @@ class Genome:
     def copy(self) -> Genome:
         """Return a new Genome object with identical, deep-copied gene sets."""
         # Deep copy nodes (Node class has a copy method)
-        new_nodes = {_id: node.copy() for _id, node in self.nodes.items()}
+        new_nodes = {
+            node_id: node.copy() for node_id, node in self.nodes.items()
+        }
 
         # Deep copy connections (Connection class has a copy method)
         new_connections = {
@@ -367,17 +370,21 @@ class Genome:
         """
         # 1. Identify Input/Output IDs
         input_node_ids = [
-            _id for _id, node in self.nodes.items() if node.typ == "input"
+            node_id
+            for node_id, node in self.nodes.items()
+            if node.typ == "input"
         ]
         output_node_ids = [
-            _id for _id, node in self.nodes.items() if node.typ == "output"
+            node_id
+            for node_id, node in self.nodes.items()
+            if node.typ == "output"
         ]
 
         if len(inputs) != len(input_node_ids):
             msg = f"Expected {len(input_node_ids)} inputs, got {len(inputs)}"
             raise ValueError(msg)
 
-        try:
+        try:  # ruff: ignore[too-many-statements-in-try-clause]  # public signature or class shape kept as is; changing it changes the API
             # --- STRATEGY A: FEED-FORWARD (Preferred) ---
             ordered_node_ids = self.get_node_ordering()
 
@@ -413,7 +420,7 @@ class Genome:
                     weighted_sum
                 )
 
-            return [node_outputs[_id] for _id in output_node_ids]
+            return [node_outputs[node_id] for node_id in output_node_ids]
 
         except Exception:  # ruff: ignore[blind-except]
             # --- STRATEGY B: RECURRENT RELAXATION (Fallback) ---
@@ -456,7 +463,7 @@ class Genome:
 
                 current_values = next_values
 
-            return [current_values[_id] for _id in output_node_ids]
+            return [current_values[node_id] for node_id in output_node_ids]
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize the Genome to a dictionary."""

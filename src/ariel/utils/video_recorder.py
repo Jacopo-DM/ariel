@@ -1,7 +1,7 @@
 """Simple video recorder that writes rendered frames to a video file."""
 
 # Standard library
-import datetime
+import datetime as dt
 from pathlib import Path
 from typing import ClassVar
 
@@ -66,7 +66,7 @@ class VideoRecorder:
 
         # Generate video name
         if self._add_timestamp_to_file_name:
-            timestamp = datetime.datetime.now(tz=datetime.UTC).strftime(
+            timestamp = dt.datetime.now(tz=dt.UTC).strftime(
                 "%Y%m%d_%H%M%S",
             )
             file_name += f"_{timestamp}"

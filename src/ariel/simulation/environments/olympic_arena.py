@@ -49,7 +49,7 @@ class OlympicArena(BaseWorld):
 
     name = "olympic_arena"
 
-    def __init__(  # ruff: ignore[too-many-arguments]
+    def __init__(  # ruff: ignore[too-many-arguments, too-many-positional-arguments]
         self,
         # Overall arena parameters
         arena_width: float = 2.0,

@@ -174,7 +174,7 @@ class SimpleCPG(nn.Module):
             "angles": self.angles.clone(),
         }
 
-    def param_type_converter(
+    def param_type_converter(  # ruff: ignore[no-self-use]  # keeps the interface shared with the sibling classes
         self,
         params: list[float] | np.ndarray | torch.Tensor,
     ) -> torch.Tensor:
@@ -302,8 +302,8 @@ class SimpleCPG(nn.Module):
                     )
 
             # Update states
-            self.x = self.x + dx * self.dt
-            self.y = self.y + dy * self.dt
+            self.x += dx * self.dt
+            self.y += dy * self.dt
 
             # Compute output angles: amplitude * y component + phase offset
             angles = self.amplitudes * self.y + self.phase + self.b

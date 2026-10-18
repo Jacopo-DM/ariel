@@ -92,8 +92,7 @@ def save_graph_as_json(
     data = json_graph.node_link_data(graph, edges="edges")
     json_string = json.dumps(data, indent=4)
 
-    with Path(save_file).open("w", encoding="utf-8") as f:
-        f.write(json_string)
+    Path(save_file).write_text(json_string, encoding="utf-8")
 
 
 def load_graph_from_json(

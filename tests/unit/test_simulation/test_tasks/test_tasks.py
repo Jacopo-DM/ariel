@@ -1,5 +1,7 @@
 """Test: simulation task fitness functions."""
 
+import math
+
 import numpy as np
 import pytest
 
@@ -181,7 +183,7 @@ def test_turning_in_place_straight_line_low_score() -> None:
 def test_turning_in_place_circle_high_score() -> None:
     """A roughly circular path produces a higher score than a straight line."""
     n = 40
-    angles = [2 * 3.14159 * i / n for i in range(n)]
+    angles = [2 * math.pi * i / n for i in range(n)]
     circle = [(np.cos(a), np.sin(a)) for a in angles]
     straight = [(float(i) * 0.01, 0.0) for i in range(n)]
 

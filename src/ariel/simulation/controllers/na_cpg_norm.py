@@ -213,7 +213,7 @@ class NaCPG_Norm(nn.Module):  # ruff: ignore[invalid-class-name]
         console.log(f"len angle history {len(self.angle_history)}")
         self.is_normalized = True
 
-    def param_type_converter(
+    def param_type_converter(  # ruff: ignore[no-self-use]  # keeps the interface shared with the sibling classes
         self,
         params: list[float] | np.ndarray | torch.Tensor,
     ) -> torch.Tensor:
@@ -307,7 +307,7 @@ class NaCPG_Norm(nn.Module):  # ruff: ignore[invalid-class-name]
         self.current_step += 1
         return self.angle_history[self.current_step - 1]
 
-    def forward(self, time: float | None = None) -> torch.Tensor:  # ruff: ignore[unused-method-argument]
+    def forward(self, time: float | None = None) -> torch.Tensor:  # ruff: ignore[too-many-locals, unused-method-argument]
         # Reset if time is zero
         # if time is not None and torch.isclose(
         # ):

@@ -104,7 +104,7 @@ class PerlinNoise:
         h = self._hash2(xi, yi) % self._grad_lut.shape[0]
         return cast("np.ndarray", self._grad_lut[h])
 
-    def as_grid(
+    def as_grid(  # ruff: ignore[too-many-locals]  # long routine kept as written; splitting it is a refactor outside this goal
         self,
         width: int,
         height: int,
