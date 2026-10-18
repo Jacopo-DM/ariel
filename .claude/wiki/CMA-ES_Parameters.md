@@ -1,10 +1,12 @@
 ---
-type: reference
+type: algorithm_reference
 tags: [cma-es, parameters, defaults, tuning]
 source: https://arxiv.org/pdf/1604.00772 (Table 1, Appendix A, pp. 28-31)
+title: "CMA-ES Default Parameters"
+date_ingested: 2026-04-24
 ---
 
-# CMA-ES Default Parameters
+# CMA-ES_Parameters
 
 All default parameters from Table 1 (Hansen 2023), where n = search space dimension.
 

@@ -1,10 +1,12 @@
 ---
-type: reference
+type: algorithm_reference
 tags: [cma-es, initialization, termination, boundaries, flat-fitness, constraints]
 source: https://arxiv.org/pdf/1604.00772 (Sections B.1–B.5, pp. 32–35)
+title: "CMA-ES: Practical Concerns"
+date_ingested: 2026-04-24
 ---
 
-# CMA-ES: Practical Concerns
+# CMA-ES_Practical_Concerns
 
 Implementation details from Appendix B of Hansen (2023).
 

@@ -2,7 +2,9 @@
 type: api_reference
 tags: [mujoco, python, class, rendering]
 source: https://mujoco.readthedocs.io/en/stable/python.html
+date_ingested: 2026-04-13
 ---
+
 # MjvScene
 
 Holds abstract geometric objects for rendering. Constructor calls `mjv_makeScene` internally.

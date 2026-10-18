@@ -4,9 +4,11 @@ authors: "ARIEL / ci-group"
 year: 2024
 source: "https://ci-group.github.io/ariel/source/Db_examples/db_with_pandas.html"
 tags: [ariel, database, pandas, sqlite, evolutionary-algorithm, analysis, visualization]
+type: ariel_reference
+date_ingested: 2026-04-11
 ---
 
-# Database Manipulation with Pandas
+# ariel_db_pandas
 
 One-sentence summary: Demonstrates how to read ARIEL's SQLite individual database into pandas, reconstruct per-generation populations from birth/death timestamps, compute fitness statistics, and plot progression curves.
 
@@ -126,4 +128,4 @@ plt.show()
 ## Related Topics
 
 - [[ariel_individual_db]] — schema details and individual lifecycle
-- [[ariel_ea_loop]] — how generations and selection interact
+- ariel_ea_loop (page not written yet) — how generations and selection interact

@@ -2,8 +2,11 @@
 type: api_reference
 tags: [mujoco, python, enumerations, constants]
 source: https://mujoco.readthedocs.io/en/stable/python.html
+title: "MuJoCo Enumerations and Constants"
+date_ingested: 2026-04-13
 ---
-# MuJoCo Enumerations and Constants
+
+# mujoco_enumerations
 
 All C enums are Python enum classes. Access as `mujoco.EnumClass.VALUE`. All C constants are accessible as `mujoco.CONSTANT_NAME`.
 

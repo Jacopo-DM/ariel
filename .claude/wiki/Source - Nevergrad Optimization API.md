@@ -3,9 +3,10 @@ type: source_summary
 tags: [nevergrad, optimization, cma-es, ask-tell, parametrization]
 source: https://facebookresearch.github.io/nevergrad/optimization.html
 date_ingested: 2026-04-09
+title: "Nevergrad Optimization API"
 ---
 
-# Nevergrad Optimization API
+# Source - Nevergrad Optimization API
 
 Nevergrad is Facebook Research's gradient-free optimization library. Covers optimizer selection, ask/tell interface, parametrization, parallel evaluation, constraints, and multiobjective optimization.
 

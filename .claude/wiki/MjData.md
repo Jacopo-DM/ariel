@@ -2,7 +2,9 @@
 type: api_reference
 tags: [mujoco, python, class, ariel]
 source: https://ci-group.github.io/ariel/source/Mujoco_docs/mujoco_docs.html
+date_ingested: 2026-04-24
 ---
+
 # MjData
 
 `MjData` is MuJoCo's runtime simulation state object. It holds all quantities that change at every timestep — positions, velocities, accelerations, forces, sensor readings, and spatial transforms. It is updated in-place by `mj_step()` and related functions.

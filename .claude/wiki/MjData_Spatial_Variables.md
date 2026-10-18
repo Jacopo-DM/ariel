@@ -2,8 +2,11 @@
 type: api_reference
 tags: [mujoco, python, mjdata, spatial, transforms, ariel]
 source: https://ci-group.github.io/ariel/source/Mujoco_docs/mujoco_docs.html
+title: "MjData — Spatial Variables"
+date_ingested: 2026-04-24
 ---
-# MjData — Spatial Variables
+
+# MjData_Spatial_Variables
 
 World-frame position, orientation, and applied Cartesian forces for bodies, geometries, sites, and cameras in [[MjData]]. All are recomputed each `mj_step` from `qpos`.
 

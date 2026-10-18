@@ -4,9 +4,11 @@ authors: "CI-Group (VU Amsterdam)"
 year: 2024
 source: "https://ci-group.github.io/ariel/autoapi/ariel/body_phenotypes/robogen_lite/index.html"
 tags: [ariel, body-phenotype, modular-robot, robogen, cppn, neat, mujoco, evolutionary-robotics]
+type: ariel_reference
+date_ingested: 2026-04-11
 ---
 
-# robogen_lite — ARIEL Body Phenotype API
+# robogen_lite_api
 
 Module path: `ariel.body_phenotypes.robogen_lite`
 
@@ -270,4 +272,4 @@ robot = construct_mjspec_from_graph(graph)   # CoreModule
 - **CPPN outputs → module selection:** softmax over raw scores governs which face/module type is placed next.
 - **max_modules=20** is the default; smaller values speed up evaluation, larger values allow more complex morphologies.
 
-See also: [[cppn_neat_genome]], [[mujoco_mjspec]], [[body_brain_learning]]
+See also: [[cppn_neat_genome]], [[MjSpec]], body_brain_learning (page not written yet)

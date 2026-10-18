@@ -2,7 +2,9 @@
 type: api_reference
 tags: [mujoco, python, class, rendering, opengl]
 source: https://mujoco.readthedocs.io/en/stable/python.html
+date_ingested: 2026-04-24
 ---
+
 # MjrContext
 
 OpenGL rendering context. Wraps the MuJoCo `mjrContext` C struct. Constructor calls `mjr_makeContext` internally.

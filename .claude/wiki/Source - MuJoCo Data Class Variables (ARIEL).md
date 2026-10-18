@@ -2,8 +2,11 @@
 type: source_summary
 tags: [mujoco, ariel, mjdata, simulation]
 source: https://ci-group.github.io/ariel/source/Mujoco_docs/mujoco_docs.html
+title: "MuJoCo Data Class Variables (ARIEL)"
+date_ingested: 2026-04-24
 ---
-# MuJoCo Data Class Variables (ARIEL)
+
+# Source - MuJoCo Data Class Variables (ARIEL)
 
 Reference documentation for the MuJoCo `MjData` class variables as used in the ARIEL framework. Covers all runtime state variables updated each simulation step — positions, velocities, forces, sensor data, and spatial transforms.
 

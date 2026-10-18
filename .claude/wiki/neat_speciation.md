@@ -4,9 +4,11 @@ authors: "Stanley, Miikkulainen"
 year: 2002
 source: "https://gwern.net/doc/reinforcement-learning/exploration/2002-stanley.pdf"
 tags: [neat, speciation, innovation-numbers, crossover, neuroevolution, evolutionary-computation]
+type: algorithm_reference
+date_ingested: 2026-04-11
 ---
 
-# NEAT Speciation and Historical Markings
+# neat_speciation
 
 Detailed notes on the two structural mechanisms that make NEAT's topology evolution tractable. Based on [[stanley_2002]].
 

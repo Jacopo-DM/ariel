@@ -2,9 +2,11 @@
 type: api_reference
 tags: [nevergrad, optimizer, cma-es, ask-tell, parallel]
 source: https://facebookresearch.github.io/nevergrad/optimization.html
+title: "Nevergrad Optimizers"
+date_ingested: 2026-04-24
 ---
 
-# Nevergrad Optimizers
+# Nevergrad_Optimizers
 
 ## Instantiation Signature
 

@@ -2,7 +2,9 @@
 type: api_reference
 tags: [mujoco, python, class, rendering]
 source: https://mujoco.readthedocs.io/en/stable/python.html
+date_ingested: 2026-04-24
 ---
+
 # MjrRect
 
 Viewport rectangle used with rendering functions.

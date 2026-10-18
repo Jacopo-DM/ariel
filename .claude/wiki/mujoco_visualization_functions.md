@@ -3,8 +3,10 @@ type: api_reference
 tags: [mujoco, python, visualization, rendering, opengl]
 source: https://github.com/google-deepmind/mujoco/blob/main/include/mujoco/mujoco.h
 date_ingested: 2026-04-13
+title: "MuJoCo Visualization Functions"
 ---
-# MuJoCo Visualization Functions
+
+# mujoco_visualization_functions
 
 Complete reference for all `mjv_*` (abstract visualizer) and `mjr_*` (OpenGL renderer) functions. The visualizer generates abstract scene geometry from model/data; the renderer converts it to pixels via OpenGL.
 

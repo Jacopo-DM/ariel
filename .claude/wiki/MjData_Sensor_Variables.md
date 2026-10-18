@@ -2,8 +2,11 @@
 type: api_reference
 tags: [mujoco, python, mjdata, sensors, mocap, ariel]
 source: https://ci-group.github.io/ariel/source/Mujoco_docs/mujoco_docs.html
+title: "MjData — Sensor, Motion Capture & Utility Variables"
+date_ingested: 2026-04-24
 ---
-# MjData — Sensor, Motion Capture & Utility Variables
+
+# MjData_Sensor_Variables
 
 Miscellaneous [[MjData]] fields for sensor readings, motion capture overrides, energy, the inertia matrix, and the `bind` helper.
 

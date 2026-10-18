@@ -1,9 +1,12 @@
 ---
 title: "ARIEL Individual Database — Schema and Temporal Model"
 tags: [ariel, database, sqlite, individual, temporal-model]
+type: ariel_reference
+source: https://ci-group.github.io/ariel/source/Db_examples/db_with_pandas.html
+date_ingested: 2026-04-11
 ---
 
-# ARIEL Individual Database
+# ariel_individual_db
 
 ARIEL uses a **flat append-only SQLite database** rather than per-generation population lists. Every individual that ever existed is stored in `__data__/database.db`, table `individual`.
 

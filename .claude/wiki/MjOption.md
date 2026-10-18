@@ -2,7 +2,9 @@
 type: api_reference
 tags: [mujoco, python, class, physics-options]
 source: https://mujoco.readthedocs.io/en/stable/python.html
+date_ingested: 2026-04-24
 ---
+
 # MjOption
 
 Physics solver options. Accessed as `model.opt` on an [[MjModel]] instance. Pre-initialized by `mj_defaultOption()`.

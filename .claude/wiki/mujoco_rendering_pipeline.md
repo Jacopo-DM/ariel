@@ -2,8 +2,11 @@
 type: api_reference
 tags: [mujoco, python, rendering, opengl, visualization]
 source: https://mujoco.readthedocs.io/en/stable/python.html
+title: "MuJoCo Rendering Pipeline"
+date_ingested: 2026-04-24
 ---
-# MuJoCo Rendering Pipeline
+
+# mujoco_rendering_pipeline
 
 MuJoCo supports both a high-level `Renderer` class and a low-level OpenGL pipeline using `mjv`/`mjr` functions.
 

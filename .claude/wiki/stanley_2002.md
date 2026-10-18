@@ -4,9 +4,11 @@ authors: "Stanley, Miikkulainen"
 year: 2002
 source: "https://gwern.net/doc/reinforcement-learning/exploration/2002-stanley.pdf"
 tags: [neat, neuroevolution, topology, speciation, genetic-algorithms, evolutionary-computation, cppn]
+type: concept_reference
+date_ingested: 2026-04-11
 ---
 
-# Evolving Neural Networks through Augmenting Topologies (NEAT)
+# stanley_2002
 
 **Stanley, K.O. & Miikkulainen, R. (2002)**
 *Evolutionary Computation, Vol. 10, No. 2*

@@ -4,9 +4,10 @@ tags: [cma-es, optimization, evolution-strategy, black-box]
 source: https://arxiv.org/pdf/1604.00772
 author: Nikolaus Hansen (Inria)
 date_ingested: 2026-04-09
+title: "The CMA Evolution Strategy: A Tutorial (Hansen, 2023)"
 ---
 
-# The CMA Evolution Strategy: A Tutorial (Hansen, 2023)
+# Source - CMA-ES Tutorial (Hansen 2023)
 
 Authoritative tutorial on the CMA-ES algorithm by its creator. Covers derivation, all update equations, default parameters, implementation concerns, and boundary handling. arXiv:1604.00772v2, 39 pages.
 

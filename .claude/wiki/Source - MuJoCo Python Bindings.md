@@ -2,8 +2,11 @@
 type: source_summary
 tags: [mujoco, python, bindings, google-deepmind]
 source: https://mujoco.readthedocs.io/en/stable/python.html
+title: "MuJoCo Python Bindings"
+date_ingested: 2026-04-24
 ---
-# MuJoCo Python Bindings
+
+# Source - MuJoCo Python Bindings
 
 Official Python bindings for the MuJoCo physics engine, maintained by Google DeepMind. Provides direct access to the MuJoCo C API via pybind11 wrappers. Install with `pip install mujoco`.
 

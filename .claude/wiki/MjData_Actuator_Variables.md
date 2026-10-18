@@ -2,8 +2,11 @@
 type: api_reference
 tags: [mujoco, python, mjdata, actuator, ariel]
 source: https://ci-group.github.io/ariel/source/Mujoco_docs/mujoco_docs.html
+title: "MjData — Actuator Variables"
+date_ingested: 2026-04-24
 ---
-# MjData — Actuator Variables
+
+# MjData_Actuator_Variables
 
 Arrays in [[MjData]] that track the state and output of actuators, plus the control input vector.
 

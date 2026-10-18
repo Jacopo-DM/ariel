@@ -2,7 +2,9 @@
 type: api_reference
 tags: [mujoco, python, class, rendering, visualization]
 source: https://mujoco.readthedocs.io/en/stable/python.html
+date_ingested: 2026-04-13
 ---
+
 # MjvCamera
 
 Abstract visualizer camera. Used with [[mujoco_rendering_pipeline]] to define the viewpoint.

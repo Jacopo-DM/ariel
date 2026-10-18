@@ -1,11 +1,13 @@
 ---
-type: reference
+type: algorithm_reference
 tags: [cma-es, mirrored-sampling, tpa, sigma-adaptation, parallel, variance-reduction]
 source: https://inria.hal.science/inria-00530202v2/document
 paper: Brockhoff, Auger, Hansen, Arnold, Hohm (2010)
+title: "CMA-ES: Mirrored Sampling and Two-Point Adaptation (TPA)"
+date_ingested: 2026-04-11
 ---
 
-# CMA-ES: Mirrored Sampling and Two-Point Adaptation (TPA)
+# CMA-ES_Mirrored_Sampling
 
 Technique introduced in [[Brockhoff_2010]] to reduce fitness evaluations via symmetric paired sampling and an alternative step-size adaptation rule compatible with batch evaluation.
 

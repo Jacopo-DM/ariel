@@ -2,8 +2,11 @@
 type: api_reference
 tags: [mujoco, python, viewer, visualization, interactive]
 source: https://mujoco.readthedocs.io/en/stable/python.html
+title: "MuJoCo Interactive Viewer"
+date_ingested: 2026-04-24
 ---
-# MuJoCo Interactive Viewer
+
+# mujoco_viewer
 
 The `mujoco.viewer` submodule provides an interactive GUI viewer for simulation. Supports both blocking and non-blocking (passive) modes.
 

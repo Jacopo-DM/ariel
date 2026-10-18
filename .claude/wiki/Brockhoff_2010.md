@@ -1,10 +1,12 @@
 ---
-type: paper
+type: concept_reference
 tags: [cma-es, mirrored-sampling, tpa, sigma-adaptation, parallel, nevergrad]
 source: https://inria.hal.science/inria-00530202v2/document
+title: "Mirrored Sampling and Sequential Selection for Evolution Strategies"
+date_ingested: 2026-04-11
 ---
 
-# Mirrored Sampling and Sequential Selection for Evolution Strategies
+# Brockhoff_2010
 
 **Authors:** Dimo Brockhoff, Anne Auger, Nikolaus Hansen, Dirk V. Arnold, Tim Hohm
 **Year:** 2010

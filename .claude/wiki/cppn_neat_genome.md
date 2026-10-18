@@ -4,9 +4,11 @@ authors: "CI-Group (VU Amsterdam)"
 year: 2024
 source: "https://ci-group.github.io/ariel/autoapi/ariel/body_phenotypes/robogen_lite/cppn_neat/genome/index.html"
 tags: [cppn, neat, genome, evolutionary-robotics, ariel, neuroevolution]
+type: ariel_reference
+date_ingested: 2026-04-11
 ---
 
-# CPPN-NEAT Genome in ARIEL
+# cppn_neat_genome
 
 ARIEL uses CPPN (Compositional Pattern Producing Networks) evolved with NEAT (NeuroEvolution of Augmenting Topologies) as the genotype for robot morphologies.
 

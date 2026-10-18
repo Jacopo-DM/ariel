@@ -2,9 +2,11 @@
 type: algorithm_reference
 tags: [cma-es, evolution-strategy, optimization, covariance-matrix]
 source: https://arxiv.org/pdf/1604.00772
+title: "CMA-ES: Core Algorithm"
+date_ingested: 2026-04-24
 ---
 
-# CMA-ES: Core Algorithm
+# CMA-ES_Algorithm
 
 CMA-ES (Covariance Matrix Adaptation Evolution Strategy) is a stochastic black-box optimizer for real-parameter, non-linear, non-convex functions. It maintains a multivariate normal distribution N(**m**, σ²**C**) and adapts all three parameters — mean **m**, step-size σ, and covariance **C** — from ranked fitness evaluations only.
 

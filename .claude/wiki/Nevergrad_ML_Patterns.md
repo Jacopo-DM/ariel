@@ -1,10 +1,12 @@
 ---
-type: reference
+type: concept_reference
 tags: [nevergrad, machine-learning, optimizer-selection, reinforcement-learning, ask-tell, parallel]
 source: https://facebookresearch.github.io/nevergrad/machinelearning.html
+title: "Nevergrad: ML Optimization Patterns"
+date_ingested: 2026-04-24
 ---
 
-# Nevergrad: ML Optimization Patterns
+# Nevergrad_ML_Patterns
 
 ## Optimizer Selection by Problem Type
 

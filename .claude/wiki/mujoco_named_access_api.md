@@ -2,8 +2,11 @@
 type: api_reference
 tags: [mujoco, python, api, named-access]
 source: https://mujoco.readthedocs.io/en/stable/python.html
+title: "MuJoCo Named Access API"
+date_ingested: 2026-04-24
 ---
-# MuJoCo Named Access API
+
+# mujoco_named_access_api
 
 Both [[MjModel]] and [[MjData]] provide O(1) named element access. Call accessor methods with a string name; the returned object exposes all struct fields with the entity-type prefix stripped, as NumPy views into the underlying C memory.
 

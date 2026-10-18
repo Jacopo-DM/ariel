@@ -2,8 +2,11 @@
 type: api_reference
 tags: [mujoco, python, functions, kinematics]
 source: https://mujoco.readthedocs.io/en/stable/python.html
+title: "MuJoCo Kinematics Functions"
+date_ingested: 2026-04-24
 ---
-# MuJoCo Kinematics Functions
+
+# mujoco_kinematics_functions
 
 Forward kinematics substage functions. These compute body positions, orientations, tendon/actuator lengths, and camera/light positions from `data.qpos`. All modify `data` in place and return `None`.
 

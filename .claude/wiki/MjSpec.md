@@ -2,7 +2,9 @@
 type: api_reference
 tags: [mujoco, python, class, model-building]
 source: https://mujoco.readthedocs.io/en/stable/python.html
+date_ingested: 2026-04-13
 ---
+
 # MjSpec
 
 Programmatic model builder. Allows constructing and editing MuJoCo models in Python without writing XML. Compiles to [[MjModel]].

@@ -2,7 +2,9 @@
 type: api_reference
 tags: [mujoco, python, class]
 source: https://mujoco.readthedocs.io/en/stable/python.html
+date_ingested: 2026-04-24
 ---
+
 # MjStatistic
 
 Static model statistics. Accessed as `model.stat` on an [[MjModel]] instance.

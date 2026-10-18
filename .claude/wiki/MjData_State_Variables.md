@@ -2,8 +2,11 @@
 type: api_reference
 tags: [mujoco, python, mjdata, state, ariel]
 source: https://ci-group.github.io/ariel/source/Mujoco_docs/mujoco_docs.html
+title: "MjData — State Variables"
+date_ingested: 2026-04-24
 ---
-# MjData — State Variables
+
+# MjData_State_Variables
 
 Generalized position, velocity, and acceleration vectors that form the core simulation state in [[MjData]].
 

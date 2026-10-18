@@ -2,8 +2,11 @@
 type: api_reference
 tags: [mujoco, python, mjdata, forces, ariel]
 source: https://ci-group.github.io/ariel/source/Mujoco_docs/mujoco_docs.html
+title: "MjData — Force Variables"
+date_ingested: 2026-04-24
 ---
-# MjData — Force Variables
+
+# MjData_Force_Variables
 
 Generalized and contact force arrays in [[MjData]]. All `qfrc_*` arrays are in generalized (joint-space) coordinates with shape `(nv,)`. Contact forces `cfrc_*` are per-body.
 

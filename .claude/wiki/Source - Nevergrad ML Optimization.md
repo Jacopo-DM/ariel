@@ -3,9 +3,10 @@ type: source_summary
 tags: [nevergrad, machine-learning, hyperparameter, reinforcement-learning, optimizer-selection]
 source: https://facebookresearch.github.io/nevergrad/machinelearning.html
 date_ingested: 2026-04-09
+title: "Nevergrad: Machine Learning Optimization Guide"
 ---
 
-# Nevergrad: Machine Learning Optimization Guide
+# Source - Nevergrad ML Optimization
 
 Covers optimizer selection by use case (hyperparameter tuning, neural network weights, RL), ask/tell patterns for parallel ML workloads, and budget guidelines.
 

@@ -2,7 +2,9 @@
 type: api_reference
 tags: [mujoco, python, class, rendering, visualization]
 source: https://mujoco.readthedocs.io/en/stable/python.html
+date_ingested: 2026-04-13
 ---
+
 # MjvOption
 
 Visualization flags and options. Controls what is drawn in the scene. Used with [[mujoco_rendering_pipeline]].

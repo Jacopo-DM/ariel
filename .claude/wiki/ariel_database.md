@@ -1,4 +1,12 @@
-# ARIEL SQLite3 Database Reference
+---
+type: ariel_reference
+tags: [ariel, database, sqlite, pandas, polars]
+source: https://ci-group.github.io/ariel/source/Db_examples/db_with_sqlite3.html
+title: "ARIEL SQLite3 Database Reference"
+date_ingested: 2026-04-11
+---
+
+# ariel_database
 
 Source pages ingested:
 - https://ci-group.github.io/ariel/source/Db_examples/db_with_sqlite3.html
@@ -305,4 +313,4 @@ plt.fill_between(x, mean - std, mean + std, color="C0", alpha=0.25)
 - [[CMA-ES_Algorithm]] — optimizer that generates the genotypes stored in `genotype_`
 - [[Nevergrad_Optimizers]] — Nevergrad wraps CMA-ES; fitness minimization convention
 - [[Nevergrad_Parametrization]] — how genotype parameter spaces are defined before being serialized to `genotype_`
-- [[MjData.md]] — MuJoCo simulation variables whose outputs feed into the `fitness_` column
+- [[MjData]] — MuJoCo simulation variables whose outputs feed into the `fitness_` column

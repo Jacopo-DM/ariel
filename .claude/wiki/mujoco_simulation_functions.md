@@ -2,8 +2,11 @@
 type: api_reference
 tags: [mujoco, python, functions, simulation, dynamics]
 source: https://mujoco.readthedocs.io/en/stable/python.html
+title: "MuJoCo Simulation Functions"
+date_ingested: 2026-04-13
 ---
-# MuJoCo Simulation Functions
+
+# mujoco_simulation_functions
 
 Core simulation stepping and forward/inverse dynamics functions. All take `(model, data)` and return `None`, modifying `data` in place.
 

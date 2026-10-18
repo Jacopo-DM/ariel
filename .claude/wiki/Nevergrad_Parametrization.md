@@ -2,9 +2,11 @@
 type: api_reference
 tags: [nevergrad, parametrization, ng.p, array, instrumentation, mutation, bounds]
 source: https://facebookresearch.github.io/nevergrad/parametrization.html
+title: "Nevergrad Parametrization (ng.p.*)"
+date_ingested: 2026-04-24
 ---
 
-# Nevergrad Parametrization (ng.p.*)
+# Nevergrad_Parametrization
 
 > **Note:** Nevergrad documentation states parametrization is "still a work in progress" with "breaking changes" anticipated. Verify against installed version.
 

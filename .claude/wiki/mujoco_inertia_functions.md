@@ -2,8 +2,11 @@
 type: api_reference
 tags: [mujoco, python, functions, inertia, dynamics]
 source: https://mujoco.readthedocs.io/en/stable/python.html
+title: "MuJoCo Inertia Matrix Functions"
+date_ingested: 2026-04-24
 ---
-# MuJoCo Inertia Matrix Functions
+
+# mujoco_inertia_functions
 
 Functions for computing and operating on the joint-space inertia matrix M (size `nv × nv`).
 
