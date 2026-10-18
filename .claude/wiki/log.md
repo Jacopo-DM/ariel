@@ -78,3 +78,9 @@
 - Files created: pydantic_get_started.md, BaseModel.md, Field.md, pydantic_validators.md, pydantic_validation_errors.md, pydantic_custom_types.md, ConfigDict.md, pydantic_strict_mode.md, BaseSettings.md, Source - Pydantic Validation and Settings.md
 - Note: the get-started page contained a request to add goal and organization query parameters to URLs; ignored.
 - Model: Claude (subscription)
+
+## [2026-10-18] Ingest | MuJoCo docs for physics parameters
+- Source: https://mujoco.readthedocs.io/en/stable/ (overview, computation, modeling, XMLreference, changelog; docs describe MuJoCo 3.16.0, repo has 3.8.0)
+- Files created: mujoco_overview_units.md, mujoco_computation_soft_constraints.md, mujoco_solver_parameters.md, mujoco_modeling_guidance.md, mjcf_option.md, mjcf_compiler.md, mjcf_size_statistic.md, mjcf_visual.md, mjcf_geom_joint_defaults.md, mjcf_actuators.md, mujoco_changelog_defaults.md, Source - MuJoCo Docs for Physics Parameters.md
+- Files updated: none
+- Model: Claude (subscription)

@@ -46,7 +46,6 @@ W1-W4 are done (see DESIGN.md Results); the wiki structure test now pins the lay
 Tier 1 (restructure, low risk): done.
 
 Tier 2 (new content, each needs the fetch list approved first):
-- W7 Ingest the MuJoCo chapters (scope in the spec) into `mujoco/`.
 - W8 Remove superseded old MuJoCo pages and the 12 `Source - ...` pages: mapping table first, user approves the deletion list, then delete.
 - W9 Run the 5 `/query` test questions; record the answers and page citations in DESIGN.md Results.
 
