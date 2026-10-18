@@ -340,10 +340,7 @@ class _NoSiteFlag:
     """An mjtVisFlag without mjVIS_SITE."""
 
 
-class _SiteFlag:
-    """An mjtVisFlag with mjVIS_SITE."""
-
-    mjVIS_SITE = 1
+_SiteFlag = type("_SiteFlag", (), {"mjVIS_SITE": 1})
 
 
 @pytest.mark.parametrize("has_site_flag", [True, False])

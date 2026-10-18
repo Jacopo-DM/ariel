@@ -320,8 +320,6 @@ def ensure_gl_backend(
             stacklevel=2,
         )
         return None
-    if config is None:
-        return None
     return apply_config(config, environ=environ, modules=modules)
 
 
@@ -331,13 +329,13 @@ def _probe_once(
     console: "Console | None",
     lock_timeout: float,
     modules: Mapping[str, object],
-) -> GLConfig | None:
-    """Probe under a lock; return the config or None if it is unavailable.
+) -> GLConfig:
+    """Probe under a lock; return the config that is saved afterwards.
 
     Returns
     -------
-    GLConfig | None
-        The config, or None if no backend works.
+    GLConfig
+        The config, whether this process probed or waited for another one.
     """
     lock = path.with_name(path.name + LOCK_SUFFIX)
     while not _try_lock(lock):

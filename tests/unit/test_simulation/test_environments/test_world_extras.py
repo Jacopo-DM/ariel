@@ -1,0 +1,230 @@
+"""Test: precompiled worlds, spawning, heightmaps and world scripts."""
+
+from __future__ import annotations
+
+import importlib
+import inspect
+import runpy
+from pathlib import Path
+
+import mujoco
+import numpy as np
+import pytest
+
+from ariel.simulation import environments
+from ariel.simulation.environments import (
+    BaseWorld,
+    CompoundWorld,
+    OlympicArena,
+    SimpleFlatWorld,
+    SimpleTiltedWorld,
+    compile_terrains,
+    heightmap_functions,
+    olympic_arena,
+)
+
+_base_world = importlib.import_module(
+    "ariel.simulation.environments._base_world"
+)
+SimpleFlatWorldWithTarget = importlib.import_module(
+    "ariel.simulation.environments._simple_flat_with_target"
+).SimpleFlatWorldWithTarget
+
+SPHERE_XML = """
+<mujoco><worldbody>
+  <body><geom name="ball" type="sphere" size=".5"/></body>
+</worldbody></mujoco>"""
+TARGET_FLOOR = (4, 4, 1)
+NON_SQUARE = (20, 30)
+EDGE = 0.1
+HEIGHT_DIMS = (10, 10)
+TWO_ROBOTS = 2
+
+
+@pytest.fixture
+def precompiled_dir(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Path:
+    # Point the world XML cache at a temporary folder.
+    monkeypatch.setattr(_base_world, "__file__", str(tmp_path / "world.py"))
+    return tmp_path / "pre_compiled"
+
+
+def _world_classes() -> list[type[BaseWorld]]:
+    return [
+        cls
+        for _, cls in inspect.getmembers(environments, inspect.isclass)
+        if issubclass(cls, BaseWorld)
+    ]
+
+
+# --- precompiled XML -------------------------------------------------------- #
+
+
+@pytest.mark.parametrize("cls", _world_classes(), ids=lambda c: c.__name__)
+def test_world_roundtrips_through_its_xml(
+    cls: type[BaseWorld], precompiled_dir: Path
+) -> None:
+    """A stored world is loaded back instead of being rebuilt."""
+    built = cls(load_precompiled=False)
+    built.store_to_xml()
+    assert (precompiled_dir / f"{built.name}.xml").exists()
+    loaded = cls(load_precompiled=True)
+    assert loaded.is_precompiled
+    model = loaded.spec.compile()
+    assert model.nbody >= 1
+    del built, loaded, model
+
+
+def test_compile_all_worlds_writes_one_xml_each(
+    precompiled_dir: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """compile_all_world stores every world class."""
+    compile_terrains.compile_all_world(with_load_compiled=False)
+    assert len(list(precompiled_dir.glob("*.xml"))) >= len(_world_classes()) - 1
+    assert "Compiled" in capsys.readouterr().out
+
+
+def test_compile_terrains_script(
+    precompiled_dir: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Running the module as a script compiles all worlds."""
+    runpy.run_path(str(Path(compile_terrains.__file__)), run_name="__main__")
+    assert list(precompiled_dir.glob("*.xml"))
+    assert "Compiled" in capsys.readouterr().out
+
+
+def test_olympic_arena_script_stores_the_arena(precompiled_dir: Path) -> None:
+    """Running olympic_arena.py as a script stores its XML."""
+    runpy.run_path(str(Path(olympic_arena.__file__)), run_name="__main__")
+    assert list(precompiled_dir.glob("*.xml"))
+
+
+# --- spawning --------------------------------------------------------------- #
+
+
+def test_spawn_with_defaults_adds_a_free_robot() -> None:
+    """spawn() without arguments uses the default position and prefix."""
+    world = SimpleFlatWorld(load_precompiled=False)
+    robot = mujoco.MjSpec.from_string(SPHERE_XML)
+    world.spawn(robot)
+    model = world.spec.compile()
+    assert model.njnt == 1
+    del world, robot, model
+
+
+def test_spawn_warns_about_floor_contact(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """A robot that touches the floor after correction is reported."""
+    world = SimpleFlatWorld(load_precompiled=False)
+    robot = mujoco.MjSpec.from_string(SPHERE_XML)
+    world.spawn(robot, validate_no_collisions=True)
+    del world, robot
+    capsys.readouterr()
+
+
+def test_spawn_reports_robot_to_robot_contact() -> None:
+    """Two robots on top of each other produce a (debug) collision note."""
+    world = SimpleFlatWorld(load_precompiled=False)
+    world.spawn(mujoco.MjSpec.from_string(SPHERE_XML), position=(0, 0, 0.5))
+    world.spawn(
+        mujoco.MjSpec.from_string(SPHERE_XML),
+        position=(0, 0, 0.5),
+        validate_no_collisions=True,
+    )
+    assert world.spawns == TWO_ROBOTS
+    del world
+
+
+def test_world_with_an_explicit_config_fails_as_a_known_bug() -> None:
+    """Known bug (PLAN.md): a mujoco_config argument is never stored."""
+    config = SimpleFlatWorld(load_precompiled=False).mujoco_config
+    with pytest.raises(AttributeError, match="mujoco_config"):
+        BaseWorld(mujoco_config=config, load_precompiled=False)  # type: ignore[abstract]  # known bug
+
+
+# --- worlds ----------------------------------------------------------------- #
+
+
+def test_flat_world_with_target_compiles() -> None:
+    """The flat world with a target adds the target body."""
+    world = SimpleFlatWorldWithTarget(load_precompiled=False)
+    model = world.spec.compile()
+    assert model.nbody > 1
+    del world, model
+
+
+def test_tilted_world_without_checker_floor_is_a_known_bug() -> None:
+    """Known bug (PLAN.md): _terrain_color is never set on the tilted world."""
+    with pytest.raises(AttributeError, match="_terrain_color"):
+        SimpleTiltedWorld(checker_floor=False, load_precompiled=False)
+
+
+def test_compound_world_takes_every_override() -> None:
+    """Each optional argument of CompoundWorld replaces the class default."""
+    world = CompoundWorld(
+        name="my-compound",
+        floor_size=TARGET_FLOOR,
+        floor_tilt=(1, 2, 3),
+        floor_rot_sequence="ZYX",
+        dims=HEIGHT_DIMS,
+        floor_heightmap=np.zeros(HEIGHT_DIMS),
+        terrain_color=(1.0, 0.0, 0.0, 1.0),
+        checker_floor=False,
+        load_precompiled=False,
+    )
+    assert world.name == "my-compound"
+    assert world.dims == HEIGHT_DIMS
+    model = world.spec.compile()
+    assert model.ngeom >= 1
+    del world, model
+
+
+def test_compound_world_loads_its_precompiled_xml(
+    precompiled_dir: Path,
+) -> None:
+    """A stored compound world is loaded without rebuilding."""
+    CompoundWorld(load_precompiled=False).store_to_xml()
+    assert (precompiled_dir / "compound-world.xml").exists()
+    assert CompoundWorld(load_precompiled=True).is_precompiled
+
+
+# --- olympic arena helpers -------------------------------------------------- #
+
+
+@pytest.mark.parametrize("axis", ["x", "y", "z"])
+def test_quaternion_from_axis_angle_turns_about_each_axis(axis: str) -> None:
+    """A half turn about an axis has w = 0 and a unit vector part."""
+    quat = olympic_arena.quaternion_from_axis_angle(axis, 180.0)
+    assert quat[0] == pytest.approx(0.0, abs=1e-9)
+    assert float(np.linalg.norm(quat)) == pytest.approx(1.0)
+
+
+def test_quaternion_from_axis_angle_rejects_other_axes() -> None:
+    """Only x, y and z are valid axes."""
+    with pytest.raises(ValueError, match="Unexpected axis"):
+        olympic_arena.quaternion_from_axis_angle("w", 10.0)
+
+
+def test_olympic_arena_loads_its_precompiled_xml(
+    precompiled_dir: Path,
+) -> None:
+    """A stored arena is loaded without rebuilding."""
+    OlympicArena(load_precompiled=False).store_to_xml()  # type: ignore[abstract]  # known bug
+    assert OlympicArena(load_precompiled=True).is_precompiled  # type: ignore[abstract]  # known bug
+    assert list(precompiled_dir.glob("*.xml"))
+
+
+# --- heightmap functions ---------------------------------------------------- #
+
+
+def test_smooth_edges_with_zero_width_is_a_hard_step() -> None:
+    """Edge width 0 gives a mask that is 0 at the border and 1 inside."""
+    mask = heightmap_functions.smooth_edges_heightmap(HEIGHT_DIMS, 0.0)
+    assert mask[0, 0] == pytest.approx(0.0)
+    assert mask[5, 5] == pytest.approx(1.0)
+
+
+def test_smooth_edges_resizes_non_square_maps() -> None:
+    """A non-square request is resized to the requested shape."""
+    mask = heightmap_functions.smooth_edges_heightmap(NON_SQUARE, EDGE)
+    assert mask.shape == NON_SQUARE
