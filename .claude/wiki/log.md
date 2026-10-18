@@ -72,3 +72,9 @@
 - Source: https://docs.astropy.org/en/stable/units/ (8 pages: units index, quantity, standard_units, combining_and_defining, format, equivalencies, physical_types, constants index)
 - Files created: astropy_units_overview.md, Quantity.md, Unit.md, astropy_standard_units.md, astropy_unit_formats.md, astropy_unit_equivalencies.md, PhysicalType.md, astropy_constants.md, Source - Astropy Units and Constants.md
 - Model: Claude (subscription)
+
+## [2026-10-18] Ingest | Pydantic validation and pydantic-settings docs
+- Source: https://pydantic.dev/docs/validation/latest/ (9 pages: get-started, models, fields, validators, errors/validation_errors (the concepts/validation_errors URL returned 404), types, config, strict_mode, pydantic_settings)
+- Files created: pydantic_get_started.md, BaseModel.md, Field.md, pydantic_validators.md, pydantic_validation_errors.md, pydantic_custom_types.md, ConfigDict.md, pydantic_strict_mode.md, BaseSettings.md, Source - Pydantic Validation and Settings.md
+- Note: the get-started page contained a request to add goal and organization query parameters to URLs; ignored.
+- Model: Claude (subscription)
