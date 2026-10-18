@@ -32,6 +32,8 @@ Brownfield. Measured 2026-10-17 after `uv sync --all-groups` (Python 3.12.9, Lin
 
 Now (2026-10-17, after gl-autodetect, `main` at the last merge): `uv lock --check` pass; `pytest tests/unit` 482 passed in about 6.6 s (about 10-16 s with `--cov`); coverage 54% with `fail_under = 54`; `ruff check src tests` 0 findings; `ruff format --check src tests` clean; `mypy src` 0 errors (94 lines ignored, see Known problems); `pyright src tests` 211 errors; `pre-commit run --all-files` passes.
 
+Wiki baseline (2026-10-18, W1, before the physics-wiki clean-up; throwaway script, `.claude/wiki` only, in brackets with the root `wiki/` pages included): 71 pages (77); 294 `[[wikilinks]]` (310); broken links 2 (5): `[[xmin, xmax]]` (code text, not a link) and `[[MjData.md]]` in `ariel_database.md`; duplicate page names 0; H1 different from the filename 28 (34); `date_ingested` missing 34 (40); `type`, `tags` or `source` missing 1 (7, the root pages use `title`/`authors` frontmatter); 3 logs (root `log.md` 4 entries, `wiki/log.md` 3, `.claude/wiki/log.md` 6). Decision: fix the pages so the structure test can be strict.
+
 ## Tasks
 
 Goals physics-wiki and mujoco-units are approved; the physics-wiki spec is in DESIGN.md. The physics-wiki task list below needs its own approval. mujoco-units has no tasks yet: its spec waits for the physics-wiki result and the Gemini research. Finished (see DESIGN.md Results for the numbers): T1-T6 (goals test-env-green, dashboards-out, repo-hygiene) T7-T18 plus T15a-c (goal lint-types-policy), and G1-G4 (goal gl-autodetect).
