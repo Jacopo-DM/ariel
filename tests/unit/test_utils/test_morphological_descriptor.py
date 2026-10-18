@@ -10,6 +10,8 @@ import pytest
 from ariel.utils.morphological_descriptor import MorphologicalMeasures
 
 CROSS_ARM = 2
+THREE_MODULES = 3
+FOUR_MODULES = 4
 CROSS_MODULES = 1 + 6 * CROSS_ARM
 SPAN = 2 * CROSS_ARM + 1
 FILLED_BRICK_FACES = 5
@@ -190,3 +192,46 @@ def test_rotated_modules_are_not_planar() -> None:
     graph = _graph({0: "CORE", 1: "HINGE"}, [(0, 1, "FRONT")])
     graph.nodes[1]["rotation"] = "DEG_45"
     assert not MorphologicalMeasures(graph).is_2d
+
+
+def test_an_edge_with_an_unknown_face_leaves_a_module_unplaced() -> None:
+    """Known limit: a module only reachable over such an edge has no place."""
+    graph = _graph({0: "CORE", 1: "BRICK"}, [(0, 1, "SIDEWAYS")])
+    with pytest.raises(KeyError):
+        MorphologicalMeasures(graph)
+
+
+def test_a_second_parent_edge_without_a_face_is_skipped() -> None:
+    """A faceless edge to an already placed module changes nothing."""
+    graph = _graph(
+        {0: "CORE", 1: "BRICK", 2: "BRICK"},
+        [(0, 1, "FRONT"), (0, 2, "RIGHT")],
+    )
+    graph.add_edge(1, 2)
+    measures = MorphologicalMeasures(graph)
+    assert measures.num_modules == THREE_MODULES
+
+
+def test_a_module_with_two_parents_is_placed_once() -> None:
+    """A child reached from two parents keeps its first position."""
+    graph = _graph(
+        {0: "CORE", 1: "BRICK", 2: "BRICK", 3: "BRICK"},
+        [
+            (0, 1, "FRONT"),
+            (0, 2, "RIGHT"),
+            (1, 3, "RIGHT"),
+            (2, 3, "FRONT"),
+        ],
+    )
+    assert MorphologicalMeasures(graph).num_modules == FOUR_MODULES
+
+
+def test_edges_between_non_bricks_do_not_count_for_clusters() -> None:
+    """Core to hinge to hinge involves no brick."""
+    graph = _graph(
+        {0: "CORE", 1: "HINGE", 2: "HINGE"},
+        [(0, 1, "FRONT"), (1, 2, "FRONT")],
+    )
+    assert MorphologicalMeasures(graph).brick_cluster_ratio == (
+        pytest.approx(0.0)
+    )

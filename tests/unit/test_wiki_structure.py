@@ -57,8 +57,7 @@ def _pages() -> list[Path]:
 
 def _frontmatter(page: Path) -> dict[str, str]:
     match = FRONTMATTER.match(page.read_text(encoding="utf-8"))
-    if match is None:
-        return {}
+    assert match is not None, f"{page} has no frontmatter"
     pairs = re.findall(r"^(\w+):\s*(.*)$", match.group(1), re.MULTILINE)
     return dict(pairs)
 

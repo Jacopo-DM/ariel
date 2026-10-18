@@ -5,12 +5,14 @@ from __future__ import annotations
 import importlib.metadata
 import inspect
 import io
+import os
 import runpy
 import subprocess  # ruff: ignore[suspicious-subprocess-import]  # only builds fake results
 import sys
 import time
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Self, cast
+from unittest.mock import Mock
 
 import mujoco
 import pytest
@@ -28,7 +30,6 @@ from ariel.utils.mujoco_ops import has_self_collision
 from ariel.utils.optimizers import revde
 
 if TYPE_CHECKING:
-    import os
     from collections.abc import Callable
     from pathlib import Path
 
@@ -205,17 +206,13 @@ def test_ensure_returns_a_config_written_by_another_process(
         return True
 
     monkeypatch.setattr(gl_backend, "_try_lock", lock_and_write)
-    ran: list[bool] = []
-
-    def never(_target: Path) -> GLConfig:
-        ran.append(True)
-        return GLConfig()
+    never = Mock(return_value=GLConfig())
 
     applied = gl_backend.ensure_gl_backend(
         path, run=never, environ={}, modules={}
     )
     assert applied == "egl"
-    assert ran == []
+    never.assert_not_called()
 
 
 # --- gl_manager ------------------------------------------------------------- #
@@ -305,6 +302,13 @@ def _fake_mujoco(
     )
 
 
+@pytest.fixture
+def keep_mujoco_gl(monkeypatch: pytest.MonkeyPatch) -> None:
+    # The probe worker sets MUJOCO_GL in this process; put the old value back.
+    monkeypatch.setenv("MUJOCO_GL", os.environ.get("MUJOCO_GL", "glfw"))
+
+
+@pytest.mark.usefixtures("keep_mujoco_gl")
 def test_probe_reports_render_time(monkeypatch: pytest.MonkeyPatch) -> None:
     """A working backend reports ok and a render time."""
     monkeypatch.setitem(sys.modules, "mujoco", _fake_mujoco(_FakeRenderer))
@@ -316,6 +320,7 @@ def test_probe_reports_render_time(monkeypatch: pytest.MonkeyPatch) -> None:
     assert result["render_ms"] == pytest.approx(RENDER_MS)
 
 
+@pytest.mark.usefixtures("keep_mujoco_gl")
 def test_probe_reports_a_failing_backend(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -338,6 +343,7 @@ def test_probe_main_checks_its_arguments(
     assert "usage" in capsys.readouterr().err
 
 
+@pytest.mark.usefixtures("keep_mujoco_gl")
 def test_probe_main_prints_json(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -347,6 +353,7 @@ def test_probe_main_prints_json(
     assert '"ok"' in capsys.readouterr().out
 
 
+@pytest.mark.usefixtures("keep_mujoco_gl")
 def test_probe_worker_script(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -375,3 +382,15 @@ def test_revde_script() -> None:
 def test_nde_script() -> None:
     """Running nde.py as a script prints the output shapes."""
     runpy.run_path(inspect.getfile(nde), run_name="__main__")
+
+
+def test_save_path_for_a_folder_that_does_not_exist_yet(
+    tmp_path: Path,
+) -> None:
+    """A target folder that is missing is not created by the path helper."""
+    target = tmp_path / "later"
+    result = file_ops.generate_save_path(
+        file_name="out", file_extension=".txt", file_path=target
+    )
+    assert result.parent == target
+    assert not target.exists()

@@ -1,9 +1,16 @@
 """Test: SimpleCPG Hopf oscillator controller."""
 
+import inspect
+import runpy
+from pathlib import Path
+
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 import torch
 
+from ariel.simulation.controllers import simple_cpg
 from ariel.simulation.controllers.simple_cpg import (
     SimpleCPG,
     create_fully_connected_adjacency,
@@ -239,3 +246,69 @@ def test_simplecpg_reset_restores_initial_state() -> None:
     assert torch.allclose(cpg.x, cpg.initial_state["x"])
     assert torch.allclose(cpg.y, cpg.initial_state["y"])
     assert cpg.angle_history == []
+
+
+# ---------------------------------------------------------------------------
+# Reset, NaN guard, saving, and the demo
+# ---------------------------------------------------------------------------
+
+NO_SEED_NODES = 2
+STEPS_BEFORE_RESET = 5
+
+
+def test_cpg_without_a_seed_still_builds() -> None:
+    """The seed is optional."""
+    cpg = SimpleCPG(_adj(NO_SEED_NODES))
+    assert cpg.n == NO_SEED_NODES
+
+
+def test_forward_at_time_zero_resets_the_state() -> None:
+    """Passing time 0 returns the CPG to its initial state."""
+    cpg = SimpleCPG(_adj(NUM_CPG_NODES), seed=0, angle_tracking=True)
+    for _ in range(STEPS_BEFORE_RESET):
+        cpg.forward()
+    assert len(cpg.angle_history) == STEPS_BEFORE_RESET
+    cpg.forward(0.0)
+    assert len(cpg.angle_history) == 1
+
+
+def test_forward_reports_nan_angles() -> None:
+    """A parameter that is NaN makes the angles NaN, which is an error."""
+    cpg = SimpleCPG(_adj(NUM_CPG_NODES), seed=0)
+    with torch.no_grad():
+        cpg.amplitudes.fill_(float("nan"))
+    with pytest.raises(ValueError, match="NaN detected"):
+        cpg.forward()
+
+
+def test_save_and_load_roundtrip(tmp_path: Path) -> None:
+    """Saved parameters load into another CPG."""
+    first = SimpleCPG(_adj(NUM_CPG_NODES), seed=0)
+    path = tmp_path / "cpg.pt"
+    first.save(path)
+    second = SimpleCPG(_adj(NUM_CPG_NODES), seed=1)
+    second.load(path)
+    assert torch.allclose(first.phase, second.phase)
+    assert torch.allclose(first.b, second.b)
+
+
+def test_demo_plots_the_angle_histories(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """main() runs the CPG and saves a figure."""
+    mpl.use("Agg")
+    monkeypatch.setattr(simple_cpg, "DATA", tmp_path)
+    monkeypatch.setattr(plt, "show", lambda: None)
+    simple_cpg.main()
+    assert (tmp_path / "simple_cpg_angles.png").exists()
+
+
+def test_demo_runs_as_a_script(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Running the module as a program calls main()."""
+    mpl.use("Agg")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(plt, "show", lambda: None)
+    runpy.run_path(inspect.getfile(simple_cpg), run_name="__main__")
+    assert (tmp_path / "__data__" / "simple_cpg_angles.png").exists()

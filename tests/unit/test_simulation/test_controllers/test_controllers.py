@@ -118,3 +118,27 @@ def test_controller_nan_output_raises() -> None:
     with pytest.raises(ValueError, match="NaN"):
         ctrl.set_control(model, data)
     del model, data
+
+
+def test_controller_waits_between_control_steps() -> None:
+    """Between control steps the callback is not called."""
+    calls: list[int] = []
+
+    def counting(
+        model: mujoco.MjModel,
+        _data: mujoco.MjData,
+        /,
+        *_args: object,
+        **_kwargs: object,
+    ) -> list[float]:
+        calls.append(1)
+        return [0.0] * model.nu
+
+    model, data = _build_spider_model()
+    ctrl = Controller(
+        controller_callback_function=counting, time_steps_per_ctrl_step=50
+    )
+    mujoco.mj_step(model, data)
+    ctrl.set_control(model, data)
+    assert calls == []
+    del model, data

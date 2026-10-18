@@ -30,15 +30,26 @@ SimpleFlatWorldWithTarget = importlib.import_module(
     "ariel.simulation.environments._simple_flat_with_target"
 ).SimpleFlatWorldWithTarget
 
+# A small anchor geom gives the wrapper body a mass for the free joint; the
+# ball sits on a slide joint so it moves and can touch the floor.
 SPHERE_XML = """
 <mujoco><worldbody>
-  <body><geom name="ball" type="sphere" size=".5"/></body>
+  <geom name="anchor" type="sphere" size=".05" mass="1"/>
+  <body><joint type="slide" axis="0 0 1"/>
+    <geom name="ball" type="sphere" size=".5"/></body>
+</worldbody></mujoco>"""
+NO_GEOM_XML = """
+<mujoco><worldbody>
+  <body><joint type="slide" axis="0 0 1"/>
+    <inertial pos="0 0 0" mass="1" diaginertia=".1 .1 .1"/>
+    <site name="mark" size=".1"/></body>
 </worldbody></mujoco>"""
 TARGET_FLOOR = (4, 4, 1)
 NON_SQUARE = (20, 30)
 EDGE = 0.1
 HEIGHT_DIMS = (10, 10)
 TWO_ROBOTS = 2
+TWO_JOINTS = 2
 
 
 @pytest.fixture
@@ -107,19 +118,36 @@ def test_spawn_with_defaults_adds_a_free_robot() -> None:
     robot = mujoco.MjSpec.from_string(SPHERE_XML)
     world.spawn(robot)
     model = world.spec.compile()
-    assert model.njnt == 1
+    assert model.njnt == TWO_JOINTS
     del world, robot, model
 
 
-def test_spawn_warns_about_floor_contact(
-    capsys: pytest.CaptureFixture[str],
-) -> None:
-    """A robot that touches the floor after correction is reported."""
+def test_spawn_warns_about_floor_contact() -> None:
+    """A robot that still touches the floor after correction is reported."""
     world = SimpleFlatWorld(load_precompiled=False)
     robot = mujoco.MjSpec.from_string(SPHERE_XML)
     world.spawn(robot, validate_no_collisions=True)
+    assert world.spawns == 1
     del world, robot
-    capsys.readouterr()
+
+
+def test_spawn_of_a_robot_without_geoms_and_with_a_prefix() -> None:
+    """A robot with no geoms has no lowest point; the prefix is used."""
+    world = SimpleFlatWorld(load_precompiled=False)
+    robot = mujoco.MjSpec.from_string(NO_GEOM_XML)
+    world.spawn(robot, spawn_prefix="bot")
+    names = [world.spec.bodies[i].name for i in range(len(world.spec.bodies))]
+    assert any(name.startswith("bot") for name in names)
+    del world, robot
+
+
+def test_spawn_without_floor_correction() -> None:
+    """The floor correction can be switched off."""
+    world = SimpleFlatWorld(load_precompiled=False)
+    robot = mujoco.MjSpec.from_string(SPHERE_XML)
+    world.spawn(robot, correct_collision_with_floor=False)
+    assert world.spawns == 1
+    del world, robot
 
 
 def test_spawn_reports_robot_to_robot_contact() -> None:
@@ -129,6 +157,7 @@ def test_spawn_reports_robot_to_robot_contact() -> None:
     world.spawn(
         mujoco.MjSpec.from_string(SPHERE_XML),
         position=(0, 0, 0.5),
+        rotation=(0, 0, 90),
         validate_no_collisions=True,
     )
     assert world.spawns == TWO_ROBOTS
@@ -143,6 +172,15 @@ def test_world_with_an_explicit_config_fails_as_a_known_bug() -> None:
 
 
 # --- worlds ----------------------------------------------------------------- #
+
+
+def test_flat_world_with_target_loads_its_precompiled_xml(
+    precompiled_dir: Path,
+) -> None:
+    """A stored flat world with a target is loaded without rebuilding."""
+    SimpleFlatWorldWithTarget(load_precompiled=False).store_to_xml()
+    assert (precompiled_dir / "simple-flat-world-with-target.xml").exists()
+    assert SimpleFlatWorldWithTarget(load_precompiled=True).is_precompiled
 
 
 def test_flat_world_with_target_compiles() -> None:

@@ -20,6 +20,13 @@ if TYPE_CHECKING:
 #   This class is a collection of measures, so many properties are expected
 
 
+_ALLOWED_FACES = {
+    "CORE": ["FRONT", "BACK", "RIGHT", "LEFT", "TOP", "BOTTOM"],
+    "BRICK": ["FRONT", "RIGHT", "LEFT", "TOP", "BOTTOM"],
+    "HINGE": ["FRONT"],
+}
+
+
 class MorphologicalMeasures:  # ruff: ignore[too-many-public-methods]  # public signature or class shape kept as is; changing it changes the API
     """Modular robot morphological measures computed from a tree (blueprint).
 
@@ -153,14 +160,7 @@ class MorphologicalMeasures:  # ruff: ignore[too-many-public-methods]  # public 
         return cast("str", self.graph.nodes[node].get("type", "UNKNOWN"))
 
     def _get_allowed_faces(self, node: int) -> list[str]:
-        t = self._get_node_type(node)
-        if t == "CORE":
-            return ["FRONT", "BACK", "RIGHT", "LEFT", "TOP", "BOTTOM"]
-        if t == "BRICK":
-            return ["FRONT", "RIGHT", "LEFT", "TOP", "BOTTOM"]
-        if t == "HINGE":
-            return ["FRONT"]
-        return []
+        return _ALLOWED_FACES.get(self._get_node_type(node), [])
 
     def _get_node_connections(self, node: int) -> list[str]:
         faces = []
@@ -177,18 +177,11 @@ class MorphologicalMeasures:  # ruff: ignore[too-many-public-methods]  # public 
         self,
         robot_graph: nx.DiGraph[int],
     ) -> tuple[NDArray[np.object_], NDArray[np.float64]]:
-        if robot_graph.number_of_nodes() == 0:
-            msg = "Cannot convert empty robot graph to grid"
-            raise ValueError(msg)
-
         positions: dict[int, NDArray[np.float64]] = {}
         core_node = self._find_core_node()
         self._calculate_graph_positions(
             core_node, positions, np.array([0, 0, 0])
         )
-
-        if not positions:
-            positions[core_node] = np.array([0, 0, 0])
 
         pos_array = np.array(list(positions.values()))
         min_pos = pos_array.min(axis=0)
@@ -706,8 +699,6 @@ class MorphologicalMeasures:  # ruff: ignore[too-many-public-methods]  # public 
             Value in (0, 1].
         """
         # TODO: verify that bounding_box_volume is the right normaliser here  # ruff: ignore[line-contains-todo, missing-todo-author]
-        if self.bounding_box_volume == 0:
-            return 0.0
         return self.num_modules / self.bounding_box_volume
 
     @property

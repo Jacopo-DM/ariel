@@ -232,3 +232,22 @@ def test_tracking_renderer_with_defaults(
     model, data = _scene()
     renderers.tracking_video_renderer(model, data, duration=DURATION)
     assert list(tmp_path.glob("video_*.mp4"))
+
+
+def test_recorder_accepts_a_string_folder(tmp_path: Path) -> None:
+    """The output folder may be given as a string."""
+    recorder = VideoRecorder(
+        output_folder=str(tmp_path / "videos"), width=WIDTH, height=HEIGHT
+    )
+    recorder.release()
+    assert list((tmp_path / "videos").glob("video_*.mp4"))
+
+
+def test_recorder_without_a_timestamp(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """With the timestamp switched off the file name is exact."""
+    monkeypatch.setattr(VideoRecorder, "_add_timestamp_to_file_name", False)
+    recorder = _recorder(tmp_path)
+    recorder.release()
+    assert (tmp_path / "clip.mp4").exists()

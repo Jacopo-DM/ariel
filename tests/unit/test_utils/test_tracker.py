@@ -108,3 +108,14 @@ def test_tracker_floor_geom() -> None:
     tracker.setup(world.spec, data)
     # floor geom should exist in a flat world
     assert "xpos" in tracker.history
+
+
+def test_tracker_setup_twice_keeps_the_history() -> None:
+    """Calling setup() again does not wipe what was recorded."""
+    spec, _model, data = _build_spider_in_world()
+    tracker = Tracker(quiet=True)
+    tracker.setup(spec, data)
+    tracker.update(data)
+    before = len(tracker.history["xpos"][0])
+    tracker.setup(spec, data)
+    assert len(tracker.history["xpos"][0]) == before

@@ -1,6 +1,7 @@
 """Heightmap generation functions for simulation environments."""
 
 import typing
+from typing import TYPE_CHECKING
 
 # Third-party libraries
 import cv2
@@ -13,7 +14,7 @@ from ariel.parameters.ariel_types import (
 )
 from ariel.utils.noise_gen import NormMethod, PerlinNoise
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from numpy.typing import NDArray
 
 

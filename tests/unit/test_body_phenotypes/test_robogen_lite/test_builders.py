@@ -110,14 +110,10 @@ def test_draw_graph_shows_when_no_file_is_given(
 # --- the module base class -------------------------------------------------- #
 
 
-def _do_nothing(self: Module, angle: float) -> None:
-    del self, angle
-
-
 def test_module_subclass_must_define_required_attributes() -> None:
     """A subclass without `index` and `module_type` is rejected."""
     with pytest.raises(NotImplementedError, match="must define attribute"):
-        type("_Incomplete", (Module,), {"rotate": _do_nothing})
+        type("_Incomplete", (Module,), {"rotate": lambda _self, _angle: None})
 
 
 def test_module_rotate_default_raises() -> None:

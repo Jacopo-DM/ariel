@@ -56,8 +56,13 @@ class _CountingWorker(MuJoCoWorkerBase):
         return float(model.nu * 100 + (config.seed or 0)) + self.offset
 
 
-def test_worker_loads_the_model_and_calls_evaluate() -> None:
+def test_worker_loads_the_model_and_calls_evaluate(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """__call__ builds the model from XML and hands it to evaluate()."""
+    # The worker sets these in this process; monkeypatch restores them.
+    for name in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS"):
+        monkeypatch.setenv(name, "1")
     config = EvalConfig(spawn_position=SPAWN, target_position=TARGET, seed=SEED)
     assert _CountingWorker()((ROBOT_XML, config)) == pytest.approx(103.0)
     assert os.environ["OMP_NUM_THREADS"] == "1"
