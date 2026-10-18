@@ -110,7 +110,8 @@ def test_population_best_returns_top_n() -> None:
     """best(n=2) returns the two highest-fitness individuals."""
     pop = Population([_make_ind(float(i)) for i in range(5)])
     top2 = pop.best(n=2)
-    fitnesses = [ind.fitness_ for ind in top2]
+    fitnesses = [ind.fitness_ for ind in top2 if ind.fitness_ is not None]
+    assert len(fitnesses) == len(top2)
     assert fitnesses == sorted(fitnesses, reverse=True)
     assert len(top2) == 2
 
@@ -119,14 +120,18 @@ def test_population_best_min_sort() -> None:
     """best(sort='min') returns the lowest-fitness individuals first."""
     pop = Population([_make_ind(float(i)) for i in range(5)])
     bottom2 = pop.best(sort="min", n=2)
-    assert bottom2[0].fitness_ <= bottom2[1].fitness_
+    first, second = bottom2[0].fitness_, bottom2[1].fitness_
+    assert first is not None
+    assert second is not None
+    assert first <= second
 
 
 def test_population_sort_descending() -> None:
     """sort() returns individuals ordered by fitness descending."""
     pop = Population([_make_ind(float(i)) for i in [3, 1, 4, 1, 5]])
     sorted_pop = pop.sort()
-    fitnesses = [ind.fitness_ for ind in sorted_pop]
+    fitnesses = [ind.fitness_ for ind in sorted_pop if ind.fitness_ is not None]
+    assert len(fitnesses) == len(sorted_pop)
     assert fitnesses == sorted(fitnesses, reverse=True)
 
 

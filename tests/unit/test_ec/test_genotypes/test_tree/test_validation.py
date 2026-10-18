@@ -12,14 +12,14 @@ from ariel.ec.genotypes.tree.validation import (
 # ---------------------------------------------------------------------------
 
 
-def _core_only() -> dict:
+def _core_only() -> dict[str, object]:
     return {
         "nodes": {"0": {"type": "CORE", "rotation": "DEG_0"}},
         "edges": [],
     }
 
 
-def _core_hinge() -> dict:
+def _core_hinge() -> dict[str, object]:
     return {
         "nodes": {
             "0": {"type": "CORE", "rotation": "DEG_0"},
@@ -29,7 +29,7 @@ def _core_hinge() -> dict:
     }
 
 
-def _core_brick_hinge() -> dict:
+def _core_brick_hinge() -> dict[str, object]:
     return {
         "nodes": {
             "0": {"type": "CORE", "rotation": "DEG_0"},

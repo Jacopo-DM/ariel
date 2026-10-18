@@ -3,6 +3,7 @@
 import io
 import json
 import sys
+from collections.abc import Callable
 from pathlib import Path
 
 import pytest
@@ -22,7 +23,7 @@ _HANG = "import time; time.sleep(60)"
 _GARBAGE = "print('not json at all')"
 
 
-def _command(script: str):
+def _command(script: str) -> Callable[[str], list[str]]:
     """Return a worker command factory that runs `script` per backend."""
 
     def build(backend: str) -> list[str]:
@@ -31,7 +32,9 @@ def _command(script: str):
     return build
 
 
-def _per_backend(scripts: dict[str, str]):
+def _per_backend(
+    scripts: dict[str, str],
+) -> Callable[[str], list[str]]:
     """Return a worker command factory with a different script per backend."""
 
     def build(backend: str) -> list[str]:

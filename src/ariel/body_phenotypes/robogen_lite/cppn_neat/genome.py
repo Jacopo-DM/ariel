@@ -410,7 +410,7 @@ class Genome:
 
                 weighted_sum += node.bias
                 node_outputs[node_id] = ACTIVATION_FUNCTIONS[node.activation](  # type: ignore[index]  # known bug
-                    weighted_sum  # type: ignore[arg-type]  # known bug
+                    weighted_sum
                 )
 
             return [node_outputs[_id] for _id in output_node_ids]
@@ -452,7 +452,7 @@ class Genome:
                     weighted_sum += node.bias
                     next_values[node_id] = ACTIVATION_FUNCTIONS[
                         node.activation  # type: ignore[index]  # known bug
-                    ](weighted_sum)  # type: ignore[arg-type]  # known bug
+                    ](weighted_sum)
 
                 current_values = next_values
 

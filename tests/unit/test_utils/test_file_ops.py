@@ -8,7 +8,7 @@ import pytest
 from ariel.utils.file_ops import generate_save_path
 
 
-def test_generate_save_path_with_name_and_extension(tmp_path) -> None:
+def test_generate_save_path_with_name_and_extension(tmp_path: Path) -> None:
     """file_name + file_extension produces a path in the default DATA dir."""
     result = generate_save_path(
         file_name="my_file",
@@ -21,7 +21,7 @@ def test_generate_save_path_with_name_and_extension(tmp_path) -> None:
     assert result.stem == "my_file"
 
 
-def test_generate_save_path_appends_date(tmp_path) -> None:
+def test_generate_save_path_appends_date(tmp_path: Path) -> None:
     """append_date=True inserts a timestamp into the file name."""
     result = generate_save_path(
         file_name="run",
@@ -34,7 +34,7 @@ def test_generate_save_path_appends_date(tmp_path) -> None:
     assert re.search(pattern, result.name), f"Unexpected name: {result.name}"
 
 
-def test_generate_save_path_no_date(tmp_path) -> None:
+def test_generate_save_path_no_date(tmp_path: Path) -> None:
     """append_date=False keeps the stem clean."""
     result = generate_save_path(
         file_name="output",
@@ -45,7 +45,7 @@ def test_generate_save_path_no_date(tmp_path) -> None:
     assert result.name == "output.txt"
 
 
-def test_generate_save_path_extension_from_file_path(tmp_path) -> None:
+def test_generate_save_path_extension_from_file_path(tmp_path: Path) -> None:
     """Extension can be inferred from a file_path with suffix."""
     result = generate_save_path(
         file_path=tmp_path / "data.json",
@@ -54,7 +54,7 @@ def test_generate_save_path_extension_from_file_path(tmp_path) -> None:
     assert result.suffix == ".json"
 
 
-def test_generate_save_path_extension_from_file_name(tmp_path) -> None:
+def test_generate_save_path_extension_from_file_name(tmp_path: Path) -> None:
     """Extension can be inferred from a file_name with suffix."""
     result = generate_save_path(
         file_name="results.csv",
@@ -70,7 +70,7 @@ def test_generate_save_path_all_none_raises() -> None:
         generate_save_path()
 
 
-def test_generate_save_path_returns_path_object(tmp_path) -> None:
+def test_generate_save_path_returns_path_object(tmp_path: Path) -> None:
     """Return type is always a pathlib.Path."""
     result = generate_save_path(
         file_name="test",

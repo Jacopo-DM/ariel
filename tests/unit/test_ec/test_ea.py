@@ -34,14 +34,20 @@ def double_pop(population: Population) -> Population:
 
 
 def _ea(
-    tmp_path: Path, pop: Population | None = None, ops=None, **kwargs
+    tmp_path: Path,
+    pop: Population | None = None,
+    ops: list[EAOperation[...]] | None = None,
+    *,
+    num_steps: int | None = None,
+    first_generation_id: int | None = None,
 ) -> EA:
     return EA(
         population=pop or _make_pop(),
         operations=ops or [noop],
         db_file_path=tmp_path / "test.db",
         quiet=True,
-        **kwargs,
+        num_steps=num_steps,
+        first_generation_id=first_generation_id,
     )
 
 
@@ -89,7 +95,7 @@ def test_eaoperation_no_params_raises() -> None:
     """@EAOperation on a zero-parameter function raises TypeError."""
     with pytest.raises(TypeError, match="first argument"):
 
-        @EAOperation
+        @EAOperation  # type: ignore[arg-type]  # deliberately wrong signature
         def bad() -> Population:  # no params
             return Population([])
 
@@ -98,7 +104,7 @@ def test_eaoperation_wrong_first_param_type_raises() -> None:
     """First parameter not annotated as Population raises TypeError."""
     with pytest.raises(TypeError, match="Population"):
 
-        @EAOperation
+        @EAOperation  # type: ignore[arg-type]  # deliberately wrong signature
         def bad(x: int) -> Population:  # noqa: ARG001
             return Population([])
 
@@ -107,8 +113,8 @@ def test_eaoperation_wrong_return_type_raises() -> None:
     """Return annotation not Population raises TypeError."""
     with pytest.raises(TypeError, match="Population"):
 
-        @EAOperation
-        def bad(population: Population) -> list:  # noqa: ARG001
+        @EAOperation  # type: ignore[arg-type]  # deliberately wrong signature
+        def bad(population: Population) -> list[int]:  # noqa: ARG001
             return []
 
 
@@ -129,6 +135,7 @@ def test_eaoperation_call_result_is_population() -> None:
     """double_pop operation doubles the population size."""
     pop = _make_pop(3)
     result = double_pop(pop)
+    assert isinstance(result, Population)
     assert len(result) == 6
 
 
@@ -146,7 +153,9 @@ def test_eaoperation_call_with_kwargs_returns_bound_op() -> None:
 
     bound = with_param(factor=2.0)
     assert isinstance(bound, EAOperation)
-    assert bound.kwargs == {"factor": 2.0}
+    # mypy 1.18 crashes on `bound.kwargs` (ParamSpec attribute), so read it
+    # through the instance dict.
+    assert vars(bound)["kwargs"] == {"factor": 2.0}
 
 
 def test_eaoperation_bound_executes_with_population() -> None:
@@ -190,13 +199,13 @@ def test_eaoperation_repr_with_kwargs() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_ea_initializes(tmp_path) -> None:
+def test_ea_initializes(tmp_path: Path) -> None:
     """EA initializes without error given population and ops."""
     ea = _ea(tmp_path)
     assert ea.current_generation == 0
 
 
-def test_ea_no_operations_raises(tmp_path) -> None:
+def test_ea_no_operations_raises(tmp_path: Path) -> None:
     """EA raises ValueError when operations is None."""
     with pytest.raises(ValueError, match="operations"):
         EA(
@@ -207,7 +216,7 @@ def test_ea_no_operations_raises(tmp_path) -> None:
         )
 
 
-def test_ea_no_population_no_restart_raises(tmp_path) -> None:
+def test_ea_no_population_no_restart_raises(tmp_path: Path) -> None:
     """EA raises ValueError when neither population nor restart is given."""
     with pytest.raises(ValueError, match="population"):
         EA(
@@ -218,14 +227,14 @@ def test_ea_no_population_no_restart_raises(tmp_path) -> None:
         )
 
 
-def test_ea_creates_database_file(tmp_path) -> None:
+def test_ea_creates_database_file(tmp_path: Path) -> None:
     """EA creates the SQLite database file on disk."""
     db = tmp_path / "ea.db"
     _ea(tmp_path, ops=[noop])
     assert db.exists() or (tmp_path / "test.db").exists()
 
 
-def test_ea_db_handling_halt_raises(tmp_path) -> None:
+def test_ea_db_handling_halt_raises(tmp_path: Path) -> None:
     """db_handling='halt' raises FileExistsError when db already exists."""
     db = tmp_path / "existing.db"
     db.touch()
@@ -239,7 +248,7 @@ def test_ea_db_handling_halt_raises(tmp_path) -> None:
         )
 
 
-def test_ea_db_handling_delete_overwrites(tmp_path) -> None:
+def test_ea_db_handling_delete_overwrites(tmp_path: Path) -> None:
     """db_handling='delete' recreates the db without raising."""
     db = tmp_path / "run.db"
     ea1 = EA(
@@ -262,14 +271,14 @@ def test_ea_db_handling_delete_overwrites(tmp_path) -> None:
     )
 
 
-def test_ea_population_stored(tmp_path) -> None:
+def test_ea_population_stored(tmp_path: Path) -> None:
     """EA stores the initial population."""
     pop = _make_pop(5)
     ea = _ea(tmp_path, pop=pop)
     assert len(ea.population) == 5
 
 
-def test_ea_custom_first_generation(tmp_path) -> None:
+def test_ea_custom_first_generation(tmp_path: Path) -> None:
     """first_generation_id is stored on the EA."""
     ea = _ea(tmp_path, first_generation_id=10)
     assert ea.current_generation == 10
@@ -280,7 +289,7 @@ def test_ea_custom_first_generation(tmp_path) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_ea_commit_sets_time_of_birth(tmp_path) -> None:
+def test_ea_commit_sets_time_of_birth(tmp_path: Path) -> None:
     """_commit assigns time_of_birth=-1 individuals the current generation."""
     ea = _ea(tmp_path)
     # Fetch fresh from DB so SQLAlchemy session context is active
@@ -289,21 +298,21 @@ def test_ea_commit_sets_time_of_birth(tmp_path) -> None:
         assert ind.time_of_birth == 0
 
 
-def test_ea_fetch_returns_population(tmp_path) -> None:
+def test_ea_fetch_returns_population(tmp_path: Path) -> None:
     """_fetch returns a Population instance."""
     ea = _ea(tmp_path)
     pop = ea._fetch()  # noqa: SLF001
     assert isinstance(pop, Population)
 
 
-def test_ea_fetch_only_alive(tmp_path) -> None:
+def test_ea_fetch_only_alive(tmp_path: Path) -> None:
     """_fetch(only_alive=True) returns only alive individuals."""
     ea = _ea(tmp_path)
     pop = ea._fetch(only_alive=True)  # noqa: SLF001
     assert all(ind.alive for ind in pop)
 
 
-def test_ea_fetch_sort_desc(tmp_path) -> None:
+def test_ea_fetch_sort_desc(tmp_path: Path) -> None:
     """_fetch(sort='desc') returns individuals sorted by fitness descending."""
     ea = _ea(tmp_path)
     pop = ea._fetch(sort="desc")  # noqa: SLF001
@@ -311,7 +320,7 @@ def test_ea_fetch_sort_desc(tmp_path) -> None:
     assert fitnesses == sorted(fitnesses, reverse=True)
 
 
-def test_ea_fetch_sort_asc(tmp_path) -> None:
+def test_ea_fetch_sort_asc(tmp_path: Path) -> None:
     """_fetch(sort='asc') returns individuals sorted by fitness ascending."""
     ea = _ea(tmp_path)
     pop = ea._fetch(sort="asc")  # noqa: SLF001
@@ -319,7 +328,7 @@ def test_ea_fetch_sort_asc(tmp_path) -> None:
     assert fitnesses == sorted(fitnesses)
 
 
-def test_ea_fetch_requires_eval_false(tmp_path) -> None:
+def test_ea_fetch_requires_eval_false(tmp_path: Path) -> None:
     """_fetch(requires_eval=False) returns only evaluated individuals."""
     ea = _ea(tmp_path)
     pop = ea._fetch(requires_eval=False)  # noqa: SLF001
@@ -331,7 +340,7 @@ def test_ea_fetch_requires_eval_false(tmp_path) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_ea_fetch_population_updates_self(tmp_path) -> None:
+def test_ea_fetch_population_updates_self(tmp_path: Path) -> None:
     """fetch_population() updates self.population from the database."""
     ea = _ea(tmp_path)
     original_len = len(ea.population)
@@ -344,7 +353,7 @@ def test_ea_fetch_population_updates_self(tmp_path) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_ea_size_property(tmp_path) -> None:
+def test_ea_size_property(tmp_path: Path) -> None:
     """Size returns the number of alive individuals."""
     ea = _ea(tmp_path, pop=_make_pop(6))
     assert ea.size == 6
@@ -355,21 +364,21 @@ def test_ea_size_property(tmp_path) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_ea_get_solution_best(tmp_path) -> None:
+def test_ea_get_solution_best(tmp_path: Path) -> None:
     """get_solution('best') returns an Individual."""
     ea = _ea(tmp_path)
     sol = ea.get_solution(mode="best")
     assert isinstance(sol, Individual)
 
 
-def test_ea_get_solution_median(tmp_path) -> None:
+def test_ea_get_solution_median(tmp_path: Path) -> None:
     """get_solution('median') returns an Individual."""
     ea = _ea(tmp_path)
     sol = ea.get_solution(mode="median")
     assert isinstance(sol, Individual)
 
 
-def test_ea_get_solution_worst(tmp_path) -> None:
+def test_ea_get_solution_worst(tmp_path: Path) -> None:
     """get_solution('worst') returns an Individual."""
     ea = _ea(tmp_path)
     sol = ea.get_solution(mode="worst")
@@ -381,14 +390,14 @@ def test_ea_get_solution_worst(tmp_path) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_ea_step_increments_generation(tmp_path) -> None:
+def test_ea_step_increments_generation(tmp_path: Path) -> None:
     """step() increments current_generation by 1."""
     ea = _ea(tmp_path)
     ea.step()
     assert ea.current_generation == 1
 
 
-def test_ea_step_applies_operations(tmp_path) -> None:
+def test_ea_step_applies_operations(tmp_path: Path) -> None:
     """step() applies all operations and the result is committed to the DB."""
     called = []
 
@@ -402,7 +411,7 @@ def test_ea_step_applies_operations(tmp_path) -> None:
     assert len(called) == 1
 
 
-def test_ea_step_twice(tmp_path) -> None:
+def test_ea_step_twice(tmp_path: Path) -> None:
     """Two steps advance generation to 2."""
     ea = _ea(tmp_path)
     ea.step()
@@ -415,14 +424,14 @@ def test_ea_step_twice(tmp_path) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_ea_run_executes_num_steps(tmp_path) -> None:
+def test_ea_run_executes_num_steps(tmp_path: Path) -> None:
     """run() executes exactly num_steps generations."""
     ea = _ea(tmp_path, num_steps=5)
     ea.run()
     assert ea.current_generation == 5
 
 
-def test_ea_run_zero_steps(tmp_path) -> None:
+def test_ea_run_zero_steps(tmp_path: Path) -> None:
     """run() with num_steps=0 leaves generation unchanged."""
     ea = _ea(tmp_path, num_steps=0)
     ea.run()

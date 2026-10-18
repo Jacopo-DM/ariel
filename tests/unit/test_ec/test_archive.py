@@ -33,7 +33,7 @@ def _make_evaluated_pop(n: int = 20) -> Population:
 
 
 @pytest.fixture(scope="module")
-def archive_db(tmp_path_factory) -> Path:
+def archive_db(tmp_path_factory: pytest.TempPathFactory) -> Path:
     """
     One EA run shared across the whole module.
 
@@ -63,7 +63,7 @@ def archive(archive_db: Path) -> Archive:
 # ---------------------------------------------------------------------------
 
 
-def test_archive_opens_existing_db(archive_db) -> None:
+def test_archive_opens_existing_db(archive_db: Path) -> None:
     """Archive opens a valid database without error."""
     a = Archive(archive_db)
     assert a.db_path == archive_db
@@ -75,7 +75,7 @@ def test_archive_missing_db_raises() -> None:
         Archive("/nonexistent/path/db.db")
 
 
-def test_archive_repr_contains_name(archive) -> None:
+def test_archive_repr_contains_name(archive: Archive) -> None:
     """__repr__ contains 'Archive'."""
     assert "Archive" in repr(archive)
 
@@ -85,12 +85,12 @@ def test_archive_repr_contains_name(archive) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_archive_size(archive) -> None:
+def test_archive_size(archive: Archive) -> None:
     """Size returns the total number of evaluated individuals."""
     assert archive.size >= 20
 
 
-def test_archive_generation_range(archive) -> None:
+def test_archive_generation_range(archive: Archive) -> None:
     """generation_range returns a (min_birth, max_death) tuple."""
     lo, hi = archive.generation_range
     assert isinstance(lo, int)
@@ -98,7 +98,7 @@ def test_archive_generation_range(archive) -> None:
     assert hi >= lo
 
 
-def test_archive_generation_range_values(archive) -> None:
+def test_archive_generation_range_values(archive: Archive) -> None:
     """Individuals born at gen 0 and alive through gen 5."""
     lo, hi = archive.generation_range
     assert lo == 0
@@ -110,33 +110,33 @@ def test_archive_generation_range_values(archive) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_fitness_stats_returns_dict(archive) -> None:
+def test_fitness_stats_returns_dict(archive: Archive) -> None:
     """fitness_stats returns a dict with the five expected keys."""
     stats = archive.fitness_stats()
     assert set(stats.keys()) == {"min", "max", "mean", "std", "median"}
 
 
-def test_fitness_stats_min_max(archive) -> None:
+def test_fitness_stats_min_max(archive: Archive) -> None:
     """Min and max fitness values match the known population range."""
     stats = archive.fitness_stats()
     assert stats["min"] == pytest.approx(0.0)
     assert stats["max"] == pytest.approx(19.0)
 
 
-def test_fitness_stats_mean(archive) -> None:
+def test_fitness_stats_mean(archive: Archive) -> None:
     """Mean fitness of 0..19 is 9.5."""
     stats = archive.fitness_stats()
     assert stats["mean"] == pytest.approx(9.5)
 
 
-def test_fitness_stats_no_match_returns_nan(archive) -> None:
+def test_fitness_stats_no_match_returns_nan(archive: Archive) -> None:
     """fitness_stats with an impossible birth_range returns NaN values."""
     stats = archive.fitness_stats(birth_range=(9999, 9999))
     for v in stats.values():
         assert math.isnan(v)
 
 
-def test_fitness_stats_birth_range_filter(archive) -> None:
+def test_fitness_stats_birth_range_filter(archive: Archive) -> None:
     """birth_range=(0, 0) restricts to individuals born at generation 0."""
     stats = archive.fitness_stats(birth_range=(0, 0))
     assert not math.isnan(stats["min"])
@@ -147,31 +147,31 @@ def test_fitness_stats_birth_range_filter(archive) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_random_individual_returns_individual(archive) -> None:
+def test_random_individual_returns_individual(archive: Archive) -> None:
     """random_individual returns an Individual."""
     ind = archive.random_individual()
     assert isinstance(ind, Individual)
 
 
-def test_random_individual_is_evaluated(archive) -> None:
+def test_random_individual_is_evaluated(archive: Archive) -> None:
     """random_individual returns an evaluated individual (fitness_ is set)."""
     ind = archive.random_individual()
     assert ind.fitness_ is not None
 
 
-def test_random_individual_birth_range_filter(archive) -> None:
+def test_random_individual_birth_range_filter(archive: Archive) -> None:
     """birth_range limits the birth generation of the result."""
     ind = archive.random_individual(birth_range=(0, 0))
     assert ind.time_of_birth == 0
 
 
-def test_random_individual_fitness_range_filter(archive) -> None:
+def test_random_individual_fitness_range_filter(archive: Archive) -> None:
     """fitness_range restricts the returned individual's fitness."""
     ind = archive.random_individual(fitness_range=(5.0, 10.0))
     assert 5.0 <= ind.fitness_ <= 10.0
 
 
-def test_random_individual_no_match_raises(archive) -> None:
+def test_random_individual_no_match_raises(archive: Archive) -> None:
     """random_individual raises ValueError when no match exists."""
     with pytest.raises(ValueError, match="No individuals"):
         archive.random_individual(fitness_range=(9999.0, 9999.0))
@@ -182,19 +182,19 @@ def test_random_individual_no_match_raises(archive) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_best_individual_min_mode(archive) -> None:
+def test_best_individual_min_mode(archive: Archive) -> None:
     """best_individual('min') returns the individual with the lowest fitness."""
     ind = archive.best_individual(fitness_mode="min")
     assert ind.fitness_ == pytest.approx(0.0)
 
 
-def test_best_individual_max_mode(archive) -> None:
+def test_best_individual_max_mode(archive: Archive) -> None:
     """best_individual('max') returns the individual with highest fitness."""
     ind = archive.best_individual(fitness_mode="max")
     assert ind.fitness_ == pytest.approx(19.0)
 
 
-def test_best_individual_birth_range(archive) -> None:
+def test_best_individual_birth_range(archive: Archive) -> None:
     """best_individual respects birth_range."""
     ind = archive.best_individual(fitness_mode="min", birth_range=(0, 0))
     assert ind.time_of_birth == 0
@@ -205,33 +205,33 @@ def test_best_individual_birth_range(archive) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_random_population_returns_population(archive) -> None:
+def test_random_population_returns_population(archive: Archive) -> None:
     """random_population returns a Population."""
     pop = archive.random_population(5)
     assert isinstance(pop, Population)
 
 
-def test_random_population_respects_n(archive) -> None:
+def test_random_population_respects_n(archive: Archive) -> None:
     """random_population returns at most n individuals."""
     pop = archive.random_population(5)
     assert len(pop) <= 5
 
 
-def test_random_population_all_evaluated(archive) -> None:
+def test_random_population_all_evaluated(archive: Archive) -> None:
     """All individuals in the random population are evaluated."""
     pop = archive.random_population(10)
     for ind in pop:
         assert ind.fitness_ is not None
 
 
-def test_random_population_fitness_range(archive) -> None:
+def test_random_population_fitness_range(archive: Archive) -> None:
     """fitness_range filter works for random_population."""
     pop = archive.random_population(20, fitness_range=(0.0, 5.0))
     for ind in pop:
         assert 0.0 <= ind.fitness_ <= 5.0
 
 
-def test_random_population_n_larger_than_archive(archive) -> None:
+def test_random_population_n_larger_than_archive(archive: Archive) -> None:
     """Requesting more than the archive size returns what's available."""
     pop = archive.random_population(10000)
     assert len(pop) <= archive.size
@@ -242,45 +242,45 @@ def test_random_population_n_larger_than_archive(archive) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_hall_of_fame_returns_population(archive) -> None:
+def test_hall_of_fame_returns_population(archive: Archive) -> None:
     """hall_of_fame returns a Population."""
     hof = archive.hall_of_fame(n=5)
     assert isinstance(hof, Population)
 
 
-def test_hall_of_fame_size(archive) -> None:
+def test_hall_of_fame_size(archive: Archive) -> None:
     """hall_of_fame returns at most n individuals."""
     hof = archive.hall_of_fame(n=5)
     assert len(hof) <= 5
 
 
-def test_hall_of_fame_min_sorted(archive) -> None:
+def test_hall_of_fame_min_sorted(archive: Archive) -> None:
     """hall_of_fame('min') is sorted ascending by fitness."""
     hof = archive.hall_of_fame(n=5, fitness_mode="min")
     fitnesses = [ind.fitness_ for ind in hof]
     assert fitnesses == sorted(fitnesses)
 
 
-def test_hall_of_fame_max_sorted(archive) -> None:
+def test_hall_of_fame_max_sorted(archive: Archive) -> None:
     """hall_of_fame('max') is sorted descending by fitness."""
     hof = archive.hall_of_fame(n=5, fitness_mode="max")
     fitnesses = [ind.fitness_ for ind in hof]
     assert fitnesses == sorted(fitnesses, reverse=True)
 
 
-def test_hall_of_fame_min_best_is_lowest(archive) -> None:
+def test_hall_of_fame_min_best_is_lowest(archive: Archive) -> None:
     """The first entry in a min hall of fame has the lowest fitness."""
     hof = archive.hall_of_fame(n=3, fitness_mode="min")
     assert hof[0].fitness_ == pytest.approx(0.0)
 
 
-def test_hall_of_fame_max_best_is_highest(archive) -> None:
+def test_hall_of_fame_max_best_is_highest(archive: Archive) -> None:
     """The first entry in a max hall of fame has the highest fitness."""
     hof = archive.hall_of_fame(n=3, fitness_mode="max")
     assert hof[0].fitness_ == pytest.approx(19.0)
 
 
-def test_hall_of_fame_birth_range(archive) -> None:
+def test_hall_of_fame_birth_range(archive: Archive) -> None:
     """hall_of_fame respects birth_range."""
     hof = archive.hall_of_fame(n=5, birth_range=(0, 0))
     for ind in hof:
@@ -292,19 +292,21 @@ def test_hall_of_fame_birth_range(archive) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_tournament_population_returns_population(archive) -> None:
+def test_tournament_population_returns_population(archive: Archive) -> None:
     """tournament_population returns a Population."""
     pop = archive.tournament_population(n=3, tournament_size=2)
     assert isinstance(pop, Population)
 
 
-def test_tournament_population_size(archive) -> None:
+def test_tournament_population_size(archive: Archive) -> None:
     """tournament_population returns exactly n individuals."""
     pop = archive.tournament_population(n=4, tournament_size=2)
     assert len(pop) == 4
 
 
-def test_tournament_population_min_winners_are_low_fitness(archive) -> None:
+def test_tournament_population_min_winners_are_low_fitness(
+    archive: Archive,
+) -> None:
     """In min mode, tournament winners have low fitness."""
     pop = archive.tournament_population(
         n=5, tournament_size=3, fitness_mode="min"
@@ -313,7 +315,7 @@ def test_tournament_population_min_winners_are_low_fitness(archive) -> None:
         assert ind.fitness_ <= 19.0
 
 
-def test_tournament_population_max_mode(archive) -> None:
+def test_tournament_population_max_mode(archive: Archive) -> None:
     """In max mode, tournament winners have high fitness."""
     pop = archive.tournament_population(
         n=5, tournament_size=3, fitness_mode="max"
@@ -322,7 +324,7 @@ def test_tournament_population_max_mode(archive) -> None:
         assert ind.fitness_ >= 0.0
 
 
-def test_tournament_size_exceeds_pool_raises(archive) -> None:
+def test_tournament_size_exceeds_pool_raises(archive: Archive) -> None:
     """tournament_size larger than the pool raises AssertionError."""
     with pytest.raises(AssertionError, match="tournament_size"):
         archive.tournament_population(
@@ -335,25 +337,25 @@ def test_tournament_size_exceeds_pool_raises(archive) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_by_generation_returns_population(archive) -> None:
+def test_by_generation_returns_population(archive: Archive) -> None:
     """by_generation returns a Population."""
     pop = archive.by_generation(0)
     assert isinstance(pop, Population)
 
 
-def test_by_generation_correct_count(archive) -> None:
+def test_by_generation_correct_count(archive: Archive) -> None:
     """All 20 individuals were alive at generation 0."""
     pop = archive.by_generation(0)
     assert len(pop) == 20
 
 
-def test_by_generation_mid_run(archive) -> None:
+def test_by_generation_mid_run(archive: Archive) -> None:
     """All individuals alive through generation 3 (born=0, died=5)."""
     pop = archive.by_generation(3)
     assert len(pop) == 20
 
 
-def test_by_generation_out_of_range_empty(archive) -> None:
+def test_by_generation_out_of_range_empty(archive: Archive) -> None:
     """A generation beyond the run returns no individuals."""
     pop = archive.by_generation(9999)
     assert len(pop) == 0
@@ -364,13 +366,13 @@ def test_by_generation_out_of_range_empty(archive) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_fitness_percentile_returns_population(archive) -> None:
+def test_fitness_percentile_returns_population(archive: Archive) -> None:
     """fitness_percentile_population returns a Population."""
     pop = archive.fitness_percentile_population(25.0, 75.0)
     assert isinstance(pop, Population)
 
 
-def test_fitness_percentile_in_band(archive) -> None:
+def test_fitness_percentile_in_band(archive: Archive) -> None:
     """All returned individuals fall within the percentile band."""
     pop = archive.fitness_percentile_population(0.0, 50.0)
     if len(pop) == 0:
@@ -386,13 +388,15 @@ def test_fitness_percentile_in_band(archive) -> None:
         assert lo <= f <= hi
 
 
-def test_fitness_percentile_with_n_sampling(archive) -> None:
+def test_fitness_percentile_with_n_sampling(archive: Archive) -> None:
     """N parameter limits the number of returned individuals."""
     pop = archive.fitness_percentile_population(0.0, 100.0, n=3)
     assert len(pop) <= 3
 
 
-def test_fitness_percentile_impossible_birth_range_empty(archive) -> None:
+def test_fitness_percentile_impossible_birth_range_empty(
+    archive: Archive,
+) -> None:
     """Impossible birth_range returns an empty population."""
     pop = archive.fitness_percentile_population(
         0.0, 100.0, birth_range=(9999, 9999)
