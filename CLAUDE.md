@@ -24,7 +24,7 @@ From the repo root. Python 3.12 (`.python-version` 3.12.9), uv 0.13.1.
 | Install everything | `uv sync --all-groups` | ~5 min first time, ~8.4 GB `.venv` |
 | Lockfile matches pyproject | `uv lock --check` | passes, ~2 s, read-only |
 | Unit tests | `uv run --no-sync pytest tests/unit -q -p no:cacheprovider` | 711 passed, ~22 s wall on 2026-10-18 (482 + 229 wiki structure cases, which add under 1 s); add `--cov=ariel` for coverage (54% today, `fail_under = 54`, target 100) |
-| Lint | `uv run --no-sync ruff check src tests` | passes (src, tests), <1 s, read-only (`fix = false`) |
+| Lint | `uv run --no-sync ruff check src tests` | passes (src, tests; `ruff.toml` and `mypy.ini` exclude `examples/` and `docs/`), <1 s, read-only (`fix = false`) |
 | Format check | `uv run --no-sync ruff format --check src tests` | passes (147 files), <1 s, read-only; also covers notebooks under `tests/` |
 | Types (mypy) | `uv run --no-sync mypy src` | passes (99 files), ~40 s, read-only; 92 lines carry `# type: ignore[...]  # known bug`, listed in PLAN.md |
 | Probe OpenGL backends | `uv run --no-sync python -m ariel.utils.gl_manager` | writes `mujoco_user_config.json` in the current folder, ~2 s here (all three backends fail on this machine); rerun after a driver change |
