@@ -19,7 +19,7 @@ Generated from `src/ariel/` on 2026-10-17. Ignore list: see CLAUDE.md.
 | `ariel.ec.genotypes.cppn` | CPPN to morphology decoding | `cppn_decoding` |
 | `ariel.ec.genotypes.nde` | neural developmental encoding (PyTorch) | `nde` |
 | `ariel.body_phenotypes.robogen_lite` | modular robot bodies | `modules` (`Core`, `Brick`, `Hinge`, `Module`), `cppn_neat` (`Genome`, `IdManager`), `decoders`, `prebuilt_robots` (gecko, spider, john_set, random_20, spider_with_blocks), `constructor`, `config` |
-| `ariel.body_phenotypes.lynx_mjspec` | Lynx arm body and `unified_pipeline` (evolve, replay, plot_from_logs) | `lynx_arm` (`LynxArm`, `ArmConfig`), `table` |
+| `ariel.body_phenotypes.lynx_mjspec` | Lynx arm body and `unified_pipeline` (common, evolve, replay, plot_from_logs); a package since GS8 | `lynx_arm` (`LynxArm`, `ArmConfig`), `table` |
 | `ariel.simulation.environments` | MuJoCo worlds | `BaseWorld` and terrain worlds (`SimpleFlatWorld`, rugged, tilted, crater, amphitheatre, `OlympicArena`) |
 | `ariel.simulation.controllers` | controllers | `Controller`, `ControlCallback` (protocol), `SimpleCPG`, `NaCPG` variants |
 | `ariel.simulation.tasks` | fitness functions | `targeted_locomotion`, `gait_learning`, `turning_in_place` |
