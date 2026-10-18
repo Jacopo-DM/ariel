@@ -7,7 +7,8 @@ Generated from `src/ariel/` on 2026-10-17. Ignore list: see CLAUDE.md.
 - Package `ariel` (`src/ariel/__init__.py`): exports `DATA`, `SEED`, `RNG`, `console`, `log`; first reads `mujoco_user_config.json` to set `MUJOCO_GL` (before anything imports mujoco).
 - `python -m ariel.utils.gl_manager`: probes the OpenGL backends and writes `mujoco_user_config.json` in the current folder.
 - `examples/`: runnable scripts (`a_mujoco`, `b_robots`, `c_genotypes`, `re_book`, `z_ec_course`, `new_EC_engine_example.py`).
-- `tests/unit/` mirrors `src/ariel/`; `tests/functional/` is notebooks; `tests/conftest.py` presets `MUJOCO_GL`.
+- `tests/unit/` mirrors `src/ariel/`; `tests/functional/` is notebooks; `tests/conftest.py` presets `MUJOCO_GL`; `tests/unit/test_wiki_structure.py` checks the knowledge wiki in `.claude/wiki/` (not `src`).
+- `.claude/wiki/`: knowledge wiki in topic folders `mujoco/`, `mjx/`, `cma-es/`, `nevergrad/`, `ariel/`, `astropy/`, `pydantic/`, plus `index.md` and one `log.md`; layout rules in `.claude/SCHEMA.md`, commands `/ingest` and `/query` in `.claude/commands/`.
 
 ## Modules
 
