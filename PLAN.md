@@ -14,7 +14,7 @@
 
 ## Current state
 
-Phase: all five goals done (test-env-green, dashboards-out, repo-hygiene, lint-types-policy, gl-autodetect). `main` was pushed to the `fork` remote (`Jacopo-DM/ariel`) on 2026-10-17 (compare with `git rev-list --count fork/main..main`); `origin/main` (`ci-group/ariel`) is untouched, so `main` is ahead of it (`git rev-list --count origin/main..main`, about 52, linear). `feature-dashboard` was rebuilt on 2026-10-18 as `main` plus the dashboard files (one commit) and pushed to `fork`. On the fork, `checks.yml` and the Sphinx workflow both passed on the first run. Next step: the user approves the physics-wiki spec and task list (not yet written into DESIGN.md or Tasks); the goals physics-wiki and mujoco-units were approved on 2026-10-18; nothing is built until the tasks are approved. The user also still has to name the first experiment branch for the fork.
+Phase: all five goals done (test-env-green, dashboards-out, repo-hygiene, lint-types-policy, gl-autodetect). `main` was pushed to the `fork` remote (`Jacopo-DM/ariel`) on 2026-10-17 (compare with `git rev-list --count fork/main..main`); `origin/main` (`ci-group/ariel`) is untouched, so `main` is ahead of it (`git rev-list --count origin/main..main`, about 52, linear). `feature-dashboard` was rebuilt on 2026-10-18 as `main` plus the dashboard files (one commit) and pushed to `fork`. On the fork, `checks.yml` and the Sphinx workflow both passed on the first run. Next step: the user approves the physics-wiki task list W1-W9 (spec approved, in DESIGN.md); the goals physics-wiki and mujoco-units were approved on 2026-10-18; nothing is built until the tasks are approved. The user also still has to name the first experiment branch for the fork.
 
 ## Baseline
 
@@ -34,7 +34,26 @@ Now (2026-10-17, after gl-autodetect, `main` at the last merge): `uv lock --chec
 
 ## Tasks
 
-No open tasks. Finished (see DESIGN.md Results for the numbers): T1-T6 (goals test-env-green, dashboards-out, repo-hygiene) T7-T18 plus T15a-c (goal lint-types-policy), and G1-G4 (goal gl-autodetect). New tasks need approval.
+Goals physics-wiki and mujoco-units are approved; the physics-wiki spec is in DESIGN.md. The physics-wiki task list below needs its own approval. mujoco-units has no tasks yet: its spec waits for the physics-wiki result and the Gemini research. Finished (see DESIGN.md Results for the numbers): T1-T6 (goals test-env-green, dashboards-out, repo-hygiene) T7-T18 plus T15a-c (goal lint-types-policy), and G1-G4 (goal gl-autodetect).
+
+### Goal physics-wiki: tasks (awaiting approval)
+
+No test or check pins the wiki today; W2 adds one first.
+
+Tier 1 (restructure, low risk):
+- W1 Baseline (read only). Count pages, `[[wikilinks]]`, broken links, duplicate names, pages missing a frontmatter field, logs; record in Baseline. Files: none (a throwaway script in the scratchpad). Serves criterion 3. Risk low, cost none. Verify: the printed counts.
+- W2 Structure test, first. `tests/unit/test_wiki_structure.py` (about 60 lines, no dependency): frontmatter fields, H1 equals filename, links resolve, names unique, no page at the wiki root except `index.md` and `log.md`. Written before the clean-up, so it must fail on today's wiki; it passes at the end of W4. Serves criteria 2, 3, 8. Risk low. If W1 shows pages missing `date_ingested`, I ask whether to fix the pages or relax the test.
+- W3 Merge. Move the 5 ARIEL pages from `wiki/` into `.claude/wiki/`; fold the three logs into `.claude/wiki/log.md` (13 entries, by date); delete `wiki/` and root `log.md`; ignore Obsidian state in `.gitignore`. Serves criterion 1. Risk low (git history keeps everything), about 15 files moved.
+- W4 Sort and document. `git mv` all pages into topic subfolders; update `SCHEMA.md`, `ingest.md` (recursive globs, one log path, folder rule), `query.md`, CLAUDE.md (ignore-list row) and PLAN.md references. Serves criteria 2, 3, 4. Risk medium (the two commands must keep working): verify with W2 passing and one dry `/query`.
+
+Tier 2 (new content, each needs the fetch list approved first):
+- W5 Ingest astropy units and quantity docs into `astropy/`. About 6 to 10 pages. Verify: index lists them.
+- W6 Ingest pydantic validation and pydantic-settings docs into `pydantic/`. About 6 to 10 pages.
+- W7 Ingest the MuJoCo chapters (scope in the spec) into `mujoco/`.
+- W8 Remove superseded old MuJoCo pages and the 12 `Source - ...` pages: mapping table first, user approves the deletion list, then delete.
+- W9 Run the 5 `/query` test questions; record the answers and page citations in DESIGN.md Results.
+
+Risk across Tier 2: medium (fetched content is summarised by a model; I check the equations and defaults against the page). Complexity: pages added only, no new dependency. New tasks need approval.
 
 ### Tier 3: left alone on purpose (not executed)
 
