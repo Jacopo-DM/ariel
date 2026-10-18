@@ -1,4 +1,4 @@
-"""This file handles the mypyc compilation settings.
+"""Handle the mypyc compilation settings.
 
 It is configured to conditionally compile the project's Python modules into C
 extensions using mypyc, based on the presence of an environment variable.
@@ -6,8 +6,9 @@ This allows for producing both pure Python and compiled wheels.
 """
 
 import os
+import sys
 
-from setuptools import setup
+from setuptools import Extension, setup
 
 # The 'mypycify' function is not available in a stock 'setuptools' environment,
 # so we only import it when we're actually going to use it. This allows the
@@ -16,7 +17,7 @@ if os.environ.get("ARIEL_COMPILE_MYPYC") == "1":
     from mypyc.build import mypycify
 
 
-def get_ext_modules():
+def get_ext_modules() -> list[Extension]:
     """Conditionally builds mypyc C extensions.
 
     If the `ARIEL_COMPILE_MYPYC` environment variable is set to "1",
@@ -24,20 +25,15 @@ def get_ext_modules():
     Otherwise, it returns an empty list, resulting in a pure Python build.
     """
     if os.environ.get("ARIEL_COMPILE_MYPYC") == "1":
-        print("Compiling with mypyc...")
-        # Add the paths to the Python modules you want to compile here.
-        # For example:
-        # return mypycify([
-        #     "src/ariel/__main__.py",
-        #     "src/ariel/some_other_module.py",
-        # ])
-        return mypycify(
-            [
-                "src/ariel/__main__.py",
-            ]
-        )
+        sys.stdout.write("Compiling with mypyc...\n")
+        # Add the paths of the Python modules to compile to this list.
+        return mypycify([
+            "src/ariel/__main__.py",
+        ])
 
-    print("Skipping mypyc compilation. Building pure Python package...")
+    sys.stdout.write(
+        "Skipping mypyc compilation. Building pure Python package...\n"
+    )
     return []
 
 
