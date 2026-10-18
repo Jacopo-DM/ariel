@@ -134,6 +134,24 @@ date_ingested: YYYY-MM-DD
 
 ---
 
+## Folder layout
+
+Pages sit in one topic folder under `.claude/wiki/`. `[[wikilinks]]` use the page name only (Obsidian resolves them across folders), so a name must be unique in the whole wiki. The only files at the wiki root are `log.md` (the single ingest log) and `index.md`.
+
+| Folder | Holds |
+|--------|-------|
+| `mujoco/` | MuJoCo docs and API (MjData, MjSpec, mjs*, mujoco_*, their `Source - ...` pages) |
+| `mjx/` | MuJoCo MJX and Warp |
+| `cma-es/` | CMA-ES algorithm, parameters, papers (Brockhoff, Hansen) |
+| `nevergrad/` | Nevergrad optimizers and patterns |
+| `ariel/` | Ariel's own docs (database, robogen-lite, CPPN-NEAT genome) and the NEAT papers they build on |
+| `astropy/` | astropy units and quantities |
+| `pydantic/` | pydantic validation and pydantic-settings |
+
+`tests/unit/test_wiki_structure.py` checks this layout, the frontmatter, that the H1 equals the filename and that every `[[link]]` resolves. Obsidian window state (`.obsidian/`) is git-ignored.
+
+---
+
 ## Global Formatting Rules
 
 1. **H1** = filename without `.md` extension (must always match)

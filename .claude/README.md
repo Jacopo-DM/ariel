@@ -24,7 +24,7 @@ either. This keeps lookups token-efficient and answers traceable.
 - **`user/`** — a directed, per-subsystem map of the public API (imports,
   signatures, runnable snippets) so an AI loads one area instead of grepping
   all of `src/`.
-- **`wiki/`** — 68 deep reference pages on third-party APIs and algorithms,
+- **`wiki/`** — 77 deep reference pages in topic folders on third-party APIs and algorithms,
   governed by [SCHEMA.md](SCHEMA.md) and fed by the [`/ingest`](commands/ingest.md)
   command. Queried via [`/query`](commands/query.md).
 

@@ -13,7 +13,7 @@ Read PLAN.md first, then DESIGN.md, CODEMAP.md and the README of the module you 
 
 Test: the code could regenerate it → CODEMAP.md. Stale once the work is done → PLAN.md. A rule for every session here → CLAUDE.md. Otherwise → DESIGN.md.
 
-`.claude/dev/`, `.claude/user/` and `.claude/wiki/` are existing hand-written developer docs, user docs and a knowledge wiki (`.claude/SCHEMA.md` explains it). Link to them; do not copy them.
+`.claude/dev/`, `.claude/user/` and `.claude/wiki/` are existing hand-written developer docs, user docs and a knowledge wiki sorted into topic folders (`.claude/SCHEMA.md` explains it; `tests/unit/test_wiki_structure.py` checks it). Link to them; do not copy them.
 
 ## Commands
 

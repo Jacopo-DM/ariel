@@ -8,7 +8,7 @@ Answer this question: **$ARGUMENTS**
 
 ### Step 1 — Load the wiki
 
-Use Glob to list all `.claude/wiki/*.md` files, then Read the ones most likely to contain the answer. If unsure, read them all. Prioritize pages whose names match the question's topic (e.g. if asked about `MjSpec`, read `MjSpec.md` first).
+Use Glob to list all `.claude/wiki/**/*.md` files (pages sit in topic folders, see SCHEMA.md §Folder layout), then Read the ones most likely to contain the answer. If unsure, read them all. Prioritize pages whose names match the question's topic (e.g. if asked about `MjSpec`, read `MjSpec.md` first).
 
 ---
 

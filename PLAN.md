@@ -40,11 +40,9 @@ Goals physics-wiki and mujoco-units are approved; the physics-wiki spec is in DE
 
 ### Goal physics-wiki: tasks (awaiting approval)
 
-No test or check pins the wiki today; W2 adds one first.
+W1-W4 are done (see DESIGN.md Results); the wiki structure test now pins the layout.
 
-Tier 1 (restructure, low risk):
-- W2 Structure test, first. `tests/unit/test_wiki_structure.py` (about 60 lines, no dependency): frontmatter fields, H1 equals filename, links resolve, names unique, no page at the wiki root except `index.md` and `log.md`. Written before the clean-up, so it must fail on today's wiki; it passes at the end of W4. Serves criteria 2, 3, 8. Risk low. If W1 shows pages missing `date_ingested`, I ask whether to fix the pages or relax the test.
-- W4 Sort and document. `git mv` all pages into topic subfolders; update `SCHEMA.md`, `ingest.md` (recursive globs, one log path, folder rule), `query.md`, CLAUDE.md (ignore-list row) and PLAN.md references. Serves criteria 2, 3, 4. Risk medium (the two commands must keep working): verify with W2 passing and one dry `/query`.
+Tier 1 (restructure, low risk): done.
 
 Tier 2 (new content, each needs the fetch list approved first):
 - W5 Ingest astropy units and quantity docs into `astropy/`. About 6 to 10 pages. Verify: index lists them.

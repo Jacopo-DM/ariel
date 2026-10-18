@@ -31,7 +31,7 @@ Classify the source as one of the following before proceeding:
 ### Step 3 — Read the existing wiki
 
 ```
-Glob .claude/wiki/*.md
+Glob .claude/wiki/**/*.md
 ```
 
 Skim all existing pages. Note which topics are already covered and which `[[wikilinks]]` are already in use. **Do not create a new page for a topic that already has one** — instead update the existing page by appending new information under a new `## From: <source>` subsection.
@@ -64,17 +64,19 @@ For **ariel source**: document the public interface. Note the file path under `#
 Use the Write tool for new files, Edit for updates to existing pages. Every file must:
 
 - Have YAML frontmatter matching SCHEMA.md
+- Sit in the topic folder SCHEMA.md §Folder layout names for its subject (`.claude/wiki/<topic>/<Page>.md`); create a new topic folder only if SCHEMA.md lists it
+- Have a name that is unique across all folders, because `[[wikilinks]]` resolve by name
 - Use the correct naming convention for its page type (SCHEMA.md §Naming)
 - Use `[[wikilinks]]` for all cross-references to other wiki pages
 - Have H1 matching the filename without `.md`
 
-Also create `.claude/wiki/Source - <Title>.md` listing every page created or updated.
+Also create `.claude/wiki/<topic>/Source - <Title>.md` listing every page created or updated.
 
 ---
 
 ### Step 6 — Update the log
 
-Append to `log.md` in the project root:
+Append to `.claude/wiki/log.md` (the only log):
 
 ```
 ## [YYYY-MM-DD] Ingest | <source title>
