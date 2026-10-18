@@ -487,3 +487,62 @@ def test_pruning_drops_bad_edges_and_their_subtrees() -> None:
     assert {(e.parent, e.child) for e in g.edges} == {(0, 1), (1, 2)}
     assert BAD_FACE_ID not in g.nodes
     assert TAKEN_FACE_ID not in g.nodes
+
+
+def test_crossover_returns_swapped_children_when_validation_passes(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """With validation stubbed out the children swap their subtrees.
+
+    Known bug (PLAN.md): the swapped subtrees are not reattached, so real
+    validation always fails and crossover returns copies of the parents.
+    """
+    monkeypatch.setattr(operators, "validate_genome_dict", lambda _genome: None)
+    a = TreeGenome(
+        nodes={
+            0: TreeNode(type="CORE", rotation="DEG_0"),
+            1: TreeNode(type="BRICK", rotation="DEG_0"),
+        },
+        edges=[TreeEdge(parent=0, child=1, face="FRONT")],
+    )
+    b = copy.deepcopy(a)
+    b.nodes[1].type = "HINGE"
+    c1, c2 = crossover_subtree(a, b)
+    assert c1.nodes[1].type == "HINGE"
+    assert c2.nodes[1].type == "BRICK"
+    assert a.nodes[1].type == "BRICK"
+
+
+def test_crossover_of_valid_parents_returns_their_copies() -> None:
+    """Known bug (PLAN.md): the children are always copies of the parents."""
+    a = _core_hinge_brick()
+    b = _core_hinge_brick()
+    c1, c2 = crossover_subtree(a, b)
+    assert c1.to_dict() == a.to_dict()
+    assert c2.to_dict() == b.to_dict()
+
+
+def test_hoist_skips_a_missing_parent_node() -> None:
+    """An edge that points at a missing node is dropped by the hoist."""
+    g = TreeGenome(
+        nodes={
+            0: TreeNode(type="CORE", rotation="DEG_0"),
+            ORPHAN_CHILD_ID: TreeNode(type="BRICK", rotation="DEG_0"),
+        },
+        edges=[
+            TreeEdge(parent=0, child=ORPHAN_ID, face="FRONT"),
+            TreeEdge(parent=ORPHAN_ID, child=ORPHAN_CHILD_ID, face="FRONT"),
+        ],
+    )
+    mutate_hoist(g)
+    assert ORPHAN_ID not in g.nodes
+
+
+def test_subtree_replacement_of_a_detached_node_adds_nothing() -> None:
+    """A node without a parent edge is removed and nothing is grafted."""
+    g = _orphan_genome()
+    g.nodes.pop(ORPHAN_CHILD_ID)
+    g.edges = []
+    random.seed(0)
+    mutate_subtree_replacement(g)
+    assert list(g.nodes) == [0]

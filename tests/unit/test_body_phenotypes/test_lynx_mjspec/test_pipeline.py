@@ -340,6 +340,12 @@ class _NoSiteFlag:
     """An mjtVisFlag without mjVIS_SITE."""
 
 
+class _SiteFlag:
+    """An mjtVisFlag with mjVIS_SITE."""
+
+    mjVIS_SITE = 1
+
+
 @pytest.mark.parametrize("has_site_flag", [True, False])
 def test_replay_viewer_loop(
     monkeypatch: pytest.MonkeyPatch,
@@ -355,8 +361,9 @@ def test_replay_viewer_loop(
         mujoco.viewer, "launch_passive", lambda _model, _data: viewer
     )
     monkeypatch.setattr(time, "sleep", lambda _seconds: None)
-    if not has_site_flag:
-        monkeypatch.setattr(mujoco, "mjtVisFlag", _NoSiteFlag)
+    monkeypatch.setattr(
+        mujoco, "mjtVisFlag", _SiteFlag if has_site_flag else _NoSiteFlag
+    )
     replay.main()
     assert viewer.syncs == SIM_STEPS
 

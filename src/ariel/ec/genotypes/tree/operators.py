@@ -306,39 +306,36 @@ def mutate_subtree_replacement(  # ruff: ignore[too-many-locals]  # long routine
 
         # The generated subtree has its own core. We graft a single branch under
         # the original parent/face to preserve tree connectivity.
-        if IDX_OF_CORE in new_subtree.nodes:
-            g_sub = new_subtree.to_networkx()
-            core_children = [
-                e.child for e in new_subtree.edges if e.parent == IDX_OF_CORE
-            ]
+        g_sub = new_subtree.to_networkx()
+        core_children = [
+            e.child for e in new_subtree.edges if e.parent == IDX_OF_CORE
+        ]
 
-            if core_children:
-                root_child = random.choice(core_children)
-                branch_nodes = {root_child, *nx.descendants(g_sub, root_child)}
-                branch_node_dict = {
-                    n: new_subtree.nodes[n].model_copy(deep=True)
-                    for n in branch_nodes
-                }
-                branch_edges = [
-                    copy.deepcopy(e)
-                    for e in new_subtree.edges
-                    if e.parent in branch_nodes and e.child in branch_nodes
-                ]
+        root_child = random.choice(core_children)
+        branch_nodes = {root_child, *nx.descendants(g_sub, root_child)}
+        branch_node_dict = {
+            n: new_subtree.nodes[n].model_copy(deep=True) for n in branch_nodes
+        }
+        branch_edges = [
+            copy.deepcopy(e)
+            for e in new_subtree.edges
+            if e.parent in branch_nodes and e.child in branch_nodes
+        ]
 
-                existing_ids = set(genome.nodes.keys())
-                new_nodes, new_edges, mapping = _reassign_ids(
-                    branch_node_dict, branch_edges, existing_ids
-                )
+        existing_ids = set(genome.nodes.keys())
+        new_nodes, new_edges, mapping = _reassign_ids(
+            branch_node_dict, branch_edges, existing_ids
+        )
 
-                genome.nodes.update(new_nodes)
-                genome.edges.extend(new_edges)
-                genome.edges.append(
-                    TreeEdge(
-                        parent=parent_id,
-                        child=mapping[root_child],
-                        face=parent_face,
-                    )
-                )
+        genome.nodes.update(new_nodes)
+        genome.edges.extend(new_edges)
+        genome.edges.append(
+            TreeEdge(
+                parent=parent_id,
+                child=mapping[root_child],
+                face=parent_face,
+            )
+        )
 
     # Clean up and validate
     _prune_invalid_edges(genome)

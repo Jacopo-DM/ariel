@@ -5,7 +5,12 @@ import tempfile
 from pathlib import Path
 
 import networkx as nx
+import pytest
 
+from ariel.ec.genotypes.tree.io import (
+    genome_to_networkx_dict,
+    load_genome,
+)
 from ariel.ec.genotypes.tree.tree_genome import (
     TreeEdge,
     TreeGenome,
@@ -173,3 +178,19 @@ def test_save_json_valid_json() -> None:
         with Path(path).open(encoding="utf-8") as fh:
             data = json.load(fh)
     assert "nodes" in data
+
+
+def test_from_dict_list_node_needs_an_id() -> None:
+    """A listed node without an id is rejected."""
+    data = {"nodes": [{"type": "CORE", "rotation": "DEG_0"}], "edges": []}
+    with pytest.raises(ValueError, match="needs an 'id'"):
+        TreeGenome.from_dict(data)
+
+
+def test_io_helpers_read_what_save_json_wrote(tmp_path: Path) -> None:
+    """load_genome reads the JSON that save_json wrote."""
+    genome = _simple_genome()
+    path = tmp_path / "genome.json"
+    genome.save_json(str(path))
+    assert load_genome(str(path)).to_dict() == genome.to_dict()
+    assert genome_to_networkx_dict(genome) == genome.to_dict()

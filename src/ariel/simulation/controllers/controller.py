@@ -24,7 +24,6 @@ class ControlCallback(Protocol):
         **kwargs: object,
     ) -> object:
         """Return the control values for the current simulation state."""
-        ...
 
 
 @dataclass

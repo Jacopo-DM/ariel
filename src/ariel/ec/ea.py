@@ -111,7 +111,6 @@ class Operation(Protocol):
         self, *args: object, **kwargs: object
     ) -> "Population | Operation":
         """Run on a population, or bind configuration arguments."""
-        ...
 
 
 class EAOperation[**P]:
@@ -249,21 +248,10 @@ class EAOperation[**P]:
         Raises
         ------
         TypeError
-            If called with a ``Population`` but the input is not an instance
-            of ``Population``.
-        TypeError
             If the wrapped function does not return a ``Population``.
         """
         if args and isinstance(args[0], Population):
             population = args[0]
-            if not isinstance(population, Population):
-                msg = (  # type: ignore[unreachable]  # known bug
-                    f"'{self.func.__name__}' expected a Population as input, "
-                    f"got '{type(population).__name__}'."
-                )
-                raise TypeError(
-                    msg,
-                )
             result = self.func(population, *self.args, **self.kwargs)
             if not isinstance(result, Population):
                 msg = (  # type: ignore[unreachable]  # known bug

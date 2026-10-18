@@ -60,7 +60,6 @@ class Archive:
         death_range: AgeRange = None,
         fitness_range: FitnessRange = None,
         alive_filter: bool | None = None,
-        evaluated_only: bool = True,
     ) -> Select[tuple[Individual]]:
         """Construct a base SQL query with optional filters.
 
@@ -75,9 +74,6 @@ class Archive:
         alive_filter : bool or None, optional
             ``True`` restricts to living individuals, ``False`` to dead ones,
             ``None`` applies no filter. Default is ``None``.
-        evaluated_only : bool, optional
-            Restrict to individuals that have been evaluated
-            (i.e. have a non-``NULL`` fitness). Default ``True``.
 
         Returns
         -------
@@ -90,8 +86,7 @@ class Archive:
             statement = statement.where(
                 Individual.alive == alive_filter,
             )
-        if evaluated_only:
-            statement = statement.where(Individual.requires_eval == False)  # ruff: ignore[true-false-comparison]
+        statement = statement.where(Individual.requires_eval == False)  # ruff: ignore[true-false-comparison]
         if birth_range is not None:
             lo, hi = birth_range
             statement = statement.where(Individual.time_of_birth >= lo).where(

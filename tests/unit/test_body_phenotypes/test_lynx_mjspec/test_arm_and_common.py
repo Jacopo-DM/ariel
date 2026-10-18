@@ -255,3 +255,12 @@ def test_position_delta_control_respects_limits() -> None:
         low, high = model.jnt_range[jid]
         assert low <= data.ctrl[i] <= high
     del model, data
+
+
+def test_actuated_joint_ids_skip_actuators_without_a_joint() -> None:
+    """An actuator whose transmission target is unset is left out."""
+    model, data, *_ = common.build_model(np.full(NUM_TUBES, TUBE_LENGTH))
+    model.actuator_trnid[0, 0] = -1
+    ids = common.get_actuated_joint_ids(model)
+    assert len(ids) == NUM_JOINTS - 1
+    del model, data

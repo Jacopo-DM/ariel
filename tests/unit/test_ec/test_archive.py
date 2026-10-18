@@ -403,8 +403,7 @@ def test_fitness_percentile_returns_population(archive: Archive) -> None:
 def test_fitness_percentile_in_band(archive: Archive) -> None:
     """All returned individuals fall within the percentile band."""
     pop = archive.fitness_percentile_population(0.0, 50.0)
-    if len(pop) == 0:
-        return
+    assert len(pop) > 0
     fitnesses = [_fitness(ind) for ind in pop]
     all_fitnesses = [
         _fitness(ind)
@@ -430,3 +429,55 @@ def test_fitness_percentile_impossible_birth_range_empty(
         0.0, 100.0, birth_range=(9999, 9999)
     )
     assert len(pop) == 0
+
+
+# ---------------------------------------------------------------------------
+# Maximisation, death ranges and empty selections
+# ---------------------------------------------------------------------------
+
+NOBODY = (100, 200)
+BEST_FITNESS = 19.0
+EVERYONE = (0, 1000)
+TOP_N = 3
+
+
+def test_best_individual_maximising(archive: Archive) -> None:
+    """In max mode the highest fitness wins."""
+    best = archive.best_individual("max")
+    assert _fitness(best) == pytest.approx(BEST_FITNESS)
+
+
+def test_hall_of_fame_maximising(archive: Archive) -> None:
+    """In max mode the hall of fame holds the highest fitnesses first."""
+    hof = archive.hall_of_fame(n=TOP_N, fitness_mode="max")
+    fitnesses = [_fitness(ind) for ind in hof]
+    assert fitnesses == sorted(fitnesses, reverse=True)
+    assert fitnesses[0] == pytest.approx(BEST_FITNESS)
+
+
+def test_death_range_filters_the_hall_of_fame(archive: Archive) -> None:
+    """A death range that covers everyone keeps everyone; none keeps nobody."""
+    everyone = archive.hall_of_fame(n=NUM_ALIVE, death_range=EVERYONE)
+    nobody = archive.hall_of_fame(n=NUM_ALIVE, death_range=NOBODY)
+    assert len(everyone) == NUM_ALIVE
+    assert len(nobody) == 0
+
+
+def test_best_individual_of_an_empty_selection_fails(
+    archive: Archive,
+) -> None:
+    """No evaluated individual in range is an error."""
+    with pytest.raises(ValueError, match="No evaluated individuals"):
+        archive.best_individual(birth_range=NOBODY)
+
+
+def test_random_individual_among_the_dead_fails(archive: Archive) -> None:
+    """Everyone is still alive after the run, so no dead one can be drawn."""
+    with pytest.raises(ValueError, match="No individuals match"):
+        archive.random_individual(only_dead=True)
+
+
+def test_tournament_of_an_empty_pool_fails(archive: Archive) -> None:
+    """A birth range without individuals gives an empty pool."""
+    with pytest.raises(ValueError, match="No individuals match"):
+        archive.tournament_population(n=2, birth_range=NOBODY)

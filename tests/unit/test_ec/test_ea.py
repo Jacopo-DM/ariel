@@ -2,10 +2,18 @@
 
 from collections.abc import Sequence
 from pathlib import Path
+from typing import Literal, cast
 
 import pytest
+from sqlmodel import SQLModel, create_engine
 
-from ariel.ec.ea import EA, EAOperation, EASettings, Operation
+from ariel.ec.ea import (
+    EA,
+    DBHandlingMode,
+    EAOperation,
+    EASettings,
+    Operation,
+)
 from ariel.ec.individual import Individual
 from ariel.ec.population import Population
 
@@ -25,14 +33,15 @@ NUM_STEPS_RUN = 5
 # ---------------------------------------------------------------------------
 
 
+def _make_ind(i: int) -> Individual:
+    ind = Individual()
+    ind.genotype = [float(i)]
+    ind.fitness = float(i)
+    return ind
+
+
 def _make_pop(n: int = 4) -> Population:
-    inds = []
-    for i in range(n):
-        ind = Individual()
-        ind.genotype = [float(i)]
-        ind.fitness = float(i)
-        inds.append(ind)
-    return Population(inds)
+    return Population([_make_ind(i) for i in range(n)])
 
 
 @EAOperation
@@ -105,29 +114,35 @@ def test_eaoperation_valid_decoration() -> None:
 
 def test_eaoperation_no_params_raises() -> None:
     """@EAOperation on a zero-parameter function raises TypeError."""
-    with pytest.raises(TypeError, match="first argument"):
 
-        @EAOperation  # type: ignore[arg-type]  # deliberately wrong signature
-        def bad() -> Population:  # no params
-            return Population([])
+    def bad() -> Population:  # no params
+        return Population([])
+
+    assert len(bad()) == 0
+    with pytest.raises(TypeError, match="first argument"):
+        EAOperation(bad)  # type: ignore[arg-type]  # deliberately wrong signature
 
 
 def test_eaoperation_wrong_first_param_type_raises() -> None:
     """First parameter not annotated as Population raises TypeError."""
-    with pytest.raises(TypeError, match="Population"):
 
-        @EAOperation  # type: ignore[arg-type]  # deliberately wrong signature
-        def bad(x: int) -> Population:  # ruff: ignore[unused-function-argument]
-            return Population([])
+    def bad(x: int) -> Population:
+        return Population([_make_ind(x)])
+
+    assert len(bad(1)) == 1
+    with pytest.raises(TypeError, match="Population"):
+        EAOperation(bad)  # type: ignore[arg-type]  # deliberately wrong signature
 
 
 def test_eaoperation_wrong_return_type_raises() -> None:
     """Return annotation not Population raises TypeError."""
-    with pytest.raises(TypeError, match="Population"):
 
-        @EAOperation  # type: ignore[arg-type]  # deliberately wrong signature
-        def bad(population: Population) -> list[int]:  # ruff: ignore[unused-function-argument]
-            return []
+    def bad(population: Population) -> list[int]:
+        return [len(population)]
+
+    assert bad(_make_pop()) == [4]
+    with pytest.raises(TypeError, match="Population"):
+        EAOperation(bad)  # type: ignore[arg-type]  # deliberately wrong signature
 
 
 # ---------------------------------------------------------------------------
@@ -165,6 +180,8 @@ def test_eaoperation_call_with_kwargs_returns_bound_op() -> None:
 
     bound = with_param(factor=2.0)
     assert isinstance(bound, EAOperation)
+    result = bound(_make_pop())
+    assert isinstance(result, Population)
     # mypy 1.18 crashes on `bound.kwargs` (ParamSpec attribute), so read it
     # through the instance dict.
     assert vars(bound)["kwargs"] == {"factor": 2.0}
@@ -204,7 +221,9 @@ def test_eaoperation_repr_with_kwargs() -> None:
         return population
 
     bound = op(k=42)
+    assert isinstance(bound, EAOperation)
     assert "42" in repr(bound)
+    assert isinstance(bound(_make_pop()), Population)
 
 
 # ---------------------------------------------------------------------------
@@ -449,3 +468,127 @@ def test_ea_run_zero_steps(tmp_path: Path) -> None:
     ea = _ea(tmp_path, num_steps=0)
     ea.run()
     assert ea.current_generation == 0
+
+
+# ---------------------------------------------------------------------------
+# Restart from a database, odd arguments, solutions and filters
+# ---------------------------------------------------------------------------
+
+RESTART_STEPS = 3
+RESTART_GENERATION = 1
+
+
+@EAOperation
+def returns_a_list(population: Population) -> Population:
+    # Lies about its return value to reach the runtime check.
+    return cast("Population", [len(population)])
+
+
+def _finished_run(tmp_path: Path) -> Path:
+    # Run a few generations and return the database that was written.
+    ea = _ea(tmp_path, num_steps=RESTART_STEPS)
+    ea.run()
+    return tmp_path / "test.db"
+
+
+def _restart(
+    tmp_path: Path,
+    source: Path | tuple[Path, int],
+    *,
+    name: str = "restarted.db",
+) -> EA:
+    return EA(
+        restart=source,
+        operations=[noop],
+        db_file_path=tmp_path / name,
+        quiet=True,
+    )
+
+
+def test_operation_returning_a_list_is_rejected() -> None:
+    """An operation must hand back a Population."""
+    with pytest.raises(TypeError, match="expected a Population as return"):
+        returns_a_list(_make_pop())
+
+
+def test_restart_continues_after_the_last_generation(tmp_path: Path) -> None:
+    """Restarting from a path alone resumes after the latest generation."""
+    source = _finished_run(tmp_path / "first")
+    ea = _restart(tmp_path / "second", source)
+    assert ea.current_generation >= RESTART_STEPS
+    assert ea.size > 0
+
+
+def test_restart_from_a_chosen_generation(tmp_path: Path) -> None:
+    """A (path, generation) pair restarts from that generation."""
+    source = _finished_run(tmp_path / "first")
+    ea = _restart(tmp_path / "second", (source, RESTART_GENERATION))
+    assert ea.current_generation == RESTART_GENERATION + 1
+
+
+def test_restart_from_a_string_path(tmp_path: Path) -> None:
+    """A path may be given as a string."""
+    source = _finished_run(tmp_path / "first")
+    ea = EA(
+        restart=str(source),
+        operations=[noop],
+        db_file_path=tmp_path / "second" / "restarted.db",
+        quiet=True,
+    )
+    assert ea.size > 0
+
+
+def test_restart_database_must_exist(tmp_path: Path) -> None:
+    """A missing source database is an error."""
+    with pytest.raises(FileNotFoundError, match="Restart database not found"):
+        _restart(tmp_path, tmp_path / "missing.db")
+
+
+def test_restart_from_an_empty_database_fails(tmp_path: Path) -> None:
+    """A database without individuals cannot be restarted from."""
+    empty = tmp_path / "empty.db"
+    SQLModel.metadata.create_all(create_engine(f"sqlite:///{empty}"))
+    with pytest.raises(ValueError, match="contains no individuals"):
+        _restart(tmp_path, empty)
+
+
+def test_restart_from_a_generation_without_individuals(tmp_path: Path) -> None:
+    """A generation that no evaluated individual lived through is an error."""
+    source = _finished_run(tmp_path / "first")
+    with pytest.raises(ValueError, match="No evaluated individuals"):
+        _restart(tmp_path / "second", (source, RESTART_STEPS * 100))
+
+
+def test_unknown_db_handling_keeps_the_existing_file(tmp_path: Path) -> None:
+    """A handling mode that is neither delete nor halt changes nothing."""
+    first = _ea(tmp_path)
+    del first
+    second = EA(
+        population=_make_pop(),
+        operations=[noop],
+        db_file_path=tmp_path / "test.db",
+        db_handling=cast("DBHandlingMode", "keep"),
+        quiet=True,
+    )
+    # Both populations are in the file: the old one was not deleted.
+    assert second.size == 2 * len(_make_pop())
+
+
+def test_get_solution_with_an_unknown_mode_returns_nothing(
+    tmp_path: Path,
+) -> None:
+    """An unknown mode falls through every case."""
+    ea = _ea(tmp_path)
+    mode = cast("Literal['best']", "unknown")
+    assert ea.get_solution(mode) is None
+
+
+def test_fetch_population_can_include_dead_and_unevaluated(
+    tmp_path: Path,
+) -> None:
+    """The filters of fetch_population are optional."""
+    ea = _ea(tmp_path)
+    ea.fetch_population(only_alive=False, requires_eval=None)
+    assert ea.population.size == len(_make_pop())
+    ea.fetch_population(only_alive=True, requires_eval=True)
+    assert ea.population.size == 0

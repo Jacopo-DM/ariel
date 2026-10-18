@@ -1,5 +1,7 @@
 """Test: generators and mutators in the ec module."""
 
+from collections.abc import Callable
+
 import pytest
 
 from ariel.ec.generators import (
@@ -200,3 +202,54 @@ def test_float_mutator_inversion_same_elements() -> None:
     individual = [1.0, 2.0, 3.0, 4.0, 5.0]
     result = FloatMutator.inversion(individual, mutation_probability=1.0)
     assert sorted(result) == pytest.approx(sorted(individual))
+
+
+# ---------------------------------------------------------------------------
+# Choice, and mutation that does not happen
+# ---------------------------------------------------------------------------
+
+POOL = [0.5, 1.5, 2.5]
+GENES = [1.0, 2.0, 3.0, 4.0]
+INT_GENES = [1, 2, 3, 4]
+NEVER = 0.0
+CHOICES = 6
+
+
+def test_floats_choice_draws_from_the_pool() -> None:
+    """FloatsGenerator.choice returns the requested number of pool values."""
+    result = FloatsGenerator.choice(POOL, size=CHOICES)
+    assert len(result) == CHOICES
+    assert set(result) <= set(POOL)
+
+
+def test_floats_choice_follows_the_probabilities() -> None:
+    """A probability of 1 on one value always draws that value."""
+    result = FloatsGenerator.choice(
+        POOL, size=CHOICES, probabilities=[0.0, 1.0, 0.0]
+    )
+    assert set(result) == {POOL[1]}
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        IntegerMutator.inversion,
+        IntegerMutator.scramble,
+    ],
+)
+def test_integer_mutators_do_nothing_at_probability_zero(
+    mutate: Callable[[list[int], float], list[int]],
+) -> None:
+    """With probability 0 the genotype comes back unchanged."""
+    assert mutate(INT_GENES, NEVER) == INT_GENES
+
+
+def test_float_inversion_does_nothing_at_probability_zero() -> None:
+    """With probability 0 the float genotype comes back unchanged."""
+    assert FloatMutator.inversion(GENES, NEVER) == GENES
+
+
+def test_swap_mutators_keep_genes_that_are_not_selected() -> None:
+    """At probability 0 no gene is swapped."""
+    assert IntegerMutator.swap(INT_GENES, NEVER) == INT_GENES
+    assert FloatMutator.swap(GENES, NEVER) == GENES
