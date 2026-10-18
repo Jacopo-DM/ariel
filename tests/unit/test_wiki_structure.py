@@ -124,3 +124,10 @@ def test_wikilinks_resolve() -> None:
         if link not in names
     )
     assert broken == []
+
+
+def test_index_lists_every_page() -> None:
+    index = (WIKI / "index.md").read_text(encoding="utf-8")
+    listed = set(WIKILINK.findall(index))
+    missing = sorted(page.stem for page in _pages() if page.stem not in listed)
+    assert missing == []
