@@ -1,11 +1,14 @@
 """Test: HighProbabilityDecoder and VectorDecoder."""
 
+import networkx as nx
 import numpy as np
 import pytest
 from networkx import DiGraph
 from numpy.typing import NDArray
 
 from ariel.body_phenotypes.robogen_lite.config import (
+    ALLOWED_FACES,
+    ALLOWED_ROTATIONS,
     NUM_OF_FACES,
     NUM_OF_ROTATIONS,
     NUM_OF_TYPES_OF_MODULES,
@@ -363,108 +366,6 @@ def test_assign_symbols_integer_symbols() -> None:
 
 
 # ---------------------------------------------------------------------------
-# VectorDecoder — set_module_types_and_rotations
-# ---------------------------------------------------------------------------
-
-
-def test_vector_decoder_set_types_and_rotations() -> None:
-    """set_module_types_and_rotations populates type_dict and rot_dict."""
-    decoder = VectorDecoder(num_modules=NUM_MODULES)
-    decoder.conn_p_space = _conn_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
-    decoder.rot_p_space = _rot_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
-    decoder.type_p_space = _type_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
-    decoder.set_module_types_and_rotations()
-    assert len(decoder.type_dict) == NUM_MODULES
-    assert len(decoder.rot_dict) == NUM_MODULES
-
-
-def test_vector_decoder_set_types_core_at_zero() -> None:
-    """After set_module_types_and_rotations, node 0 is typed as CORE."""
-    decoder = VectorDecoder(num_modules=NUM_MODULES)
-    decoder.conn_p_space = _conn_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
-    decoder.rot_p_space = _rot_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
-    decoder.type_p_space = _type_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
-    decoder.set_module_types_and_rotations()
-    assert decoder.type_dict[0] == ModuleType.CORE
-
-
-# ---------------------------------------------------------------------------
-# VectorDecoder — apply_connection_constraints
-# ---------------------------------------------------------------------------
-
-
-def test_vector_decoder_apply_constraints_no_self_connections() -> None:
-    """After apply_connection_constraints, diagonal entries are zero."""
-    decoder = VectorDecoder(num_modules=NUM_MODULES)
-    decoder.conn_p_space = _conn_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
-    decoder.rot_p_space = _rot_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
-    decoder.type_p_space = _type_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
-    decoder.apply_connection_constraints()
-    for face_idx in range(NUM_OF_FACES):
-        for i in range(NUM_MODULES):
-            assert decoder.conn_p_space[i, i, face_idx] == 0  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
-
-
-def test_vector_decoder_apply_constraints_core_never_child() -> None:
-    """After constraints, core (index 0) cannot be a child."""
-    decoder = VectorDecoder(num_modules=NUM_MODULES)
-    decoder.conn_p_space = _conn_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
-    decoder.rot_p_space = _rot_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
-    decoder.type_p_space = _type_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
-    decoder.apply_connection_constraints()
-    assert np.all(decoder.conn_p_space[:, 0, :] == 0)  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
-
-
-# ---------------------------------------------------------------------------
-# VectorDecoder — decode_vector_to_graph
-# ---------------------------------------------------------------------------
-
-
-def _setup_vector_decoder(num_modules: int = NUM_MODULES) -> VectorDecoder:
-    """Return a VectorDecoder ready for decode_vector_to_graph.
-
-    Returns
-    -------
-    VectorDecoder
-        The decoder.
-    """
-    decoder = VectorDecoder(num_modules=num_modules)
-    decoder.conn_p_space = _conn_space(num_modules)  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
-    decoder.rot_p_space = _rot_space(num_modules)  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
-    decoder.type_p_space = _type_space(num_modules)  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
-    decoder.apply_connection_constraints()
-    decoder.set_module_types_and_rotations()
-    return decoder
-
-
-def test_vector_decoder_decode_populates_nodes() -> None:
-    """decode_vector_to_graph creates a nodes set containing the core."""
-    decoder = _setup_vector_decoder()
-    decoder.decode_vector_to_graph()
-    assert 0 in decoder.nodes
-
-
-def test_vector_decoder_decode_populates_edges() -> None:
-    """decode_vector_to_graph creates an edges list."""
-    decoder = _setup_vector_decoder()
-    decoder.decode_vector_to_graph()
-    assert isinstance(decoder.edges, list)
-
-
-def test_vector_decoder_decode_zero_conn_only_core() -> None:
-    """All-zero connection space after constraints leaves only the core."""
-    decoder = VectorDecoder(num_modules=NUM_MODULES)
-    decoder.conn_p_space = np.zeros(  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
-        (NUM_MODULES, NUM_MODULES, NUM_OF_FACES), dtype=np.float32
-    )
-    decoder.rot_p_space = _rot_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
-    decoder.type_p_space = _type_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
-    decoder.set_module_types_and_rotations()
-    decoder.decode_vector_to_graph()
-    assert 0 in decoder.nodes
-
-
-# ---------------------------------------------------------------------------
 # Decoding errors: the guards against corrupt probability spaces
 # ---------------------------------------------------------------------------
 
@@ -496,26 +397,124 @@ def test_hi_prob_decode_none_parent_raises() -> None:
         decoder.decode_probability_to_graph()
 
 
-def test_vector_decode_core_as_child_raises() -> None:
-    """The vector decoder refuses to make the core a child."""
-    decoder = _setup_vector_decoder()
-    decoder.conn_p_space[0, 0, 0] = BIG  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
-    with pytest.raises(ValueError, match="core module as a child"):
-        decoder.decode_vector_to_graph()
+# ---------------------------------------------------------------------------
+# VectorDecoder — vectors_to_graph
+# ---------------------------------------------------------------------------
+
+BRICK_VALUE = 0.2  # first of three types: BRICK, HINGE, NONE
+HINGE_VALUE = 0.6
+NONE_VALUE = 0.9
+FIRST_SLOT = 0.0
+LAST_SLOT = 1.0
+VECTOR_MODULES = 4
+FIRST_NODES = 3
 
 
-def test_vector_decode_none_child_raises() -> None:
-    """The vector decoder refuses a NONE child."""
-    decoder = _setup_vector_decoder()
-    decoder.type_dict[1] = ModuleType.NONE
-    decoder.conn_p_space[0, 1, 0] = BIG  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
-    with pytest.raises(ValueError, match="NONE module"):
-        decoder.decode_vector_to_graph()
+def _vectors(
+    types: list[float], connections: list[float], rotations: list[float]
+) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
+    return (
+        np.array(types, dtype=np.float64),
+        np.array(connections, dtype=np.float64),
+        np.array(rotations, dtype=np.float64),
+    )
 
 
-def test_vector_decode_none_parent_raises() -> None:
-    """The vector decoder refuses a NONE parent."""
-    decoder = _setup_vector_decoder()
-    decoder.type_dict[0] = ModuleType.NONE
-    with pytest.raises(ValueError, match="NONE module"):
-        decoder.decode_vector_to_graph()
+def test_vectors_to_graph_builds_the_documented_example() -> None:
+    """Brick, then NONE (left out), then hinge, all on the first free slot."""
+    decoder = VectorDecoder(num_modules=VECTOR_MODULES)
+    graph = decoder.vectors_to_graph(
+        *_vectors(
+            [BRICK_VALUE, NONE_VALUE, HINGE_VALUE],
+            [FIRST_SLOT] * 3,
+            [FIRST_SLOT] * 3,
+        )
+    )
+    assert isinstance(graph, DiGraph)
+    assert set(graph.nodes) == {0, 1, 3}
+    assert graph.nodes[0]["type"] == "CORE"
+    assert graph.nodes[1]["type"] == "BRICK"
+    assert graph.nodes[3]["type"] == "HINGE"
+    # both on the core: the first two free slots are the core's two first faces
+    assert [parent for parent, _ in graph.edges] == [0, 0]
+    faces = [graph.edges[edge]["face"] for edge in graph.edges]
+    assert len(set(faces)) == len(faces)
+
+
+def test_vectors_to_graph_makes_a_tree() -> None:
+    decoder = VectorDecoder(num_modules=VECTOR_MODULES)
+    graph = decoder.vectors_to_graph(
+        *_vectors([BRICK_VALUE] * 3, [LAST_SLOT] * 3, [FIRST_SLOT] * 3)
+    )
+    assert len(graph.nodes) == VECTOR_MODULES
+    assert len(graph.edges) == VECTOR_MODULES - 1
+    # the last free slot of the placed modules is used each time: module 1 on
+    # the core, module 2 on module 1, module 3 on module 2
+    assert sorted(graph.edges) == [(0, 1), (1, 2), (2, 3)]
+
+
+def test_vectors_to_graph_rotation_is_limited_by_the_type() -> None:
+    decoder = VectorDecoder(num_modules=3)
+    graph = decoder.vectors_to_graph(
+        *_vectors([BRICK_VALUE, HINGE_VALUE], [FIRST_SLOT] * 2, [LAST_SLOT] * 2)
+    )
+    allowed = {r.name for r in ALLOWED_ROTATIONS[ModuleType.BRICK]}
+    assert graph.nodes[1]["rotation"] in allowed
+    assert graph.nodes[1]["rotation"] == ModuleRotationsIdx.DEG_90.name
+
+
+def test_vectors_to_graph_always_finds_a_free_slot() -> None:
+    """Hinges offer one face each, as many as they use: no module is lost."""
+    modules = len(ALLOWED_FACES[ModuleType.CORE]) + 3
+    decoder = VectorDecoder(num_modules=modules)
+    count = modules - 1
+    graph = decoder.vectors_to_graph(
+        *_vectors(
+            [HINGE_VALUE] * count, [FIRST_SLOT] * count, [FIRST_SLOT] * count
+        )
+    )
+    assert len(graph.nodes) == modules
+    assert nx.is_tree(graph.to_undirected())
+
+
+def test_vectors_to_graph_with_only_none_modules_is_the_core() -> None:
+    decoder = VectorDecoder(num_modules=3)
+    graph = decoder.vectors_to_graph(
+        *_vectors([NONE_VALUE] * 2, [FIRST_SLOT] * 2, [FIRST_SLOT] * 2)
+    )
+    assert set(graph.nodes) == {0}
+    assert not graph.edges
+
+
+def test_vectors_to_graph_with_a_single_module_is_the_core() -> None:
+    decoder = VectorDecoder(num_modules=1)
+    graph = decoder.vectors_to_graph(*_vectors([], [], []))
+    assert set(graph.nodes) == {0}
+
+
+def test_vectors_to_graph_refuses_a_vector_of_the_wrong_length() -> None:
+    decoder = VectorDecoder(num_modules=VECTOR_MODULES)
+    with pytest.raises(ValueError, match="connection vector must hold 3"):
+        decoder.vectors_to_graph(
+            *_vectors([BRICK_VALUE] * 3, [FIRST_SLOT] * 2, [FIRST_SLOT] * 3)
+        )
+
+
+def test_vectors_to_graph_refuses_values_outside_the_unit_interval() -> None:
+    decoder = VectorDecoder(num_modules=3)
+    with pytest.raises(ValueError, match=r"within \[0, 1\]"):
+        decoder.vectors_to_graph(
+            *_vectors([BRICK_VALUE, 1.5], [FIRST_SLOT] * 2, [FIRST_SLOT] * 2)
+        )
+
+
+def test_vectors_to_graph_resets_between_calls() -> None:
+    decoder = VectorDecoder(num_modules=3)
+    first = decoder.vectors_to_graph(
+        *_vectors([BRICK_VALUE] * 2, [FIRST_SLOT] * 2, [FIRST_SLOT] * 2)
+    )
+    second = decoder.vectors_to_graph(
+        *_vectors([NONE_VALUE] * 2, [FIRST_SLOT] * 2, [FIRST_SLOT] * 2)
+    )
+    assert len(first.nodes) == FIRST_NODES
+    assert len(second.nodes) == 1
