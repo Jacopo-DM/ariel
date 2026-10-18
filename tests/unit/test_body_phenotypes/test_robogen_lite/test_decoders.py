@@ -26,7 +26,13 @@ NUM_MODULES = 4
 
 
 def _type_space(num_modules: int = NUM_MODULES) -> np.ndarray:
-    """Type probability space with core forced at index 0, no NONE elsewhere."""
+    """Type probability space with core forced at index 0, no NONE elsewhere.
+
+    Returns
+    -------
+    np.ndarray
+        The probability space.
+    """
     space = np.ones((num_modules, NUM_OF_TYPES_OF_MODULES), dtype=np.float32)
     space[0] = 0.0
     space[0, ModuleType.CORE.value] = 1.0
@@ -202,7 +208,13 @@ def test_hi_prob_set_types_creates_rot_dict() -> None:
 
 
 def _setup_decoder(num_modules: int = NUM_MODULES) -> HighProbabilityDecoder:
-    """Return a decoder fully initialized for decode_probability_to_graph."""
+    """Return a decoder fully initialized for decode_probability_to_graph.
+
+    Returns
+    -------
+    HighProbabilityDecoder
+        The decoder.
+    """
     decoder = HighProbabilityDecoder(num_modules=num_modules)
     decoder.conn_p_space = _conn_space(num_modules)
     decoder.rot_p_space = _rot_space(num_modules)
@@ -406,7 +418,13 @@ def test_vector_decoder_apply_constraints_core_never_child() -> None:
 
 
 def _setup_vector_decoder(num_modules: int = NUM_MODULES) -> VectorDecoder:
-    """Return a VectorDecoder ready for decode_vector_to_graph."""
+    """Return a VectorDecoder ready for decode_vector_to_graph.
+
+    Returns
+    -------
+    VectorDecoder
+        The decoder.
+    """
     decoder = VectorDecoder(num_modules=num_modules)
     decoder.conn_p_space = _conn_space(num_modules)  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
     decoder.rot_p_space = _rot_space(num_modules)  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)

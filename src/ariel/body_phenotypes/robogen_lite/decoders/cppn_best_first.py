@@ -27,7 +27,13 @@ console = Console()
 
 
 def softmax(raw_scores: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
-    """Return the softmax of `raw_scores`."""
+    """Return the softmax of `raw_scores`.
+
+    Returns
+    -------
+    npt.NDArray[np.float32]
+        The softmax values; they sum to 1.
+    """
     e_x = np.exp(raw_scores - np.max(raw_scores))
     return cast("np.ndarray", e_x / e_x.sum())
 
@@ -59,7 +65,13 @@ class MorphologyDecoderBestFirst:
         )
 
     def decode(self) -> nx.DiGraph[Any]:  # ruff: ignore[too-many-locals]  # long routine kept as written; splitting it is a refactor outside this goal
-        """Grow the robot graph from the core, best-scoring connection first."""
+        """Grow the robot graph from the core, best-scoring connection first.
+
+        Returns
+        -------
+        nx.DiGraph[Any]
+            The robot graph.
+        """
         robot_graph: nx.DiGraph[Any] = nx.DiGraph()
         occupied_coords = {}
         module_data = {}

@@ -82,7 +82,13 @@ class BaseWorld:
         """Expand the world specification with additional elements."""
 
     def _init_spec(self) -> mj.MjSpec:
-        """Initialize the MuJoCo specification."""
+        """Initialize the MuJoCo specification.
+
+        Returns
+        -------
+        mj.MjSpec
+            The new specification.
+        """
         spec = mj.MjSpec()
 
         # Model name

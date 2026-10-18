@@ -45,7 +45,18 @@ class VectorDecoder(Blueprint):
         symbols: Sequence[T] | Sequence[Sequence[T]],
         weight: Sequence[float] | Sequence[Sequence[float]] | None = None,
     ) -> list[T]:
-        """Map each value in [0, 1] to a symbol; ValueError if out of range."""
+        """Map each value in [0, 1] to a symbol; ValueError if out of range.
+
+        Returns
+        -------
+        list[T]
+            One symbol per value.
+
+        Raises
+        ------
+        ValueError
+            If a value is outside [0, 1].
+        """
         vector = np.asarray(vector, dtype=np.float64)
 
         if np.any(vector < 0) or np.any(vector > 1):

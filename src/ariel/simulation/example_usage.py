@@ -85,7 +85,13 @@ class TargetedLocomotionWorker(MuJoCoWorkerBase):
         data: mj.MjData,
         config: LocomotionConfig,  # type: ignore[override]  # known bug
     ) -> float:
-        """Optimise a controller with CMA-ES and return the best fitness."""
+        """Optimise a controller with CMA-ES and return the best fitness.
+
+        Returns
+        -------
+        float
+            The best fitness found.
+        """
         rng = np.random.default_rng(config.seed)
 
         state_size = len(data.qpos) + len(data.qvel) + 3
@@ -147,7 +153,13 @@ def evaluate_population(
     worker: MuJoCoWorkerBase,
     num_workers: int = 8,
 ) -> list[float]:
-    """Run eval_args through a process pool and return fitness values."""
+    """Run eval_args through a process pool and return fitness values.
+
+    Returns
+    -------
+    list[float]
+        The fitness of each individual.
+    """
     ctx = get_context("spawn")
     with ctx.Pool(processes=num_workers) as pool:
         return list(pool.imap(worker, eval_args, chunksize=1))

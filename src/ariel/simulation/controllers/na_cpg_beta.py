@@ -61,7 +61,13 @@ class BetaParams(NamedTuple):
 
 
 def create_fully_connected_adjacency(num_nodes: int) -> dict[int, list[int]]:
-    """Return an adjacency dict where every node connects to all others."""
+    """Return an adjacency dict where every node connects to all others.
+
+    Returns
+    -------
+    dict[int, list[int]]
+        A map from each node to every other node.
+    """
     adjacency_dict = {}
     for i in range(num_nodes):
         adjacency_dict[i] = [j for j in range(num_nodes) if j != i]
@@ -255,7 +261,13 @@ class NaCPGBeta(nn.Module):
     def init_state(  # ruff: ignore[no-self-use]  # keeps the interface shared with the sibling classes
         self, value: float, size: int | list[int] | tuple[int, ...]
     ) -> torch.Tensor:
-        """Sample an initial state with random signs and magnitude `value`."""
+        """Sample an initial state with random signs and magnitude `value`.
+
+        Returns
+        -------
+        torch.Tensor
+            The initial state.
+        """
         return torch.Tensor(RNG.choice([-value, value], size=size))
 
     def scaled_beta(  # ruff: ignore[no-self-use]  # keeps the interface shared with the sibling classes
@@ -266,7 +278,18 @@ class NaCPGBeta(nn.Module):
         negative_reflect: bool = True,
     ) -> torch.Tensor:
         # Unpack parameters
-        """Sample from a beta distribution scaled to the range [c, d]."""
+        """Sample from a beta distribution scaled to the range [c, d].
+
+        Returns
+        -------
+        torch.Tensor
+            The samples.
+
+        Raises
+        ------
+        ValueError
+            If c or d is negative while negative_reflect is true.
+        """
         a, b, c, d = beta_params
 
         # a & b must be grater than 0
@@ -291,7 +314,13 @@ class NaCPGBeta(nn.Module):
         self,
         params: list[float] | np.ndarray | torch.Tensor,
     ) -> torch.Tensor:
-        """Convert input parameters to torch.Tensor if needed."""
+        """Convert input parameters to torch.Tensor if needed.
+
+        Returns
+        -------
+        torch.Tensor
+            The parameters as a tensor.
+        """
         if isinstance(params, list):
             params = torch.tensor(params, dtype=torch.float32)
         elif isinstance(params, np.ndarray):
@@ -300,7 +329,13 @@ class NaCPGBeta(nn.Module):
 
     def set_flat_params(self, params: torch.Tensor) -> None:
         # Convert params to tensor if needed
-        """Set all learnable parameters from a flat tensor."""
+        """Set all learnable parameters from a flat tensor.
+
+        Raises
+        ------
+        ValueError
+            If the parameter vector has the wrong size.
+        """
         safe_params = self.param_type_converter(params)
 
         # Check size is correct
@@ -330,7 +365,13 @@ class NaCPGBeta(nn.Module):
         params: torch.Tensor,
     ) -> None:
         # Convert params to tensor if needed
-        """Set parameters for a specific group."""
+        """Set parameters for a specific group.
+
+        Raises
+        ------
+        ValueError
+            If the group does not exist or the vector has the wrong size.
+        """
         safe_params = self.param_type_converter(params)
 
         # Check group exists
@@ -350,22 +391,46 @@ class NaCPGBeta(nn.Module):
         param.data = safe_params.view_as(param)
 
     def get_flat_params(self) -> torch.Tensor:
-        """Get all learnable parameters as a flat tensor."""
+        """Get all learnable parameters as a flat tensor.
+
+        Returns
+        -------
+        torch.Tensor
+            The learnable parameters as one flat tensor.
+        """
         return torch.cat([p.flatten() for p in self.parameter_groups.values()])
 
     @staticmethod
     def term_a(alpha: float, r2i: float) -> float:
-        """Term A from the NA-CPG equations."""
+        """Term A from the NA-CPG equations.
+
+        Returns
+        -------
+        float
+            The value of term A.
+        """
         return alpha * (1 - r2i**2)
 
     @staticmethod
     def term_b(zeta_i: torch.Tensor, w_i: torch.Tensor) -> torch.Tensor:
-        """Term B from the NA-CPG equations."""
+        """Term B from the NA-CPG equations.
+
+        Returns
+        -------
+        torch.Tensor
+            The value of term B.
+        """
         return (1 / (zeta_i + E)) * w_i  # type: ignore[no-any-return]  # known bug
 
     @staticmethod
     def zeta(ha_i: torch.Tensor, x_dot_old: torch.Tensor) -> torch.Tensor:
-        """Zeta function from the NA-CPG equations."""
+        """Zeta function from the NA-CPG equations.
+
+        Returns
+        -------
+        torch.Tensor
+            The value of zeta.
+        """
         return 1 - ha_i * ((x_dot_old + E) / (torch.abs(x_dot_old) + E))  # type: ignore[no-any-return]  # known bug
 
     def set_state(
@@ -389,11 +454,23 @@ class NaCPGBeta(nn.Module):
         coefficients: tuple[float, float, float, float],
         w: float,
     ) -> float:
-        """Evaluate the constraint polynomial at `w`."""
+        """Evaluate the constraint polynomial at `w`.
+
+        Returns
+        -------
+        float
+            The value of the constraint polynomial.
+        """
         return float(np.polyval(coefficients, w))
 
     def run_for(self, steps: int) -> torch.Tensor:
-        """Run the CPG for `steps` steps and return the final angles."""
+        """Run the CPG for `steps` steps and return the final angles.
+
+        Returns
+        -------
+        torch.Tensor
+            The angles after the last step.
+        """
         for _ in range(steps):
             self.forward()
         return self.angles.clone()
@@ -427,7 +504,18 @@ class NaCPGBeta(nn.Module):
         time: float | None = None,
     ) -> torch.Tensor:
         # Reset if time is zero
-        """Perform a forward pass: update CPG states, compute output angles."""
+        """Perform a forward pass: update CPG states, compute output angles.
+
+        Returns
+        -------
+        torch.Tensor
+            The joint angles for this step.
+
+        Raises
+        ------
+        ValueError
+            If the angles contain NaN.
+        """
         if time is not None and torch.isclose(
             torch.tensor(time),
             torch.tensor(0.0),

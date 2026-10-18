@@ -37,12 +37,24 @@ DEFAULT_TIME_BONUS_WEIGHT = 0.08
 
 
 def make_run_name() -> str:
-    """Return a UTC timestamp used to name a run."""
+    """Return a UTC timestamp used to name a run.
+
+    Returns
+    -------
+    str
+        A run name made from the current UTC time.
+    """
     return datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
 
 
 def parse_args() -> argparse.Namespace:
-    """Parse the command-line arguments of the evolution run."""
+    """Parse the command-line arguments of the evolution run.
+
+    Returns
+    -------
+    argparse.Namespace
+        The parsed command-line arguments.
+    """
     parser = argparse.ArgumentParser(
         description="Unified Lynx evolution pipeline"
     )
@@ -100,7 +112,13 @@ def evaluate_candidate(  # ruff: ignore[too-many-arguments, too-many-locals, too
     hold_steps_to_stop: int,
     time_bonus_weight: float,
 ) -> float:
-    """Return the fitness of one genome (tube lengths plus policy weights)."""
+    """Return the fitness of one genome (tube lengths plus policy weights).
+
+    Returns
+    -------
+    float
+        The fitness of the genome; lower is better.
+    """
     try:  # ruff: ignore[too-many-statements-in-try-clause]  # public signature or class shape kept as is; changing it changes the API
         tube_lengths_raw = genome[:NUM_TUBES]
         weights = genome[NUM_TUBES:]

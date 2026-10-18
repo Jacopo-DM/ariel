@@ -47,12 +47,24 @@ class IdManager:
             self.load()
 
     def get_next_node_id(self) -> int:
-        """Return the next available node ID and increments the counter."""
+        """Return the next available node ID and increments the counter.
+
+        Returns
+        -------
+        int
+            The next free node id.
+        """
         self._node_id += 1
         return self._node_id
 
     def get_next_innov_id(self) -> int:
-        """Return the next innovation ID and increment the counter."""
+        """Return the next innovation ID and increment the counter.
+
+        Returns
+        -------
+        int
+            The next free innovation id.
+        """
         self._innov_id += 1
         return self._innov_id
 

@@ -23,6 +23,11 @@ def get_ext_modules() -> list[Extension]:
     If the `ARIEL_COMPILE_MYPYC` environment variable is set to "1",
     this function will return a list of modules to be compiled by mypyc.
     Otherwise, it returns an empty list, resulting in a pure Python build.
+
+    Returns
+    -------
+    list[Extension]
+        The extensions to build; empty unless ARIEL_COMPILE_MYPYC=1.
     """
     if os.environ.get("ARIEL_COMPILE_MYPYC") == "1":
         sys.stdout.write("Compiling with mypyc...\n")

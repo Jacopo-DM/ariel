@@ -25,6 +25,11 @@ def is_single_connected_tree(genome: dict[str, Any]) -> bool:
 
     In this domain, the core (IDX_OF_CORE) must be the root and all nodes
     must be reachable from it.
+
+    Returns
+    -------
+    bool
+        True if the genome is one connected tree rooted at the core.
     """
     nodes = genome.get("nodes", {})
     edges = genome.get("edges", [])
@@ -70,7 +75,14 @@ def is_single_connected_tree(genome: dict[str, Any]) -> bool:
 
 
 def validate_genome_dict(genome: dict[str, Any]) -> None:  # ruff: ignore[complex-structure]
-    """Check a genome dict for consistency; raise ValueError if invalid."""
+    """Check a genome dict for consistency; raise ValueError if invalid.
+
+    Raises
+    ------
+    ValueError
+        If the genome has no core, a bad type, rotation or face, a missing
+        parent, a repeated face, or is not one connected tree.
+    """
     nodes = genome.get("nodes", {})
     edges = genome.get("edges", [])
 

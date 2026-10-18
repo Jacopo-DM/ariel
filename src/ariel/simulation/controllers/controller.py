@@ -54,6 +54,11 @@ class Controller:
         **kwargs : dict[Any, Any]
             Additional keyword arguments to pass to the controller callback
             function.
+
+        Raises
+        ------
+        ValueError
+            If the control signal contains NaN.
         """
         # Calculate current time step
         time = data.time

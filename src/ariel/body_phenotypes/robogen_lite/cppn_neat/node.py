@@ -20,5 +20,11 @@ class Node:
         self.bias = bias
 
     def copy(self) -> Node:
-        """Return a new Node object with identical values."""
+        """Return a new Node object with identical values.
+
+        Returns
+        -------
+        Node
+            A copy with the same values.
+        """
         return Node(self._id, self.typ, self.activation, self.bias)

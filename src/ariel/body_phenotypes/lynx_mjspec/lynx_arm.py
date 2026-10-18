@@ -39,7 +39,13 @@ class LynxArm:
         self._build_robot()
 
     def _rotate_axis_z(self, axis: np.ndarray, yaw: float) -> np.ndarray:  # ruff: ignore[no-self-use]  # keeps the interface shared with the sibling classes
-        """Rotate a vector around Z axis."""
+        """Rotate a vector around Z axis.
+
+        Returns
+        -------
+        np.ndarray
+            The rotated vector.
+        """
         c, s = np.cos(yaw), np.sin(yaw)
         rotation = np.array([
             [c, -s, 0],

@@ -21,7 +21,18 @@ TERRAIN_COLOR = [0.460, 0.362, 0.216, 1.0]
 
 
 def quaternion_from_axis_angle(axis: str, angle_deg: float) -> list[float]:
-    """Return the quaternion for a rotation of `angle_deg` about `axis`."""
+    """Return the quaternion for a rotation of `angle_deg` about `axis`.
+
+    Returns
+    -------
+    list[float]
+        The quaternion (w, x, y, z).
+
+    Raises
+    ------
+    ValueError
+        If the axis name is not x, y or z.
+    """
     match axis:
         case "x":
             axis_tup = [1, 0, 0]

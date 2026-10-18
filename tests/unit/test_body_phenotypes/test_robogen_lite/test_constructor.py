@@ -13,14 +13,26 @@ from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
 
 
 def _make_core_only_graph() -> nx.DiGraph[int]:
-    """Single-node graph — just a core module."""
+    """Single-node graph — just a core module.
+
+    Returns
+    -------
+    nx.DiGraph[int]
+        The graph.
+    """
     g: nx.DiGraph[int] = nx.DiGraph()
     g.add_node(0, type="CORE", rotation="DEG_0")
     return g
 
 
 def _make_core_with_hinge_graph() -> nx.DiGraph[int]:
-    """Core with one hinge attached to the FRONT face."""
+    """Core with one hinge attached to the FRONT face.
+
+    Returns
+    -------
+    nx.DiGraph[int]
+        The graph.
+    """
     g: nx.DiGraph[int] = nx.DiGraph()
     g.add_node(0, type="CORE", rotation="DEG_0")
     g.add_node(1, type="HINGE", rotation="DEG_0")
@@ -29,7 +41,13 @@ def _make_core_with_hinge_graph() -> nx.DiGraph[int]:
 
 
 def _make_core_with_brick_graph() -> nx.DiGraph[int]:
-    """Core with one brick attached to the BACK face."""
+    """Core with one brick attached to the BACK face.
+
+    Returns
+    -------
+    nx.DiGraph[int]
+        The graph.
+    """
     g: nx.DiGraph[int] = nx.DiGraph()
     g.add_node(0, type="CORE", rotation="DEG_0")
     g.add_node(1, type="BRICK", rotation="DEG_0")
@@ -38,7 +56,13 @@ def _make_core_with_brick_graph() -> nx.DiGraph[int]:
 
 
 def _make_core_with_none_graph() -> nx.DiGraph[int]:
-    """Core with a NONE-type slot on FRONT — should be skipped."""
+    """Core with a NONE-type slot on FRONT — should be skipped.
+
+    Returns
+    -------
+    nx.DiGraph[int]
+        The graph.
+    """
     g: nx.DiGraph[int] = nx.DiGraph()
     g.add_node(0, type="CORE", rotation="DEG_0")
     g.add_node(1, type="NONE", rotation="DEG_0")

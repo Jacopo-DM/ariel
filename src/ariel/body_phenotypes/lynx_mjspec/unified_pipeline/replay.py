@@ -26,7 +26,13 @@ from ariel.body_phenotypes.lynx_mjspec.unified_pipeline.common import (
 
 
 def parse_args() -> argparse.Namespace:
-    """Parse the command-line arguments of the replay."""
+    """Parse the command-line arguments of the replay.
+
+    Returns
+    -------
+    argparse.Namespace
+        The parsed command-line arguments.
+    """
     parser = argparse.ArgumentParser(description="Unified Lynx replay pipeline")
     parser.add_argument(
         "--artifact-dir", type=str, default="__data__/lynx_mjspec/unified"
@@ -47,7 +53,18 @@ def parse_args() -> argparse.Namespace:
 
 
 def resolve_artifact_dir(artifact_dir: Path) -> Path:
-    """Return the run directory that holds `metadata.json`."""
+    """Return the run directory that holds `metadata.json`.
+
+    Returns
+    -------
+    Path
+        The folder that holds metadata.json.
+
+    Raises
+    ------
+    FileNotFoundError
+        If no run folder with metadata.json is found.
+    """
     if (artifact_dir / "metadata.json").exists():
         return artifact_dir
 
@@ -66,7 +83,18 @@ def resolve_artifact_dir(artifact_dir: Path) -> Path:
 def load_artifacts(
     artifact_dir: Path,
 ) -> tuple[np.ndarray, np.ndarray, PolicySpec, dict[str, object]]:
-    """Load the best genome, policy spec and metadata of a run."""
+    """Load the best genome, policy spec and metadata of a run.
+
+    Returns
+    -------
+    tuple[np.ndarray, np.ndarray, PolicySpec, dict[str, object]]
+        The best genome, the policy weights, the policy spec and the metadata.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the metadata file is missing.
+    """
     artifact_dir = resolve_artifact_dir(artifact_dir)
 
     metadata_path = artifact_dir / "metadata.json"
@@ -105,7 +133,14 @@ def run_rollout(  # ruff: ignore[too-many-arguments, too-many-positional-argumen
     ctrl_freq: int,
     touch_threshold: float,
 ) -> tuple[float, float, float, float | None]:
-    """Run the policy; return initial, min, final distance and touch time."""
+    """Run the policy; return initial, min, final distance and touch time.
+
+    Returns
+    -------
+    tuple[float, float, float, float | None]
+        The initial distance, the minimum distance, the final distance and the
+        time of first touch (None if never touched).
+    """
     set_target_position(model, data, tgt_sid, target)
 
     initial_distance = float(

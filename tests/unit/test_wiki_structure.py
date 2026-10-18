@@ -41,7 +41,13 @@ H1 = re.compile(r"^# (.+)$", re.MULTILINE)
 
 
 def _pages() -> list[Path]:
-    """Return every wiki page except the logs and the index."""
+    """Return every wiki page except the logs and the index.
+
+    Returns
+    -------
+    list[Path]
+        The page paths, sorted.
+    """
     return sorted(
         page
         for page in WIKI.rglob("*.md")

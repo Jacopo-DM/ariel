@@ -14,7 +14,13 @@ from ariel.ec.genotypes.tree.tree_genome import TreeGenome
 
 
 def _simple_genome() -> TreeGenome:
-    """Core + one hinge child."""
+    """Core + one hinge child.
+
+    Returns
+    -------
+    TreeGenome
+        The genome.
+    """
     g = TreeGenome()
     g.nodes = {
         0: {"type": "CORE", "rotation": "DEG_0"},

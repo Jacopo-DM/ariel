@@ -48,6 +48,11 @@ class VideoRecorder:
             Height of the video frames.
         fps
             Frames per second for the video.
+
+        Raises
+        ------
+        RuntimeError
+            If no video codec can be opened.
         """
         # Save local variables
         self.width = width

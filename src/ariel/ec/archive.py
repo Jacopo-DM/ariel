@@ -38,7 +38,13 @@ class Archive:
     """
 
     def __init__(self, db_path: Path | str) -> None:
-        """Open the archive database at `db_path`; raise if it is missing."""
+        """Open the archive database at `db_path`; raise if it is missing.
+
+        Raises
+        ------
+        FileNotFoundError
+            If the database file does not exist.
+        """
         self.db_path = Path(db_path)
         if not self.db_path.exists():
             msg = f"Archive database not found: {self.db_path}"

@@ -22,7 +22,13 @@ class Connection:
         self.innov_id = innov_id
 
     def copy(self) -> Connection:
-        """Return a new Connection object with identical values."""
+        """Return a new Connection object with identical values.
+
+        Returns
+        -------
+        Connection
+            A copy with the same values.
+        """
         return Connection(
             self.in_id, self.out_id, self.weight, self.enabled, self.innov_id
         )

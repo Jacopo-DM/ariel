@@ -10,7 +10,13 @@ from ariel.utils.tracker import Tracker
 def _build_spider_in_world() -> tuple[
     mujoco.MjSpec, mujoco.MjModel, mujoco.MjData
 ]:
-    """Spawn a spider in a SimpleFlatWorld and return (spec, model, data)."""
+    """Spawn a spider in a SimpleFlatWorld and return (spec, model, data).
+
+    Returns
+    -------
+    tuple[mujoco.MjSpec, mujoco.MjModel, mujoco.MjData]
+        The specification, the model and the data.
+    """
     world = SimpleFlatWorld()
     core = spider()
     world.spawn(core.spec, position=(0, 0, 0.3), rotation=(0, 0, 0))

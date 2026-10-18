@@ -17,7 +17,13 @@ from ariel.utils.noise_gen import NormMethod, PerlinNoise
 def flat_heightmap(
     dims: tuple[int, int],
 ) -> FloatArray:
-    """Return a flat heightmap of zeros."""
+    """Return a flat heightmap of zeros.
+
+    Returns
+    -------
+    FloatArray
+        The heightmap.
+    """
     return np.zeros(shape=dims).astype(ND_FLOAT_PRECISION)
 
 
@@ -27,7 +33,13 @@ def rugged_heightmap(
     normalize: NormMethod,
 ) -> FloatArray:
     # Create noise generator
-    """Return a rugged heightmap from noise at `scale_of_noise`."""
+    """Return a rugged heightmap from noise at `scale_of_noise`.
+
+    Returns
+    -------
+    FloatArray
+        The heightmap.
+    """
     pnoise = PerlinNoise()
 
     # Generate a grid of noise
@@ -45,7 +57,13 @@ def smooth_edges_heightmap(
     edge_width: float,
 ) -> FloatArray:
     # Generate square grid for processing
-    """Return a mask that smooths the heightmap edges over `edge_width`."""
+    """Return a mask that smooths the heightmap edges over `edge_width`.
+
+    Returns
+    -------
+    FloatArray
+        The mask; 0 at the edge and 1 inside.
+    """
     size = np.max(dims)
     y, x = np.mgrid[0:size, 0:size].astype(ND_FLOAT_PRECISION)
     x /= size
@@ -97,7 +115,13 @@ def amphitheater_heightmap(
     cone_height: float,
 ) -> FloatArray:
     # Generate grid
-    """Return a heightmap with a ring-shaped amphitheater."""
+    """Return a heightmap with a ring-shaped amphitheater.
+
+    Returns
+    -------
+    FloatArray
+        The heightmap.
+    """
     size = np.max(dims)
     y, x = np.mgrid[0:size, 0:size].astype(ND_FLOAT_PRECISION)
     x /= size
@@ -136,7 +160,13 @@ def crater_heightmap(
     crater_radius: float,
 ) -> FloatArray:
     # Generate grid
-    """Return a heightmap with a crater of given depth and radius."""
+    """Return a heightmap with a crater of given depth and radius.
+
+    Returns
+    -------
+    FloatArray
+        The heightmap.
+    """
     size = np.max(dims)
     y, x = np.mgrid[0:size, 0:size].astype(ND_FLOAT_PRECISION)
     x /= size

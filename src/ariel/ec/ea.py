@@ -150,7 +150,13 @@ class EAOperation[**P]:
         *args: P.args,
         **kwargs: P.kwargs,
     ) -> None:
-        """Wrap `func` with its bound positional and keyword arguments."""
+        """Wrap `func` with its bound positional and keyword arguments.
+
+        Raises
+        ------
+        TypeError
+            If an operation does not take and return a Population.
+        """
         sig = inspect.signature(func)
         params = list(sig.parameters.values())
 
@@ -257,7 +263,13 @@ class EAOperation[**P]:
         return EAOperation(self.func, *args, **kwargs)  # type: ignore[arg-type]  # known bug
 
     def __repr__(self) -> str:
-        """Return the function name with its bound keyword arguments."""
+        """Return the function name with its bound keyword arguments.
+
+        Returns
+        -------
+        str
+            The function name and its bound keyword arguments.
+        """
         kwargs = ", ".join(f"{k}={v!r}" for k, v in self.kwargs.items())  # type: ignore[attr-defined]  # known bug
         return f"{self.func.__name__}({kwargs})"
 
@@ -336,7 +348,17 @@ class EA:
         db_file_path: Path | None = None,
         db_handling: DBHandlingMode | None = None,
     ) -> None:
-        """Create an EA from an optional population and list of operations."""
+        """Create an EA from an optional population and list of operations.
+
+        Raises
+        ------
+        FileNotFoundError
+            If the restart database does not exist.
+        ValueError
+            If the operations are missing, both or neither of population and
+            restart are given, or the restart database has no usable
+            individuals.
+        """
         if operations is None:
             msg = "'operations' is required."
             raise ValueError(msg)

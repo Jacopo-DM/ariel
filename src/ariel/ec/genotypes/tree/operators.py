@@ -60,6 +60,11 @@ def get_top_ancestor(genome: TreeGenome, node_id: int) -> int:
     This walks predecessors in the directed graph until reaching a node whose
     parent is the core (IDX_OF_CORE) or there is no parent. Useful for
     selecting a subtree root that contains a full branch rather than a leaf.
+
+    Returns
+    -------
+    int
+        The id of the highest ancestor.
     """
     g = genome.to_networkx()
     current = node_id
@@ -111,6 +116,11 @@ def subtree_swap(
         IDs are remapped to the smallest integers greater than any value in
         *existing_ids*.  A mapping dict is also returned but only callers that
         need to translate external references will use it.
+
+        Returns
+        -------
+        tuple[dict[int, dict[str, str]], list[dict[str, Any]], dict[int, int]]
+            The new nodes, the new edges and the map from old to new ids.
         """
         if not nodes:
             return {}, [], {}
@@ -175,6 +185,11 @@ def crossover_subtree(
     and swaps the entire subtree rooted at that node. Returns a pair ``(child1,
     child2)``.
     Parents are left unmodified.
+
+    Returns
+    -------
+    tuple[TreeGenome, TreeGenome]
+        The two children.
     """
     child1 = copy.deepcopy(a)
     child2 = copy.deepcopy(b)
@@ -269,7 +284,13 @@ def mutate_subtree_replacement(  # ruff: ignore[complex-structure, too-many-loca
         edges: list[dict[str, Any]],
         existing_ids: set[int],
     ) -> tuple[dict[int, dict[str, str]], list[dict[str, Any]], dict[int, int]]:
-        """Return copies of *nodes* and *edges* with fresh identifiers."""
+        """Return copies of *nodes* and *edges* with fresh identifiers.
+
+        Returns
+        -------
+        tuple[dict[int, dict[str, str]], list[dict[str, Any]], dict[int, int]]
+            The new nodes, the new edges and the map from old to new ids.
+        """
         if not nodes:
             return {}, [], {}
         mapping: dict[int, int] = {}
@@ -500,6 +521,11 @@ def random_tree(max_modules: int) -> TreeGenome:
 
     Starts with only the core and iteratively adds a random module on a free
     face until the budget is exhausted or no free faces remain.
+
+    Returns
+    -------
+    TreeGenome
+        The new tree genome.
     """
     g = TreeGenome()
     g.nodes = {IDX_OF_CORE: {"type": "CORE", "rotation": "DEG_0"}}
@@ -532,7 +558,13 @@ def random_tree(max_modules: int) -> TreeGenome:
 
 
 def get_tree_depth(genome: TreeGenome) -> int:
-    """Calculate the maximum depth from core to any leaf node."""
+    """Calculate the maximum depth from core to any leaf node.
+
+    Returns
+    -------
+    int
+        The depth, counted in edges from the core.
+    """
     if not genome.nodes:
         return 0
 
@@ -553,7 +585,13 @@ def get_tree_depth(genome: TreeGenome) -> int:
 
 
 def validate_tree_depth(genome: TreeGenome, max_depth: int) -> bool:
-    """Check if tree depth is within the specified limit."""
+    """Check if tree depth is within the specified limit.
+
+    Returns
+    -------
+    bool
+        True if the depth is within the limit.
+    """
     return get_tree_depth(genome) <= max_depth
 
 

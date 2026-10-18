@@ -22,7 +22,13 @@ def noop(population: Population) -> Population:
 
 
 def _make_evaluated_pop(n: int = 20) -> Population:
-    """Return n individuals with distinct float fitnesses 0..n-1."""
+    """Return n individuals with distinct float fitnesses 0..n-1.
+
+    Returns
+    -------
+    Population
+        The population.
+    """
     inds = []
     for i in range(n):
         ind = Individual()
@@ -40,11 +46,15 @@ def _fitness(ind: Individual) -> float:
 
 @pytest.fixture(scope="module")
 def archive_db(tmp_path_factory: pytest.TempPathFactory) -> Path:
-    """
-    One EA run shared across the whole module.
+    """One EA run shared across the whole module.
 
     20 individuals, fitness 0.0-19.0, run for 5 steps with noop so every
     individual survives to generation 5 (time_of_birth=0, time_of_death=5).
+
+    Returns
+    -------
+    Path
+        The path of the archive database.
     """
     db = tmp_path_factory.mktemp("archive") / "archive.db"
     ea = EA(

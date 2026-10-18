@@ -47,7 +47,13 @@ class FastNumpyNetwork:
         output_size: int,
         weights: np.ndarray,
     ) -> None:
-        """Create a three-layer tanh network with zero-initialised weights."""
+        """Create a three-layer tanh network with zero-initialised weights.
+
+        Raises
+        ------
+        ValueError
+            If the weight vector has the wrong size.
+        """
         w1_end = hidden_size * input_size
         b1_end = w1_end + hidden_size
 
@@ -71,14 +77,26 @@ class FastNumpyNetwork:
         self.b3 = weights[w3_end:b3_end]
 
     def forward(self, x: np.ndarray) -> np.ndarray:
-        """Map an observation to an action in [-1, 1]^output_size."""
+        """Map an observation to an action in [-1, 1]^output_size.
+
+        Returns
+        -------
+        np.ndarray
+            The action, one value per output unit, in [-1, 1].
+        """
         x = np.tanh(self.w1 @ x + self.b1)
         x = np.tanh(self.w2 @ x + self.b2)
         return cast("np.ndarray", np.tanh(self.w3 @ x + self.b3))
 
 
 def num_network_params(spec: PolicySpec) -> int:
-    """Return the number of weights and biases of the policy network."""
+    """Return the number of weights and biases of the policy network.
+
+    Returns
+    -------
+    int
+        The number of weights and biases.
+    """
     h = spec.hidden_size
     i = spec.input_size
     o = spec.output_size
@@ -86,7 +104,13 @@ def num_network_params(spec: PolicySpec) -> int:
 
 
 def resolve_site_id(model: mujoco.MjModel, base_name: str) -> int:
-    """Return the id of a site by name or name suffix, or -1."""
+    """Return the id of a site by name or name suffix, or -1.
+
+    Returns
+    -------
+    int
+        The site id, or -1 if no site matches.
+    """
     sid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, base_name)
     if sid != -1:
         return cast("int", sid)
@@ -102,7 +126,13 @@ def resolve_site_id(model: mujoco.MjModel, base_name: str) -> int:
 def get_actuated_joint_ids(
     model: mujoco.MjModel, count: int = NUM_JOINTS
 ) -> list[int]:
-    """Return the joint ids driven by the first `count` actuators."""
+    """Return the joint ids driven by the first `count` actuators.
+
+    Returns
+    -------
+    list[int]
+        The ids of the driven joints.
+    """
     ids: list[int] = []
     for i in range(min(count, model.nu)):
         jid = int(model.actuator_trnid[i, 0])
@@ -114,7 +144,13 @@ def get_actuated_joint_ids(
 def get_joint_state(
     model: mujoco.MjModel, data: mujoco.MjData, joint_ids: list[int]
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Return the positions and velocities of the given joints."""
+    """Return the positions and velocities of the given joints.
+
+    Returns
+    -------
+    tuple[np.ndarray, np.ndarray]
+        The joint positions and the joint velocities.
+    """
     q = np.zeros(NUM_JOINTS, dtype=np.float64)
     qd = np.zeros(NUM_JOINTS, dtype=np.float64)
 
@@ -158,7 +194,13 @@ def build_observation(
     tcp_sid: int,
     tgt_sid: int,
 ) -> np.ndarray:
-    """Return joint positions, velocities and target relative to the TCP."""
+    """Return joint positions, velocities and target relative to the TCP.
+
+    Returns
+    -------
+    np.ndarray
+        The observation vector for the policy.
+    """
     q, qd = get_joint_state(model, data, joint_ids)
     rel_target = data.site_xpos[tgt_sid] - data.site_xpos[tcp_sid]
     return cast(
@@ -190,7 +232,19 @@ def apply_position_delta_control(
 def build_model(
     tube_lengths: np.ndarray,
 ) -> tuple[mujoco.MjModel, mujoco.MjData, int, int, list[int]]:
-    """Compile the arm on a table; return model, data and ids."""
+    """Compile the arm on a table; return model, data and ids.
+
+    Returns
+    -------
+    tuple[mujoco.MjModel, mujoco.MjData, int, int, list[int]]
+        The model, the data, the tcp site id, the target site id and the
+        actuated joint ids.
+
+    Raises
+    ------
+    RuntimeError
+        If a site id cannot be resolved or too few joints are actuated.
+    """
     config: dict[str, Any] = {
         "num_joints": NUM_JOINTS,
         "genotype_tube": [1] * NUM_TUBES,

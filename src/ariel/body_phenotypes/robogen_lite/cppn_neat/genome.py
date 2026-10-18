@@ -40,11 +40,23 @@ class Genome:
 
     @staticmethod
     def _get_random_activation() -> str:
-        """Select a random activation function from the available list."""
+        """Select a random activation function from the available list.
+
+        Returns
+        -------
+        str
+            The name of an activation function.
+        """
         return random.choice(list(ACTIVATION_FUNCTIONS))
 
     def copy(self) -> Genome:
-        """Return a new Genome object with identical, deep-copied gene sets."""
+        """Return a new Genome object with identical, deep-copied gene sets.
+
+        Returns
+        -------
+        Genome
+            A deep copy of this genome.
+        """
         # Deep copy nodes (Node class has a copy method)
         new_nodes = {
             node_id: node.copy() for node_id, node in self.nodes.items()
@@ -66,10 +78,14 @@ class Genome:
         next_node_id: int,  # ruff: ignore[unused-class-method-argument]
         next_innov_id: int,
     ) -> Self:
-        """
-        Create a new, randomly initialized Genome with a base topology.
+        """Create a new, randomly initialized Genome with a base topology.
 
         Initial topology is fully connected inputs to outputs.
+
+        Returns
+        -------
+        Self
+            A new genome with the base topology and random weights.
         """
         nodes = {}
         connections = {}
@@ -209,7 +225,13 @@ class Genome:
     def crossover(  # ruff: ignore[complex-structure, too-many-branches]
         self, other: Genome, *, is_maximisation: bool = True
     ) -> Genome:
-        """Cross over this Genome (parent A) with another (parent B)."""
+        """Cross over this Genome (parent A) with another (parent B).
+
+        Returns
+        -------
+        Genome
+            The child genome.
+        """
         # Determine the fitter parent
         if is_maximisation:
             if self.fitness >= other.fitness:
@@ -291,7 +313,13 @@ class Genome:
         )
 
     def add_connection(self, connection: Connection) -> None:
-        """Add a connection gene to the genome."""
+        """Add a connection gene to the genome.
+
+        Raises
+        ------
+        ValueError
+            If the connection is already in the genome.
+        """
         if connection not in self.connections.values():
             self.connections[connection.innov_id] = connection
         else:
@@ -299,7 +327,13 @@ class Genome:
             raise ValueError(msg)
 
     def add_node(self, node: Node) -> None:
-        """Add a node gene to the genome."""
+        """Add a node gene to the genome.
+
+        Raises
+        ------
+        ValueError
+            If the node is already in the genome.
+        """
         if node not in self.nodes.values():
             self.nodes[node._id] = node  # ruff: ignore[private-member-access]
         else:
@@ -307,13 +341,22 @@ class Genome:
             raise ValueError(msg)
 
     def get_node_ordering(self) -> list[int]:
-        """
-        Calculate a topological order for feed-forward activation.
+        """Calculate a topological order for feed-forward activation.
 
         Uses Kahn's algorithm.
         This ensures a node is evaluated only after all its input nodes are
         ready.
         https://www.geeksforgeeks.org/dsa/topological-sorting-indegree-based-solution/
+
+        Returns
+        -------
+        list[int]
+            The node ids in feed-forward order.
+
+        Raises
+        ------
+        Exception
+            If the graph has a cycle.
         """
         # 1. Build the graph structure and count incoming connections
         # (in-degrees) for each node.
@@ -361,12 +404,21 @@ class Genome:
         return sorted_order
 
     def activate(self, inputs: list[float]) -> list[float]:  # ruff: ignore[complex-structure, too-many-branches]
-        """
-        Activate the neural network.
+        """Activate the neural network.
 
         1. Tries a topological sort (Feed-Forward) for speed and precision.
         2. If a cycle is detected, falls back to iterative relaxation
           (Recurrent).
+
+        Returns
+        -------
+        list[float]
+            The output values, in the order of the output nodes.
+
+        Raises
+        ------
+        ValueError
+            If the number of inputs does not match the input nodes.
         """
         # 1. Identify Input/Output IDs
         input_node_ids = [
@@ -466,7 +518,13 @@ class Genome:
             return [current_values[node_id] for node_id in output_node_ids]
 
     def to_dict(self) -> dict[str, Any]:
-        """Serialize the Genome to a dictionary."""
+        """Serialize the Genome to a dictionary.
+
+        Returns
+        -------
+        dict[str, Any]
+            The genome as a JSON-serialisable dict.
+        """
         return {
             "nodes": {
                 str(k): {
@@ -494,7 +552,13 @@ class Genome:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any], fitness: float = 0.0) -> Genome:  # ruff: ignore[unused-class-method-argument]
-        """Reconstructs a Genome object from a dictionary."""
+        """Reconstructs a Genome object from a dictionary.
+
+        Returns
+        -------
+        Genome
+            The rebuilt genome.
+        """
         # 1. Rebuild Nodes
         nodes = {}
         for nid, props in data["nodes"].items():

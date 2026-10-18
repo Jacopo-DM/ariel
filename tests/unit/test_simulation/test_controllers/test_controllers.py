@@ -10,7 +10,13 @@ from ariel.utils.tracker import Tracker
 
 
 def _zero_callback(model: mujoco.MjModel, _data: mujoco.MjData) -> list[float]:
-    """Control callback that always outputs zeros."""
+    """Control callback that always outputs zeros.
+
+    Returns
+    -------
+    list[float]
+        A list of zeros.
+    """
     return [0.0] * model.nu
 
 

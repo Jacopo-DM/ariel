@@ -212,7 +212,13 @@ class Population:  # ruff: ignore[too-many-public-methods]  # public signature o
         sort: Literal["max", "min"] = "max",
         attribute: str = "fitness_",
     ) -> "Population":
-        """Return a new population sorted by `attribute`."""
+        """Return a new population sorted by `attribute`.
+
+        Returns
+        -------
+        'Population'
+            A new population in sorted order.
+        """
         reverse: bool = sort == "max"
 
         def key(ind: Individual) -> float:

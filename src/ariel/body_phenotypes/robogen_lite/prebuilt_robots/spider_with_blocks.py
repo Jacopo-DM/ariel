@@ -23,7 +23,13 @@ F, L, B, R = faces
 
 
 def make_core() -> CoreModule:
-    """Return a new core module named "C"."""
+    """Return a new core module named "C".
+
+    Returns
+    -------
+    CoreModule
+        The new core module.
+    """
     core = CoreModule(index=0)
     core.name = "C"  # type: ignore[attr-defined]  # known bug
     return core
@@ -36,7 +42,13 @@ def attach(
     name: str,
     rotation: float = 0,
 ) -> SUBMODULES:
-    """Attach `module` to `parent` on `face` and return it."""
+    """Attach `module` to `parent` on `face` and return it.
+
+    Returns
+    -------
+    SUBMODULES
+        The attached module.
+    """
     name = f"{parent.name}-{name}"  # type: ignore[union-attr]  # known bug
     parent.sites[face].attach_body(body=module.body, prefix=name + "-")
 
@@ -49,7 +61,13 @@ def attach(
 
 
 def body_spider() -> CoreModule:
-    """Return the spider body: a core with four legs."""
+    """Return the spider body: a core with four legs.
+
+    Returns
+    -------
+    CoreModule
+        The spider body.
+    """
     core = make_core()
 
     for i, f in enumerate(faces, start=1):
@@ -62,7 +80,13 @@ def body_spider() -> CoreModule:
 
 
 def body_spider45() -> CoreModule:
-    """Return the spider body rotated by 45 degrees about the vertical axis."""
+    """Return the spider body rotated by 45 degrees about the vertical axis.
+
+    Returns
+    -------
+    CoreModule
+        The spider body, rotated.
+    """
     core = body_spider()
     core.spec.body("core").quat = (
         math.cos(math.pi / 8),

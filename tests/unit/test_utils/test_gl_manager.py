@@ -24,7 +24,13 @@ _GARBAGE = "print('not json at all')"
 
 
 def _command(script: str) -> Callable[[str], list[str]]:
-    """Return a worker command factory that runs `script` per backend."""
+    """Return a worker command factory that runs `script` per backend.
+
+    Returns
+    -------
+    Callable[[str], list[str]]
+        The command factory.
+    """
 
     def build(backend: str) -> list[str]:
         return [sys.executable, "-c", script, backend]
@@ -35,7 +41,13 @@ def _command(script: str) -> Callable[[str], list[str]]:
 def _per_backend(
     scripts: dict[str, str],
 ) -> Callable[[str], list[str]]:
-    """Return a worker command factory with a different script per backend."""
+    """Return a worker command factory with a different script per backend.
+
+    Returns
+    -------
+    Callable[[str], list[str]]
+        The command factory.
+    """
 
     def build(backend: str) -> list[str]:
         return [sys.executable, "-c", scripts[backend], backend]

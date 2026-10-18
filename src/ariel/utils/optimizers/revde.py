@@ -71,7 +71,18 @@ class RevDE:
         parent_c: ArrayGenotype,
     ) -> list[ArrayGenotype]:
         # Ensure parents have the same shape
-        """Return three mutants of three parents of equal shape."""
+        """Return three mutants of three parents of equal shape.
+
+        Returns
+        -------
+        list[ArrayGenotype]
+            The three mutants.
+
+        Raises
+        ------
+        ValueError
+            If the parents differ in shape.
+        """
         if not (parent_a.shape == parent_b.shape == parent_c.shape):
             msg = "Parents must have the same shape"
             raise ValueError(msg)

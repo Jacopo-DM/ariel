@@ -178,7 +178,13 @@ class SimpleCPG(nn.Module):
         self,
         params: list[float] | np.ndarray | torch.Tensor,
     ) -> torch.Tensor:
-        """Convert input parameters to torch.Tensor if needed."""
+        """Convert input parameters to torch.Tensor if needed.
+
+        Returns
+        -------
+        torch.Tensor
+            The parameters as a tensor.
+        """
         if isinstance(params, list):
             params = torch.tensor(params, dtype=torch.float32)
         elif isinstance(params, np.ndarray):
@@ -189,7 +195,13 @@ class SimpleCPG(nn.Module):
         self,
         params: list[float] | np.ndarray | torch.Tensor,
     ) -> None:
-        """Set all learnable parameters from a flat tensor."""
+        """Set all learnable parameters from a flat tensor.
+
+        Raises
+        ------
+        ValueError
+            If the parameter vector has the wrong size.
+        """
         safe_params = self.param_type_converter(params)
 
         if safe_params.numel() != self.num_of_parameters:
@@ -219,7 +231,13 @@ class SimpleCPG(nn.Module):
         group_name: str,
         params: torch.Tensor,
     ) -> None:
-        """Set parameters for a specific group."""
+        """Set parameters for a specific group.
+
+        Raises
+        ------
+        ValueError
+            If the group does not exist or the vector has the wrong size.
+        """
         safe_params = self.param_type_converter(params)
 
         if group_name not in self.parameter_groups:
@@ -235,7 +253,13 @@ class SimpleCPG(nn.Module):
         param.data = safe_params.view_as(param)
 
     def get_flat_params(self) -> torch.Tensor:
-        """Get all learnable parameters as a flat tensor."""
+        """Get all learnable parameters as a flat tensor.
+
+        Returns
+        -------
+        torch.Tensor
+            The learnable parameters as one flat tensor.
+        """
         return torch.cat([p.flatten() for p in self.parameter_groups.values()])
 
     def reset(self) -> None:
@@ -246,8 +270,7 @@ class SimpleCPG(nn.Module):
         self.angle_history = []
 
     def forward(self, time: float | None = None) -> torch.Tensor:
-        """
-        Perform a forward pass to update CPG states and compute output angles.
+        """Perform a forward pass to update CPG states and compute angles.
 
         Parameters
         ----------
@@ -258,6 +281,11 @@ class SimpleCPG(nn.Module):
         -------
         torch.Tensor
             Output angles for each CPG node.
+
+        Raises
+        ------
+        ValueError
+            If the angles contain NaN.
         """
         # Reset if time is zero
         if time is not None and torch.isclose(

@@ -185,7 +185,13 @@ def mujoco_version() -> str:
 
 
 def _current_config(path: Path) -> dict[str, Any] | None:
-    """Read the config; None if missing, invalid or from another setup."""
+    """Read the config; None if missing, invalid or from another setup.
+
+    Returns
+    -------
+    dict[str, Any] | None
+        The config, or None if it is missing, invalid or from another setup.
+    """
     config = read_config(path)
     if config is None:
         return None
@@ -199,7 +205,13 @@ def _current_config(path: Path) -> dict[str, Any] | None:
 
 
 def _try_lock(lock: Path) -> bool:
-    """Create the lock file; False if another process holds it."""
+    """Create the lock file; False if another process holds it.
+
+    Returns
+    -------
+    bool
+        True if this process created the lock file.
+    """
     try:
         handle = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
     except FileExistsError:
@@ -290,7 +302,13 @@ def _probe_once(
     lock_timeout: float,
     modules: Mapping[str, object],
 ) -> dict[str, Any] | None:
-    """Probe under a lock; return the config or None if it is unavailable."""
+    """Probe under a lock; return the config or None if it is unavailable.
+
+    Returns
+    -------
+    dict[str, Any] | None
+        The config, or None if no backend works.
+    """
     lock = path.with_name(path.name + LOCK_SUFFIX)
     while not _try_lock(lock):
         _wait_for_lock(lock, lock_timeout)

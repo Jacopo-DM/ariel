@@ -219,13 +219,17 @@ class NaCPG(nn.Module):
         return params
 
     def set_flat_params(self, params: torch.Tensor) -> None:
-        """
-        Set all learnable parameters from a flat tensor.
+        """Set all learnable parameters from a flat tensor.
 
         Parameters
         ----------
         params : torch.Tensor
             A flat tensor containing all learnable parameters.
+
+        Raises
+        ------
+        ValueError
+            If the parameter vector has the wrong size.
         """
         # Convert params to tensor if needed
         safe_params = self.param_type_converter(params)
@@ -264,8 +268,7 @@ class NaCPG(nn.Module):
         group_name: str,
         params: torch.Tensor,
     ) -> None:
-        """
-        Set parameters for a specific group.
+        """Set parameters for a specific group.
 
         Parameters
         ----------
@@ -273,6 +276,11 @@ class NaCPG(nn.Module):
             The name of the parameter group to set.
         params : torch.Tensor
             A tensor containing the parameters for the specified group.
+
+        Raises
+        ------
+        ValueError
+            If the group does not exist or the vector has the wrong size.
         """
         # Convert params to tensor if needed
         safe_params = self.param_type_converter(params)
@@ -294,22 +302,46 @@ class NaCPG(nn.Module):
         param.data = safe_params.view_as(param)
 
     def get_flat_params(self) -> torch.Tensor:
-        """Get all learnable parameters as a flat tensor."""
+        """Get all learnable parameters as a flat tensor.
+
+        Returns
+        -------
+        torch.Tensor
+            The learnable parameters as one flat tensor.
+        """
         return torch.cat([p.flatten() for p in self.parameter_groups.values()])
 
     @staticmethod
     def term_a(alpha: float, r2i: float) -> float:
-        """Term A from the NA-CPG equations."""
+        """Term A from the NA-CPG equations.
+
+        Returns
+        -------
+        float
+            The value of term A.
+        """
         return alpha * (1 - r2i**2)
 
     @staticmethod
     def term_b(zeta_i: torch.Tensor, w_i: torch.Tensor) -> torch.Tensor:
-        """Term B from the NA-CPG equations."""
+        """Term B from the NA-CPG equations.
+
+        Returns
+        -------
+        torch.Tensor
+            The value of term B.
+        """
         return (1 / (zeta_i + E)) * w_i  # type: ignore[no-any-return]  # known bug
 
     @staticmethod
     def zeta(ha_i: torch.Tensor, x_dot_old: torch.Tensor) -> torch.Tensor:
-        """Zeta function from the NA-CPG equations."""
+        """Zeta function from the NA-CPG equations.
+
+        Returns
+        -------
+        torch.Tensor
+            The value of zeta.
+        """
         return 1 - ha_i * ((x_dot_old + E) / (torch.abs(x_dot_old) + E))  # type: ignore[no-any-return]  # known bug
 
     def reset(self) -> None:
@@ -320,8 +352,7 @@ class NaCPG(nn.Module):
         self.angle_history = []
 
     def forward(self, time: float | None = None) -> torch.Tensor:  # ruff: ignore[complex-structure, too-many-locals, too-many-statements]
-        """
-        Perform a forward pass: update CPG states, compute output angles.
+        """Perform a forward pass: update CPG states, compute output angles.
 
         Parameters
         ----------
@@ -334,6 +365,11 @@ class NaCPG(nn.Module):
         -------
         torch.Tensor
             The output angles for each CPG node after the update.
+
+        Raises
+        ------
+        ValueError
+            If the angles contain NaN.
         """
         # Reset if time is zero
         if time is not None and torch.isclose(

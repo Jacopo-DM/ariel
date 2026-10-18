@@ -13,7 +13,13 @@ from ariel.body_phenotypes.robogen_lite.modules.hinge import HingeModule
 
 
 def baby_a() -> CoreModule:  # ruff: ignore[too-many-locals]  # long routine kept as written; splitting it is a refactor outside this goal
-    """Build a custom robot body made with the 3D editor."""
+    """Build a custom robot body made with the 3D editor.
+
+    Returns
+    -------
+    CoreModule
+        The core module of the finished robot body.
+    """
     core = CoreModule(index=0)
     hinge_0 = HingeModule(index=2)
     hinge_0.rotate(90)
@@ -100,7 +106,13 @@ def baby_a() -> CoreModule:  # ruff: ignore[too-many-locals]  # long routine kep
 
 
 def baby_b() -> CoreModule:  # ruff: ignore[too-many-locals]  # long routine kept as written; splitting it is a refactor outside this goal
-    """Build a custom robot body made with the 3D editor."""
+    """Build a custom robot body made with the 3D editor.
+
+    Returns
+    -------
+    CoreModule
+        The core module of the finished robot body.
+    """
     core = CoreModule(index=0)
     hinge_0 = HingeModule(index=2)
     core.sites[ModuleFaces.BACK].attach_body(
@@ -212,7 +224,13 @@ def baby_b() -> CoreModule:  # ruff: ignore[too-many-locals]  # long routine kep
 
 
 def gecko() -> CoreModule:
-    """Build a custom robot body made with the 3D editor."""
+    """Build a custom robot body made with the 3D editor.
+
+    Returns
+    -------
+    CoreModule
+        The core module of the finished robot body.
+    """
     core = CoreModule(index=0)
     hinge_0 = HingeModule(index=4)
     core.sites[ModuleFaces.FRONT].attach_body(
@@ -282,7 +300,13 @@ def gecko() -> CoreModule:
 
 
 def linkin_modified() -> CoreModule:  # ruff: ignore[too-many-locals]  # long routine kept as written; splitting it is a refactor outside this goal
-    """Build a custom robot body made with the 3D editor."""
+    """Build a custom robot body made with the 3D editor.
+
+    Returns
+    -------
+    CoreModule
+        The core module of the finished robot body.
+    """
     core = CoreModule(index=0)
     hinge_0 = HingeModule(index=5)
     core.sites[ModuleFaces.LEFT].attach_body(
@@ -368,7 +392,13 @@ def linkin_modified() -> CoreModule:  # ruff: ignore[too-many-locals]  # long ro
 
 
 def snake() -> CoreModule:  # ruff: ignore[too-many-locals]  # long routine kept as written; splitting it is a refactor outside this goal
-    """Build a custom robot body made with the 3D editor."""
+    """Build a custom robot body made with the 3D editor.
+
+    Returns
+    -------
+    CoreModule
+        The core module of the finished robot body.
+    """
     core = CoreModule(index=0)
     hinge_0 = HingeModule(index=1)
     hinge_0.rotate(90)
@@ -457,7 +487,13 @@ def snake() -> CoreModule:  # ruff: ignore[too-many-locals]  # long routine kept
 
 
 def turtle() -> CoreModule:  # ruff: ignore[too-many-locals]  # long routine kept as written; splitting it is a refactor outside this goal
-    """Build a custom robot body made with the 3D editor."""
+    """Build a custom robot body made with the 3D editor.
+
+    Returns
+    -------
+    CoreModule
+        The core module of the finished robot body.
+    """
     core = CoreModule(index=0)
     brick_0 = BrickModule(index=1)
     core.sites[ModuleFaces.RIGHT].attach_body(
@@ -567,7 +603,13 @@ def turtle() -> CoreModule:  # ruff: ignore[too-many-locals]  # long routine kep
 
 
 def iguana() -> CoreModule:
-    """Build a custom robot body made with the 3D editor."""
+    """Build a custom robot body made with the 3D editor.
+
+    Returns
+    -------
+    CoreModule
+        The core module of the finished robot body.
+    """
     core = CoreModule(index=0)
     hinge_0 = HingeModule(index=897)
     hinge_0.rotate(-90)
@@ -649,7 +691,13 @@ def iguana() -> CoreModule:
 
 
 def spider_8() -> CoreModule:  # ruff: ignore[too-many-locals]  # long routine kept as written; splitting it is a refactor outside this goal
-    """Build a custom robot body made with the 3D editor."""
+    """Build a custom robot body made with the 3D editor.
+
+    Returns
+    -------
+    CoreModule
+        The core module of the finished robot body.
+    """
     core = CoreModule(index=0)
     hinge_0 = HingeModule(index=2)
     core.sites[ModuleFaces.BACK].attach_body(
@@ -739,7 +787,13 @@ def spider_8() -> CoreModule:  # ruff: ignore[too-many-locals]  # long routine k
 
 
 def spider_12() -> CoreModule:  # ruff: ignore[too-many-locals]  # long routine kept as written; splitting it is a refactor outside this goal
-    """Build a custom robot body made with the 3D editor."""
+    """Build a custom robot body made with the 3D editor.
+
+    Returns
+    -------
+    CoreModule
+        The core module of the finished robot body.
+    """
     core = CoreModule(index=0)
     hinge_0 = HingeModule(index=2)
     core.sites[ModuleFaces.RIGHT].attach_body(
@@ -873,7 +927,13 @@ def spider_12() -> CoreModule:  # ruff: ignore[too-many-locals]  # long routine 
 
 
 def spider_16() -> CoreModule:  # ruff: ignore[too-many-locals]  # long routine kept as written; splitting it is a refactor outside this goal
-    """Build a custom robot body made with the 3D editor."""
+    """Build a custom robot body made with the 3D editor.
+
+    Returns
+    -------
+    CoreModule
+        The core module of the finished robot body.
+    """
     core = CoreModule(index=0)
     hinge_0 = HingeModule(index=2)
     core.sites[ModuleFaces.RIGHT].attach_body(
@@ -1051,7 +1111,13 @@ def spider_16() -> CoreModule:  # ruff: ignore[too-many-locals]  # long routine 
 
 
 def centipede_3() -> CoreModule:  # ruff: ignore[too-many-locals]  # long routine kept as written; splitting it is a refactor outside this goal
-    """Build a custom robot body made with the 3D editor."""
+    """Build a custom robot body made with the 3D editor.
+
+    Returns
+    -------
+    CoreModule
+        The core module of the finished robot body.
+    """
     core = CoreModule(index=0)
     hinge_0 = HingeModule(index=8)
     core.sites[ModuleFaces.FRONT].attach_body(
@@ -1175,7 +1241,13 @@ def centipede_3() -> CoreModule:  # ruff: ignore[too-many-locals]  # long routin
 
 
 def centipede_4() -> CoreModule:  # ruff: ignore[too-many-locals]  # long routine kept as written; splitting it is a refactor outside this goal
-    """Build a custom robot body made with the 3D editor."""
+    """Build a custom robot body made with the 3D editor.
+
+    Returns
+    -------
+    CoreModule
+        The core module of the finished robot body.
+    """
     core = CoreModule(index=0)
     hinge_0 = HingeModule(index=8)
     core.sites[ModuleFaces.FRONT].attach_body(
@@ -1331,7 +1403,13 @@ def centipede_4() -> CoreModule:  # ruff: ignore[too-many-locals]  # long routin
 
 
 def centipede_5() -> CoreModule:  # ruff: ignore[too-many-locals]  # long routine kept as written; splitting it is a refactor outside this goal
-    """Build a custom robot body made with the 3D editor."""
+    """Build a custom robot body made with the 3D editor.
+
+    Returns
+    -------
+    CoreModule
+        The core module of the finished robot body.
+    """
     core = CoreModule(index=0)
     hinge_0 = HingeModule(index=8)
     core.sites[ModuleFaces.FRONT].attach_body(

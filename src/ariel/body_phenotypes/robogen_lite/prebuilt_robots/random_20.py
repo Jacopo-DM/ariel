@@ -26,6 +26,11 @@ def random_spider20(seed: int = 1337) -> CoreModule:
     -------
     CoreModule
         Core of a randomized robot with exactly 20 total modules.
+
+    Raises
+    ------
+    RuntimeError
+        If no open attachment site is left.
     """
     rng = random.Random(seed)
 

@@ -90,14 +90,26 @@ def test_perlin_noise_invalid_scale_raises() -> None:
 
 
 def _make_single_core_graph() -> nx.DiGraph[int]:
-    """Minimal graph: only a CORE node."""
+    """Minimal graph: only a CORE node.
+
+    Returns
+    -------
+    nx.DiGraph[int]
+        The graph.
+    """
     g: nx.DiGraph[int] = nx.DiGraph()
     g.add_node(0, type="CORE", rotation="DEG_0")
     return g
 
 
 def _make_spider_graph() -> nx.DiGraph[int]:
-    """Spider-like graph: core + 4 hinge arms."""
+    """Spider-like graph: core + 4 hinge arms.
+
+    Returns
+    -------
+    nx.DiGraph[int]
+        The graph.
+    """
     g: nx.DiGraph[int] = nx.DiGraph()
     g.add_node(0, type="CORE", rotation="DEG_0")
     for i, face in enumerate(["FRONT", "BACK", "LEFT", "RIGHT"], start=1):
@@ -107,7 +119,13 @@ def _make_spider_graph() -> nx.DiGraph[int]:
 
 
 def _make_branching_graph() -> nx.DiGraph[int]:
-    """Core with two bricks attached and hinges on the bricks."""
+    """Core with two bricks attached and hinges on the bricks.
+
+    Returns
+    -------
+    nx.DiGraph[int]
+        The graph.
+    """
     g: nx.DiGraph[int] = nx.DiGraph()
     g.add_node(0, type="CORE", rotation="DEG_0")
     g.add_node(1, type="BRICK", rotation="DEG_0")
