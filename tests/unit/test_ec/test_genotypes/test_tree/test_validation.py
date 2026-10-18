@@ -244,6 +244,25 @@ def test_a_node_reachable_by_two_paths_is_connected() -> None:
     assert is_single_connected_tree(genome) is True
 
 
+def test_a_node_reached_through_two_branches_is_visited_once() -> None:
+    """Listing the shared child first pushes it twice on the search stack."""
+    genome = {
+        "nodes": {
+            "0": {"type": "CORE", "rotation": "DEG_0"},
+            "1": {"type": "BRICK", "rotation": "DEG_0"},
+            "2": {"type": "BRICK", "rotation": "DEG_0"},
+            "3": {"type": "BRICK", "rotation": "DEG_0"},
+        },
+        "edges": [
+            {"parent": 0, "child": 1, "face": "FRONT"},
+            {"parent": 1, "child": 2, "face": "FRONT"},
+            {"parent": 1, "child": 3, "face": "LEFT"},
+            {"parent": 3, "child": 2, "face": "FRONT"},
+        ],
+    }
+    assert is_single_connected_tree(genome) is True
+
+
 def test_validate_missing_parent_node_raises() -> None:
     """An edge from a parent that is not a node is invalid."""
     genome = _core_only()

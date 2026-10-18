@@ -199,3 +199,10 @@ def test_population_chain_api() -> None:
     result = pop.alive.sample(10).best(n=1)
     assert len(result) == 1
     assert result[0].alive is True
+
+
+def test_sort_treats_missing_attributes_as_lowest() -> None:
+    """An attribute an individual lacks sorts as -inf instead of failing."""
+    pop = Population([_make_ind(1.0), _make_ind(2.0)])
+    ordered = pop.sort(attribute="no_such_attribute")
+    assert len(ordered) == len(pop)
