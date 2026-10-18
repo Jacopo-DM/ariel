@@ -25,7 +25,7 @@ class _NodeRecord(BaseModel):
 
     node_id: int = Field(alias="_id")
     typ: str
-    activation: str
+    activation: str | None
     bias: float
 
 
