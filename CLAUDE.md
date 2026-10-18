@@ -24,15 +24,15 @@ From the repo root. Python 3.12 (`.python-version` 3.12.9), uv 0.13.1.
 | Install everything | `uv sync --all-groups` | ~5 min first time, ~8.4 GB `.venv` |
 | Lockfile matches pyproject | `uv lock --check` | passes, ~2 s, read-only |
 | Unit tests | `uv run --no-sync pytest tests/unit -q -p no:cacheprovider` | 711 passed, ~22 s wall on 2026-10-18 (482 + 229 wiki structure cases, which add under 1 s); add `--cov=ariel` for coverage (54% today, `fail_under = 54`, target 100) |
-| Lint | `uv run --no-sync ruff check src tests` | passes (src, tests; `ruff.toml` and `mypy.ini` exclude `examples/` and `docs/`), <1 s, read-only (`fix = false`) |
-| Format check | `uv run --no-sync ruff format --check src tests` | passes (147 files), <1 s, read-only; also covers notebooks under `tests/` |
-| Types (mypy) | `uv run --no-sync mypy src` | passes (99 files), ~40 s, read-only; 92 lines carry `# type: ignore[...]  # known bug`, listed in PLAN.md |
-| Whole-repo gate commands | `uv run --no-sync ruff format --check . && uv run --no-sync ruff check --no-fix . && uv run --no-sync mypy .` | pass (150 files, 142 mypy sources) on 2026-10-18; the user's global Python gate runs these; `examples/` and `docs/` are excluded in `ruff.toml` and `mypy.ini`; the gate still lists the weaker `mypy.ini`, `ruff.toml`, `pytest.ini` (PLAN.md, GS5-GS9) |
+| Lint | `uv run --no-sync ruff check src tests` | passes (src, tests; `ruff.toml` and `mypy.ini` exclude `examples/` and `docs/`), <1 s, read-only (`fix = false`); `ruff.toml` is the user's template (ruff 0.17, `preview = true`, banned-api for `Any`, `dataclass`, `NamedTuple`, `TypedDict`) with py312, those two exclusions and `fix = false` |
+| Format check | `uv run --no-sync ruff format --check src tests` | passes (150 files), <1 s, read-only; also covers notebooks under `tests/`; ruff 0.17 also formats the code blocks in markdown (`.claude/`, README) |
+| Types (mypy) | `uv run --no-sync mypy src` | passes (101 files), ~40 s, read-only; `mypy.ini` is the user's template (`disallow_any_explicit`, `pydantic.mypy` plugin, `follow_untyped_imports`) with py312 and `mujoco` kept untyped; 87 lines carry `# type: ignore[...]  # known bug`, listed in PLAN.md |
+| Whole-repo gate commands | `uv run --no-sync ruff format --check . && uv run --no-sync ruff check --no-fix . && uv run --no-sync mypy .` | pass (293 files, 144 mypy sources) on 2026-10-18; the user's global Python gate runs these plus `pytest -q`; `examples/` and `docs/` are excluded in `ruff.toml` and `mypy.ini`; the gate still lists the missing coverage floor of 100 (PLAN.md, GS8) |
 | Probe OpenGL backends | `uv run --no-sync python -m ariel.utils.gl_manager` | writes `mujoco_user_config.json` in the current folder, ~2 s here (all three backends fail on this machine); rerun after a driver change |
 | Pre-commit (all hooks) | `uv run --no-sync pre-commit run --all-files` | passes; first run clones `pre-commit/pre-commit-hooks` into `~/.cache/pre-commit`; the whitespace/EOF hooks edit files, ruff hooks cover `src` and `tests` only |
 | Types (pyright) | `uv run --no-sync pyright src tests` | fails today (211 errors), ~15 s, read-only; first run downloads Node into `~/.cache/pyright-python` (229 MB) |
 
-Ruff is pinned to 0.14.* and does not fix by default; `ruff check --fix` is opt-in. Pytest with `--cov=ariel` adds ~4 s and writes `.coverage`. Failing results are listed in PLAN.md.
+Ruff is pinned to 0.17.* and does not fix by default; `ruff check --fix` is opt-in. Pytest with `--cov=ariel` adds ~4 s and writes `.coverage`. Failing results are listed in PLAN.md.
 
 ## Code rules
 
@@ -74,6 +74,7 @@ Ruff is pinned to 0.14.* and does not fix by default; `ruff check --fix` is opt-
 ## Things that bite
 
 - `ruff check --fix` is opt-in (config has `fix = false`), and the pre-commit ruff hook does not pass it either. The whitespace and end-of-file hooks do edit files.
+- Suppressions use ruff 0.17 syntax, not `# noqa`: `# ruff: ignore[rule-name]  # reason` on the line, `# ruff: file-ignore[rule-name]  # reason` for a file; ruff reports `# noqa` (RUF105). Names, not codes (RUF201).
 - `ruff check --select X --fix` with a narrow `--select` makes `RUF100` flag valid `# noqa` comments for the rules you did not select (it removed three needed `E712` ones). Never select `RUF100` alone; check with the full rule set.
 - mypy only honours `# type: ignore[code]` when it is the first comment on the line (`  # type: ignore[code]  # noqa: X  # known bug`), and `ruff format` can move a trailing comment to another line when it re-wraps. Run mypy after formatting.
 - `MUJOCO_GL` is read when `mujoco` is first imported. Code that decides the backend must run before that import (`ariel/__init__.py`, the top of `ariel/utils/renderers.py`, which is why it carries `# isort: split` and `# ruff: noqa: E402`). Do not import `mujoco` or any module that does above them.
