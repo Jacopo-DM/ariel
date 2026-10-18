@@ -46,7 +46,6 @@ W1-W4 are done (see DESIGN.md Results); the wiki structure test now pins the lay
 Tier 1 (restructure, low risk): done.
 
 Tier 2 (new content, each needs the fetch list approved first):
-- W5 Ingest astropy units and quantity docs into `astropy/`. About 6 to 10 pages. Verify: index lists them.
 - W6 Ingest pydantic validation and pydantic-settings docs into `pydantic/`. About 6 to 10 pages.
 - W7 Ingest the MuJoCo chapters (scope in the spec) into `mujoco/`.
 - W8 Remove superseded old MuJoCo pages and the 12 `Source - ...` pages: mapping table first, user approves the deletion list, then delete.

@@ -67,3 +67,8 @@
 - Files created: mjx_overview.md, mjx_core_functions.md, mjx_warp.md, mjx_performance.md, Source - MuJoCo MJX Documentation.md
 - Files updated: (none)
 - Model: Claude (subscription)
+
+## [2026-10-18] Ingest | astropy units and constants docs
+- Source: https://docs.astropy.org/en/stable/units/ (8 pages: units index, quantity, standard_units, combining_and_defining, format, equivalencies, physical_types, constants index)
+- Files created: astropy_units_overview.md, Quantity.md, Unit.md, astropy_standard_units.md, astropy_unit_formats.md, astropy_unit_equivalencies.md, PhysicalType.md, astropy_constants.md, Source - Astropy Units and Constants.md
+- Model: Claude (subscription)
