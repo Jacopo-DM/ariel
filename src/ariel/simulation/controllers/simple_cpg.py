@@ -185,7 +185,10 @@ class SimpleCPG(nn.Module):
             params = torch.from_numpy(params).float()
         return params
 
-    def set_flat_params(self, params: torch.Tensor) -> None:
+    def set_flat_params(
+        self,
+        params: list[float] | np.ndarray | torch.Tensor,
+    ) -> None:
         """Set all learnable parameters from a flat tensor."""
         safe_params = self.param_type_converter(params)
 

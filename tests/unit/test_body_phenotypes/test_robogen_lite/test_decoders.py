@@ -303,7 +303,7 @@ def test_assign_symbols_boundary_one() -> None:
 def test_assign_symbols_per_element_symbols() -> None:
     """Per-element symbol lists assign from the correct per-element set."""
     decoder = VectorDecoder(num_modules=NUM_MODULES)
-    result = decoder.assign_symbols_from_range(
+    result: list[str] = decoder.assign_symbols_from_range(
         vector=[0.2, 0.8],
         symbols=[["A", "B"], ["C", "D"]],
     )
@@ -355,9 +355,9 @@ def test_assign_symbols_integer_symbols() -> None:
 def test_vector_decoder_set_types_and_rotations() -> None:
     """set_module_types_and_rotations populates type_dict and rot_dict."""
     decoder = VectorDecoder(num_modules=NUM_MODULES)
-    decoder.conn_p_space = _conn_space()
-    decoder.rot_p_space = _rot_space()
-    decoder.type_p_space = _type_space()
+    decoder.conn_p_space = _conn_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
+    decoder.rot_p_space = _rot_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
+    decoder.type_p_space = _type_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
     decoder.set_module_types_and_rotations()
     assert len(decoder.type_dict) == NUM_MODULES
     assert len(decoder.rot_dict) == NUM_MODULES
@@ -366,9 +366,9 @@ def test_vector_decoder_set_types_and_rotations() -> None:
 def test_vector_decoder_set_types_core_at_zero() -> None:
     """After set_module_types_and_rotations, node 0 is typed as CORE."""
     decoder = VectorDecoder(num_modules=NUM_MODULES)
-    decoder.conn_p_space = _conn_space()
-    decoder.rot_p_space = _rot_space()
-    decoder.type_p_space = _type_space()
+    decoder.conn_p_space = _conn_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
+    decoder.rot_p_space = _rot_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
+    decoder.type_p_space = _type_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
     decoder.set_module_types_and_rotations()
     assert decoder.type_dict[0] == ModuleType.CORE
 
@@ -381,23 +381,23 @@ def test_vector_decoder_set_types_core_at_zero() -> None:
 def test_vector_decoder_apply_constraints_no_self_connections() -> None:
     """After apply_connection_constraints, diagonal entries are zero."""
     decoder = VectorDecoder(num_modules=NUM_MODULES)
-    decoder.conn_p_space = _conn_space()
-    decoder.rot_p_space = _rot_space()
-    decoder.type_p_space = _type_space()
+    decoder.conn_p_space = _conn_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
+    decoder.rot_p_space = _rot_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
+    decoder.type_p_space = _type_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
     decoder.apply_connection_constraints()
     for face_idx in range(NUM_OF_FACES):
         for i in range(NUM_MODULES):
-            assert decoder.conn_p_space[i, i, face_idx] == 0.0
+            assert decoder.conn_p_space[i, i, face_idx] == 0.0  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
 
 
 def test_vector_decoder_apply_constraints_core_never_child() -> None:
     """After constraints, core (index 0) cannot be a child."""
     decoder = VectorDecoder(num_modules=NUM_MODULES)
-    decoder.conn_p_space = _conn_space()
-    decoder.rot_p_space = _rot_space()
-    decoder.type_p_space = _type_space()
+    decoder.conn_p_space = _conn_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
+    decoder.rot_p_space = _rot_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
+    decoder.type_p_space = _type_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
     decoder.apply_connection_constraints()
-    assert np.all(decoder.conn_p_space[:, 0, :] == 0.0)
+    assert np.all(decoder.conn_p_space[:, 0, :] == 0.0)  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
 
 
 # ---------------------------------------------------------------------------
@@ -408,9 +408,9 @@ def test_vector_decoder_apply_constraints_core_never_child() -> None:
 def _setup_vector_decoder(num_modules: int = NUM_MODULES) -> VectorDecoder:
     """Return a VectorDecoder ready for decode_vector_to_graph."""
     decoder = VectorDecoder(num_modules=num_modules)
-    decoder.conn_p_space = _conn_space(num_modules)
-    decoder.rot_p_space = _rot_space(num_modules)
-    decoder.type_p_space = _type_space(num_modules)
+    decoder.conn_p_space = _conn_space(num_modules)  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
+    decoder.rot_p_space = _rot_space(num_modules)  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
+    decoder.type_p_space = _type_space(num_modules)  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
     decoder.apply_connection_constraints()
     decoder.set_module_types_and_rotations()
     return decoder
@@ -433,11 +433,11 @@ def test_vector_decoder_decode_populates_edges() -> None:
 def test_vector_decoder_decode_zero_conn_only_core() -> None:
     """All-zero connection space after constraints leaves only the core."""
     decoder = VectorDecoder(num_modules=NUM_MODULES)
-    decoder.conn_p_space = np.zeros(
+    decoder.conn_p_space = np.zeros(  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
         (NUM_MODULES, NUM_MODULES, NUM_OF_FACES), dtype=np.float32
     )
-    decoder.rot_p_space = _rot_space()
-    decoder.type_p_space = _type_space()
+    decoder.rot_p_space = _rot_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
+    decoder.type_p_space = _type_space()  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
     decoder.set_module_types_and_rotations()
     decoder.decode_vector_to_graph()
     assert 0 in decoder.nodes

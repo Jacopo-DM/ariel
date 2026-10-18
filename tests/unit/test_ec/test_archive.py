@@ -32,6 +32,12 @@ def _make_evaluated_pop(n: int = 20) -> Population:
     return Population(inds)
 
 
+def _fitness(ind: Individual) -> float:
+    fitness = ind.fitness_
+    assert fitness is not None
+    return fitness
+
+
 @pytest.fixture(scope="module")
 def archive_db(tmp_path_factory: pytest.TempPathFactory) -> Path:
     """
@@ -168,7 +174,7 @@ def test_random_individual_birth_range_filter(archive: Archive) -> None:
 def test_random_individual_fitness_range_filter(archive: Archive) -> None:
     """fitness_range restricts the returned individual's fitness."""
     ind = archive.random_individual(fitness_range=(5.0, 10.0))
-    assert 5.0 <= ind.fitness_ <= 10.0
+    assert 5.0 <= _fitness(ind) <= 10.0
 
 
 def test_random_individual_no_match_raises(archive: Archive) -> None:
@@ -228,7 +234,7 @@ def test_random_population_fitness_range(archive: Archive) -> None:
     """fitness_range filter works for random_population."""
     pop = archive.random_population(20, fitness_range=(0.0, 5.0))
     for ind in pop:
-        assert 0.0 <= ind.fitness_ <= 5.0
+        assert 0.0 <= _fitness(ind) <= 5.0
 
 
 def test_random_population_n_larger_than_archive(archive: Archive) -> None:
@@ -257,14 +263,14 @@ def test_hall_of_fame_size(archive: Archive) -> None:
 def test_hall_of_fame_min_sorted(archive: Archive) -> None:
     """hall_of_fame('min') is sorted ascending by fitness."""
     hof = archive.hall_of_fame(n=5, fitness_mode="min")
-    fitnesses = [ind.fitness_ for ind in hof]
+    fitnesses = [_fitness(ind) for ind in hof]
     assert fitnesses == sorted(fitnesses)
 
 
 def test_hall_of_fame_max_sorted(archive: Archive) -> None:
     """hall_of_fame('max') is sorted descending by fitness."""
     hof = archive.hall_of_fame(n=5, fitness_mode="max")
-    fitnesses = [ind.fitness_ for ind in hof]
+    fitnesses = [_fitness(ind) for ind in hof]
     assert fitnesses == sorted(fitnesses, reverse=True)
 
 
@@ -312,7 +318,7 @@ def test_tournament_population_min_winners_are_low_fitness(
         n=5, tournament_size=3, fitness_mode="min"
     )
     for ind in pop:
-        assert ind.fitness_ <= 19.0
+        assert _fitness(ind) <= 19.0
 
 
 def test_tournament_population_max_mode(archive: Archive) -> None:
@@ -321,7 +327,7 @@ def test_tournament_population_max_mode(archive: Archive) -> None:
         n=5, tournament_size=3, fitness_mode="max"
     )
     for ind in pop:
-        assert ind.fitness_ >= 0.0
+        assert _fitness(ind) >= 0.0
 
 
 def test_tournament_size_exceeds_pool_raises(archive: Archive) -> None:
@@ -377,9 +383,9 @@ def test_fitness_percentile_in_band(archive: Archive) -> None:
     pop = archive.fitness_percentile_population(0.0, 50.0)
     if len(pop) == 0:
         return
-    fitnesses = [ind.fitness_ for ind in pop]
+    fitnesses = [_fitness(ind) for ind in pop]
     all_fitnesses = [
-        ind.fitness_
+        _fitness(ind)
         for ind in archive._fetch_all(archive._base_query())  # noqa: SLF001
     ]
     lo = float(np.percentile(all_fitnesses, 0.0))

@@ -31,7 +31,7 @@ def test_amphitheatre_terrain_world_initialization() -> None:
 
 def test_base_world_initialization() -> None:
     """Simply instantiate the BaseWorld class."""
-    world = BaseWorld()
+    world = BaseWorld()  # type: ignore[abstract]  # known bug: BaseWorld and OlympicArena are abstract (PLAN.md)
     model = world.spec.compile()
     data = mujoco.MjData(model)
     del model, data, world
@@ -55,7 +55,7 @@ def test_crater_terrain_world_initialization() -> None:
 
 def test_olympic_arena_initialization() -> None:
     """Simply instantiate the OlympicArena class."""
-    world = OlympicArena()
+    world = OlympicArena()  # type: ignore[abstract]  # known bug: BaseWorld and OlympicArena are abstract (PLAN.md)
     model = world.spec.compile()
     data = mujoco.MjData(model)
     del model, data, world
@@ -170,4 +170,4 @@ def test_all_heightmap_functions() -> None:
         ),
     ):
         # Call the function with default parameters
-        _ = func(**arguments[func.__name__])
+        _ = func(**arguments[func.__name__])  # type: ignore[arg-type]  # heterogeneous values, not a bug

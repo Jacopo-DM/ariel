@@ -1,5 +1,7 @@
 """Test: crossover operators in the ec module."""
 
+from typing import cast
+
 import pytest
 
 from ariel.ec.crossover import Crossover
@@ -38,8 +40,10 @@ def test_one_point_symmetric() -> None:
     c1, c2 = Crossover.one_point(p_i, p_j)
     c3, c4 = Crossover.one_point(p_j, p_i)
     # The multiset of all genes must be preserved across the pair
-    assert sorted(c1 + c2) == pytest.approx(sorted(p_i + p_j))
-    assert sorted(c3 + c4) == pytest.approx(sorted(p_j + p_i))
+    genes_12 = [*cast("list[float]", c1), *cast("list[float]", c2)]
+    genes_34 = [*cast("list[float]", c3), *cast("list[float]", c4)]
+    assert sorted(genes_12) == pytest.approx(sorted(p_i + p_j))
+    assert sorted(genes_34) == pytest.approx(sorted(p_j + p_i))
 
 
 # ---------------------------------------------------------------------------

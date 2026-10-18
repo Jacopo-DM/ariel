@@ -1,5 +1,7 @@
 """Test: construct_mjspec_from_graph builds valid robot specs from graphs."""
 
+from __future__ import annotations
+
 import mujoco
 import networkx as nx
 import pytest
@@ -10,34 +12,34 @@ from ariel.body_phenotypes.robogen_lite.constructor import (
 from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
 
 
-def _make_core_only_graph() -> nx.DiGraph:
+def _make_core_only_graph() -> nx.DiGraph[int]:
     """Single-node graph — just a core module."""
-    g = nx.DiGraph()
+    g: nx.DiGraph[int] = nx.DiGraph()
     g.add_node(0, type="CORE", rotation="DEG_0")
     return g
 
 
-def _make_core_with_hinge_graph() -> nx.DiGraph:
+def _make_core_with_hinge_graph() -> nx.DiGraph[int]:
     """Core with one hinge attached to the FRONT face."""
-    g = nx.DiGraph()
+    g: nx.DiGraph[int] = nx.DiGraph()
     g.add_node(0, type="CORE", rotation="DEG_0")
     g.add_node(1, type="HINGE", rotation="DEG_0")
     g.add_edge(0, 1, face="FRONT")
     return g
 
 
-def _make_core_with_brick_graph() -> nx.DiGraph:
+def _make_core_with_brick_graph() -> nx.DiGraph[int]:
     """Core with one brick attached to the BACK face."""
-    g = nx.DiGraph()
+    g: nx.DiGraph[int] = nx.DiGraph()
     g.add_node(0, type="CORE", rotation="DEG_0")
     g.add_node(1, type="BRICK", rotation="DEG_0")
     g.add_edge(0, 1, face="BACK")
     return g
 
 
-def _make_core_with_none_graph() -> nx.DiGraph:
+def _make_core_with_none_graph() -> nx.DiGraph[int]:
     """Core with a NONE-type slot on FRONT — should be skipped."""
-    g = nx.DiGraph()
+    g: nx.DiGraph[int] = nx.DiGraph()
     g.add_node(0, type="CORE", rotation="DEG_0")
     g.add_node(1, type="NONE", rotation="DEG_0")
     g.add_edge(0, 1, face="FRONT")
@@ -85,7 +87,7 @@ def test_core_with_none_module_compiles() -> None:
 
 def test_unknown_module_type_raises() -> None:
     """A graph node with an unknown type raises ValueError."""
-    g = nx.DiGraph()
+    g: nx.DiGraph[int] = nx.DiGraph()
     g.add_node(0, type="CORE", rotation="DEG_0")
     g.add_node(1, type="UNKNOWN_TYPE", rotation="DEG_0")
     g.add_edge(0, 1, face="FRONT")

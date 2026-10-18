@@ -7,7 +7,9 @@ from ariel.simulation.environments._simple_flat import SimpleFlatWorld
 from ariel.utils.tracker import Tracker
 
 
-def _build_spider_in_world():
+def _build_spider_in_world() -> tuple[
+    mujoco.MjSpec, mujoco.MjModel, mujoco.MjData
+]:
     """Spawn a spider in a SimpleFlatWorld and return (spec, model, data)."""
     world = SimpleFlatWorld()
     core = spider()

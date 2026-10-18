@@ -168,6 +168,7 @@ def test_eaoperation_bound_executes_with_population() -> None:
         return population
 
     op = capture(tag="hello")
+    assert isinstance(op, EAOperation)
     pop = _make_pop()
     op(pop)
     assert results == ["hello"]
