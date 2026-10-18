@@ -1,7 +1,12 @@
 """Test: genetic operators for tree genomes."""
 
 import copy
+import random
+from collections.abc import Callable
 
+import pytest
+
+from ariel.ec.genotypes.tree import operators
 from ariel.ec.genotypes.tree.operators import (
     add_node,
     crossover_subtree,
@@ -354,3 +359,131 @@ def test_crossover_subtree_core_only_returns_copies() -> None:
     c1, c2 = crossover_subtree(a, b)
     assert 0 in c1.nodes
     assert 0 in c2.nodes
+
+
+# ---------------------------------------------------------------------------
+# Edge cases and the transactional restore
+# ---------------------------------------------------------------------------
+
+ORPHAN_ID = 5
+ORPHAN_CHILD_ID = 6
+BAD_FACE_ID = 3
+TAKEN_FACE_ID = 4
+
+
+def _orphan_genome() -> TreeGenome:
+    # A core, plus a hinge with a brick child that is not connected to it.
+    g = _core_only()
+    g.nodes[ORPHAN_ID] = TreeNode(type="HINGE", rotation="DEG_0")
+    g.nodes[ORPHAN_CHILD_ID] = TreeNode(type="BRICK", rotation="DEG_0")
+    g.edges = [TreeEdge(parent=ORPHAN_ID, child=ORPHAN_CHILD_ID, face="FRONT")]
+    return g
+
+
+def _reject_everything(_genome: object) -> None:
+    msg = "rejected"
+    raise ValueError(msg)
+
+
+def test_top_ancestor_of_the_core_is_the_core() -> None:
+    """A node without a parent is its own top ancestor."""
+    assert get_top_ancestor(_core_hinge(), 0) == 0
+
+
+def test_depth_of_an_empty_genome_is_zero() -> None:
+    """No nodes means depth 0."""
+    assert get_tree_depth(TreeGenome()) == 0
+
+
+def test_crossover_of_core_only_genomes_returns_copies() -> None:
+    """With no non-core node to swap the children equal the parents."""
+    a, b = _core_only(), _core_only()
+    c1, c2 = crossover_subtree(a, b)
+    assert c1 is not a
+    assert c1.nodes.keys() == a.nodes.keys()
+    assert c2.nodes.keys() == b.nodes.keys()
+
+
+def test_crossover_falls_back_to_parent_copies_when_invalid(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """If validation rejects the children the parents are copied."""
+    monkeypatch.setattr(operators, "validate_genome_dict", _reject_everything)
+    a, b = _core_hinge_brick(), _core_hinge_brick()
+    c1, c2 = crossover_subtree(a, b)
+    assert c1.to_dict() == a.to_dict()
+    assert c2.to_dict() == b.to_dict()
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        mutate_replace_node,
+        mutate_subtree_replacement,
+        mutate_shrink,
+        mutate_hoist,
+    ],
+)
+def test_failed_validation_restores_the_genome(
+    monkeypatch: pytest.MonkeyPatch,
+    mutation: Callable[[TreeGenome], None],
+) -> None:
+    """A mutation that cannot be validated leaves the genome as it was."""
+    monkeypatch.setattr(operators, "validate_genome_dict", _reject_everything)
+    for seed in range(20):
+        random.seed(seed)
+        g = _core_hinge_brick()
+        before = g.to_dict()
+        mutation(g)
+        assert g.to_dict() == before
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        mutate_replace_node,
+        mutate_subtree_replacement,
+        mutate_shrink,
+        mutate_hoist,
+    ],
+)
+def test_mutations_leave_a_core_only_genome_alone(
+    mutation: Callable[[TreeGenome], None],
+) -> None:
+    """With only the core there is nothing to mutate."""
+    g = _core_only()
+    mutation(g)
+    assert list(g.nodes) == [0]
+
+
+def test_shrink_and_hoist_skip_nodes_without_a_parent() -> None:
+    """A node cut off from the core cannot be shrunk or hoisted."""
+    shrunk = _orphan_genome()
+    shrunk.nodes.pop(ORPHAN_CHILD_ID)
+    shrunk.edges = []
+    mutate_shrink(shrunk)
+    assert ORPHAN_ID in shrunk.nodes
+    hoisted = _orphan_genome()
+    mutate_hoist(hoisted)
+    assert ORPHAN_ID in hoisted.nodes
+    assert ORPHAN_CHILD_ID in hoisted.nodes
+
+
+def test_pruning_drops_bad_edges_and_their_subtrees() -> None:
+    """Edges to missing nodes, on disallowed faces, or on a taken face go."""
+    g = _core_hinge_brick()
+    g.nodes[BAD_FACE_ID] = TreeNode(type="BRICK", rotation="DEG_0")
+    g.nodes[TAKEN_FACE_ID] = TreeNode(type="BRICK", rotation="DEG_0")
+    g.edges.extend([
+        TreeEdge(
+            parent=1, child=BAD_FACE_ID, face="BACK"
+        ),  # hinge allows FRONT only
+        TreeEdge(
+            parent=0, child=TAKEN_FACE_ID, face="FRONT"
+        ),  # core FRONT is taken
+        TreeEdge(parent=0, child=99, face="LEFT"),  # child does not exist
+    ])
+    operators._prune_invalid_edges(g)  # ruff: ignore[private-member-access]  # tests the private helper directly
+    assert {(e.parent, e.child) for e in g.edges} == {(0, 1), (1, 2)}
+    assert BAD_FACE_ID not in g.nodes
+    assert TAKEN_FACE_ID not in g.nodes

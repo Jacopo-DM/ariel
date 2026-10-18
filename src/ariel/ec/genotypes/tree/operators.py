@@ -69,8 +69,6 @@ def _reassign_ids(
     tuple[dict[int, TreeNode], list[TreeEdge], dict[int, int]]
         The new nodes, the new edges and the map from old to new ids.
     """
-    if not nodes:
-        return {}, [], {}
     mapping: dict[int, int] = {}
     next_id = max(existing_ids, default=-1) + 1
     for old in sorted(nodes):
@@ -242,8 +240,6 @@ def mutate_replace_node(genome: TreeGenome) -> None:
         t for t in ModuleType if t not in {ModuleType.CORE, ModuleType.NONE}
     ]
     types = [t for t in types if t.name != old_type]
-    if not types:
-        return
     new_type = random.choice(types).name
 
     # choose a rotation allowed for the new type
@@ -430,8 +426,6 @@ def mutate_hoist(genome: TreeGenome) -> None:
 
     # Get all children of this parent
     children = [e.child for e in genome.edges if e.parent == parent_id]
-    if not children:
-        return
 
     # Choose one child to hoist
     child_to_hoist = random.choice(children)
@@ -506,8 +500,6 @@ def random_tree(max_modules: int) -> TreeGenome:
             free.extend(
                 (pid, face) for face in allowed_faces if face not in used
             )
-        if not free:
-            break
         parent, face = random.choice(free)
         # choose random module type/rotation
         types = [
@@ -533,8 +525,6 @@ def get_tree_depth(genome: TreeGenome) -> int:
         return 0
 
     g = genome.to_networkx()
-    if len(g) == 0:
-        return 0
 
     max_depth = 0
     stack = [(IDX_OF_CORE, 0)]  # (node, depth)
