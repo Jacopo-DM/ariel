@@ -21,7 +21,7 @@ Generated from `src/ariel/` on 2026-10-17. Ignore list: see CLAUDE.md.
 | `ariel.body_phenotypes.robogen_lite` | modular robot bodies | `modules` (`Core`, `Brick`, `Hinge`, `Module`), `cppn_neat` (`Genome`, `IdManager`), `decoders`, `prebuilt_robots` (gecko, spider, john_set, random_20, spider_with_blocks), `constructor`, `config` |
 | `ariel.body_phenotypes.lynx_mjspec` | Lynx arm body and `unified_pipeline` (common, evolve, replay, plot_from_logs); a package since GS8 | `lynx_arm` (`LynxArm`, `ArmConfig`), `table` |
 | `ariel.simulation.environments` | MuJoCo worlds | `BaseWorld` and terrain worlds (`SimpleFlatWorld`, rugged, tilted, crater, amphitheatre, `OlympicArena`) |
-| `ariel.simulation.controllers` | controllers | `Controller`, `ControlCallback` (protocol), `SimpleCPG`, `NaCPG` variants |
+| `ariel.simulation.controllers` | controllers | `Controller`, `ControlCallback` (protocol), `SimpleCPG`, `NaCPG` (one class, after the paper) |
 | `ariel.simulation.tasks` | fitness functions | `targeted_locomotion`, `gait_learning`, `turning_in_place` |
 | `ariel.simulation` | MuJoCo worker base class | `mujoco_worker` |
 | `ariel.parameters` | shared types and params | `ariel_types`, `ariel_modules`, `mujoco_params`, `base_model` (`FrozenModel`, `MutableModel`: the base classes of every pydantic record) |

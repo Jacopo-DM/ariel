@@ -1,22 +1,36 @@
 """
-Normalized Asymmetric central pattern generator (NA-CPG) as a PyTorch module.
+Normalized asymmetric central pattern generator (NA-CPG) as a PyTorch module.
 
-Notes
------
-    *
+The model follows Tong et al., "NA-CPG: A robust and stable rhythm generator
+for robot motion control", Biomimetic Intelligence and Robotics 2 (2022)
+100075 (equations 2 to 12). Each oscillator ``i`` has a state ``(x_i, y_i)``
+and obeys::
+
+    d(x_i, y_i)/dt = K_i (x_i, y_i - b_i)
+                     + h * sum_j R(phi_i - phi_j) (x_j, y_j - b_j)
+
+    K_i = [[alpha (1 - r_i^2), -w_i / zeta_i],
+           [w_i / zeta_i,       alpha (1 - r_i^2)]]
+    r_i^2 = x_i^2 + (y_i - b_i)^2
+    zeta_i = 1 - ha_i * sign(dx_i/dt_old)
+    theta_i = A_i * y_i
+
+* Normalized: the limit cycle has radius 1 whatever ``A_i`` is, so the
+  amplitude and the learning rate ``alpha`` are decoupled. The amplitude only
+  scales the output ``theta_i``.
+* Asymmetric: ``zeta_i`` slows the rotation in one half of the cycle and
+  speeds it up in the other (``ha_i`` in (-1, 1), 0 is symmetric), without
+  changing the shape of the cycle.
+* Constrained: the new derivative may differ from the previous one by at
+  most ``CF(w_i)`` (equations 4 and 12). The paper fits ``CF`` to the largest
+  second derivative seen at each angular frequency and does not publish the
+  fit. By default ``CF(w) = CONSTRAINT_MARGIN * w^2 * dt``, the largest
+  change of the derivative per step on the unit circle, with a margin for the
+  asymmetry. A cubic fitted elsewhere can be given as ``coefficients``.
 
 References
 ----------
     [1] https://www.sciencedirect.com/science/article/pii/S2667379722000353
-
-Todo
-----
-    [ ] Fix constraint function:
-        This requires experimental validation to find the mapping from angular
-        velocity to maximum allowed change in the CPG state space.
-        The paper determines this information empirically.
-    [ ] Implement matrix formulation
-    [ ] What should the initial values be???
 """
 
 # Standard library
@@ -27,48 +41,72 @@ import numpy as np
 import torch
 from numpy.typing import NDArray
 from rich.console import Console
-from rich.traceback import install
 from torch import nn
+
+# Local libraries
+from ariel.parameters import FrozenModel
+from ariel.simulation.controllers.simple_cpg import (
+    create_fully_connected_adjacency,
+)
+
+__all__ = ["BetaParams", "NaCPG", "create_fully_connected_adjacency"]
 
 # Global constants
 E = 1e-9
+CONSTRAINT_MARGIN = 3.0  # covers ha up to about 0.4: 1 / (1 - ha)^2 = 2.8
 
 # --- DATA SETUP ---
-SCRIPT_NAME = __file__.split("/")[-1][:-3]
-CWD = Path.cwd()
-DATA = CWD / "__data__"
-DATA.mkdir(exist_ok=True)
+DATA = Path.cwd() / "__data__"
 
-# --- TERMINAL OUTPUT SETUP ---
-install(show_locals=False)
 console = Console()
-torch.set_printoptions(precision=4)  # type: ignore[no-untyped-call]  # known bug
 
 
-def create_fully_connected_adjacency(num_nodes: int) -> dict[int, list[int]]:
-    """
-    Create a fully connected adjacency dictionary for the CPG network.
+class BetaParams(FrozenModel):
+    """Shape parameters (a, b) and bounds (c, d) of a scaled beta."""
+
+    a: float
+    b: float
+    c: float
+    d: float
+
+
+def scaled_beta(
+    params: BetaParams,
+    size: int,
+    rng: np.random.Generator,
+) -> torch.Tensor:
+    """Sample a beta distribution scaled to the range ``[c, d]``.
 
     Parameters
     ----------
-    num_nodes : int
-        Number of nodes in the CPG network.
+    params : BetaParams
+        The shape parameters and the bounds.
+    size : int
+        The number of samples.
+    rng : np.random.Generator
+        The source of randomness.
 
     Returns
     -------
-    dict[int, list[int]]
-        Adjacency dictionary where each key is a node index and the value is a
-        list
-        of indices of connected nodes.
+    torch.Tensor
+        The samples, as float32.
     """
-    adjacency_dict = {}
-    for i in range(num_nodes):
-        adjacency_dict[i] = [j for j in range(num_nodes) if j != i]
-    return adjacency_dict
+    lower = min(params.c, params.d)
+    upper = max(params.c, params.d)
+    sample = lower + (upper - lower) * rng.beta(params.a, params.b, size)
+    return torch.tensor(sample, dtype=torch.float32)
+
+
+# Ranges of the adaptable parameters at initialisation (uniform betas)
+PHASE_PARAMS = BetaParams(a=1, b=1, c=0, d=2 * np.pi)
+W_PARAMS = BetaParams(a=1, b=1, c=0, d=4 * np.pi)  # up to 2 Hz
+AMPLITUDE_PARAMS = BetaParams(a=1, b=1, c=0, d=np.pi / 2)
+HA_PARAMS = BetaParams(a=1, b=1, c=0, d=0.5)
+B_PARAMS = BetaParams(a=1, b=1, c=-0.5, d=0.5)
 
 
 class NaCPG(nn.Module):
-    """Implements the Normalized Asymmetric CPG (NA-CPG)."""
+    """Normalized asymmetric CPG network (Tong et al., 2022)."""
 
     xy: torch.Tensor
     xy_dot_old: torch.Tensor
@@ -77,93 +115,84 @@ class NaCPG(nn.Module):
     def __init__(
         self,
         adjacency_dict: dict[int, list[int]],
-        alpha: float = 0.1,
+        alpha: float = 30.0,
         dt: float = 0.01,
-        hard_bounds: tuple[float, float] | None = (-torch.pi / 2, torch.pi / 2),
-        *,
-        angle_tracking: bool = False,
+        angle_limits: tuple[float, float] | None = (
+            -torch.pi / 2,
+            torch.pi / 2,
+        ),
         seed: int | None = None,
+        *,
+        coupling: float = 1.0,
+        clipping: bool = True,
+        angle_tracking: bool = False,
     ) -> None:
-        """Initialize the NA-CPG module. Inherits from **torch.nn.Module**.
+        """Initialize the NA-CPG network. Inherits from **torch.nn.Module**.
 
         Parameters
         ----------
         adjacency_dict : dict[int, list[int]]
-            Dictionary defining the connectivity of the CPG network. Each key is
-            a node
-            index, and the value is a list of indices of connected nodes.
+            Node index to the indices of the nodes that drive it. The keys
+            are ``0 .. n - 1``.
         alpha : float, optional
-            Learning rate for the CPG dynamics, by default 0.1.
+            Learning rate, the speed of convergence to the unit limit cycle.
+            The paper uses 30 with ``dt = 0.01``.
         dt : float, optional
-            Time step for the CPG updates, by default 0.01.
-        hard_bounds : tuple[float, float] | None, optional
-            If provided, the output angles will be clamped to these bounds. If
-            None,
-            no clamping is applied, by default (-π/2, π/2).
-        angle_tracking : bool, optional
-            If True, the history of output angles will be stored for analysis,
-            by default False.
+            Time step of the Euler update, in seconds.
+        angle_limits : tuple[float, float] | None, optional
+            Lower and upper bound of the output angles, in radians.
         seed : int | None, optional
-            Random seed for reproducibility, by default None.
+            Seed of the random initial parameters.
+        coupling : float, optional
+            Coupling coefficient ``h`` between connected oscillators.
+        clipping : bool, optional
+            If True, the output angles are clipped to ``angle_limits``. The
+            distance to the limits is recorded in ``clamping_error`` either
+            way.
+        angle_tracking : bool, optional
+            If True, every output is appended to ``angle_history``.
+
+        Raises
+        ------
+        ValueError
+            If the keys of ``adjacency_dict`` are not ``0 .. n - 1`` or a
+            neighbour is not a node.
         """
         super().__init__()
 
-        # ================================================================== #
-        # User parameters
-        # ------------------------------------------------------------------ #
         self.adjacency_dict = adjacency_dict
         self.n = len(adjacency_dict)
+        if set(adjacency_dict) != set(range(self.n)):
+            msg = "The keys of the adjacency dict must be 0 .. n - 1."
+            raise ValueError(msg)
+        self.adjacency = torch.zeros(self.n, self.n)
+        for node, neighbours in adjacency_dict.items():
+            for neighbour in neighbours:
+                if not 0 <= neighbour < self.n:
+                    msg = f"Node {node} has the unknown neighbour {neighbour}."
+                    raise ValueError(msg)
+                self.adjacency[node, neighbour] = 1.0
+
         self.angle_tracking = angle_tracking
-        self.hard_bounds = hard_bounds
+        self.angle_history: list[list[float]] = []
+        self.angle_limits = angle_limits
+        self.clipping = clipping
         self.clamping_error = 0.0
-        if seed is not None:
-            torch.manual_seed(seed)
 
-        # ================================================================== #
-        # Inherent parameters: do not change during learning
-        # ------------------------------------------------------------------ #
-
-        # Learning rate (alpha)
+        # Inherent parameters, fixed during learning
         self.alpha = alpha
-
-        # Time step (dt)
         self.dt = dt
+        self.coupling = coupling
+        # Cubic (highest power first) for CF(w); None uses the default
+        self.coefficients: tuple[float, float, float, float] | None = None
 
-        # ================================================================== #
         # Adaptable parameters
-        # ------------------------------------------------------------------ #
-
-        scale = torch.pi * 2
-        # --- Definitely to adapt --- #
-        self.phase = nn.Parameter(
-            ((torch.rand(self.n) * 2 - 1) * scale),
-            requires_grad=False,
-        )
-        self.amplitudes = nn.Parameter(
-            ((torch.rand(self.n) * 2 - 1) * scale),
-            requires_grad=False,
-        )
-
-        # --- Probably to adapt --- #
-        self.w = nn.Parameter(
-            ((torch.rand(self.n) * 2 - 1) * scale),
-            requires_grad=False,
-        )
-
-        # --- Probably not to adapt --- #
-        self.ha = nn.Parameter(
-            torch.randn(self.n),
-            requires_grad=False,
-        )
-        self.b = nn.Parameter(
-            torch.randint(
-                -100,
-                100,
-                (self.n,),
-                dtype=torch.float32,
-            ),
-            requires_grad=False,
-        )
+        rng = np.random.default_rng(seed)
+        self.phase = self._parameter(PHASE_PARAMS, rng)
+        self.w = self._parameter(W_PARAMS, rng)
+        self.amplitudes = self._parameter(AMPLITUDE_PARAMS, rng)
+        self.ha = self._parameter(HA_PARAMS, rng)
+        self.b = self._parameter(B_PARAMS, rng)
         self.parameter_groups = {
             "phase": self.phase,
             "w": self.w,
@@ -174,34 +203,31 @@ class NaCPG(nn.Module):
         self.num_of_parameters = sum(p.numel() for p in self.parameters())
         self.num_of_parameter_groups = len(self.parameter_groups)
 
-        # ================================================================== #
         # Internal states (buffers, not learnable)
-        # ------------------------------------------------------------------ #
-        self.register_buffer(
-            "xy",
-            torch.randn(self.n, 2),
+        self.register_buffer("xy", torch.zeros(self.n, 2))
+        self.register_buffer("xy_dot_old", torch.zeros(self.n, 2))
+        self.register_buffer("angles", torch.zeros(self.n))
+        self.reset_state()
+
+    def _parameter(
+        self, params: BetaParams, rng: np.random.Generator
+    ) -> nn.Parameter:
+        """Sample one parameter group.
+
+        Returns
+        -------
+        nn.Parameter
+            The group, with no gradient.
+        """
+        return nn.Parameter(
+            scaled_beta(params, self.n, rng), requires_grad=False
         )
-        self.register_buffer(
-            "xy_dot_old",
-            torch.randn(self.n, 2),
-        )
-        self.register_buffer(
-            "angles",
-            torch.zeros(self.n),
-        )
-        self.angle_history: list[list[float]] = []
-        self.initial_state = {
-            "xy": self.xy.clone(),
-            "xy_dot_old": self.xy_dot_old.clone(),
-            "angles": self.angles.clone(),
-        }
 
     def param_type_converter(  # ruff: ignore[no-self-use]  # keeps the interface shared with the sibling classes
         self,
         params: list[float] | NDArray[np.float64] | torch.Tensor,
     ) -> torch.Tensor:
-        """
-        Convert input parameters to torch.Tensor if needed.
+        """Convert input parameters to torch.Tensor if needed.
 
         Parameters
         ----------
@@ -211,286 +237,232 @@ class NaCPG(nn.Module):
         Returns
         -------
         torch.Tensor
-            Converted parameters as a torch.Tensor.
+            Converted parameters as a float32 torch.Tensor.
         """
         if isinstance(params, list):
-            params = torch.tensor(params, dtype=torch.float32)
-        elif isinstance(params, np.ndarray):
-            params = torch.from_numpy(params).float()
+            return torch.tensor(params, dtype=torch.float32)
+        if isinstance(params, np.ndarray):
+            return torch.from_numpy(params).float()
         return params
 
-    def set_flat_params(self, params: torch.Tensor) -> None:
-        """Set all learnable parameters from a flat tensor.
+    def set_flat_params(
+        self, params: list[float] | NDArray[np.float64] | torch.Tensor
+    ) -> None:
+        """Set all adaptable parameters from one flat vector.
 
         Parameters
         ----------
-        params : torch.Tensor
-            A flat tensor containing all learnable parameters.
+        params : list[float] | NDArray[np.float64] | torch.Tensor
+            The groups in the order of ``parameter_groups``, one after another.
 
         Raises
         ------
         ValueError
             If the parameter vector has the wrong size.
         """
-        # Convert params to tensor if needed
         safe_params = self.param_type_converter(params)
-
-        # Check size is correct
         if safe_params.numel() != self.num_of_parameters:
             msg = "Parameter vector has incorrect size. "
             msg += (
                 f"Expected {self.num_of_parameters}, got {safe_params.numel()}."
             )
             raise ValueError(msg)
-
-        # Set parameters
         pointer = 0
         for param in self.parameter_groups.values():
             num_param = param.numel()
-            param.data = params[pointer : pointer + num_param].view_as(param)
+            param.data = safe_params[pointer : pointer + num_param].view_as(
+                param
+            )
             pointer += num_param
 
-    def set_param_with_dict(self, params: dict[str, torch.Tensor]) -> None:
-        """
-        Set parameters from a dict of group names to tensors.
+    def set_param_with_dict(
+        self,
+        params: dict[str, list[float] | NDArray[np.float64] | torch.Tensor],
+    ) -> None:
+        """Set parameter groups from a dict of group names to vectors.
 
         Parameters
         ----------
-        params : dict[str, torch.Tensor]
-            Dictionary with parameter group names as keys and parameter tensors
-            as values.
+        params : dict[str, list[float] | NDArray[np.float64] | torch.Tensor]
+            Group names as keys, one value per oscillator.
         """
         for key, value in params.items():
-            safe_value = self.param_type_converter(value)
-            self.set_params_by_group(key, safe_value)
+            self.set_params_by_group(key, value)
 
     def set_params_by_group(
         self,
         group_name: str,
-        params: torch.Tensor,
+        params: list[float] | NDArray[np.float64] | torch.Tensor,
     ) -> None:
-        """Set parameters for a specific group.
+        """Set one parameter group.
 
         Parameters
         ----------
         group_name : str
-            The name of the parameter group to set.
-        params : torch.Tensor
-            A tensor containing the parameters for the specified group.
+            ``phase``, ``w``, ``amplitudes``, ``ha`` or ``b``.
+        params : list[float] | NDArray[np.float64] | torch.Tensor
+            One value per oscillator.
 
         Raises
         ------
         ValueError
             If the group does not exist or the vector has the wrong size.
         """
-        # Convert params to tensor if needed
         safe_params = self.param_type_converter(params)
-
-        # Check group exists
         if group_name not in self.parameter_groups:
             msg = f"Parameter group '{group_name}' does not exist."
             raise ValueError(msg)
-
-        # Get the parameter group
         param = self.parameter_groups[group_name]
         if safe_params.numel() != param.numel():
             msg = (
                 f"Parameter vector has incorrect size for group '{group_name}'."
             )
-            raise ValueError(
-                msg,
-            )
+            raise ValueError(msg)
         param.data = safe_params.view_as(param)
 
     def get_flat_params(self) -> torch.Tensor:
-        """Get all learnable parameters as a flat tensor.
+        """Get all adaptable parameters as one flat tensor.
 
         Returns
         -------
         torch.Tensor
-            The learnable parameters as one flat tensor.
+            The groups in the order of ``parameter_groups``.
         """
         return torch.cat([p.flatten() for p in self.parameter_groups.values()])
 
-    @staticmethod
-    def term_a(alpha: float, r2i: float) -> float:
-        """Term A from the NA-CPG equations.
-
-        Returns
-        -------
-        float
-            The value of term A.
-        """
-        return alpha * (1 - r2i**2)
-
-    @staticmethod
-    def term_b(zeta_i: torch.Tensor, w_i: torch.Tensor) -> torch.Tensor:
-        """Term B from the NA-CPG equations.
+    def zeta(self) -> torch.Tensor:
+        """Return the asymmetry factor of every oscillator (equation 3).
 
         Returns
         -------
         torch.Tensor
-            The value of term B.
+            ``1 - ha * sign(x_dot_old)``, never below ``E``.
         """
-        return (1 / (zeta_i + E)) * w_i  # type: ignore[no-any-return]  # known bug
+        sign = torch.sign(self.xy_dot_old[:, 0])
+        return torch.clamp(1 - self.ha * sign, min=E)
 
-    @staticmethod
-    def zeta(ha_i: torch.Tensor, x_dot_old: torch.Tensor) -> torch.Tensor:
-        """Zeta function from the NA-CPG equations.
+    def constraint_function(self) -> torch.Tensor:
+        """Return the largest allowed change of the derivative per step.
 
         Returns
         -------
         torch.Tensor
-            The value of zeta.
+            ``CF(w)`` for every oscillator, never below zero.
         """
-        return 1 - ha_i * ((x_dot_old + E) / (torch.abs(x_dot_old) + E))  # type: ignore[no-any-return]  # known bug
+        if self.coefficients is None:
+            return CONSTRAINT_MARGIN * self.w**2 * self.dt
+        value = np.polyval(self.coefficients, self.w.numpy())
+        return torch.clamp(torch.tensor(value, dtype=torch.float32), min=0.0)
 
-    def reset(self) -> None:
-        """Reset the internal states to their initial values."""
-        self.xy.data = self.initial_state["xy"].clone()
-        self.xy_dot_old.data = self.initial_state["xy_dot_old"].clone()
-        self.angles.data = self.initial_state["angles"].clone()
+    def set_state(
+        self,
+        xy: list[float] | NDArray[np.float64] | torch.Tensor,
+        xy_dot_old: list[float] | NDArray[np.float64] | torch.Tensor,
+    ) -> None:
+        """Set the oscillator states and the previous derivatives.
+
+        Parameters
+        ----------
+        xy : list[float] | NDArray[np.float64] | torch.Tensor
+            The states ``(x_i, y_i)``, ``n * 2`` values.
+        xy_dot_old : list[float] | NDArray[np.float64] | torch.Tensor
+            The previous derivatives, ``n * 2`` values.
+        """
+        self.xy = self.param_type_converter(xy).reshape(self.n, 2).clone()
+        self.xy_dot_old = (
+            self.param_type_converter(xy_dot_old).reshape(self.n, 2).clone()
+        )
+
+    def reset_state(self) -> None:
+        """Put every oscillator on its limit cycle at its phase, at rest.
+
+        The state is ``(cos phi_i, sin phi_i + b_i)`` and the previous
+        derivative is zero. Oscillators that start there are already phase
+        locked, so the first steps only show the transient of the coupling.
+        """
+        self.xy = torch.stack(
+            [torch.cos(self.phase), torch.sin(self.phase) + self.b], dim=1
+        ).detach()
+        self.xy_dot_old = torch.zeros(self.n, 2)
+        self.angles = torch.zeros(self.n)
         self.angle_history = []
 
-    def forward(self, time: float | None = None) -> torch.Tensor:  # ruff: ignore[complex-structure, too-many-locals, too-many-statements]
-        """Perform a forward pass: update CPG states, compute output angles.
+    def forward(self, time: float | None = None) -> torch.Tensor:
+        """Advance every oscillator by one step and return the angles.
 
         Parameters
         ----------
         time : float | None, optional
-            Current simulation time. If provided and equal to zero, the CPG
-            states
-            will be reset, by default None.
+            The simulation time. At 0 the state is reset first.
 
         Returns
         -------
         torch.Tensor
-            The output angles for each CPG node after the update.
+            The output angles ``A_i * y_i``, clipped to ``angle_limits`` if
+            ``clipping`` is set.
 
         Raises
         ------
         ValueError
             If the angles contain NaN.
         """
-        # Reset if time is zero
-        if time is not None and torch.isclose(
-            torch.tensor(time),
-            torch.tensor(0.0),
-        ):
-            self.reset()
+        if time is not None and np.isclose(time, 0.0):
+            self.reset_state()
 
-        # Update CPG states
         with torch.inference_mode():
-            # R matrix
-            r_matrix = torch.zeros(self.n, self.n, 2, 2)
-            for i in range(self.n):
-                for j in range(self.n):
-                    if i == j:
-                        r_matrix[i, j] = torch.eye(2)
-                    else:
-                        phase_diff_ij = self.phase[i] - self.phase[j]
-                        cos_d_ij = torch.cos(phase_diff_ij)
-                        sin_d_ij = torch.sin(phase_diff_ij)
-                        r_matrix[i, j] = torch.tensor([
-                            [cos_d_ij, -sin_d_ij],
-                            [sin_d_ij, cos_d_ij],
-                        ])
+            x = self.xy[:, 0]
+            y = self.xy[:, 1] - self.b  # centred on the offset
+            gain = self.alpha * (1 - (x**2 + y**2))
+            rotation = self.w / self.zeta()
 
-            # K matrix
-            k_matrix = torch.zeros(self.n, 2, 2)
-            for i in range(self.n):
-                x_dot_old, _ = self.xy_dot_old[i]
-                ha_i = self.ha[i]
-                w_i = self.w[i]
-                xi, yi = self.xy[i]
+            # Coupling: R(phi_i - phi_j) (x_j, y_j - b_j), over the neighbours
+            delta = self.phase[:, None] - self.phase[None, :]
+            cos_d = torch.cos(delta) * self.adjacency
+            sin_d = torch.sin(delta) * self.adjacency
+            coupled_x = (cos_d * x[None, :] - sin_d * y[None, :]).sum(dim=1)
+            coupled_y = (sin_d * x[None, :] + cos_d * y[None, :]).sum(dim=1)
 
-                r2i = xi**2 + yi**2
-                term_a = self.term_a(self.alpha, r2i)
+            xy_dot = torch.stack(
+                [
+                    gain * x - rotation * y + self.coupling * coupled_x,
+                    rotation * x + gain * y + self.coupling * coupled_y,
+                ],
+                dim=1,
+            )
 
-                zeta_i = self.zeta(ha_i, x_dot_old)
-                term_b = self.term_b(zeta_i, w_i)
+            # Constraint function (equations 4 and 12)
+            limit = self.constraint_function()[:, None]
+            xy_dot = torch.clamp(
+                xy_dot, self.xy_dot_old - limit, self.xy_dot_old + limit
+            )
 
-                k_matrix[i] = torch.tensor([
-                    [term_a, -term_b],
-                    [term_b, term_a],
-                ])
+            self.xy += xy_dot * self.dt
+            self.xy_dot_old = xy_dot
+            angles = self.amplitudes * self.xy[:, 1]
 
-            # Update each CPG
-            angles = torch.zeros(self.n)
-            for i, (xi, yi) in enumerate(self.xy):
-                # term_a contribution
-                term_a_vec = torch.mv(k_matrix[i], self.xy[i])
-
-                # term_b contribution
-                term_b_vec = torch.zeros(2)
-                for j in self.adjacency_dict[i]:
-                    term_b_vec += torch.mv(r_matrix[i, j], self.xy[j])
-
-                # Combine contributions to get the derivative
-                xi_dot, yi_dot = term_a_vec + term_b_vec
-
-                # Constraint function (CF)
-                xi_dot_old, yi_dot_old = self.xy_dot_old[i]
-                diff = 10
-                xi_dot = torch.clamp(
-                    xi_dot,
-                    xi_dot_old - diff,
-                    xi_dot_old + diff,
+            if self.angle_limits is not None:
+                clamped = torch.clamp(
+                    angles, min=self.angle_limits[0], max=self.angle_limits[1]
                 )
-                yi_dot = torch.clamp(
-                    yi_dot,
-                    yi_dot_old - diff,
-                    yi_dot_old + diff,
-                )
+                # Distance to the limits, usable as a loss
+                self.clamping_error = (angles - clamped).abs().mean().item()
+                if self.clipping:
+                    angles = clamped
 
-                # Compute new states
-                xi_new = xi + (xi_dot * self.dt)
-                yi_new = yi + (yi_dot * self.dt)
-
-                # Save new values
-                self.xy_dot_old[i] = self.xy[i]
-                self.xy[i] = torch.tensor([xi_new, yi_new])
-
-                # Save the angles (results)
-                angles[i] = self.amplitudes[i] * yi_new
-
-            # Apply hard bounds if requested
-            if self.hard_bounds is not None:
-                pre_clamping = angles.clone()
-                angles = torch.clamp(
-                    angles,
-                    min=self.hard_bounds[0],
-                    max=self.hard_bounds[1],
-                    out=angles,
-                )
-
-                # Track how much clamping was done (can be used as a loss)
-                self.clamping_error = (pre_clamping - angles).abs().sum().item()
-
-            # Keep history if requested
             if self.angle_tracking:
-                self.angle_history.append(angles.clone().tolist())
+                self.angle_history.append(angles.tolist())
 
-        # Check if there are any NaN values in the angle signal
-        if np.any(np.isnan(angles.cpu().numpy())):
+        if torch.isnan(angles).any():
             msg = "NaN values detected in the angle signal.\n"
-            msg += f"{angles.cpu().numpy()=}\n"
-            msg += f"{self.clamping_error.cpu().numpy()=}\n"  # type: ignore[attr-defined]  # known bug
-            msg += f"{self.xy.cpu().numpy()=}\n"
-            msg += f"{self.xy_dot_old.cpu().numpy()=}\n"
-            msg += f"{self.ha.cpu().numpy()=}\n"
-            msg += f"{self.w.cpu().numpy()=}\n"
-            msg += f"{self.amplitudes.cpu().numpy()=}\n"
-            msg += f"{self.phase.cpu().numpy()=}\n"
+            msg += f"{self.xy=}\n{self.xy_dot_old=}\n{self.ha=}\n{self.w=}\n"
+            msg += f"{self.amplitudes=}\n{self.phase=}\n{self.b=}\n"
             raise ValueError(msg)
 
-        # Save and return the angles
         self.angles = angles
         return self.angles.clone()
 
     def save(self, path: str | Path) -> None:
-        """
-        Save learnable parameters to file.
+        """Save the adaptable parameters to a file.
 
         Parameters
         ----------
@@ -498,19 +470,17 @@ class NaCPG(nn.Module):
             File path to save the parameters.
         """
         path = Path(path)
-        to_save = {
-            "phase": self.phase.detach().cpu(),
-            "w": self.w.detach().cpu(),
-            "amplitudes": self.amplitudes.detach().cpu(),
-            "ha": self.ha.detach().cpu(),
-            "b": self.b.detach().cpu(),
-        }
-        torch.save(to_save, path)
+        torch.save(
+            {
+                name: group.detach().cpu()
+                for name, group in self.parameter_groups.items()
+            },
+            path,
+        )
         console.log(f"[green]Saved parameters to {path}[/green]")
 
     def load(self, path: str | Path) -> None:
-        """
-        Load learnable parameters from file.
+        """Load the adaptable parameters from a file.
 
         Parameters
         ----------
@@ -518,47 +488,40 @@ class NaCPG(nn.Module):
             File path to load the parameters from.
         """
         path = Path(path)
-        loaded = torch.load(path, map_location="cpu")
-        self.phase.data = loaded["phase"]
-        self.w.data = loaded["w"]
-        self.amplitudes.data = loaded["amplitudes"]
-        self.ha.data = loaded["ha"]
-        self.b.data = loaded["b"]
+        loaded = torch.load(path, map_location="cpu", weights_only=True)
+        for name, group in self.parameter_groups.items():
+            group.data = loaded[name]
         console.log(f"[green]Loaded parameters from {path}[/green]")
 
 
 # Example usage
 def main() -> None:
     """Show example usage of the NaCPG class."""
-    adj_dict = create_fully_connected_adjacency(3)
-    na_cpg_mat = NaCPG(adj_dict, angle_tracking=True)
+    DATA.mkdir(exist_ok=True)
+    na_cpg = NaCPG(create_fully_connected_adjacency(3), angle_tracking=True)
 
     for _ in range(1000):
-        na_cpg_mat.forward()
+        na_cpg.forward()
 
     import matplotlib.pyplot as plt  # ruff: ignore[import-outside-top-level]
 
-    hist = torch.tensor(na_cpg_mat.angle_history)
-    times = torch.arange(hist.shape[0]) * na_cpg_mat.dt
+    hist = torch.tensor(na_cpg.angle_history)
+    times = torch.arange(hist.shape[0]) * na_cpg.dt
 
     plt.figure(figsize=(8, 4))
     for j in range(hist.shape[1]):
         plt.plot(times, hist[:, j], label=f"joint {j}")
     plt.xlabel("time (s)")
-    plt.ylabel("angle")
-    plt.title("CPG angle histories")
+    plt.ylabel("angle (rad)")
+    plt.title("NA-CPG angle histories")
     plt.legend()
     plt.grid(visible=True)
     plt.tight_layout()
-    plt.savefig(DATA / "angle_histories.png")
+    plt.savefig(DATA / "na_cpg_angles.png")
     plt.show()
 
-    # Save learnable parameters
-    na_cpg_mat.save(DATA / "na_cpg_params.pt")
-
-    console.log(na_cpg_mat.clamping_error)
+    na_cpg.save(DATA / "na_cpg_params.pt")
 
 
 if __name__ == "__main__":
-    for _ in range(10):  # run fewer times for demo
-        main()
+    main()
