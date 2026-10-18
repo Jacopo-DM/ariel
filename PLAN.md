@@ -12,7 +12,7 @@
 
 ## Current state
 
-Phase: all five goals done (test-env-green, dashboards-out, repo-hygiene, lint-types-policy, gl-autodetect). `main` was pushed to the `fork` remote (`Jacopo-DM/ariel`) on 2026-10-17 and is level with `fork/main`; `origin/main` (`ci-group/ariel`) is untouched, so `main` is ahead of it (`git rev-list --count origin/main..main`, about 45, linear). `feature-dashboard` is local only. On the fork, `checks.yml` and the Sphinx workflow both passed on the first run. Next step: the user decides about `feature-dashboard` and the first experiment branch; then plan the next goal with `/zz-project-plan`.
+Phase: all five goals done (test-env-green, dashboards-out, repo-hygiene, lint-types-policy, gl-autodetect). `main` was pushed to the `fork` remote (`Jacopo-DM/ariel`) on 2026-10-17 (compare with `git rev-list --count fork/main..main`); `origin/main` (`ci-group/ariel`) is untouched, so `main` is ahead of it (`git rev-list --count origin/main..main`, about 45, linear). `feature-dashboard` is local only. On the fork, `checks.yml` and the Sphinx workflow both passed on the first run. Next step: the user decides about `feature-dashboard` and the first experiment branch; then plan the next goal with `/zz-project-plan`.
 
 ## Baseline
 
