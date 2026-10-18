@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import random
-from typing import TYPE_CHECKING, Self
+from typing import TYPE_CHECKING, Self, cast
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -316,11 +316,13 @@ class Genome:
                 # Inherit from the Fitter Parent
                 offspring_connection_genes[innov_id] = conn_a.copy()
 
-            elif conn_b:
-                # Standard NEAT: Only inherit if parents are equally fit.
-                if fitter_parent.fitness == less_fit_parent.fitness:
-                    offspring_connection_genes[innov_id] = conn_b.copy()
-                # Otherwise, skip inheriting the less fit parent's unique gene.
+            # Standard NEAT: genes only the less fit parent has are inherited
+            # only if the parents are equally fit (innov_id comes from the
+            # union, so conn_b exists here).
+            elif fitter_parent.fitness == less_fit_parent.fitness:
+                offspring_connection_genes[innov_id] = cast(
+                    "Connection", conn_b
+                ).copy()
 
         # 2. Inherit Node Genes
         all_inherited_node_ids = set()
@@ -496,8 +498,7 @@ class Genome:
                 for conn in incoming_map[node_id]:
                     # In feed-forward, conn.in_id is GUARANTEED to be in
                     # node_outputs
-                    if conn.in_id in node_outputs:
-                        weighted_sum += node_outputs[conn.in_id] * conn.weight
+                    weighted_sum += node_outputs[conn.in_id] * conn.weight
 
                 weighted_sum += node.bias
                 node_outputs[node_id] = ACTIVATION_FUNCTIONS[node.activation](  # type: ignore[index]  # known bug

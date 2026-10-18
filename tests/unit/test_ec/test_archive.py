@@ -2,11 +2,12 @@
 
 import math
 from pathlib import Path
+from typing import cast
 
 import numpy as np
 import pytest
 
-from ariel.ec.archive import Archive
+from ariel.ec.archive import Archive, FitnessMode
 from ariel.ec.ea import EA, EAOperation
 from ariel.ec.individual import Individual
 from ariel.ec.population import Population
@@ -481,3 +482,12 @@ def test_tournament_of_an_empty_pool_fails(archive: Archive) -> None:
     """A birth range without individuals gives an empty pool."""
     with pytest.raises(ValueError, match="No individuals match"):
         archive.tournament_population(n=2, birth_range=NOBODY)
+
+
+def test_unknown_fitness_mode_leaves_the_order_to_the_database(
+    archive: Archive,
+) -> None:
+    """A mode that is neither min nor max applies no ordering."""
+    mode = cast("FitnessMode", "unsorted")
+    assert isinstance(archive.best_individual(mode), Individual)
+    assert len(archive.hall_of_fame(n=TOP_N, fitness_mode=mode)) == TOP_N

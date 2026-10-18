@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import concurrent.futures
+import inspect
 import json
 import runpy
 import sys
@@ -434,3 +436,42 @@ def test_plot_main_block_plots_the_runs(
     runpy.run_path(str(Path(plot_from_logs.__file__)), run_name="__main__")
     assert "Plotting 1 runs" in capsys.readouterr().out
     assert (tmp_path / "lynx_arm_experiment_10x.png").exists()
+
+
+# --- running the scripts as programs ---------------------------------------- #
+
+
+def test_evolve_runs_as_a_script(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Running evolve.py as a program calls main()."""
+    monkeypatch.setattr(
+        concurrent.futures, "ProcessPoolExecutor", ThreadPoolExecutor
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "evolve",
+            "--generations", str(GENERATIONS),
+            "--population", str(POPULATION),
+            "--workers", "1",
+            "--hidden-size", str(HIDDEN),
+            "--sim-steps", str(SIM_STEPS),
+            "--out-dir", str(tmp_path / "out"),
+        ],
+    )  # fmt: skip
+    runpy.run_path(inspect.getfile(evolve), run_name="__main__")
+    assert list((tmp_path / "out").iterdir())
+
+
+def test_replay_runs_as_a_script(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Running replay.py as a program calls main()."""
+    _artifacts(tmp_path)
+    _replay_argv(monkeypatch, tmp_path, "--eval-only")
+    runpy.run_path(inspect.getfile(replay), run_name="__main__")
+    assert "touch_time=" in capsys.readouterr().out

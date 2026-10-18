@@ -592,3 +592,16 @@ def test_fetch_population_can_include_dead_and_unevaluated(
     assert ea.population.size == len(_make_pop())
     ea.fetch_population(only_alive=True, requires_eval=True)
     assert ea.population.size == 0
+
+
+def test_restart_keeps_an_explicit_first_generation(tmp_path: Path) -> None:
+    """first_generation_id overrides the generation derived from the restart."""
+    source = _finished_run(tmp_path / "first")
+    ea = EA(
+        restart=source,
+        operations=[noop],
+        db_file_path=tmp_path / "second" / "restarted.db",
+        first_generation_id=FIRST_GENERATION_ID,
+        quiet=True,
+    )
+    assert ea.current_generation == FIRST_GENERATION_ID

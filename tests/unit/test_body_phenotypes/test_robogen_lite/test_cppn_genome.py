@@ -23,6 +23,8 @@ LESS_FIT = 1.0
 NODE_PAIR = 2
 FIRST_INNOV = 100
 FIRST_ID = 1
+UNKNOWN_NODE = 99
+EXTRA_INNOV = 7
 LAST_NODE_START = 3
 LAST_INNOV_START = 7
 
@@ -277,6 +279,29 @@ def test_crossover_maximisation_self_worse_known_bug() -> None:
         worse.crossover(better)
 
 
+def test_crossover_skips_genes_only_the_less_fit_parent_has() -> None:
+    """With different fitness the less fit parent's own genes are dropped."""
+    random.seed(7)
+    fitter = _chain_genome()
+    fitter.fitness = FITTER
+    less = _parent_with_extra_gene(LESS_FIT)
+    child = fitter.crossover(less)
+    assert set(child.connections) == {0, 1}
+
+
+def test_crossover_ignores_connections_to_unknown_nodes() -> None:
+    """A connection whose node is in neither parent adds no node gene."""
+    random.seed(8)
+    a = _chain_genome()
+    a.fitness = FITTER
+    a.connections[EXTRA_INNOV] = Connection(
+        0, UNKNOWN_NODE, 1.0, enabled=True, innov_id=EXTRA_INNOV
+    )
+    child = a.crossover(_chain_genome())
+    assert UNKNOWN_NODE not in child.nodes
+    assert EXTRA_INNOV in child.connections
+
+
 # --- ordering and activation ------------------------------------------------ #
 
 
@@ -313,6 +338,17 @@ def test_activate_ignores_disabled_connections() -> None:
     assert genome.activate([x0, x1]) == [
         pytest.approx(sigmoid(WEIGHT_A * x0 + BIAS))
     ]
+
+
+def test_activate_recurrent_genome_skips_disabled_connections() -> None:
+    """A disabled connection of a cyclic genome does not feed its target."""
+    genome = _chain_genome()
+    genome.add_node(_node(7, "hidden"))
+    genome.add_connection(Connection(2, 7, 1.0, enabled=True, innov_id=5))
+    genome.add_connection(Connection(7, 2, 1.0, enabled=True, innov_id=6))
+    genome.add_connection(Connection(0, 7, 1.0, enabled=False, innov_id=8))
+    out = genome.activate([0.1, 0.2])
+    assert math.isfinite(out[0])
 
 
 def test_activate_wrong_input_count_raises() -> None:

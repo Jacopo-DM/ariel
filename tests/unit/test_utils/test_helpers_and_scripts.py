@@ -354,7 +354,7 @@ def test_probe_worker_script(
     monkeypatch.setitem(sys.modules, "mujoco", _fake_mujoco(_FakeRenderer))
     monkeypatch.setattr(sys, "argv", ["worker", "egl"])
     with pytest.raises(SystemExit) as stop:
-        runpy.run_path(_gl_probe_worker.__file__, run_name="__main__")
+        runpy.run_path(inspect.getfile(_gl_probe_worker), run_name="__main__")
     assert stop.value.code == 0
     assert '"ok"' in capsys.readouterr().out
 

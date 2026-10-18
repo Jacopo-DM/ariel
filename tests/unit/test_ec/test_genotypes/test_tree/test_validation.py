@@ -216,3 +216,37 @@ def test_validate_disconnected_raises() -> None:
     }
     with pytest.raises(ValueError, match="connected tree"):
         validate_genome_dict(genome)
+
+
+def test_edges_to_unknown_nodes_do_not_break_connectivity() -> None:
+    """An edge whose child is not a node is ignored by the tree check."""
+    genome = _core_only()
+    genome["edges"] = [{"parent": 0, "child": 9, "face": "FRONT"}]
+    assert is_single_connected_tree(genome) is True
+
+
+def test_a_node_reachable_by_two_paths_is_connected() -> None:
+    """A diamond shape is still one connected component."""
+    genome = {
+        "nodes": {
+            "0": {"type": "CORE", "rotation": "DEG_0"},
+            "1": {"type": "BRICK", "rotation": "DEG_0"},
+            "2": {"type": "BRICK", "rotation": "DEG_0"},
+            "3": {"type": "BRICK", "rotation": "DEG_0"},
+        },
+        "edges": [
+            {"parent": 0, "child": 1, "face": "FRONT"},
+            {"parent": 0, "child": 2, "face": "BACK"},
+            {"parent": 1, "child": 3, "face": "FRONT"},
+            {"parent": 2, "child": 3, "face": "FRONT"},
+        ],
+    }
+    assert is_single_connected_tree(genome) is True
+
+
+def test_validate_missing_parent_node_raises() -> None:
+    """An edge from a parent that is not a node is invalid."""
+    genome = _core_only()
+    genome["edges"] = [{"parent": 7, "child": 0, "face": "FRONT"}]
+    with pytest.raises(ValueError, match="missing parent node"):
+        validate_genome_dict(genome)
