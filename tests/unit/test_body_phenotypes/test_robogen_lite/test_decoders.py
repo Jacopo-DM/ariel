@@ -462,3 +462,60 @@ def test_vector_decoder_decode_zero_conn_only_core() -> None:
     decoder.set_module_types_and_rotations()
     decoder.decode_vector_to_graph()
     assert 0 in decoder.nodes
+
+
+# ---------------------------------------------------------------------------
+# Decoding errors: the guards against corrupt probability spaces
+# ---------------------------------------------------------------------------
+
+BIG = 5.0
+
+
+def test_hi_prob_decode_core_as_child_raises() -> None:
+    """A connection that makes the core a child is an error."""
+    decoder = _setup_decoder()
+    decoder.conn_p_space[0, 0, 0] = BIG
+    with pytest.raises(ValueError, match="core module as a child"):
+        decoder.decode_probability_to_graph()
+
+
+def test_hi_prob_decode_none_child_raises() -> None:
+    """A NONE module cannot become a child."""
+    decoder = _setup_decoder()
+    decoder.type_dict[1] = ModuleType.NONE
+    decoder.conn_p_space[0, 1, 0] = BIG
+    with pytest.raises(ValueError, match="NONE module"):
+        decoder.decode_probability_to_graph()
+
+
+def test_hi_prob_decode_none_parent_raises() -> None:
+    """A NONE module cannot be a parent."""
+    decoder = _setup_decoder()
+    decoder.type_dict[0] = ModuleType.NONE
+    with pytest.raises(ValueError, match="NONE module"):
+        decoder.decode_probability_to_graph()
+
+
+def test_vector_decode_core_as_child_raises() -> None:
+    """The vector decoder refuses to make the core a child."""
+    decoder = _setup_vector_decoder()
+    decoder.conn_p_space[0, 0, 0] = BIG  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
+    with pytest.raises(ValueError, match="core module as a child"):
+        decoder.decode_vector_to_graph()
+
+
+def test_vector_decode_none_child_raises() -> None:
+    """The vector decoder refuses a NONE child."""
+    decoder = _setup_vector_decoder()
+    decoder.type_dict[1] = ModuleType.NONE
+    decoder.conn_p_space[0, 1, 0] = BIG  # type: ignore[attr-defined]  # known bug: VectorDecoder never defines these attributes (PLAN.md)
+    with pytest.raises(ValueError, match="NONE module"):
+        decoder.decode_vector_to_graph()
+
+
+def test_vector_decode_none_parent_raises() -> None:
+    """The vector decoder refuses a NONE parent."""
+    decoder = _setup_vector_decoder()
+    decoder.type_dict[0] = ModuleType.NONE
+    with pytest.raises(ValueError, match="NONE module"):
+        decoder.decode_vector_to_graph()
