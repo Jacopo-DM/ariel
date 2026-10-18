@@ -60,7 +60,7 @@ class Genome:
         cls,
         num_inputs: int,
         num_outputs: int,
-        next_node_id: int,  # noqa: ARG003
+        next_node_id: int,  # ruff: ignore[unused-class-method-argument]
         next_innov_id: int,
     ) -> Self:
         """
@@ -203,7 +203,7 @@ class Genome:
         )
         self.add_connection(conn2)
 
-    def crossover(  # noqa: C901, PLR0912
+    def crossover(  # ruff: ignore[complex-structure, too-many-branches]
         self, other: Genome, *, is_maximisation: bool = True
     ) -> Genome:
         """Cross over this Genome (parent A) with another (parent B)."""
@@ -298,7 +298,7 @@ class Genome:
     def add_node(self, node: Node) -> None:
         """Add a node gene to the genome."""
         if node not in self.nodes.values():
-            self.nodes[node._id] = node  # noqa: SLF001
+            self.nodes[node._id] = node  # ruff: ignore[private-member-access]
         else:
             msg = "Node already exists in genome."
             raise ValueError(msg)
@@ -353,11 +353,11 @@ class Genome:
                 "A cycle was detected in the genome's graph, "
                 "cannot create a feed-forward order."
             )
-            raise Exception(msg)  # noqa: TRY002
+            raise Exception(msg)  # ruff: ignore[raise-vanilla-class]
 
         return sorted_order
 
-    def activate(self, inputs: list[float]) -> list[float]:  # noqa: C901, PLR0912
+    def activate(self, inputs: list[float]) -> list[float]:  # ruff: ignore[complex-structure, too-many-branches]
         """
         Activate the neural network.
 
@@ -415,7 +415,7 @@ class Genome:
 
             return [node_outputs[_id] for _id in output_node_ids]
 
-        except Exception:  # noqa: BLE001
+        except Exception:  # ruff: ignore[blind-except]
             # --- STRATEGY B: RECURRENT RELAXATION (Fallback) ---
             # A cycle exists. We update all nodes iteratively for N steps.
 
@@ -463,7 +463,7 @@ class Genome:
         return {
             "nodes": {
                 str(k): {
-                    "_id": v._id,  # noqa: SLF001
+                    "_id": v._id,  # ruff: ignore[private-member-access]
                     "typ": v.typ,
                     "activation": v.activation,
                     "bias": v.bias,
@@ -486,7 +486,7 @@ class Genome:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any], fitness: float = 0.0) -> Genome:  # noqa: ARG003
+    def from_dict(cls, data: dict[str, Any], fitness: float = 0.0) -> Genome:  # ruff: ignore[unused-class-method-argument]
         """Reconstructs a Genome object from a dictionary."""
         # 1. Rebuild Nodes
         nodes = {}

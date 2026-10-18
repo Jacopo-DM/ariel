@@ -74,8 +74,8 @@ mjx_data = mjx.make_data(mjx_model)
 MJX-Warp example:
 ```python
 mj_model = mujoco.MjModel.from_xml_path(...)
-model = mjx.put_model(mj_model, impl='warp')
-data = mjx.make_data(mj_model, impl='warp', naconmax=naconmax, njmax=njmax)
+model = mjx.put_model(mj_model, impl="warp")
+data = mjx.make_data(mj_model, impl="warp", naconmax=naconmax, njmax=njmax)
 ```
 
 ## put_data

@@ -99,9 +99,9 @@ Convert sparse inertia matrix to dense format.
 import mujoco
 import numpy as np
 
-model = mujoco.MjModel.from_xml_path('model.xml')
-data  = mujoco.MjData(model)
-mujoco.mj_forward(model, data)    # computes everything including crb
+model = mujoco.MjModel.from_xml_path("model.xml")
+data = mujoco.MjData(model)
+mujoco.mj_forward(model, data)  # computes everything including crb
 
 # Factorize and solve M*x = qacc
 mujoco.mj_factorM(model, data)

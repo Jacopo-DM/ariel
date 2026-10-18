@@ -20,7 +20,8 @@ optimizer). All live in [simulation/tasks/](../../src/ariel/simulation/tasks/).
 
 ```python
 from ariel.simulation.tasks.targeted_locomotion import distance_to_target
-score = distance_to_target(final_pos, target_pos)   # minimise this
+
+score = distance_to_target(final_pos, target_pos)  # minimise this
 ```
 
 These are **minimised** in the examples (smaller distance = better) — set
@@ -50,7 +51,7 @@ score, and assign:
 def evaluate(population: Population) -> Population:
     for ind in population:
         if ind.requires_eval:
-            final_pos = run_and_get_position(ind)        # your sim
+            final_pos = run_and_get_position(ind)  # your sim
             ind.fitness = distance_to_target(final_pos, target)
     return population
 ```

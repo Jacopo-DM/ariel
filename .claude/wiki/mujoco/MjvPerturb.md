@@ -12,7 +12,7 @@ Object selection and perturbation handle used in interactive visualization. Trac
 
 ```python
 pert = mujoco.MjvPerturb()
-mujoco.mjv_defaultPerturb(pert)   # initialize to defaults
+mujoco.mjv_defaultPerturb(pert)  # initialize to defaults
 ```
 
 ## Attributes
@@ -65,11 +65,17 @@ geomid = np.array([-1])
 flexid = np.array([-1])
 skinid = np.array([-1])
 bodyid = mujoco.mjv_select(
-    model, data, opt,
-    viewport.width / viewport.height,   # aspect ratio
-    relx, rely,
+    model,
+    data,
+    opt,
+    viewport.width / viewport.height,  # aspect ratio
+    relx,
+    rely,
     scene,
-    selpnt, geomid, flexid, skinid
+    selpnt,
+    geomid,
+    flexid,
+    skinid,
 )
 
 if bodyid > 0:

@@ -20,18 +20,21 @@ Custom validation for fields and whole models. Import from `pydantic` (`field_va
 ## Signatures
 
 ```python
-@field_validator('number', mode='after')
+@field_validator("number", mode="after")
 @classmethod
 def is_even(cls, value: int) -> int: ...
 
-@field_validator('my_string', mode='wrap')
+
+@field_validator("my_string", mode="wrap")
 @classmethod
 def truncate(cls, value: Any, handler: ValidatorFunctionWrapHandler) -> str: ...
 
-@model_validator(mode='after')
+
+@model_validator(mode="after")
 def check_passwords_match(self) -> Self: ...
 
-@model_validator(mode='before')
+
+@model_validator(mode="before")
 @classmethod
 def check_card_number_not_present(cls, data: Any) -> Any: ...
 ```

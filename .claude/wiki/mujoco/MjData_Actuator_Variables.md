@@ -21,8 +21,8 @@ Arrays in [[MjData]] that track the state and output of actuators, plus the cont
 **Example:**
 
 ```python
-data.ctrl[0] = 1.0   # set first actuator command
-data.ctrl[:] = 0.0   # zero all controls
+data.ctrl[0] = 1.0  # set first actuator command
+data.ctrl[:] = 0.0  # zero all controls
 ```
 
 ---

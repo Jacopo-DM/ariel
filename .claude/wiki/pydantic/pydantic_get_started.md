@@ -22,15 +22,15 @@ from pydantic import BaseModel, PositiveInt
 
 class User(BaseModel):
     id: int
-    name: str = 'John Doe'
+    name: str = "John Doe"
     signup_ts: datetime | None
     tastes: dict[str, PositiveInt]
 
 
 external_data = {
-    'id': 123,
-    'signup_ts': '2019-06-01 12:22',
-    'tastes': {'wine': 9, b'cheese': 7, 'cabbage': '1'},
+    "id": 123,
+    "signup_ts": "2019-06-01 12:22",
+    "tastes": {"wine": 9, b"cheese": 7, "cabbage": "1"},
 }
 user = User(**external_data)
 print(user.model_dump())
@@ -46,7 +46,7 @@ Invalid input raises one `ValidationError` listing every failing field:
 
 ```python
 try:
-    User(id='not an int', tastes={})
+    User(id="not an int", tastes={})
 except ValidationError as e:
     print(e.errors())
 # [{'type': 'int_parsing', 'loc': ('id',), 'msg': 'Input should be a valid integer, unable to parse string as an integer',

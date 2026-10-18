@@ -112,7 +112,7 @@ def _import_ariel(
     env = {k: v for k, v in os.environ.items() if k != "MUJOCO_GL"}
     if preset is not None:
         env["MUJOCO_GL"] = preset
-    return subprocess.run(  # noqa: S603
+    return subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true]
         [
             sys.executable,
             "-c",
@@ -309,7 +309,7 @@ gl_backend.ensure_gl_backend(
 def test_ensure_two_processes_probe_once(tmp_path: Path) -> None:
     """Two processes starting together produce one probe and one file."""
     procs = [
-        subprocess.Popen(  # noqa: S603
+        subprocess.Popen(  # ruff: ignore[subprocess-without-shell-equals-true]
             [sys.executable, "-c", _PROCESS_SCRIPT, str(tmp_path)]
         )
         for _ in range(2)
@@ -368,7 +368,7 @@ def test_import_renderers_probes_once_for_real(tmp_path: Path) -> None:
     """Importing ariel.utils.renderers creates the file the first time only."""
     env = {k: v for k, v in os.environ.items() if k != "MUJOCO_GL"}
     command = [sys.executable, "-c", "import ariel.utils.renderers"]
-    first = subprocess.run(  # noqa: S603
+    first = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true]
         command,
         cwd=tmp_path,
         env=env,
@@ -381,7 +381,7 @@ def test_import_renderers_probes_once_for_real(tmp_path: Path) -> None:
     assert "One-off setup" in first.stdout + first.stderr
     config = json.loads((tmp_path / CONFIG_NAME).read_text(encoding="utf-8"))
     assert set(config["backends"]) == {"glfw", "egl", "osmesa"}
-    second = subprocess.run(  # noqa: S603
+    second = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true]
         command,
         cwd=tmp_path,
         env=env,

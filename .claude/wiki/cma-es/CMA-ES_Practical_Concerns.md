@@ -15,9 +15,9 @@ Implementation details from Appendix B of Hansen (2023).
 Use eigendecomposition **C = B D² Bᵀ**:
 
 ```python
-z = randn(n)          # N(0, I)
-y = B @ D @ z         # N(0, C)
-x = m + sigma * y     # N(m, sigma^2 * C)
+z = randn(n)  # N(0, I)
+y = B @ D @ z  # N(0, C)
+x = m + sigma * y  # N(m, sigma^2 * C)
 
 # For C^{-1/2} * <y>_w  (needed in step-size path update):
 # C^{-1/2} * y  =  B @ D^{-1} @ (Bᵀ @ y)  =  B @ sum_i(w_i * z_{i:λ})

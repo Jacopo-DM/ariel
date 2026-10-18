@@ -78,7 +78,8 @@ import numpy as np
 import pandas as pd
 
 data = pd.read_sql(
-    "SELECT * FROM individual", sqlite3.connect("__data__/database.db"),
+    "SELECT * FROM individual",
+    sqlite3.connect("__data__/database.db"),
 )
 data["genotype_"] = data["genotype_"].apply(json5.loads)
 ```
@@ -167,9 +168,7 @@ population_per_gen = {
 ### sqlite3 / plain Python
 
 ```python
-fitness_by_id = {
-    ind["id"]: float(ind["fitness_"]) for ind in individuals
-}
+fitness_by_id = {ind["id"]: float(ind["fitness_"]) for ind in individuals}
 
 generations = list(range(min_gen, max_gen + 1))
 means = []
@@ -224,7 +223,9 @@ Genotypes are stored as JSON5 strings in `genotype_`. After decoding with `json5
 
 ```python
 # sqlite3 style — after loading with Pattern 1 above:
-genotype_of_best = individuals[best_idx]["genotype_"]  # already a list after json5.loads
+genotype_of_best = individuals[best_idx][
+    "genotype_"
+]  # already a list after json5.loads
 
 # pandas style:
 best_row = data.loc[data["fitness_"].idxmin()]

@@ -17,15 +17,15 @@ date_ingested: 2026-04-24
 Continuous multidimensional parameter backed by a NumPy array.
 
 ```python
-param = ng.p.Array(shape=(n,))          # shape-based init
+param = ng.p.Array(shape=(n,))  # shape-based init
 param = ng.p.Array(init=np.array(...))  # value-based init
 ```
 
 **Configuration methods (chainable):**
 ```python
-param.set_mutation(sigma=10)            # scalar sigma — same for all dims
-param.set_bounds(lower, upper)          # box constraints
-param.set_integer_casting()             # round values to int
+param.set_mutation(sigma=10)  # scalar sigma — same for all dims
+param.set_bounds(lower, upper)  # box constraints
+param.set_integer_casting()  # round values to int
 ```
 
 > **Per-element sigma**: The docs show `sigma` as a **scalar only** in all examples. Array sigma is **[unverified — not confirmed in docs]**. Use separate `ng.p.Array` objects per group if different sigmas are needed (see Tuple below).
@@ -69,13 +69,13 @@ param = ng.p.TransitionChoice(range(10), repetitions=3)
 Composes multiple parameters into one. Useful for **per-group sigma**:
 
 ```python
-tubes_p   = ng.p.Array(init=tubes_init).set_mutation(sigma=0.27)
+tubes_p = ng.p.Array(init=tubes_init).set_mutation(sigma=0.27)
 weights_p = ng.p.Array(init=weights_init).set_mutation(sigma=0.10)
-param     = ng.p.Tuple(tubes_p, weights_p)
+param = ng.p.Tuple(tubes_p, weights_p)
 
 # Access values after ask():
 candidate = optimizer.ask()
-tubes_val, weights_val = candidate.value   # tuple unpacking
+tubes_val, weights_val = candidate.value  # tuple unpacking
 genome = np.concatenate([tubes_val, weights_val])
 ```
 
@@ -85,12 +85,12 @@ Dictionary-keyed composition:
 
 ```python
 param = ng.p.Dict(
-    log   = ng.p.Log(lower=0.01, upper=1.0),
-    array = ng.p.Array(shape=(2,)),
-    char  = ng.p.Choice(["a", "b", "c"]),
+    log=ng.p.Log(lower=0.01, upper=1.0),
+    array=ng.p.Array(shape=(2,)),
+    char=ng.p.Choice(["a", "b", "c"]),
 )
 candidate = optimizer.ask()
-candidate.value["log"]    # float
+candidate.value["log"]  # float
 candidate.value["array"]  # np.ndarray
 ```
 
@@ -100,9 +100,9 @@ Container for mixed positional + keyword parameters. Used when the function sign
 
 ```python
 instru = ng.p.Instrumentation(
-    ng.p.Scalar(),           # positional arg 0
+    ng.p.Scalar(),  # positional arg 0
     ng.p.Array(shape=(5,)),  # positional arg 1
-    lr=ng.p.Log(0.001, 0.1), # keyword arg
+    lr=ng.p.Log(0.001, 0.1),  # keyword arg
 )
 
 # After ask():
@@ -134,7 +134,7 @@ Clips or penalizes values outside `[lower, upper]`. The exact method (clipping v
 
 ```python
 # Access current value
-param.value                              # numpy array or structured value
+param.value  # numpy array or structured value
 
 # Create a child with a specific value (for information injection)
 child = param.spawn_child(new_value=np.array([...]))
@@ -161,16 +161,22 @@ param.register_cheap_constraint(lambda x: x[0] >= 1.0)
 Split genome into tubes + weights with independent sigmas:
 
 ```python
-from ariel.body_phenotypes.lynx_mjspec.unified_pipeline.common import TUBE_MIN, TUBE_MAX, NUM_TUBES
+from ariel.body_phenotypes.lynx_mjspec.unified_pipeline.common import (
+    TUBE_MIN,
+    TUBE_MAX,
+    NUM_TUBES,
+)
 
-tubes_init   = np.full(NUM_TUBES, (TUBE_MIN + TUBE_MAX) / 2)   # 0.55
+tubes_init = np.full(NUM_TUBES, (TUBE_MIN + TUBE_MAX) / 2)  # 0.55
 weights_init = rng.uniform(-0.1, 0.1, size=num_weights)
 
-tubes_p   = ng.p.Array(init=tubes_init).set_mutation(sigma=0.27)
+tubes_p = ng.p.Array(init=tubes_init).set_mutation(sigma=0.27)
 weights_p = ng.p.Array(init=weights_init).set_mutation(sigma=0.10)
-param     = ng.p.Tuple(tubes_p, weights_p)
+param = ng.p.Tuple(tubes_p, weights_p)
 
-optimizer = ng.optimizers.CMA(parametrization=param, budget=budget, num_workers=workers)
+optimizer = ng.optimizers.CMA(
+    parametrization=param, budget=budget, num_workers=workers
+)
 
 # In ask/tell loop:
 candidates = [optimizer.ask() for _ in range(population)]

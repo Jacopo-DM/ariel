@@ -114,7 +114,7 @@ class TargetedLocomotionWorker(MuJoCoWorkerBase):
 
                 def cb(m: mj.MjModel, d: mj.MjData) -> None:
                     pos = d.qpos[:3].copy()
-                    vec = np.array(target) - pos  # noqa: B023
+                    vec = np.array(target) - pos  # ruff: ignore[function-uses-loop-variable]
                     dist = np.linalg.norm(vec) + 1e-6
                     state = np.concatenate([
                         d.qpos.copy(),

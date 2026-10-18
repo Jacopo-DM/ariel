@@ -94,7 +94,7 @@ Nevergrad implements mirrored-sampling variants of CMA-ES. Because offspring mus
 optimizer = ng.optimizers.CMA(
     parametrization=dim,
     budget=total_budget,
-    num_workers=lambda_size   # must be even for mirrored sampling
+    num_workers=lambda_size,  # must be even for mirrored sampling
 )
 
 # Ask exactly lambda_size times per generation

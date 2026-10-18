@@ -9,8 +9,15 @@ optimizer (CMA-ES, Nevergrad) directly for brain-only problems.
 
 ```python
 from ariel.ec import (
-    EA, EAOperation, EASettings, Individual, Population, Archive,
-    Crossover, FloatMutator, IntegerMutator,
+    EA,
+    EAOperation,
+    EASettings,
+    Individual,
+    Population,
+    Archive,
+    Crossover,
+    FloatMutator,
+    IntegerMutator,
 )
 ```
 
@@ -32,9 +39,9 @@ from ariel.ec import EA, EAOperation, Population, Individual
 
 population = Population([make_individual() for _ in range(pop_size)])
 ops = [
-    EAOperation(parent_selection),    # each: Population -> Population
+    EAOperation(parent_selection),  # each: Population -> Population
     EAOperation(reproduction),
-    EAOperation(evaluate),            # sets ind.fitness for ind.requires_eval
+    EAOperation(evaluate),  # sets ind.fitness for ind.requires_eval
     EAOperation(survivor_selection),
 ]
 ea = EA(population, operations=ops, num_steps=budget)
@@ -52,8 +59,8 @@ body+brain example with all four operations, `EASettings`, and DB output:
 ```python
 ind = Individual()
 ind.genotype = {"morph": genome.to_dict(), "ctrl": [...]}
-ind.tags["ps"] = False          # free-form tags (e.g. parent-selected)
-ind.fitness = score             # also flips requires_eval False
+ind.tags["ps"] = False  # free-form tags (e.g. parent-selected)
+ind.fitness = score  # also flips requires_eval False
 ```
 
 `ind.fitness` raises if read before evaluation — that's by design

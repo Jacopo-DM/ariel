@@ -54,20 +54,20 @@ All functions have the same `(model, data, jacp, jacr, ...)` signature pattern.
 import mujoco
 import numpy as np
 
-model = mujoco.MjModel.from_xml_path('model.xml')
-data  = mujoco.MjData(model)
+model = mujoco.MjModel.from_xml_path("model.xml")
+data = mujoco.MjData(model)
 
 # Run kinematics to update positions
 mujoco.mj_forward(model, data)
 
 # Get end-effector site ID and compute Jacobian
-site_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, 'end_effector')
+site_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, "end_effector")
 jacp = np.zeros((3, model.nv))
 jacr = np.zeros((3, model.nv))
 mujoco.mj_jacSite(model, data, jacp, jacr, site_id)
 
 # Jacobian-based control: map end-effector error to joint torques
-ee_error = target_pos - data.site('end_effector').xpos
+ee_error = target_pos - data.site("end_effector").xpos
 joint_torques = jacp.T @ ee_error
 ```
 

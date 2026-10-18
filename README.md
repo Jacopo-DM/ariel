@@ -34,7 +34,7 @@ from ariel.body_phenotypes.robogen_lite.prebuilt_robots.gecko import gecko
 world = SimpleFlatWorld()
 
 # 2. Build a modular robot body and spawn it into the world
-robot = gecko()                       # returns a CoreModule
+robot = gecko()  # returns a CoreModule
 world.spawn(robot.spec, position=[0, 0, 0.1])
 
 # 3. Compile to a MuJoCo model + data

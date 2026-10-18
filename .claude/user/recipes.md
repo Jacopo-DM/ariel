@@ -23,7 +23,7 @@ world = SimpleFlatWorld()
 world.spawn(body_spider45().spec, position=[0, 0, 0.1])
 model = world.spec.compile()
 data = mujoco.MjData(model)
-viewer.launch(model=model, data=data)        # interactive
+viewer.launch(model=model, data=data)  # interactive
 ```
 
 ## 2. Add a CPG and walk
@@ -33,7 +33,8 @@ Source: [examples/re_book/2_body_brain_evolution.py](../../examples/re_book/2_bo
 ```python
 from ariel.simulation.controllers.controller import Controller
 from ariel.simulation.controllers.simple_cpg import (
-    SimpleCPG, create_fully_connected_adjacency,
+    SimpleCPG,
+    create_fully_connected_adjacency,
 )
 from ariel.utils.tracker import Tracker
 
@@ -70,8 +71,11 @@ from evotorch.neuroevolution import NEProblem
 from ariel.simulation.tasks.targeted_locomotion import distance_to_target
 
 problem = NEProblem(
-    objective_sense="min", network=network.eval(),
-    network_eval_func=fitness_function, initial_bounds=(-0.5, 0.5), device="cpu",
+    objective_sense="min",
+    network=network.eval(),
+    network_eval_func=fitness_function,
+    initial_bounds=(-0.5, 0.5),
+    device="cpu",
 )
 searcher = CMAES(problem=problem, stdev_init=0.075, popsize=10)
 for _ in range(budget + 1):
@@ -86,8 +90,12 @@ Source: [examples/re_book/2_body_brain_evolution.py](../../examples/re_book/2_bo
 ```python
 from ariel.ec import EA, EAOperation, EASettings, Individual, Population
 
-cfg = EASettings(is_maximisation=False, num_steps=80,
-                 target_population_size=80, output_folder=DATA)
+cfg = EASettings(
+    is_maximisation=False,
+    num_steps=80,
+    target_population_size=80,
+    output_folder=DATA,
+)
 population = Population([make_individual() for _ in range(80)])
 ops = [
     EAOperation(parent_selection),
@@ -95,8 +103,13 @@ ops = [
     EAOperation(evaluate),
     EAOperation(survivor_selection),
 ]
-ea = EA(population, operations=ops, num_steps=80,
-        db_file_path=cfg.db_file_path, db_handling=cfg.db_handling)
+ea = EA(
+    population,
+    operations=ops,
+    num_steps=80,
+    db_file_path=cfg.db_file_path,
+    db_handling=cfg.db_handling,
+)
 ea.run()
 best = ea.get_solution("best", only_alive=False)
 ```

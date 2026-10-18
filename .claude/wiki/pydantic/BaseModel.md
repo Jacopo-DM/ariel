@@ -13,9 +13,10 @@ Pydantic models subclass `BaseModel` and declare fields as annotated attributes.
 ```python
 from pydantic import BaseModel, ConfigDict
 
+
 class User(BaseModel):
     id: int
-    name: str = 'Jane Doe'
+    name: str = "Jane Doe"
 
     model_config = ConfigDict(str_max_length=10)
 ```
@@ -46,8 +47,9 @@ class User(BaseModel):
 
 ```python
 from pydantic import RootModel
+
 Pets = RootModel[list[str]]
-print(Pets.model_validate(['dog', 'cat']))
+print(Pets.model_validate(["dog", "cat"]))
 ```
 
 Serialisation returns the root value directly.

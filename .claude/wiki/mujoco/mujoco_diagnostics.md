@@ -17,7 +17,9 @@ MuJoCo registers warnings in `data.warning` without stopping simulation. Trigger
 for wtype in mujoco.mjtWarning:
     stat = data.warning[wtype]
     if stat.number > 0:
-        print(f"Warning {wtype.name}: triggered {stat.number} times, last info: {stat.lastinfo}")
+        print(
+            f"Warning {wtype.name}: triggered {stat.number} times, last info: {stat.lastinfo}"
+        )
 ```
 
 Counters are cleared on reset. The first trigger of each type also prints via `mju_warning`.
@@ -75,9 +77,9 @@ model.opt.enableflags |= mujoco.mjtEnableBit.mjENBL_FWDINV
 model.opt.enableflags |= mujoco.mjtEnableBit.mjENBL_ENERGY
 mujoco.mj_step(model, data)
 
-kinetic_energy   = data.energy[0]
+kinetic_energy = data.energy[0]
 potential_energy = data.energy[1]
-total            = data.energy[0] + data.energy[1]
+total = data.energy[0] + data.energy[1]
 ```
 
 For fully conservative systems (no contacts, no actuators, no dissipation), energy should be constant. Temporal drift in total energy indicates integration inaccuracy — use RK4 integrator for better conservation.
@@ -100,11 +102,16 @@ If `maxuse_arena` exceeds the `memory` attribute, MuJoCo triggers a terminal err
 # Install custom error handler (must not return)
 def my_error(msg: str) -> None:
     raise RuntimeError(f"MuJoCo error: {msg}")
+
+
 mujoco.set_mju_user_error(my_error)
+
 
 # Install custom warning handler
 def my_warning(msg: str) -> None:
     logging.warning(f"MuJoCo warning: {msg}")
+
+
 mujoco.set_mju_user_warning(my_warning)
 ```
 

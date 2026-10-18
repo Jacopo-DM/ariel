@@ -40,12 +40,13 @@ Complete reference for all `mjv_*` (abstract visualizer) and `mjr_*` (OpenGL ren
 ```python
 # Standard render-loop call
 mujoco.mjv_updateScene(
-    model, data,
-    opt,                              # MjvOption
-    pert,                             # MjvPerturb or None
-    cam,                              # MjvCamera
-    mujoco.mjtCatBit.mjCAT_ALL,       # catmask
-    scene                             # MjvScene
+    model,
+    data,
+    opt,  # MjvOption
+    pert,  # MjvPerturb or None
+    cam,  # MjvCamera
+    mujoco.mjtCatBit.mjCAT_ALL,  # catmask
+    scene,  # MjvScene
 )
 ```
 
@@ -149,18 +150,18 @@ Ray-cast from cursor position `(relx, rely)` (normalized: 0=left/bottom, 1=right
 
 ```python
 # Standard per-frame sequence
-mujoco.mjr_render(viewport, scene, ctx)            # 3D scene
-mujoco.mjr_overlay(                                # text overlay
+mujoco.mjr_render(viewport, scene, ctx)  # 3D scene
+mujoco.mjr_overlay(  # text overlay
     mujoco.mjtFont.mjFONT_NORMAL,
     mujoco.mjtGridPos.mjGRID_TOPLEFT,
     viewport,
     f"Step {step}",
     "",
-    ctx
+    ctx,
 )
-mujoco.mjr_figure(fig_viewport, fig, ctx)          # 2D plot overlay
+mujoco.mjr_figure(fig_viewport, fig, ctx)  # 2D plot overlay
 rgb = np.zeros((H, W, 3), dtype=np.uint8)
-mujoco.mjr_readPixels(rgb, None, viewport, ctx)    # read to numpy
+mujoco.mjr_readPixels(rgb, None, viewport, ctx)  # read to numpy
 ```
 
 ---

@@ -14,10 +14,10 @@ MuJoCo supports both a high-level `Renderer` class and a low-level OpenGL pipeli
 
 ```python
 renderer = mujoco.Renderer(model, height=480, width=640)
-renderer.update_scene(data)                    # default free camera
-renderer.update_scene(data, camera='cam_name') # or camera id (int)
-pixels = renderer.render()                     # returns (H, W, 3) uint8 numpy array
-depth  = renderer.render_depth()              # returns (H, W) float32
+renderer.update_scene(data)  # default free camera
+renderer.update_scene(data, camera="cam_name")  # or camera id (int)
+pixels = renderer.render()  # returns (H, W, 3) uint8 numpy array
+depth = renderer.render_depth()  # returns (H, W) float32
 renderer.close()
 ```
 
@@ -36,20 +36,20 @@ with mujoco.Renderer(model, height=480, width=640) as renderer:
 import mujoco
 import numpy as np
 
-model = mujoco.MjModel.from_xml_path('model.xml')
-data  = mujoco.MjData(model)
+model = mujoco.MjModel.from_xml_path("model.xml")
+data = mujoco.MjData(model)
 
-cam   = mujoco.MjvCamera()
-opt   = mujoco.MjvOption()
+cam = mujoco.MjvCamera()
+opt = mujoco.MjvOption()
 scene = mujoco.MjvScene(model, maxgeom=10000)
 
 mujoco.mjv_defaultCamera(cam)
 mujoco.mjv_defaultOption(opt)
 
-cam.type      = mujoco.mjtCamera.mjCAMERA_FREE
+cam.type = mujoco.mjtCamera.mjCAMERA_FREE
 cam.lookat[:] = [0.0, 0.0, 0.5]
-cam.distance  = 3.0
-cam.azimuth   = 90.0
+cam.distance = 3.0
+cam.azimuth = 90.0
 cam.elevation = -30.0
 ```
 
@@ -58,7 +58,7 @@ cam.elevation = -30.0
 See [[mujoco_rendering_pipeline#OpenGL Backends]] below for EGL/GLFW/OSMesa setup.
 
 ```python
-ctx      = mujoco.MjrContext(model, mujoco.mjtFontScale.mjFONTSCALE_150)
+ctx = mujoco.MjrContext(model, mujoco.mjtFontScale.mjFONTSCALE_150)
 viewport = mujoco.MjrRect(0, 0, 1280, 720)
 ```
 
@@ -68,17 +68,19 @@ viewport = mujoco.MjrRect(0, 0, 1280, 720)
 mujoco.mj_step(model, data)
 
 mujoco.mjv_updateScene(
-    model, data, opt,
-    None,                          # perturb (or mujoco.MjvPerturb())
+    model,
+    data,
+    opt,
+    None,  # perturb (or mujoco.MjvPerturb())
     cam,
     mujoco.mjtCatBit.mjCAT_ALL,
-    scene
+    scene,
 )
 mujoco.mjr_render(viewport, scene, ctx)
 
 # Read pixels
-rgb   = np.zeros((720, 1280, 3), dtype=np.uint8)
-depth = np.zeros((720, 1280),    dtype=np.float32)
+rgb = np.zeros((720, 1280, 3), dtype=np.uint8)
+depth = np.zeros((720, 1280), dtype=np.float32)
 mujoco.mjr_readPixels(rgb, depth, viewport, ctx)
 ```
 
@@ -119,7 +121,8 @@ Select via environment variable `MUJOCO_GL`:
 
 ```python
 import os
-os.environ['MUJOCO_GL'] = 'egl'
+
+os.environ["MUJOCO_GL"] = "egl"
 
 from mujoco.egl import GLContext
 
@@ -132,6 +135,7 @@ ctx = mujoco.MjrContext(model, mujoco.mjtFontScale.mjFONTSCALE_150)
 
 ```python
 from mujoco.osmesa import GLContext
+
 gl_ctx = GLContext(max_width=1920, max_height=1080)
 gl_ctx.make_current()
 ```
@@ -140,6 +144,7 @@ gl_ctx.make_current()
 
 ```python
 from mujoco.glfw import GLContext
+
 gl_ctx = GLContext(max_width=1920, max_height=1080)
 gl_ctx.make_current()
 ```
@@ -150,18 +155,19 @@ All three `GLContext` classes share the same interface: `__init__(max_width, max
 
 ```python
 import os
-os.environ['MUJOCO_GL'] = 'egl'
+
+os.environ["MUJOCO_GL"] = "egl"
 
 import mujoco
 import numpy as np
 
-model = mujoco.MjModel.from_xml_path('model.xml')
-data  = mujoco.MjData(model)
+model = mujoco.MjModel.from_xml_path("model.xml")
+data = mujoco.MjData(model)
 mujoco.mj_forward(model, data)
 
 with mujoco.Renderer(model, height=480, width=640) as renderer:
     renderer.update_scene(data)
-    pixels = renderer.render()   # (480, 640, 3) uint8
+    pixels = renderer.render()  # (480, 640, 3) uint8
 ```
 
 See [[MjvCamera]], [[MjvOption]], [[MjvScene]], [[MjrContext]], [[MjrRect]], [[mujoco_viewer]].

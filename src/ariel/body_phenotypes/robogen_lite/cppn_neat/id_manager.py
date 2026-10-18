@@ -68,7 +68,7 @@ class IdManager:
         # Innovation IDs start after initial connections. Last used ID is
         # total_conns - 1.
         self._innov_id = (num_inputs * num_outputs) - 1
-        print(  # noqa: T201
+        print(  # ruff: ignore[print]
             f"IdManager initialized: Next Node ID starts at "
             f"{self._node_id + 1}, Next Innov ID starts at "
             f"{self._innov_id + 1}."
@@ -81,7 +81,7 @@ class IdManager:
             with self.save_path.open("w") as f:
                 json.dump(state, f, indent=4)
         except OSError as e:
-            print(f"Error saving ID state: {e}")  # noqa: T201
+            print(f"Error saving ID state: {e}")  # ruff: ignore[print]
 
     def load(self) -> None:
         """Load the ID counters from the specified JSON file if it exists."""
@@ -94,6 +94,6 @@ class IdManager:
                 self._node_id = state.get("next_node_id", 0)
                 self._innov_id = state.get("next_innov_id", 0)
         except (OSError, json.JSONDecodeError) as e:
-            print(f"Error loading ID state: {e}. Starting with fresh IDs.")  # noqa: T201
+            print(f"Error loading ID state: {e}. Starting with fresh IDs.")  # ruff: ignore[print]
             self._node_id = 0
             self._innov_id = 0

@@ -56,7 +56,9 @@ from concurrent import futures
 
 optim = ng.optimizers.registry[name](parametrization=instru, budget=budget)
 with futures.ThreadPoolExecutor(max_workers=optim.num_workers) as executor:
-    recommendation = optim.minimize(train_and_return_test_error, executor=executor)
+    recommendation = optim.minimize(
+        train_and_return_test_error, executor=executor
+    )
 ```
 
 Use `ProcessPoolExecutor` instead of `ThreadPoolExecutor` for CPU-bound work (MuJoCo simulations, numpy-heavy fitness functions).
@@ -66,10 +68,12 @@ Use `ProcessPoolExecutor` instead of `ThreadPoolExecutor` for CPU-bound work (Mu
 ```python
 import nevergrad as ng
 
-def myfunction(lr, num_layers, arg3, arg4, other):
-    return -accuracy   # minimize negative accuracy
 
-lr         = ng.p.Log(lower=0.0001, upper=1.0)
+def myfunction(lr, num_layers, arg3, arg4, other):
+    return -accuracy  # minimize negative accuracy
+
+
+lr = ng.p.Log(lower=0.0001, upper=1.0)
 num_layers = ng.p.TransitionChoice([4, 5, 6])
 parametrization = ng.p.Instrumentation(lr, num_layers, 3.0, arg4=4.0)
 
@@ -81,8 +85,8 @@ best_lr, best_layers, _, _ = recommendation.args
 ## Mixed Discrete+Continuous Example
 
 ```python
-arg1  = ng.p.TransitionChoice(["a", "b"])           # ordered discrete
-arg2  = ng.p.Choice(["a", "c", "e"])                 # unordered discrete
+arg1 = ng.p.TransitionChoice(["a", "b"])  # ordered discrete
+arg2 = ng.p.Choice(["a", "c", "e"])  # unordered discrete
 value = ng.p.Scalar(init=1.0).set_mutation(sigma=2)  # continuous
 
 instru = ng.p.Instrumentation(arg1, arg2, "blublu", value=value)
@@ -94,10 +98,13 @@ Dimension count: `1 (TransitionChoice "a/b") + 3 (softmax for 3-way Choice) + 1 
 
 ```python
 def train_and_return_test_error(x):
-    return np.linalg.norm([int(50. * abs(x_ - 0.2)) for x_ in x])
+    return np.linalg.norm([int(50.0 * abs(x_ - 0.2)) for x_ in x])
+
 
 parametrization = ng.p.Array(shape=(300,))
-optim = ng.optimizers.CMA(parametrization=parametrization, budget=1200, num_workers=1)
+optim = ng.optimizers.CMA(
+    parametrization=parametrization, budget=1200, num_workers=1
+)
 ```
 
 Budget 1200 for 300D = 4 evaluations/dimension — **very tight**. Per `CMA-ES_Parameters.md`, CMA needs O(n²/μ_eff) generations for covariance adaptation. Use `TwoPointsDE` if budget is this constrained.
@@ -111,8 +118,10 @@ Budget 1200 for 300D = 4 evaluations/dimension — **very tight**. Per `CMA-ES_P
 ## Accessing Recommendation
 
 ```python
-recommendation = optim.recommend()   # or optim.provide_recommendation()
-result = train_and_return_test_error(*recommendation.args, **recommendation.kwargs)
+recommendation = optim.recommend()  # or optim.provide_recommendation()
+result = train_and_return_test_error(
+    *recommendation.args, **recommendation.kwargs
+)
 
 # Or for Array parametrization:
 best_genome = np.asarray(recommendation.value)

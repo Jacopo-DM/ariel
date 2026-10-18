@@ -33,12 +33,14 @@ class Model(BaseModel):
     short_str: str = Field(max_length=3)
     precise_decimal: Decimal = Field(max_digits=5, decimal_places=2)
 
+
 class User(BaseModel):
     email: EmailStr
-    username: str = Field(default_factory=lambda data: data['email'])
+    username: str = Field(default_factory=lambda data: data["email"])
+
 
 class Model(BaseModel):
-    name: Annotated[str, Field(strict=True), WithJsonSchema({'extra': 'data'})]
+    name: Annotated[str, Field(strict=True), WithJsonSchema({"extra": "data"})]
     int_list: list[Annotated[int, Field(gt=0)]]
 ```
 

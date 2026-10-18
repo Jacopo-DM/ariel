@@ -55,7 +55,7 @@ dev = [
     "pre-commit>=4.7.0",
     "pydoclint>=0.11.1",
     "pyright>=1.1.414",
-    "ruff==0.14.*",
+    "ruff==0.17.*",
 ]
 docs = [
   "furo>=2025.12.19",

@@ -15,7 +15,10 @@ class Model(BaseModel):
     model_config = ConfigDict(str_max_length=5)
     v: str
 
-class Model2(BaseModel, frozen=True):   # class arguments; type checkers see frozen
+
+class Model2(
+    BaseModel, frozen=True
+):  # class arguments; type checkers see frozen
     a: str
 ```
 

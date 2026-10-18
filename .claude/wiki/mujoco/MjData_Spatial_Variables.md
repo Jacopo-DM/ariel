@@ -24,7 +24,8 @@ World-frame orientation of each body as a flattened 3×3 rotation matrix.
 
 ```python
 import numpy as np
-body_id = model.body('torso').id
+
+body_id = model.body("torso").id
 rot = data.xmat[body_id].reshape(3, 3)
 pos = data.xpos[body_id]
 ```

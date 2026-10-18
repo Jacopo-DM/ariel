@@ -73,10 +73,10 @@ if scene.ngeom < scene.maxgeom:
     mujoco.mjv_initGeom(
         geom,
         mujoco.mjtGeom.mjGEOM_ARROW,
-        np.array([0.01, 0.01, 0.1]),   # size: radius, radius, length
-        np.array([0.0, 0.0, 1.0]),     # pos
-        np.eye(3).flatten(),           # mat (identity)
-        np.array([1.0, 0.0, 0.0, 1.0], dtype=np.float32)  # rgba: red
+        np.array([0.01, 0.01, 0.1]),  # size: radius, radius, length
+        np.array([0.0, 0.0, 1.0]),  # pos
+        np.eye(3).flatten(),  # mat (identity)
+        np.array([1.0, 0.0, 0.0, 1.0], dtype=np.float32),  # rgba: red
     )
     geom.label = "force"
     scene.ngeom += 1
@@ -86,16 +86,16 @@ if scene.ngeom < scene.maxgeom:
 
 ```python
 from_pt = np.array([0.0, 0.0, 0.0])
-to_pt   = np.array([1.0, 0.0, 0.0])
+to_pt = np.array([1.0, 0.0, 0.0])
 
 if scene.ngeom < scene.maxgeom:
     geom = scene.geoms[scene.ngeom]
     mujoco.mjv_connector(
         geom,
         mujoco.mjtGeom.mjGEOM_LINE,
-        0.005,     # width
+        0.005,  # width
         from_pt,
-        to_pt
+        to_pt,
     )
     geom.rgba = np.array([0.0, 1.0, 0.0, 1.0], dtype=np.float32)
     scene.ngeom += 1

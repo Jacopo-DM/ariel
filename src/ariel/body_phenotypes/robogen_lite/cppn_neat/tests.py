@@ -11,10 +11,10 @@ def display_genome(genome: Genome, title: str) -> None:
     print(f"   Fitness: {genome.fitness}")
     print("   Nodes:")
     # Sort nodes by ID for consistent display order
-    for node in sorted(genome.nodes.values(), key=lambda n: n._id):  # noqa: SLF001
+    for node in sorted(genome.nodes.values(), key=lambda n: n._id):  # ruff: ignore[private-member-access]
         act_func = node.activation.__name__ if node.activation else "None"  # type: ignore[truthy-function]  # known bug
         print(
-            f"     - Node {node._id} (type: {node.typ}, "  # noqa: SLF001
+            f"     - Node {node._id} (type: {node.typ}, "  # ruff: ignore[private-member-access]
             f"bias: {node.bias:.3f}, act: {act_func})"
         )
     print("   Connections:")

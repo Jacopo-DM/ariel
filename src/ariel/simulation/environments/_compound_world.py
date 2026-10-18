@@ -44,7 +44,7 @@ class CompoundWorld(BaseWorld):
 
     _terrain_color = (0.460, 0.362, 0.216, 1.0)  # RGBA
 
-    def __init__(  # noqa: C901, PLR0913
+    def __init__(  # ruff: ignore[complex-structure, too-many-arguments]
         self,
         name: str | None = None,
         floor_size: Dimension | None = None,

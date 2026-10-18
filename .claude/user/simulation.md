@@ -10,8 +10,14 @@ Import from the package (re-exported in
 
 ```python
 from ariel.simulation.environments import (
-    SimpleFlatWorld, RuggedTerrainWorld, RuggedTiltedWorld, SimpleTiltedWorld,
-    CraterTerrainWorld, AmphitheatreTerrainWorld, CompoundWorld, OlympicArena,
+    SimpleFlatWorld,
+    RuggedTerrainWorld,
+    RuggedTiltedWorld,
+    SimpleTiltedWorld,
+    CraterTerrainWorld,
+    AmphitheatreTerrainWorld,
+    CompoundWorld,
+    OlympicArena,
     BaseWorld,
 )
 ```
@@ -34,9 +40,9 @@ All worlds subclass `BaseWorld` and expose `.spec` (a `mujoco.MjSpec`) and
 import mujoco
 from ariel.simulation.environments import SimpleFlatWorld
 
-mujoco.set_mjcb_control(None)        # clear any previous control callback
+mujoco.set_mjcb_control(None)  # clear any previous control callback
 world = SimpleFlatWorld()
-world.spawn(core.spec, position=[0, 0, 0.1])   # core from bodies.md
+world.spawn(core.spec, position=[0, 0, 0.1])  # core from bodies.md
 model = world.spec.compile()
 data = mujoco.MjData(model)
 

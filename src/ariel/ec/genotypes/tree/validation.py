@@ -69,7 +69,7 @@ def is_single_connected_tree(genome: dict[str, Any]) -> bool:
     return len(visited) == len(node_ids)
 
 
-def validate_genome_dict(genome: dict[str, Any]) -> None:  # noqa: C901
+def validate_genome_dict(genome: dict[str, Any]) -> None:  # ruff: ignore[complex-structure]
     """Check a genome dict for consistency; raise ValueError if invalid."""
     nodes = genome.get("nodes", {})
     edges = genome.get("edges", [])

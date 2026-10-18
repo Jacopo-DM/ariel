@@ -44,13 +44,13 @@ All optimizers are accessible via `ng.optimizers.registry`.
 
 ```python
 # Core loop
-x = optimizer.ask()                        # returns a Candidate object
-loss = function(*x.args, **x.kwargs)       # evaluate (or use x.value directly)
-optimizer.tell(x, loss)                    # report result back
+x = optimizer.ask()  # returns a Candidate object
+loss = function(*x.args, **x.kwargs)  # evaluate (or use x.value directly)
+optimizer.tell(x, loss)  # report result back
 
 # Get best found solution
 recommendation = optimizer.provide_recommendation()
-best_value = recommendation.value          # numpy array or structured value
+best_value = recommendation.value  # numpy array or structured value
 ```
 
 **Minimize shorthand:**
@@ -104,9 +104,11 @@ optimizer.parametrization.register_cheap_constraint(lambda x: x[0] >= 1)
 ## Multiobjective
 
 ```python
-optimizer.tell(ng.p.MultiobjectiveReference(), [5, 5])   # set reference point
+optimizer.tell(ng.p.MultiobjectiveReference(), [5, 5])  # set reference point
 optimizer.minimize(multiobjective_func)
-front = optimizer.pareto_front(k, subset="random|loss-covering|domain-covering|EPS")
+front = optimizer.pareto_front(
+    k, subset="random|loss-covering|domain-covering|EPS"
+)
 ```
 
 ## Information Injection
@@ -133,8 +135,9 @@ DEwithLHS = Chaining([LHSSearch, DE], [100])
 
 ```python
 import numpy as np
-np.random.seed(32)                                        # affects parametrization init
-optimizer.parametrization.random_state.seed(12)           # direct seeding
+
+np.random.seed(32)  # affects parametrization init
+optimizer.parametrization.random_state.seed(12)  # direct seeding
 ```
 
 ## Verbosity

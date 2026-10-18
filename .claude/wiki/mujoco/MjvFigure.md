@@ -12,7 +12,7 @@ date_ingested: 2026-04-13
 
 ```python
 fig = mujoco.MjvFigure()
-mujoco.mjv_defaultFigure(fig)   # initialize to defaults
+mujoco.mjv_defaultFigure(fig)  # initialize to defaults
 ```
 
 ## Attributes
@@ -63,19 +63,19 @@ fig = mujoco.MjvFigure()
 mujoco.mjv_defaultFigure(fig)
 
 # Configure
-fig.title    = "Reward"
-fig.xlabel   = "Step"
+fig.title = "Reward"
+fig.xlabel = "Step"
 fig.flg_legend = 1
 fig.linename[0] = "episode"
-fig.linergb[0]  = np.array([0.0, 1.0, 0.2])   # green
-fig.range[0]    = [0.0, 1000.0]                # x range
-fig.range[1]    = [-1.0, 1.0]                  # y range
+fig.linergb[0] = np.array([0.0, 1.0, 0.2])  # green
+fig.range[0] = [0.0, 1000.0]  # x range
+fig.range[1] = [-1.0, 1.0]  # y range
 
 # Add a data point to line 0
-n = fig.linepnt[0]          # current point count
+n = fig.linepnt[0]  # current point count
 if n < 1001:
-    fig.linedata[0, n*2]     = step_number      # x
-    fig.linedata[0, n*2 + 1] = reward_value     # y
+    fig.linedata[0, n * 2] = step_number  # x
+    fig.linedata[0, n * 2 + 1] = reward_value  # y
     fig.linepnt[0] += 1
 
 # Render into a sub-viewport (top-right corner example)

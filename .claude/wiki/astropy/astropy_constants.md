@@ -13,9 +13,10 @@ date_ingested: 2026-10-18
 ```python
 from astropy.constants import G
 from astropy import constants as const
-F = (const.G * 3. * const.M_sun * 100 * u.kg) / (2.2 * u.au) ** 2
+
+F = (const.G * 3.0 * const.M_sun * 100 * u.kg) / (2.2 * u.au) ** 2
 print(F.to(u.N))
-print(const.c.to('km/s'))
+print(const.c.to("km/s"))
 const.c.cgs
 100 * const.e.esu
 ```

@@ -79,14 +79,16 @@ for gen in pop_df["generation"]:
     ids = population_per_gen.get(int(gen), [])
     fits = fitness_by_id.reindex(ids).dropna().astype(float).values
     if fits.size == 0:
-        means.append(np.nan); stds.append(np.nan); maxs.append(np.nan)
+        means.append(np.nan)
+        stds.append(np.nan)
+        maxs.append(np.nan)
     else:
         means.append(float(np.mean(fits)))
         stds.append(float(np.std(fits, ddof=0)))
-        maxs.append(float(np.min(fits)))   # min = best for minimisation tasks
+        maxs.append(float(np.min(fits)))  # min = best for minimisation tasks
 
 pop_df["fitness_mean"] = means
-pop_df["fitness_std"]  = stds
+pop_df["fitness_std"] = stds
 pop_df["fitness_best"] = maxs
 ```
 
@@ -97,18 +99,20 @@ pop_df["fitness_best"] = maxs
 ```python
 import matplotlib.pyplot as plt
 
-df   = pop_df.copy()
+df = pop_df.copy()
 mask = df["fitness_mean"].notna()
 
-x    = df.loc[mask, "generation"]
+x = df.loc[mask, "generation"]
 mean = df.loc[mask, "fitness_mean"]
-std  = df.loc[mask, "fitness_std"]
+std = df.loc[mask, "fitness_std"]
 best = df.loc[mask, "fitness_best"]
 
 plt.figure(figsize=(10, 5))
 plt.plot(x, mean, label="Fitness mean", color="C0", linewidth=2)
 plt.plot(x, best, label="Fitness best", color="C1", linestyle="--", linewidth=2)
-plt.fill_between(x, mean - std, mean + std, color="C0", alpha=0.25, label="Mean ± Std")
+plt.fill_between(
+    x, mean - std, mean + std, color="C0", alpha=0.25, label="Mean ± Std"
+)
 plt.xlabel("Generation")
 plt.ylabel("Fitness")
 plt.title("Fitness statistics per generation")

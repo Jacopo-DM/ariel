@@ -85,7 +85,9 @@ examples import it as `mujoco` — match the file you're in.
 
 ```python
 # Before — single quotes, no trailing comma, >80 cols, untyped
-def make(world, pos): return world.spawn(robot, position=pos)
+def make(world, pos):
+    return world.spawn(robot, position=pos)
+
 
 # After — house style
 def make(

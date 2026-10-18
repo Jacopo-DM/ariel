@@ -59,15 +59,15 @@ Union of all the above. Two `mjData` instances with identical integration state 
 import mujoco
 
 # Size of state vector for a given component bitfield
-size = mujoco.mj_stateSize(model, spec)          # spec is int (mjtState bitfield)
+size = mujoco.mj_stateSize(model, spec)  # spec is int (mjtState bitfield)
 
 # Copy state to/from a flat numpy array
 state = np.zeros(size)
-mujoco.mj_getState(model, data, state, spec)      # data → array
-mujoco.mj_setState(model, data, state, spec)      # array → data
+mujoco.mj_getState(model, data, state, spec)  # data → array
+mujoco.mj_setState(model, data, state, spec)  # array → data
 
 # Copy state between two mjData objects
-mujoco.mj_copyState(model, src, dst, spec)        # src → dst for selected components
+mujoco.mj_copyState(model, src, dst, spec)  # src → dst for selected components
 
 # Extract state into a new array (returns array)
 state = mujoco.mj_extractState(model, data, spec)
@@ -79,8 +79,8 @@ state = mujoco.mj_extractState(model, data, spec)
 import mujoco
 import numpy as np
 
-model = mujoco.MjModel.from_xml_path('model.xml')
-data  = mujoco.MjData(model)
+model = mujoco.MjModel.from_xml_path("model.xml")
+data = mujoco.MjData(model)
 
 spec = mujoco.mjtState.mjSTATE_INTEGRATION
 size = mujoco.mj_stateSize(model, spec)
@@ -100,7 +100,9 @@ mujoco.mj_setState(model, data, saved, spec)
 ```python
 # Thread-safe: copy physics state from main data to worker
 worker_data = mujoco.MjData(model)
-mujoco.mj_copyState(model, data_main, worker_data, mujoco.mjtState.mjSTATE_INTEGRATION)
+mujoco.mj_copyState(
+    model, data_main, worker_data, mujoco.mjtState.mjSTATE_INTEGRATION
+)
 ```
 
 ## Reset Functions

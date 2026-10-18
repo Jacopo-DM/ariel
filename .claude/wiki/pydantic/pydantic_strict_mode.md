@@ -11,21 +11,24 @@ By default Pydantic coerces (`'123'` becomes `123`). Strict mode raises when the
 ## Ways to enable
 
 ```python
-TypeAdapter(date).validate_python('2000-01-01', strict=True)   # per call: raises
-TypeAdapter(date).validate_json('"2000-01-01"', strict=True)   # JSON: ok
+TypeAdapter(date).validate_python("2000-01-01", strict=True)  # per call: raises
+TypeAdapter(date).validate_json('"2000-01-01"', strict=True)  # JSON: ok
+
 
 class User(BaseModel):
     name: str
-    age: int = Field(strict=True)            # per field
+    age: int = Field(strict=True)  # per field
+
 
 class User2(BaseModel):
-    id: Annotated[UUID, Strict()]            # Strict() metadata
-    age: StrictInt                           # also StrictBool, StrictFloat, StrictStr, StrictBytes
+    id: Annotated[UUID, Strict()]  # Strict() metadata
+    age: StrictInt  # also StrictBool, StrictFloat, StrictStr, StrictBytes
+
 
 class User3(BaseModel):
-    model_config = ConfigDict(strict=True)   # per model
+    model_config = ConfigDict(strict=True)  # per model
     name: str
-    age: int = Field(strict=False)           # override one field
+    age: int = Field(strict=False)  # override one field
 ```
 
 ## Notes

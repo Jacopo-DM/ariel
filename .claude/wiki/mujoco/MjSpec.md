@@ -12,9 +12,9 @@ Programmatic model builder. Allows constructing and editing MuJoCo models in Pyt
 ## Signature
 
 ```python
-spec = mujoco.MjSpec()                          # empty spec
-spec = mujoco.MjSpec.from_file('/path/to.xml')  # parse existing XML
-spec = mujoco.MjSpec.from_string(xml_str)       # parse XML string
+spec = mujoco.MjSpec()  # empty spec
+spec = mujoco.MjSpec.from_file("/path/to.xml")  # parse existing XML
+spec = mujoco.MjSpec.from_string(xml_str)  # parse XML string
 ```
 
 ## Compilation Methods
@@ -40,16 +40,16 @@ if model is None:
 ## Body Tree
 
 ```python
-spec.worldbody                   # root body (MjsBody)
+spec.worldbody  # root body (MjsBody)
 
 # Adding children to a body:
-body   = spec.worldbody.add_body()
-geom   = body.add_geom()
-joint  = body.add_joint()
-site   = body.add_site()
+body = spec.worldbody.add_body()
+geom = body.add_geom()
+joint = body.add_joint()
+site = body.add_site()
 camera = body.add_camera()
-light  = body.add_light()
-frame  = body.add_frame()
+light = body.add_light()
+frame = body.add_frame()
 
 # Free joint shorthand:
 joint = body.add_freejoint()
@@ -59,19 +59,19 @@ joint = body.add_freejoint()
 
 ```python
 actuator = spec.add_actuator()
-sensor   = spec.add_sensor()
-tendon   = spec.add_tendon()
+sensor = spec.add_sensor()
+tendon = spec.add_tendon()
 material = spec.add_material()
-mesh     = spec.add_mesh()
-texture  = spec.add_texture()
-key      = spec.add_key()
+mesh = spec.add_mesh()
+texture = spec.add_texture()
+key = spec.add_key()
 ```
 
 ## Named Access
 
 ```python
-spec.geom('my_geom')   # returns element or None
-spec.body('my_body')
+spec.geom("my_geom")  # returns element or None
+spec.body("my_body")
 ```
 
 ## List Properties
@@ -83,17 +83,17 @@ All element collections are accessible as plural properties:
 ## Body Subtree Methods
 
 ```python
-body.geoms                       # direct children geoms
-body.find_all('site')            # or mjtObj.mjOBJ_SITE
+body.geoms  # direct children geoms
+body.find_all("site")  # or mjtObj.mjOBJ_SITE
 
-spec.delete(spec.geom('my_geom'))  # remove element and all referencing elements
+spec.delete(spec.geom("my_geom"))  # remove element and all referencing elements
 ```
 
 ## Setting Options
 
 ```python
 spec.option.timestep = 0.002
-spec.option.gravity  = [0, 0, -9.81]
+spec.option.gravity = [0, 0, -9.81]
 ```
 
 ## Example
@@ -105,8 +105,8 @@ spec = mujoco.MjSpec()
 spec.option.timestep = 0.002
 
 body = spec.worldbody.add_body()
-body.name = 'box'
-body.pos  = [0, 0, 1]
+body.name = "box"
+body.pos = [0, 0, 1]
 
 geom = body.add_geom()
 geom.type = mujoco.mjtGeom.mjGEOM_BOX
@@ -116,7 +116,7 @@ geom.mass = 1.0
 joint = body.add_freejoint()
 
 model = spec.compile()
-data  = mujoco.MjData(model)
+data = mujoco.MjData(model)
 ```
 
 ## Notes

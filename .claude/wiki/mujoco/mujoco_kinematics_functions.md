@@ -44,19 +44,19 @@ After `mj_kinematics(model, data)`:
 import mujoco
 import numpy as np
 
-model = mujoco.MjModel.from_xml_path('model.xml')
-data  = mujoco.MjData(model)
+model = mujoco.MjModel.from_xml_path("model.xml")
+data = mujoco.MjData(model)
 
 # Set joint angles
-data.qpos[7] = 0.5   # some joint angle
+data.qpos[7] = 0.5  # some joint angle
 
 # Compute only kinematics (no dynamics)
 mujoco.mj_kinematics(model, data)
 mujoco.mj_comPos(model, data)
 
 # Read results
-body_pos = data.body('hand').xpos.copy()   # (3,) world position
-site_pos = data.site('fingertip').xpos.copy()
+body_pos = data.body("hand").xpos.copy()  # (3,) world position
+site_pos = data.site("fingertip").xpos.copy()
 ```
 
 ## Note on Ordering

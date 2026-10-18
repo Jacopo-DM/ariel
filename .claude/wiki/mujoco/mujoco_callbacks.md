@@ -13,9 +13,9 @@ MuJoCo supports installing Python callables as C-level callback hooks via `set_m
 ## Callback Management
 
 ```python
-mujoco.set_mjcb_foo(callable)   # install callback
-mujoco.set_mjcb_foo(None)       # remove callback
-cb = mujoco.get_mjcb_foo()      # get current callback (or None)
+mujoco.set_mjcb_foo(callable)  # install callback
+mujoco.set_mjcb_foo(None)  # remove callback
+cb = mujoco.get_mjcb_foo()  # get current callback (or None)
 ```
 
 ## Available Callbacks
@@ -39,6 +39,7 @@ def control_callback(model, data):
     # data: MjData (read/write)
     data.ctrl[0] = -0.1 * data.qpos[0]
 
+
 def sensor_callback(model, data):
     # Populate user sensor data
     data.sensordata[user_sensor_adr] = compute_sensor(data)
@@ -49,11 +50,13 @@ def sensor_callback(model, data):
 ```python
 import mujoco
 
-model = mujoco.MjModel.from_xml_path('model.xml')
-data  = mujoco.MjData(model)
+model = mujoco.MjModel.from_xml_path("model.xml")
+data = mujoco.MjData(model)
+
 
 def my_controller(model, data):
-    data.ctrl[0] = -0.1 * data.qpos[0]   # proportional control
+    data.ctrl[0] = -0.1 * data.qpos[0]  # proportional control
+
 
 mujoco.set_mjcb_control(my_controller)
 

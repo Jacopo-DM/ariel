@@ -92,7 +92,7 @@ def load_artifacts(
     return tubes, brain, policy, metadata
 
 
-def run_rollout(  # noqa: PLR0913
+def run_rollout(  # ruff: ignore[too-many-arguments]
     model: mujoco.MjModel,
     data: mujoco.MjData,
     net: FastNumpyNetwork,

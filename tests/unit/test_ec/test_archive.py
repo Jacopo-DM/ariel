@@ -386,7 +386,7 @@ def test_fitness_percentile_in_band(archive: Archive) -> None:
     fitnesses = [_fitness(ind) for ind in pop]
     all_fitnesses = [
         _fitness(ind)
-        for ind in archive._fetch_all(archive._base_query())  # noqa: SLF001
+        for ind in archive._fetch_all(archive._base_query())  # ruff: ignore[private-member-access]
     ]
     lo = float(np.percentile(all_fitnesses, 0.0))
     hi = float(np.percentile(all_fitnesses, 50.0))

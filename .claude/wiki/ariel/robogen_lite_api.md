@@ -127,7 +127,9 @@ Common properties on all modules: `sites`, `spec`, `body`.
 ## constructor — Graph → MuJoCo
 
 ```python
-from ariel.body_phenotypes.robogen_lite.constructor import construct_mjspec_from_graph
+from ariel.body_phenotypes.robogen_lite.constructor import (
+    construct_mjspec_from_graph,
+)
 ```
 
 ### `construct_mjspec_from_graph(graph: networkx.DiGraph) → CoreModule`
@@ -157,10 +159,7 @@ from ariel.body_phenotypes.robogen_lite.cppn_neat.genome import Genome
 #### Construction
 ```python
 genome = Genome.random(
-    num_inputs=...,
-    num_outputs=...,
-    next_node_id=...,
-    next_innov_id=...
+    num_inputs=..., num_outputs=..., next_node_id=..., next_innov_id=...
 )
 ```
 Creates a fully-connected input→output topology.
@@ -171,15 +170,15 @@ genome.mutate(
     node_add_rate=...,
     conn_add_rate=...,
     next_innov_id_getter=...,
-    next_node_id_getter=...
+    next_node_id_getter=...,
 )
-child = genome.crossover(other_genome)   # → Genome
+child = genome.crossover(other_genome)  # → Genome
 ```
 
 #### Network Evaluation
 ```python
-outputs = genome.activate(inputs)        # → list[float]
-ordering = genome.get_node_ordering()    # topological sort (Kahn's algorithm)
+outputs = genome.activate(inputs)  # → list[float]
+ordering = genome.get_node_ordering()  # topological sort (Kahn's algorithm)
 ```
 `activate` falls back to iterative relaxation if cycles exist.
 
@@ -187,7 +186,7 @@ ordering = genome.get_node_ordering()    # topological sort (Kahn's algorithm)
 ```python
 d = genome.to_dict()
 genome2 = Genome.from_dict(d, fitness=0.0)
-copy = genome.copy()                     # deep copy
+copy = genome.copy()  # deep copy
 ```
 
 ### Node
@@ -205,7 +204,9 @@ Node(_id: int, _typ: str, _activation: ActivationFunction, _bias: float)
 
 ### MorphologyDecoderBestFirst
 ```python
-from ariel.body_phenotypes.robogen_lite.decoders.cppn_best_first import MorphologyDecoderBestFirst
+from ariel.body_phenotypes.robogen_lite.decoders.cppn_best_first import (
+    MorphologyDecoderBestFirst,
+)
 ```
 
 ```python
@@ -245,19 +246,24 @@ from ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider import ...
 
 ```python
 from ariel.body_phenotypes.robogen_lite.cppn_neat.genome import Genome
-from ariel.body_phenotypes.robogen_lite.decoders.cppn_best_first import MorphologyDecoderBestFirst
-from ariel.body_phenotypes.robogen_lite.constructor import construct_mjspec_from_graph
+from ariel.body_phenotypes.robogen_lite.decoders.cppn_best_first import (
+    MorphologyDecoderBestFirst,
+)
+from ariel.body_phenotypes.robogen_lite.constructor import (
+    construct_mjspec_from_graph,
+)
 
 # 1. Create / evolve genome
-genome = Genome.random(num_inputs=8, num_outputs=6,
-                       next_node_id=id_mgr, next_innov_id=innov_mgr)
+genome = Genome.random(
+    num_inputs=8, num_outputs=6, next_node_id=id_mgr, next_innov_id=innov_mgr
+)
 
 # 2. Decode genome → morphology graph
 decoder = MorphologyDecoderBestFirst(genome, max_modules=20)
-graph = decoder.decode()          # nx.DiGraph
+graph = decoder.decode()  # nx.DiGraph
 
 # 3. Build MuJoCo spec
-robot = construct_mjspec_from_graph(graph)   # CoreModule
+robot = construct_mjspec_from_graph(graph)  # CoreModule
 
 # 4. Simulate with MuJoCo (robot.spec etc.)
 ```

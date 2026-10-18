@@ -63,11 +63,11 @@ mujoco.mj_fullM(model, M_dense, data.qM)  # MuJoCo never does this internally
 
 ```python
 # WRONG — there may be padding between qpos and qvel
-state = data.qpos[:model.nq + model.nv]   # undefined behavior
+state = data.qpos[: model.nq + model.nv]  # undefined behavior
 
 # CORRECT — copy individually
-qpos = data.qpos.copy()   # shape (nq,)
-qvel = data.qvel.copy()   # shape (nv,)
+qpos = data.qpos.copy()  # shape (nq,)
+qvel = data.qvel.copy()  # shape (nv,)
 ```
 
 ## Internal Stack (Arena)
@@ -85,8 +85,8 @@ Most top-level MuJoCo functions push/pop the stack internally. After any functio
 mujoco.mj_markStack(data)
 
 # Allocate arrays (size checked; advances stack pointer)
-my_arr = mujoco.mj_stackAllocNum(data, model.nq)   # mjtNum array
-my_int = mujoco.mj_stackAllocInt(data, model.nv)   # int array
+my_arr = mujoco.mj_stackAllocNum(data, model.nq)  # mjtNum array
+my_int = mujoco.mj_stackAllocInt(data, model.nv)  # int array
 
 # Restore frame (free allocations)
 mujoco.mj_freeStack(data)

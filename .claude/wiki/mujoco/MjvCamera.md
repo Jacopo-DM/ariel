@@ -13,7 +13,7 @@ Abstract visualizer camera. Used with [[mujoco_rendering_pipeline]] to define th
 
 ```python
 cam = mujoco.MjvCamera()
-mujoco.mjv_defaultCamera(cam)   # initialize to defaults
+mujoco.mjv_defaultCamera(cam)  # initialize to defaults
 ```
 
 ## Attributes
@@ -43,19 +43,23 @@ mujoco.mjv_defaultCamera(cam)   # initialize to defaults
 cam = mujoco.MjvCamera()
 mujoco.mjv_defaultCamera(cam)
 
-cam.type      = mujoco.mjtCamera.mjCAMERA_FREE
+cam.type = mujoco.mjtCamera.mjCAMERA_FREE
 cam.lookat[:] = [0.0, 0.0, 0.5]
-cam.distance  = 3.0
-cam.azimuth   = 90.0
+cam.distance = 3.0
+cam.azimuth = 90.0
 cam.elevation = -30.0
 ```
 
 ## Related Functions
 
 ```python
-mujoco.mjv_defaultCamera(cam)              # initialize to defaults
-mujoco.mjv_defaultFreeCamera(model, cam)   # initialize free camera for model extent
-mujoco.mjv_moveCamera(model, action, reldx, reldy, scene, cam)  # interactive move
+mujoco.mjv_defaultCamera(cam)  # initialize to defaults
+mujoco.mjv_defaultFreeCamera(
+    model, cam
+)  # initialize free camera for model extent
+mujoco.mjv_moveCamera(
+    model, action, reldx, reldy, scene, cam
+)  # interactive move
 ```
 
 See [[MjvOption]], [[MjvScene]], [[mujoco_rendering_pipeline]].

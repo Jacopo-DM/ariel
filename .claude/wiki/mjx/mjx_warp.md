@@ -13,8 +13,8 @@ MJX-Warp is the NVIDIA GPU-optimized MuJoCo implementation in MJX. It resolves k
 
 ```python
 mj_model = mujoco.MjModel.from_xml_path(...)
-model = mjx.put_model(mj_model, impl='warp')
-data = mjx.make_data(mj_model, impl='warp', naconmax=naconmax, njmax=njmax)
+model = mjx.put_model(mj_model, impl="warp")
+data = mjx.make_data(mj_model, impl="warp", naconmax=naconmax, njmax=njmax)
 ```
 
 `naconmax` = max contacts across **all worlds combined** (scale by number of environments).
@@ -31,7 +31,9 @@ Controls CUDA graph caching behavior. Set via `mjx.put_model`:
 ```python
 import mujoco.mjx.warp as mjxw
 
-model = mjx.put_model(mj_model, impl='warp', graph_mode=mjxw.GraphMode.WARP_STAGED)
+model = mjx.put_model(
+    mj_model, impl="warp", graph_mode=mjxw.GraphMode.WARP_STAGED
+)
 ```
 
 | Mode | Description |
@@ -91,6 +93,7 @@ Hold a reference to `rc` for the lifetime of the program. Pass `rc.pytree()` to 
 ```python
 from mujoco.mjx import get_rgb
 
+
 @jax.jit
 def render_fn(mx, d, rc_pytree):
     # 1. Update BVH for current scene state
@@ -103,6 +106,7 @@ def render_fn(mx, d, rc_pytree):
     rgb = get_rgb(rc_pytree, 0, pixels)
 
     return rgb, d
+
 
 rgb, d = render_fn(mx, d, rc.pytree())
 ```
@@ -124,7 +128,7 @@ nworld_per_device = nworld // ndevices
 rc = create_render_context(
     mjm=m,
     nworld=nworld_per_device,
-    devices=[f'cuda:{i}' for i in range(ndevices)],
+    devices=[f"cuda:{i}" for i in range(ndevices)],
     cam_res=(width, height),
 )
 ```

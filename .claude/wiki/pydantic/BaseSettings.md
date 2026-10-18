@@ -12,8 +12,8 @@ date_ingested: 2026-10-18
 
 ```python
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix='my_prefix_')
-    auth_key: str = 'xxx'   # read from my_prefix_auth_key
+    model_config = SettingsConfigDict(env_prefix="my_prefix_")
+    auth_key: str = "xxx"  # read from my_prefix_auth_key
 ```
 
 ## SettingsConfigDict options
@@ -50,9 +50,12 @@ CLI arguments (if `cli_parse_args`), initialiser arguments, environment variable
 ```python
 @classmethod
 def settings_customise_sources(
-    cls, settings_cls: type[BaseSettings],
-    init_settings: PydanticBaseSettingsSource, env_settings: PydanticBaseSettingsSource,
-    dotenv_settings: PydanticBaseSettingsSource, file_secret_settings: PydanticBaseSettingsSource,
+    cls,
+    settings_cls: type[BaseSettings],
+    init_settings: PydanticBaseSettingsSource,
+    env_settings: PydanticBaseSettingsSource,
+    dotenv_settings: PydanticBaseSettingsSource,
+    file_secret_settings: PydanticBaseSettingsSource,
 ) -> tuple[PydanticBaseSettingsSource, ...]:
     return env_settings, CliSettingsSource(settings_cls, cli_parse_args=True)
 ```

@@ -16,8 +16,7 @@ state to carry between calls.
 def xy_displacement(
     xy1: tuple[float, float],
     xy2: tuple[float, float],
-) -> float:
-    ...
+) -> float: ...
 ```
 
 Real examples to imitate:

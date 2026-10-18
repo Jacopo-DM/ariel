@@ -20,7 +20,7 @@ Miscellaneous [[MjData]] fields for sensor readings, motion capture overrides, e
 
 ```python
 # Read a specific sensor by name
-sensor_id = model.sensor('imu_accel').id
+sensor_id = model.sensor("imu_accel").id
 adr = model.sensor_adr[sensor_id]
 dim = model.sensor_dim[sensor_id]
 reading = data.sensordata[adr : adr + dim]

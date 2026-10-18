@@ -31,7 +31,7 @@ Opens the viewer and blocks until the window is closed. Useful for static inspec
 with mujoco.viewer.launch_passive(model, data) as handle:
     while handle.is_running():
         mujoco.mj_step(model, data)
-        handle.sync()          # push model/data changes to GUI, pull user inputs
+        handle.sync()  # push model/data changes to GUI, pull user inputs
 ```
 
 Returns a handle that lets you run your own physics loop while the viewer updates.
@@ -54,8 +54,8 @@ import mujoco
 import mujoco.viewer
 import time
 
-model = mujoco.MjModel.from_xml_path('model.xml')
-data  = mujoco.MjData(model)
+model = mujoco.MjModel.from_xml_path("model.xml")
+data = mujoco.MjData(model)
 
 with mujoco.viewer.launch_passive(model, data) as handle:
     while handle.is_running():

@@ -84,8 +84,8 @@ size = mujoco.mj_stateSize(model, spec)
 ## Name / ID Lookup
 
 ```python
-body_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, 'my_body')
-name    = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, body_id)
+body_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "my_body")
+name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, body_id)
 ```
 
 ## Examples
@@ -93,18 +93,20 @@ name    = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, body_id)
 ```python
 import mujoco
 
-model = mujoco.MjModel.from_xml_path('model.xml')
-data  = mujoco.MjData(model)
+model = mujoco.MjModel.from_xml_path("model.xml")
+data = mujoco.MjData(model)
 
 # Run 1000 steps
 for _ in range(1000):
     mujoco.mj_step(model, data)
 
+
 # Use step1/step2 to insert control between halves
 def control_loop(model, data):
     mujoco.mj_step1(model, data)
-    data.ctrl[0] = -1.0 * data.qpos[0]   # custom control
+    data.ctrl[0] = -1.0 * data.qpos[0]  # custom control
     mujoco.mj_step2(model, data)
+
 
 # Compute kinematics only (no dynamics)
 mujoco.mj_kinematics(model, data)

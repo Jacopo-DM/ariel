@@ -14,13 +14,14 @@ The page gives no full signature (see the astropy API reference). Forms it shows
 
 ```python
 from astropy import units as u
-15 * u.m / u.s                    # number times unit
+
+15 * u.m / u.s  # number times unit
 1.25 / u.s
-[1, 2, 3] * u.m                   # list or ndarray times unit
-u.Quantity(15, u.m / u.s)         # constructor: value, unit
-u.Quantity(qlst, u.minute)        # merge quantities with equivalent units
-u.Quantity('15 m/s')              # parse a string
-u.Quantity(1.0, dtype=np.float32) # explicit dtype
+[1, 2, 3] * u.m  # list or ndarray times unit
+u.Quantity(15, u.m / u.s)  # constructor: value, unit
+u.Quantity(qlst, u.minute)  # merge quantities with equivalent units
+u.Quantity("15 m/s")  # parse a string
+u.Quantity(1.0, dtype=np.float32)  # explicit dtype
 ```
 
 ## Parameters / attributes

@@ -13,7 +13,7 @@ Visualization flags and options. Controls what is drawn in the scene. Used with 
 
 ```python
 opt = mujoco.MjvOption()
-mujoco.mjv_defaultOption(opt)   # initialize to defaults
+mujoco.mjv_defaultOption(opt)  # initialize to defaults
 ```
 
 ## Attributes

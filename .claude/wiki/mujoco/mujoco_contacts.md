@@ -40,8 +40,8 @@ Not all detected contacts enter the force computation. Active contacts have `con
 import mujoco
 import numpy as np
 
-model = mujoco.MjModel.from_xml_path('model.xml')
-data  = mujoco.MjData(model)
+model = mujoco.MjModel.from_xml_path("model.xml")
+data = mujoco.MjData(model)
 
 mujoco.mj_step(model, data)
 
@@ -51,13 +51,15 @@ for i, contact in enumerate(data.contact):
         continue  # excluded contact
 
     # Raw constraint force (interpretation depends on friction cone type)
-    raw_force = data.efc_force[contact.efc_address : contact.efc_address + contact.dim]
+    raw_force = data.efc_force[
+        contact.efc_address : contact.efc_address + contact.dim
+    ]
 
     # Convert to intuitive 3D force + 3D torque in contact frame
     result = np.zeros(6)
     mujoco.mj_contactForce(model, data, i, result)
-    contact_force  = result[:3]   # force in contact frame
-    contact_torque = result[3:]   # torque (nonzero only when condim > 3)
+    contact_force = result[:3]  # force in contact frame
+    contact_torque = result[3:]  # torque (nonzero only when condim > 3)
 ```
 
 ## mj_contactForce

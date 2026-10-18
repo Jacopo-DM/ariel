@@ -14,9 +14,9 @@ Represents the static model — geometry, physics parameters, and topology. Load
 ```python
 # No direct constructor — use class methods:
 model = mujoco.MjModel.from_xml_string(xml_str, assets=None)
-model = mujoco.MjModel.from_xml_path('/path/to/model.xml', assets=None)
-model = mujoco.MjModel.from_binary_path('/path/to/model.mjb', assets=None)
-model = mujoco.MjModel.from_spec(spec)   # from MjSpec
+model = mujoco.MjModel.from_xml_path("/path/to/model.xml", assets=None)
+model = mujoco.MjModel.from_binary_path("/path/to/model.mjb", assets=None)
+model = mujoco.MjModel.from_spec(spec)  # from MjSpec
 ```
 
 `assets` is an optional `dict[str, bytes]` mapping filenames to file contents (virtual filesystem for meshes, textures, etc.).
@@ -68,11 +68,11 @@ model = mujoco.MjModel.from_spec(spec)   # from MjSpec
 `MjModel` supports O(1) named element access via accessor methods. See [[mujoco_named_access_api]].
 
 ```python
-model.geom('floor').rgba      # (4,) view into geom_rgba
-model.geom('floor').id        # integer index
-model.body('upper_arm').mass  # float
-model.joint('elbow').type     # int (mjtJoint)
-model.actuator('motor1').id
+model.geom("floor").rgba  # (4,) view into geom_rgba
+model.geom("floor").id  # integer index
+model.body("upper_arm").mass  # float
+model.joint("elbow").type  # int (mjtJoint)
+model.actuator("motor1").id
 ```
 
 ## Examples
@@ -93,13 +93,15 @@ model = mujoco.MjModel.from_xml_string("""
 """)
 
 # Load from file with virtual asset filesystem
-with open('mesh.stl', 'rb') as f:
+with open("mesh.stl", "rb") as f:
     mesh_bytes = f.read()
-model = mujoco.MjModel.from_xml_path('model.xml', assets={'mesh.stl': mesh_bytes})
+model = mujoco.MjModel.from_xml_path(
+    "model.xml", assets={"mesh.stl": mesh_bytes}
+)
 
 # Access physics options
-print(model.opt.timestep)   # e.g. 0.002
-print(model.opt.gravity)    # (3,) array
+print(model.opt.timestep)  # e.g. 0.002
+print(model.opt.gravity)  # (3,) array
 
 # Access count attributes
 print(model.nbody, model.ngeom, model.nu)

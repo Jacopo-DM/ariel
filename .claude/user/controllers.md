@@ -11,11 +11,12 @@ common routes: a **CPG** (central pattern generator, good for locomotion) or a
 
 ```python
 from ariel.simulation.controllers.simple_cpg import (
-    SimpleCPG, create_fully_connected_adjacency,
+    SimpleCPG,
+    create_fully_connected_adjacency,
 )
 
-adj = create_fully_connected_adjacency(model.nu)   # nu = #actuators
-cpg = SimpleCPG(adj)            # SimpleCPG(adjacency_dict, mu=1.0, dt=0.01, ...)
+adj = create_fully_connected_adjacency(model.nu)  # nu = #actuators
+cpg = SimpleCPG(adj)  # SimpleCPG(adjacency_dict, mu=1.0, dt=0.01, ...)
 action = cpg.forward(data.time)  # -> per-joint targets
 ```
 

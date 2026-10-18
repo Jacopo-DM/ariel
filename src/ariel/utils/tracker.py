@@ -92,7 +92,7 @@ class Tracker:
                     idx: [] for idx in range(len(self.to_track))
                 }
 
-    def update(self, data: mj.MjData) -> None:  # noqa: ARG002
+    def update(self, data: mj.MjData) -> None:  # ruff: ignore[unused-method-argument]
         """Update the history of tracked attributes for each bound object."""
         # Update the bound objects
         for idx, obj in enumerate(self.to_track):

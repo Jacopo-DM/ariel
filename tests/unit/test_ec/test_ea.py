@@ -70,8 +70,8 @@ def test_easettings_defaults() -> None:
 
 def test_easettings_db_file_path() -> None:
     """db_file_path computed field combines output_folder and db_file_name."""
-    s = EASettings(output_folder=Path("/tmp/ea"), db_file_name="run.db")  # noqa: S108
-    assert s.db_file_path == Path("/tmp/ea/run.db")  # noqa: S108
+    s = EASettings(output_folder=Path("/tmp/ea"), db_file_name="run.db")  # ruff: ignore[hardcoded-temp-file]
+    assert s.db_file_path == Path("/tmp/ea/run.db")  # ruff: ignore[hardcoded-temp-file]
 
 
 def test_easettings_override() -> None:
@@ -105,7 +105,7 @@ def test_eaoperation_wrong_first_param_type_raises() -> None:
     with pytest.raises(TypeError, match="Population"):
 
         @EAOperation  # type: ignore[arg-type]  # deliberately wrong signature
-        def bad(x: int) -> Population:  # noqa: ARG001
+        def bad(x: int) -> Population:  # ruff: ignore[unused-function-argument]
             return Population([])
 
 
@@ -114,7 +114,7 @@ def test_eaoperation_wrong_return_type_raises() -> None:
     with pytest.raises(TypeError, match="Population"):
 
         @EAOperation  # type: ignore[arg-type]  # deliberately wrong signature
-        def bad(population: Population) -> list[int]:  # noqa: ARG001
+        def bad(population: Population) -> list[int]:  # ruff: ignore[unused-function-argument]
             return []
 
 
@@ -148,7 +148,7 @@ def test_eaoperation_call_with_kwargs_returns_bound_op() -> None:
     """Calling with kwargs returns a new bound EAOperation (not executing)."""
 
     @EAOperation
-    def with_param(population: Population, factor: float = 1.0) -> Population:  # noqa: ARG001
+    def with_param(population: Population, factor: float = 1.0) -> Population:  # ruff: ignore[unused-function-argument]
         return population
 
     bound = with_param(factor=2.0)
@@ -188,7 +188,7 @@ def test_eaoperation_repr_with_kwargs() -> None:
     """__repr__ includes bound kwargs."""
 
     @EAOperation
-    def op(population: Population, k: int = 1) -> Population:  # noqa: ARG001
+    def op(population: Population, k: int = 1) -> Population:  # ruff: ignore[unused-function-argument]
         return population
 
     bound = op(k=42)
@@ -294,7 +294,7 @@ def test_ea_commit_sets_time_of_birth(tmp_path: Path) -> None:
     """_commit assigns time_of_birth=-1 individuals the current generation."""
     ea = _ea(tmp_path)
     # Fetch fresh from DB so SQLAlchemy session context is active
-    pop = ea._fetch()  # noqa: SLF001
+    pop = ea._fetch()  # ruff: ignore[private-member-access]
     for ind in pop:
         assert ind.time_of_birth == 0
 
@@ -302,21 +302,21 @@ def test_ea_commit_sets_time_of_birth(tmp_path: Path) -> None:
 def test_ea_fetch_returns_population(tmp_path: Path) -> None:
     """_fetch returns a Population instance."""
     ea = _ea(tmp_path)
-    pop = ea._fetch()  # noqa: SLF001
+    pop = ea._fetch()  # ruff: ignore[private-member-access]
     assert isinstance(pop, Population)
 
 
 def test_ea_fetch_only_alive(tmp_path: Path) -> None:
     """_fetch(only_alive=True) returns only alive individuals."""
     ea = _ea(tmp_path)
-    pop = ea._fetch(only_alive=True)  # noqa: SLF001
+    pop = ea._fetch(only_alive=True)  # ruff: ignore[private-member-access]
     assert all(ind.alive for ind in pop)
 
 
 def test_ea_fetch_sort_desc(tmp_path: Path) -> None:
     """_fetch(sort='desc') returns individuals sorted by fitness descending."""
     ea = _ea(tmp_path)
-    pop = ea._fetch(sort="desc")  # noqa: SLF001
+    pop = ea._fetch(sort="desc")  # ruff: ignore[private-member-access]
     fitnesses = [ind.fitness_ for ind in pop if ind.fitness_ is not None]
     assert fitnesses == sorted(fitnesses, reverse=True)
 
@@ -324,7 +324,7 @@ def test_ea_fetch_sort_desc(tmp_path: Path) -> None:
 def test_ea_fetch_sort_asc(tmp_path: Path) -> None:
     """_fetch(sort='asc') returns individuals sorted by fitness ascending."""
     ea = _ea(tmp_path)
-    pop = ea._fetch(sort="asc")  # noqa: SLF001
+    pop = ea._fetch(sort="asc")  # ruff: ignore[private-member-access]
     fitnesses = [ind.fitness_ for ind in pop if ind.fitness_ is not None]
     assert fitnesses == sorted(fitnesses)
 
@@ -332,7 +332,7 @@ def test_ea_fetch_sort_asc(tmp_path: Path) -> None:
 def test_ea_fetch_requires_eval_false(tmp_path: Path) -> None:
     """_fetch(requires_eval=False) returns only evaluated individuals."""
     ea = _ea(tmp_path)
-    pop = ea._fetch(requires_eval=False)  # noqa: SLF001
+    pop = ea._fetch(requires_eval=False)  # ruff: ignore[private-member-access]
     assert all(not ind.requires_eval for ind in pop)
 
 

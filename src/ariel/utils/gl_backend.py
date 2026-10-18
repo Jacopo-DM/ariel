@@ -302,7 +302,7 @@ def _probe_once(
         if config is not None:
             return config
         if run is None:
-            from ariel.utils.gl_manager import (  # noqa: PLC0415
+            from ariel.utils.gl_manager import (  # ruff: ignore[import-outside-top-level]
                 run as manager_run,
             )
 
@@ -312,7 +312,7 @@ def _probe_once(
         config = run(path)
         if "mujoco" in modules:
             if console is None:
-                from rich.console import Console  # noqa: PLC0415
+                from rich.console import Console  # ruff: ignore[import-outside-top-level]
 
                 console = Console()
             console.print(

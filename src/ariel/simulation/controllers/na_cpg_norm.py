@@ -52,7 +52,7 @@ def create_fully_connected_adjacency(num_nodes: int) -> dict[int, list[int]]:
     return adjacency_dict
 
 
-class NaCPG_Norm(nn.Module):  # noqa: N801
+class NaCPG_Norm(nn.Module):  # ruff: ignore[invalid-class-name]
     """Implements the Normalized Asymmetric CPG (NA-CPG)."""
 
     msg = "This class is a work in progress and not ready for use."
@@ -302,12 +302,12 @@ class NaCPG_Norm(nn.Module):  # noqa: N801
         self.angle_history = self.init_angle_history()
         self.current_step = 0
 
-    def step(self, time: float) -> torch.Tensor:  # noqa: ARG002
+    def step(self, time: float) -> torch.Tensor:  # ruff: ignore[unused-method-argument]
         """Return the next precomputed (normalized) angles from the history."""
         self.current_step += 1
         return self.angle_history[self.current_step - 1]
 
-    def forward(self, time: float | None = None) -> torch.Tensor:  # noqa: ARG002
+    def forward(self, time: float | None = None) -> torch.Tensor:  # ruff: ignore[unused-method-argument]
         # Reset if time is zero
         # if time is not None and torch.isclose(
         # ):
@@ -467,7 +467,7 @@ def main(run_id: int) -> torch.Tensor:
 
 def plot_all_runs(histories: list[torch.Tensor], dt: float) -> None:
     """Plot the angle histories of all runs against time."""
-    import matplotlib.pyplot as plt  # noqa: PLC0415
+    import matplotlib.pyplot as plt  # ruff: ignore[import-outside-top-level]
 
     plt.figure(figsize=(12, 8))
     for i, hist in enumerate(histories):

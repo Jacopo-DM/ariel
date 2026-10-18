@@ -11,8 +11,8 @@ Physical types group quantities whose units are dimensionally compatible, for ex
 ## Signature
 
 ```python
-unit.physical_type            # attribute of a Unit
-u.get_physical_type(obj)      # obj: a name, unit, Quantity, number or PhysicalType
+unit.physical_type  # attribute of a Unit
+u.get_physical_type(obj)  # obj: a name, unit, Quantity, number or PhysicalType
 ```
 
 ## Examples

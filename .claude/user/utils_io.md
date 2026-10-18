@@ -10,13 +10,13 @@ from ariel.utils.tracker import Tracker
 import mujoco
 
 tracker = Tracker(
-    mujoco.mjtObj.mjOBJ_BODY,        # what kind of object
-    "core",                          # name substring to bind
-    ["xpos"],                        # attributes to record
+    mujoco.mjtObj.mjOBJ_BODY,  # what kind of object
+    "core",  # name substring to bind
+    ["xpos"],  # attributes to record
 )
-tracker.setup(world.spec, data)      # call before stepping
+tracker.setup(world.spec, data)  # call before stepping
 # ... run sim ...
-traj = tracker.history["xpos"]       # {body_id: [pos, pos, ...]}
+traj = tracker.history["xpos"]  # {body_id: [pos, pos, ...]}
 ```
 
 Signature: `Tracker(mujoco_obj_to_find=None, name_to_bind=None,
@@ -27,11 +27,14 @@ also plugs into `Controller` (see [controllers.md](controllers.md)).
 ## Video & frames
 
 ```python
-from ariel.utils.video_recorder import VideoRecorder      # or: from ariel.utils.renderers import VideoRecorder
+from ariel.utils.video_recorder import (
+    VideoRecorder,
+)  # or: from ariel.utils.renderers import VideoRecorder
 from ariel.utils.renderers import video_renderer, single_frame_renderer
 
-rec = VideoRecorder(file_name="run", output_folder=str(out), width=640,
-                    height=480, fps=30)
+rec = VideoRecorder(
+    file_name="run", output_folder=str(out), width=640, height=480, fps=30
+)
 video_renderer(model, data, duration=30, video_recorder=rec)
 ```
 
@@ -63,7 +66,10 @@ pandas / polars:
 
 ```python
 import pandas as pd, sqlite3
-df = pd.read_sql("SELECT * FROM individual", sqlite3.connect("__data__/database.db"))
+
+df = pd.read_sql(
+    "SELECT * FROM individual", sqlite3.connect("__data__/database.db")
+)
 ```
 
 Schema, the birth/death temporal model, and pandas/polars access patterns are

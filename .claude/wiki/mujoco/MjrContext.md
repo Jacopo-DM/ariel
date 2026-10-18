@@ -43,8 +43,8 @@ ctx = mujoco.MjrContext(model, mujoco.mjtFontScale.mjFONTSCALE_150)
 mujoco.mjr_render(viewport, scene, ctx)
 
 # Read pixels
-rgb   = np.zeros((H, W, 3), dtype=np.uint8)
-depth = np.zeros((H, W),    dtype=np.float32)
+rgb = np.zeros((H, W, 3), dtype=np.uint8)
+depth = np.zeros((H, W), dtype=np.float32)
 mujoco.mjr_readPixels(rgb, depth, viewport, ctx)
 
 # Overlay text

@@ -5,9 +5,10 @@ target-version = "py312"
 exclude = [".venv", ".git", ".typings", "examples", "docs"]
 
 # Customization of the linter and formatter
-fix = false
+fix = false               # Auto-fixes are opt-in (see CLAUDE.md)
 unsafe-fixes = false
 show-fixes = true         # Show fixes in the output
+preview = true            # Allow unstable features
 respect-gitignore = false # Ignore files listed in .gitignore
 
 # Same as Black.
@@ -47,40 +48,27 @@ convention = "numpy"
 select = ["ALL"]
 ignore = [
     # --- Necessary (avoid conflict) ---
-    "D203",   # one-blank-line-before-class
-    "D212",   # multi-line-summary-first-line
-    "TID252", # relative-imports
-    "ISC001", # single-line-implicit-string-concatenation (--x COM812)
+    "incorrect-blank-line-before-class",   # one-blank-line-before-class
+    "multi-line-summary-first-line",   # multi-line-summary-first-line
+    "relative-imports", # relative-imports
+    "single-line-implicit-string-concatenation", # single-line-implicit-string-concatenation (--x COM812)
+    "missing-trailing-comma", # missing-trailing-comma (conflicts with the formatter)
     # --- Unnecessary (beyond usual scope) ---
-    "CPY001", # Requests copyright notice
-    "TD003",  # Requests issue-link under TODO
-    "INP001", # implicit module __init__ thing
-    "COM812", # trailing commas: conflicts with the formatter
-    "TRY003", # long messages in exceptions
-    "S311", # Cryptographic Purposes, not really needed here
+    "missing-copyright-notice", # Requests copyright notice
+    "missing-todo-link",  # Requests issue-link under TODO
+    "implicit-namespace-package", # implicit module __init__ thing
     # --- Annoying (but useful) ---
-    "PLR2004", # Magic value used in comparison, consider replacing with a constant variable
-    # "F841", # Variable declared but never used
-    # "ANN101",  # Missing type annotation for self in method
-    # "ANN102",  # Missing type annotation for cls in classmethod
-    # "N801",    # Should use CapWords convention
-    # "PLR0913", # Too many arguments for method
-    # "PLR0904", # Too many public methods
-    # "FIX002", # Found "TODO" in code
-    # "ERA001",  # Found commented-out code
-    # "FBT003", # Found "bool" in function argument
-    # "TID252", # relative imports
-    # "D205",   # blank line between summary and description
-    # "T201",   # found print statement
-    # "S301",   # pickle insecure
-    # "S403",   # pickle insecure import
-    # "G004",   # Logging statement uses string formatting
+    "commented-out-code",  # Found commented-out code
+    "undocumented-public-class", # No docstring in public class
+    "undocumented-public-method", # No docstring in public method
+    "undocumented-public-function", # No docstring in public function
+    "undocumented-magic-method", # No docstring in public magic method
 ]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
 unfixable = []
-preview = false
+preview = true
 allowed-confusables = []
 task-tags = ["TODO", "WARN", "[ ]", "[~]", "[x]", "[?]", "[!]"]
 
@@ -90,25 +78,36 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 # Allow assertions in tests.
 # Source: https://github.com/astral-sh/ruff/issues/4368#issuecomment-2245567481
 [lint.extend-per-file-ignores]
+"**/examples/**/*.py" = [
+    "undocumented-public-class", # Missing docstring public class
+    "undocumented-public-method", # Missing docstring public method
+    "undocumented-public-function", # Missing docstring public function
+]
 "**/tests/**/*.py" = [
-    "S101", # asserts not allowed --> ok in tests
+    "assert", # asserts not allowed --> ok in tests
 ]
 "*/test_*.py" = [
-    "S101", # asserts not allowed --> ok in tests
+    "assert", # asserts not allowed --> ok in tests
 ]
-"noxfile.py" = [
-    "S101", # asserts not allowed --> ok in nox config
-]
+
+# --- Standards additions (python-standards) --- #
+# Ruff's own rule set cannot say "no Any, no dataclass"; banned-api can.
+[lint.flake8-tidy-imports.banned-api]
+"typing.Any".msg = "No Any. Use a model, a Protocol or a TypeVar. See typing-and-pydantic.md."
+"dataclasses.dataclass".msg = "Use a pydantic BaseModel. Exceptions need a reason, see core.md."
+"pydantic.dataclasses".msg = "Use a pydantic BaseModel, not pydantic dataclasses."
+"typing.NamedTuple".msg = "Use a frozen pydantic BaseModel."
+"collections.namedtuple".msg = "Use a frozen pydantic BaseModel."
+"typing.TypedDict".msg = "Use a pydantic BaseModel. Exceptions need a reason, see core.md."
 
 [lint.pylint]
 max-args = 8
 
 [lint.per-file-ignores]
-"tests/**" = ["ANN", "D100", "D101", "D102", "D103", "D104", "D105", "D106", "D107"]
-"examples/**" = ["T201"]
+"tests/**" = ["ANN", "undocumented-public-module", "undocumented-public-class", "undocumented-public-method", "undocumented-public-function", "undocumented-public-package", "undocumented-magic-method", "undocumented-public-nested-class", "undocumented-public-init"]
 # Command-line and demo scripts that live inside the package
-"src/ariel/body_phenotypes/lynx_mjspec/unified_pipeline/**" = ["T201"]
-"src/ariel/body_phenotypes/robogen_lite/cppn_neat/tests.py" = ["T201"]
-"src/ariel/simulation/example_usage.py" = ["T201"]
+"src/ariel/body_phenotypes/lynx_mjspec/unified_pipeline/**" = ["print"]
+"src/ariel/body_phenotypes/robogen_lite/cppn_neat/tests.py" = ["print"]
+"src/ariel/simulation/example_usage.py" = ["print"]
 # Robot bodies generated by the 3D editor: long straight-line functions
-"src/ariel/body_phenotypes/robogen_lite/prebuilt_robots/john_set.py" = ["PLR0915"]
+"src/ariel/body_phenotypes/robogen_lite/prebuilt_robots/john_set.py" = ["too-many-statements"]

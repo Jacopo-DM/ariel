@@ -34,7 +34,7 @@ def probe(backend: str) -> dict[str, object]:
     """
     os.environ["MUJOCO_GL"] = backend
     try:
-        import mujoco  # noqa: PLC0415 (must follow setting MUJOCO_GL)
+        import mujoco  # ruff: ignore[import-outside-top-level] (must follow setting MUJOCO_GL)
 
         model = mujoco.MjModel.from_xml_string(_XML)
         data = mujoco.MjData(model)
@@ -47,7 +47,7 @@ def probe(backend: str) -> dict[str, object]:
                 renderer.update_scene(data)
                 renderer.render()
             elapsed = time.perf_counter() - start
-    except Exception as exc:  # noqa: BLE001 (any failure means "unusable")
+    except Exception as exc:  # ruff: ignore[blind-except] (any failure means "unusable")
         return {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
     return {"ok": True, "render_ms": 1000.0 * elapsed / _FRAMES}
 

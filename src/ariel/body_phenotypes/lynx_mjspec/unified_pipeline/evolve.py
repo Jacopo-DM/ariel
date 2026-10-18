@@ -89,7 +89,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def evaluate_candidate(  # noqa: PLR0913
+def evaluate_candidate(  # ruff: ignore[too-many-arguments]
     genome: np.ndarray,
     policy_spec: PolicySpec,
     target: np.ndarray,
@@ -197,7 +197,7 @@ def evaluate_candidate(  # noqa: PLR0913
             + (0.10 if not touched else 0.0)
             + boundary_penalty
         )
-    except Exception:  # noqa: BLE001
+    except Exception:  # ruff: ignore[blind-except]
         return INVALID_FITNESS
 
 
@@ -230,7 +230,8 @@ def main() -> None:
     # set_bounds tells CMA the valid range; clipping keeps proposals in-bounds
     # before penalization.
     tubes_p = (
-        ng.p.Array(init=tubes_init)
+        ng.p
+        .Array(init=tubes_init)
         .set_bounds(TUBE_MIN, TUBE_MAX, method="clipping")
         .set_mutation(sigma=0.27)
     )
@@ -279,7 +280,7 @@ def main() -> None:
 
             valid = [f for f in fitnesses if f < INVALID_FITNESS]
             try:
-                sigma_str = f" σ={optimizer.optim.es.sigma:.4f}"  # type: ignore[attr-defined]  # noqa: RUF001  # known bug
+                sigma_str = f" σ={optimizer.optim.es.sigma:.4f}"  # type: ignore[attr-defined]  # ruff: ignore[ambiguous-unicode-character-string]  # known bug
             except AttributeError:
                 sigma_str = ""
             best_idx = int(np.argmin(fitnesses))

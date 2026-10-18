@@ -85,7 +85,7 @@ class Archive:
                 Individual.alive == alive_filter,
             )
         if evaluated_only:
-            statement = statement.where(Individual.requires_eval == False)  # noqa: E712
+            statement = statement.where(Individual.requires_eval == False)  # ruff: ignore[true-false-comparison]
         if birth_range is not None:
             lo, hi = birth_range
             statement = statement.where(Individual.time_of_birth >= lo).where(
@@ -146,7 +146,8 @@ class Archive:
             If no individuals match the supplied filters.
         """
         statement = (
-            self._base_query(
+            self
+            ._base_query(
                 birth_range=birth_range,
                 death_range=death_range,
                 fitness_range=fitness_range,
@@ -233,7 +234,8 @@ class Archive:
             May be smaller than ``n`` if fewer matching individuals exist.
         """
         statement = (
-            self._base_query(
+            self
+            ._base_query(
                 birth_range=birth_range,
                 death_range=death_range,
                 fitness_range=fitness_range,
@@ -377,7 +379,7 @@ class Archive:
         """
         statement = (
             select(Individual)
-            .where(Individual.requires_eval == False)  # noqa: E712
+            .where(Individual.requires_eval == False)  # ruff: ignore[true-false-comparison]
             .where(Individual.time_of_birth <= generation)
             .where(Individual.time_of_death >= generation)
         )
@@ -389,7 +391,7 @@ class Archive:
         hi_pct: float = 75.0,
         n: int | None = None,
         *,
-        fitness_mode: FitnessMode = "min",  # noqa: ARG002
+        fitness_mode: FitnessMode = "min",  # ruff: ignore[unused-method-argument]
         birth_range: AgeRange = None,
     ) -> Population:
         """Return individuals whose fitness falls within a percentile band.
@@ -441,7 +443,7 @@ class Archive:
         with Session(self.engine) as session:
             return session.exec(
                 select(func.count(Individual.id)).where(  # type: ignore[arg-type]  # known bug
-                    Individual.requires_eval == False,  # noqa: E712
+                    Individual.requires_eval == False,  # ruff: ignore[true-false-comparison]
                 ),
             ).one()
 

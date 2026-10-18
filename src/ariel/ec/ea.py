@@ -323,7 +323,7 @@ class EA:
     >>> ea = EA(None, ops, restart=("__data__/run_1/database.db", 50))
     """
 
-    def __init__(  # noqa: PLR0913
+    def __init__(  # ruff: ignore[too-many-arguments]
         self,
         population: Population | None = None,
         operations: list[EAOperation[...]] | None = None,
@@ -366,7 +366,7 @@ class EA:
                         select(Individual)
                         .where(Individual.time_of_birth <= restart_gen)
                         .where(Individual.time_of_death >= restart_gen)
-                        .where(Individual.requires_eval == False)  # noqa: E712
+                        .where(Individual.requires_eval == False)  # ruff: ignore[true-false-comparison]
                     ).all()
                 )
 

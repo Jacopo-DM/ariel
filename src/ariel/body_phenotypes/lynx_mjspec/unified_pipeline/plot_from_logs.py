@@ -91,7 +91,7 @@ def plot_training_logs(log_files: str | list[str]) -> None:
         agg_mean_mean + agg_mean_std,
         color="steelblue",
         alpha=0.2,
-        label="Mean ±1σ across runs",  # noqa: RUF001
+        label="Mean ±1σ across runs",  # ruff: ignore[ambiguous-unicode-character-string]
     )
 
     # Chart Formatting

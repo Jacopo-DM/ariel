@@ -105,7 +105,7 @@ def probe_backend(
         timeout, error message).
     """
     try:
-        done = subprocess.run(  # noqa: S603 (command comes from our code)
+        done = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] (command comes from our code)
             command(backend),
             capture_output=True,
             text=True,

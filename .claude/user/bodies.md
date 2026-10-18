@@ -22,8 +22,9 @@ More (snake, turtle, iguana, centipede_3/4/5, spider_8/12/16, …) in
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider_with_blocks import (
     body_spider45,
 )
+
 core = body_spider45()
-world.spawn(core.spec, position=[0, 0, 0.1])   # see simulation.md
+world.spawn(core.spec, position=[0, 0, 0.1])  # see simulation.md
 ```
 
 ## Decode a genome → body
@@ -41,11 +42,13 @@ from ariel.body_phenotypes.robogen_lite.constructor import (
 )
 
 genome = Genome.random(
-    num_inputs=6, num_outputs=NUM_CPPN_OUTPUTS,
-    next_node_id=..., next_innov_id=...,
+    num_inputs=6,
+    num_outputs=NUM_CPPN_OUTPUTS,
+    next_node_id=...,
+    next_innov_id=...,
 )
 graph = MorphologyDecoderBestFirst(cppn_genome=genome, max_modules=10).decode()
-spec = construct_mjspec_from_graph(graph).spec   # CoreModule -> .spec
+spec = construct_mjspec_from_graph(graph).spec  # CoreModule -> .spec
 ```
 
 `Genome` key methods (see [genome.py](../../src/ariel/body_phenotypes/robogen_lite/cppn_neat/genome.py)):

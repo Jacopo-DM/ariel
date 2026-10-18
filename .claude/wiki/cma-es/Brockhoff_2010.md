@@ -71,7 +71,9 @@ In Nevergrad's implementation (see [[Nevergrad_Optimizers]]):
 
 **Recommended pattern for mirrored-sampling optimizers in Nevergrad:**
 ```python
-optimizer = ng.optimizers.CMA(parametrization=dim, budget=budget, num_workers=lambda_)
+optimizer = ng.optimizers.CMA(
+    parametrization=dim, budget=budget, num_workers=lambda_
+)
 # Use batch_mode=True or ensure ask() is called exactly lambda_ times per generation
 candidates = [optimizer.ask() for _ in range(lambda_)]
 losses = parallel_evaluate(candidates)

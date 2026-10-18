@@ -17,7 +17,7 @@ Used with `mj_name2id` / `mj_id2name`:
 `mjOBJ_UNKNOWN`, `mjOBJ_BODY`, `mjOBJ_XBODY`, `mjOBJ_JOINT`, `mjOBJ_DOF`, `mjOBJ_GEOM`, `mjOBJ_SITE`, `mjOBJ_CAMERA`, `mjOBJ_LIGHT`, `mjOBJ_MESH`, `mjOBJ_SKIN`, `mjOBJ_HFIELD`, `mjOBJ_TEXTURE`, `mjOBJ_MATERIAL`, `mjOBJ_PAIR`, `mjOBJ_EXCLUDE`, `mjOBJ_EQUALITY`, `mjOBJ_TENDON`, `mjOBJ_ACTUATOR`, `mjOBJ_SENSOR`, `mjOBJ_NUMERIC`, `mjOBJ_TEXT`, `mjOBJ_TUPLE`, `mjOBJ_KEY`, `mjOBJ_PLUGIN`
 
 ```python
-body_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, 'my_body')
+body_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "my_body")
 ```
 
 ## `mjtJoint` — Joint Types
@@ -75,22 +75,22 @@ body_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, 'my_body')
 ## Notable Constants
 
 ```python
-mujoco.mjPI             # 3.14159...
-mujoco.mjMAXVAL         # maximum value (1e10)
-mujoco.mjMINMU          # minimum friction coefficient
-mujoco.mjNREF           # size of solref array (2)
-mujoco.mjNIMP           # size of solimp array (5)
-mujoco.mjNEQDATA        # constraint equality data size
-mujoco.mjVISSTRING      # visualization string array
+mujoco.mjPI  # 3.14159...
+mujoco.mjMAXVAL  # maximum value (1e10)
+mujoco.mjMINMU  # minimum friction coefficient
+mujoco.mjNREF  # size of solref array (2)
+mujoco.mjNIMP  # size of solimp array (5)
+mujoco.mjNEQDATA  # constraint equality data size
+mujoco.mjVISSTRING  # visualization string array
 mujoco.mjDISABLESTRING  # disable flags string array
-mujoco.mjENABLESTRING   # enable flags string array
+mujoco.mjENABLESTRING  # enable flags string array
 ```
 
 ## Usage Example
 
 ```python
 # Check joint type
-if model.joint('knee').type == mujoco.mjtJoint.mjJNT_HINGE:
+if model.joint("knee").type == mujoco.mjtJoint.mjJNT_HINGE:
     print("hinge joint")
 
 # Set geom type in MjSpec

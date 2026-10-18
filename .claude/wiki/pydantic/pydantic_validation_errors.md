@@ -12,10 +12,10 @@ How validation failures are reported. The URL in the plan, `concepts/validation_
 
 ```python
 try:
-    Model(x='test')
+    Model(x="test")
 except ValidationError as exc:
-    print(repr(exc.errors()[0]['type']))
-    #> 'int_parsing'
+    print(repr(exc.errors()[0]["type"]))
+    # > 'int_parsing'
 ```
 
 `exc.errors()` is a list of dicts; the key `'type'` holds the error code. The full key list (`loc`, `msg`, `input`, `ctx`, `url`) is shown in [[pydantic_get_started]], not on this page. Printed form:

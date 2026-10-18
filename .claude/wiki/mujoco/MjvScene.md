@@ -53,11 +53,13 @@ Updated each frame by `mjv_updateScene`:
 
 ```python
 mujoco.mjv_updateScene(
-    model, data, opt,
-    None,                           # perturb object (or MjvPerturb)
+    model,
+    data,
+    opt,
+    None,  # perturb object (or MjvPerturb)
     cam,
     mujoco.mjtCatBit.mjCAT_ALL,
-    scene
+    scene,
 )
 ```
 

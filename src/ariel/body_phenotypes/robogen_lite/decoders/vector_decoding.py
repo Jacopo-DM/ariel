@@ -126,14 +126,14 @@ class VectorDecoder(Blueprint):
 
         # Known bug (see PLAN.md): unfinished code, `allowed_per_element` is
         # undefined, so this method raises NameError when called.
-        allowed_rot_per_type = [  # noqa: F841
+        allowed_rot_per_type = [  # ruff: ignore[unused-variable]
             ALLOWED_ROTATIONS[module_type]  # type: ignore[index]  # known bug
             for module_type in module_types
         ]
 
-        rotations = self.assign_symbols_from_range(  # noqa: F841
+        rotations = self.assign_symbols_from_range(  # ruff: ignore[unused-variable]
             vector=self.rotation_vector,
-            symbols=allowed_per_element,  # type: ignore[name-defined]  # noqa: F821  # known bug
+            symbols=allowed_per_element,  # type: ignore[name-defined]  # ruff: ignore[undefined-name]  # known bug
         )
         rot_types = [i.value for i in ModuleRotationsIdx]
         self.assign_symbols_from_range(

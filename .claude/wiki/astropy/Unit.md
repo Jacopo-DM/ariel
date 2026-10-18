@@ -13,11 +13,13 @@ Units in `astropy.units`: how to combine them and how to define new ones. A [[Qu
 The page gives no full signatures for `Unit` or `def_unit` (see the astropy API reference). Forms it shows:
 
 ```python
-u.Unit("erg / (s cm2)")                       # from a string
-u.def_unit('bakers_fortnight', 13 * u.day)    # compound unit: name, definition
-u.def_unit('titter')                          # new fundamental unit, no definition
-u.def_unit(['Fo', 'foo'], prefixes=True, namespace=new_units)  # names, prefixes, namespace dict
-u.add_enabled_units(new_units)                # make custom units findable and parseable
+u.Unit("erg / (s cm2)")  # from a string
+u.def_unit("bakers_fortnight", 13 * u.day)  # compound unit: name, definition
+u.def_unit("titter")  # new fundamental unit, no definition
+u.def_unit(
+    ["Fo", "foo"], prefixes=True, namespace=new_units
+)  # names, prefixes, namespace dict
+u.add_enabled_units(new_units)  # make custom units findable and parseable
 ```
 
 ## Examples

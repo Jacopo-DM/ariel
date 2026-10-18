@@ -25,7 +25,7 @@ def _nde(n: int = 5) -> NeuralDevelopmentalEncoding:
     return NeuralDevelopmentalEncoding(number_of_modules=n)
 
 
-def _genotype(n: int = 5, seed: int = 0) -> list[np.ndarray]:  # noqa: ARG001
+def _genotype(n: int = 5, seed: int = 0) -> list[np.ndarray]:  # ruff: ignore[unused-function-argument]
     """Three float32 chromosomes (type, connection, rotation), fixed length."""
     rng = np.random.default_rng(seed)
     return [rng.random(GENOTYPE_SIZE).astype(np.float32) for _ in range(3)]

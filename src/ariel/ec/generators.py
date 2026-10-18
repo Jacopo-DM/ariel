@@ -86,7 +86,8 @@ class IntegersGenerator:
         )
         return cast(
             "Integers",
-            _rng.integers(
+            _rng
+            .integers(
                 low=low,
                 high=high,
                 size=size,
@@ -138,7 +139,8 @@ class IntegersGenerator:
         s: bool = shuffle if shuffle is not None else _settings.choice_shuffle
         return cast(
             "Integers",
-            np.array(
+            np
+            .array(
                 _rng.choice(
                     a=value_set,
                     size=size,
@@ -291,7 +293,8 @@ class FloatsGenerator:
         """
         return cast(
             "Floats",
-            np.array(
+            np
+            .array(
                 _rng.choice(
                     a=np.array(value_set),
                     size=size,
