@@ -74,8 +74,8 @@ nbsphinx_execute = "never"  # Do not run notebooks during build
 # """
 
 # # Nicer code highlighting theme
-pygments_style = "default"          # dark code blocks
-pygments_dark_style = "monokai"     # Furo-specific: dark mode highlight theme
+pygments_style = "default"  # dark code blocks
+pygments_dark_style = "monokai"  # Furo-specific: dark mode highlight theme
 
 # --------- AUTOAPI --------- #
 autoapi_add_toctree_entry = True
@@ -145,10 +145,8 @@ autosectionlabel_prefix_document = True
 html_theme_options = {
     # -- Sidebar --
     "sidebar_hide_name": False,  # Show project name in sidebar
-
     # -- Top of page announcement banner --
     "announcement": "<b>🚀 New release coming soon!</b> Check out what's new in v0.1",
-
     # -- Light / Dark mode custom colors --
     "light_css_variables": {
         "color-brand-primary": "#4A90D9",
@@ -162,7 +160,6 @@ html_theme_options = {
         "color-brand-content": "#79B8FF",
         "color-admonition-background": "rgba(121, 184, 255, 0.05)",
     },
-
     # -- Footer icons (e.g. GitHub link) --
     "footer_icons": [
         {
@@ -186,10 +183,10 @@ html_theme_options = {
 }
 
 # --------- HTML OUTPUT --------- #
-html_title = "ARIEL"                        # Browser tab + sidebar title
-html_last_updated_fmt = "%b %d, %Y"        # "Last updated: Jan 01, 2025" in footer
-html_show_sourcelink = False               # Hide "View page source" link
-html_copy_source = False                   # Don't copy .rst/.md source into build
+html_title = "ARIEL"  # Browser tab + sidebar title
+html_last_updated_fmt = "%b %d, %Y"  # "Last updated: Jan 01, 2025" in footer
+html_show_sourcelink = False  # Hide "View page source" link
+html_copy_source = False  # Don't copy .rst/.md source into build
 
 # --------- STATIC FILES (optional custom CSS) --------- #
 # html_static_path = ["_static"]
