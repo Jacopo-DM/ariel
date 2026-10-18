@@ -5,6 +5,8 @@ import pytest
 
 from ariel.utils.optimizers.revde import RevDE
 
+NUM_CHILDREN = 3
+
 
 def test_revde_initialization() -> None:
     """RevDE initializes with a 3x3 transformation matrix."""
@@ -19,7 +21,7 @@ def test_revde_mutate_returns_three_children() -> None:
     b = np.array([4.0, 5.0, 6.0])
     c = np.array([7.0, 8.0, 9.0])
     children = revde.mutate(a, b, c)
-    assert len(children) == 3
+    assert len(children) == NUM_CHILDREN
 
 
 def test_revde_mutate_children_same_shape() -> None:
@@ -47,7 +49,7 @@ def test_revde_scaling_factor_negative() -> None:
     revde = RevDE(scaling_factor=-0.5)
     a, b, c = np.ones(3), np.ones(3), np.ones(3)
     children = revde.mutate(a, b, c)
-    assert len(children) == 3
+    assert len(children) == NUM_CHILDREN
 
 
 def test_revde_linear_transformation() -> None:

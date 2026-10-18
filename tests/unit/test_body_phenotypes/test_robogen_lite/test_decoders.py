@@ -18,6 +18,8 @@ from ariel.body_phenotypes.robogen_lite.decoders.vector_decoding import (
     VectorDecoder,
 )
 
+NUM_SYMBOLS = 3
+
 # ---------------------------------------------------------------------------
 # Shared helpers
 # ---------------------------------------------------------------------------
@@ -264,7 +266,7 @@ def test_assign_symbols_basic() -> None:
         symbols=["A", "B", "C"],
     )
     assert isinstance(result, list)
-    assert len(result) == 3
+    assert len(result) == NUM_SYMBOLS
     assert all(s in {"A", "B", "C"} for s in result)
 
 
@@ -346,7 +348,7 @@ def test_assign_symbols_numpy_input() -> None:
     result = decoder.assign_symbols_from_range(
         vector=vector, symbols=["A", "B", "C"]
     )
-    assert len(result) == 3
+    assert len(result) == NUM_SYMBOLS
 
 
 def test_assign_symbols_integer_symbols() -> None:

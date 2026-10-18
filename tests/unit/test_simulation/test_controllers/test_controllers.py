@@ -8,6 +8,11 @@ from ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider import spider
 from ariel.simulation.controllers.controller import Controller
 from ariel.utils.tracker import Tracker
 
+DEFAULT_CTRL_STEP = 50
+DEFAULT_SAVE_STEP = 500
+CUSTOM_CTRL_STEP = 10
+CUSTOM_SAVE_STEP = 100
+
 
 def _zero_callback(model: mujoco.MjModel, _data: mujoco.MjData) -> list[float]:
     """Control callback that always outputs zeros.
@@ -30,8 +35,8 @@ def _build_spider_model() -> tuple[mujoco.MjModel, mujoco.MjData]:
 def test_controller_default_initialization() -> None:
     """Controller initializes with expected defaults."""
     ctrl = Controller(controller_callback_function=_zero_callback)
-    assert ctrl.time_steps_per_ctrl_step == 50
-    assert ctrl.time_steps_per_save == 500
+    assert ctrl.time_steps_per_ctrl_step == DEFAULT_CTRL_STEP
+    assert ctrl.time_steps_per_save == DEFAULT_SAVE_STEP
     assert ctrl.alpha == pytest.approx(0.5)
     assert isinstance(ctrl.tracker, Tracker)
 
@@ -40,12 +45,12 @@ def test_controller_custom_params() -> None:
     """Controller stores custom parameters correctly."""
     ctrl = Controller(
         controller_callback_function=_zero_callback,
-        time_steps_per_ctrl_step=10,
-        time_steps_per_save=100,
+        time_steps_per_ctrl_step=CUSTOM_CTRL_STEP,
+        time_steps_per_save=CUSTOM_SAVE_STEP,
         alpha=0.8,
     )
-    assert ctrl.time_steps_per_ctrl_step == 10
-    assert ctrl.time_steps_per_save == 100
+    assert ctrl.time_steps_per_ctrl_step == CUSTOM_CTRL_STEP
+    assert ctrl.time_steps_per_save == CUSTOM_SAVE_STEP
     assert ctrl.alpha == pytest.approx(0.8)
 
 

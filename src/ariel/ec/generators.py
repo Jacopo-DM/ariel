@@ -7,6 +7,8 @@ import numpy as np
 from numpy.random import Generator
 from pydantic_settings import BaseSettings
 
+UNIFORM_MEDIAN = 0.5
+
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
@@ -710,7 +712,7 @@ class FloatMutator:
         delta_high: NDArray[np.float64] = (high - arr) / (high - low)
 
         delta_q = np.where(
-            u <= 0.5,
+            u <= UNIFORM_MEDIAN,
             (2.0 * u + (1.0 - 2.0 * u) * (1.0 - delta_low) ** (eta + 1.0))
             ** (1.0 / (eta + 1.0))
             - 1.0,

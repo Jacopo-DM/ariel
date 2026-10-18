@@ -8,6 +8,17 @@ from ariel.ec.ea import EA, EAOperation, EASettings
 from ariel.ec.individual import Individual
 from ariel.ec.population import Population
 
+DEFAULT_NUM_STEPS = 100
+DEFAULT_POPULATION_SIZE = 100
+CUSTOM_NUM_STEPS = 50
+SIZE_BEFORE_DOUBLING = 3
+SIZE_AFTER_DOUBLING = 2 * SIZE_BEFORE_DOUBLING
+INITIAL_POP_SIZE = 5
+FIRST_GENERATION_ID = 10
+ALIVE_COUNT = 6
+STEPS_TAKEN = 2
+NUM_STEPS_RUN = 5
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -59,8 +70,8 @@ def _ea(
 def test_easettings_defaults() -> None:
     """EASettings initializes with expected defaults."""
     s = EASettings()
-    assert s.num_steps == 100
-    assert s.target_population_size == 100
+    assert s.num_steps == DEFAULT_NUM_STEPS
+    assert s.target_population_size == DEFAULT_POPULATION_SIZE
     assert s.db_file_name == "database.db"
     assert s.db_handling == "delete"
     assert s.is_maximisation is True
@@ -76,8 +87,8 @@ def test_easettings_db_file_path() -> None:
 
 def test_easettings_override() -> None:
     """EASettings fields can be overridden at construction."""
-    s = EASettings(num_steps=50, quiet=True)
-    assert s.num_steps == 50
+    s = EASettings(num_steps=CUSTOM_NUM_STEPS, quiet=True)
+    assert s.num_steps == CUSTOM_NUM_STEPS
     assert s.quiet is True
 
 
@@ -133,10 +144,10 @@ def test_eaoperation_call_with_population_executes() -> None:
 
 def test_eaoperation_call_result_is_population() -> None:
     """double_pop operation doubles the population size."""
-    pop = _make_pop(3)
+    pop = _make_pop(SIZE_BEFORE_DOUBLING)
     result = double_pop(pop)
     assert isinstance(result, Population)
-    assert len(result) == 6
+    assert len(result) == SIZE_AFTER_DOUBLING
 
 
 # ---------------------------------------------------------------------------
@@ -274,15 +285,15 @@ def test_ea_db_handling_delete_overwrites(tmp_path: Path) -> None:
 
 def test_ea_population_stored(tmp_path: Path) -> None:
     """EA stores the initial population."""
-    pop = _make_pop(5)
+    pop = _make_pop(INITIAL_POP_SIZE)
     ea = _ea(tmp_path, pop=pop)
-    assert len(ea.population) == 5
+    assert len(ea.population) == INITIAL_POP_SIZE
 
 
 def test_ea_custom_first_generation(tmp_path: Path) -> None:
     """first_generation_id is stored on the EA."""
-    ea = _ea(tmp_path, first_generation_id=10)
-    assert ea.current_generation == 10
+    ea = _ea(tmp_path, first_generation_id=FIRST_GENERATION_ID)
+    assert ea.current_generation == FIRST_GENERATION_ID
 
 
 # ---------------------------------------------------------------------------
@@ -356,8 +367,8 @@ def test_ea_fetch_population_updates_self(tmp_path: Path) -> None:
 
 def test_ea_size_property(tmp_path: Path) -> None:
     """Size returns the number of alive individuals."""
-    ea = _ea(tmp_path, pop=_make_pop(6))
-    assert ea.size == 6
+    ea = _ea(tmp_path, pop=_make_pop(ALIVE_COUNT))
+    assert ea.size == ALIVE_COUNT
 
 
 # ---------------------------------------------------------------------------
@@ -417,7 +428,7 @@ def test_ea_step_twice(tmp_path: Path) -> None:
     ea = _ea(tmp_path)
     ea.step()
     ea.step()
-    assert ea.current_generation == 2
+    assert ea.current_generation == STEPS_TAKEN
 
 
 # ---------------------------------------------------------------------------
@@ -427,9 +438,9 @@ def test_ea_step_twice(tmp_path: Path) -> None:
 
 def test_ea_run_executes_num_steps(tmp_path: Path) -> None:
     """run() executes exactly num_steps generations."""
-    ea = _ea(tmp_path, num_steps=5)
+    ea = _ea(tmp_path, num_steps=NUM_STEPS_RUN)
     ea.run()
-    assert ea.current_generation == 5
+    assert ea.current_generation == NUM_STEPS_RUN
 
 
 def test_ea_run_zero_steps(tmp_path: Path) -> None:

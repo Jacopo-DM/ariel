@@ -13,6 +13,8 @@ import os
 import sys
 import time
 
+EXPECTED_ARGV_LENGTH = 2
+
 _XML = "<mujoco><worldbody><geom size='.1'/></worldbody></mujoco>"
 _SIZE = 64
 _FRAMES = 5
@@ -66,7 +68,7 @@ def main(argv: list[str]) -> int:
     int
         Exit code: 0 when a result was printed, 2 on a usage error.
     """
-    if len(argv) != 2:
+    if len(argv) != EXPECTED_ARGV_LENGTH:
         sys.stderr.write("usage: _gl_probe_worker <backend>\n")
         return 2
     sys.stdout.write(json.dumps(probe(argv[1])) + "\n")

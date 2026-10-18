@@ -2,6 +2,8 @@
 
 import numpy as np
 
+MIN_SURVIVAL_Z_HEIGHT = 0.05
+
 
 def _xy_distance(a: np.ndarray, b: np.ndarray) -> float:
     """Euclidean distance in the horizontal plane (x, y).
@@ -76,7 +78,7 @@ def fitness_survival_and_locomotion(
     float
         The fitness; lower is better.
     """
-    if min_z_height < 0.05:
+    if min_z_height < MIN_SURVIVAL_Z_HEIGHT:
         return 10.0
 
     return fitness_delta_distance(initial_pos, final_pos, target_pos)

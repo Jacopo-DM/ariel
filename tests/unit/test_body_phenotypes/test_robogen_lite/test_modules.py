@@ -12,6 +12,8 @@ from ariel.body_phenotypes.robogen_lite.modules.brick import BrickModule
 from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
 from ariel.body_phenotypes.robogen_lite.modules.hinge import HingeModule
 
+BRICK_INDEX = 2
+
 
 def test_core_module_initialization() -> None:
     """Simply instantiate the CoreModule with the correct index."""
@@ -90,8 +92,8 @@ def test_hinge_module_rotate_degrees() -> None:
 
 def test_brick_module_initialization() -> None:
     """Simply instantiate the BrickModule."""
-    brick = BrickModule(index=2)
-    assert brick.index == 2
+    brick = BrickModule(index=BRICK_INDEX)
+    assert brick.index == BRICK_INDEX
     assert brick.module_type == ModuleType.BRICK
     del brick
 

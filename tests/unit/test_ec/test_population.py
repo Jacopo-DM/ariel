@@ -3,6 +3,14 @@
 from ariel.ec.individual import Individual
 from ariel.ec.population import Population
 
+POP_LEN = 2
+SLICE_LEN = 2
+COMBINED_LEN = 2
+EXTENDED_LEN = 3
+SAMPLE_N = 5
+SMALL_POP_SIZE = 3
+TOP_N = 2
+
 
 def _make_ind(
     fitness: float | None = None, *, alive: bool = True
@@ -16,7 +24,7 @@ def _make_ind(
 def test_population_len() -> None:
     """len() returns the number of individuals."""
     pop = Population([_make_ind(1.0), _make_ind(2.0)])
-    assert len(pop) == 2
+    assert len(pop) == POP_LEN
 
 
 def test_population_empty_constructor() -> None:
@@ -51,9 +59,9 @@ def test_population_getitem_slice() -> None:
     """Slice indexing returns a Population."""
     inds = [_make_ind(float(i)) for i in range(4)]
     pop = Population(inds)
-    sliced = pop[:2]
+    sliced = pop[:SLICE_LEN]
     assert isinstance(sliced, Population)
-    assert len(sliced) == 2
+    assert len(sliced) == SLICE_LEN
 
 
 def test_population_add() -> None:
@@ -61,7 +69,7 @@ def test_population_add() -> None:
     p1 = Population([_make_ind(1.0)])
     p2 = Population([_make_ind(2.0)])
     combined = p1 + p2
-    assert len(combined) == 2
+    assert len(combined) == COMBINED_LEN
 
 
 def test_population_repr() -> None:
@@ -81,7 +89,7 @@ def test_population_extend() -> None:
     """Extend adds multiple individuals in place."""
     pop = Population([_make_ind(1.0)])
     pop.extend([_make_ind(2.0), _make_ind(3.0)])
-    assert len(pop) == 3
+    assert len(pop) == EXTENDED_LEN
 
 
 def test_population_to_list() -> None:
@@ -95,25 +103,25 @@ def test_population_to_list() -> None:
 def test_population_sample_respects_max() -> None:
     """sample(n) returns at most n individuals."""
     pop = Population([_make_ind(float(i)) for i in range(10)])
-    sampled = pop.sample(5)
-    assert len(sampled) == 5
+    sampled = pop.sample(SAMPLE_N)
+    assert len(sampled) == SAMPLE_N
 
 
 def test_population_sample_never_exceeds_size() -> None:
     """sample(n) where n > size returns all individuals."""
-    pop = Population([_make_ind() for _ in range(3)])
+    pop = Population([_make_ind() for _ in range(SMALL_POP_SIZE)])
     sampled = pop.sample(100)
-    assert len(sampled) == 3
+    assert len(sampled) == SMALL_POP_SIZE
 
 
 def test_population_best_returns_top_n() -> None:
     """best(n=2) returns the two highest-fitness individuals."""
     pop = Population([_make_ind(float(i)) for i in range(5)])
-    top2 = pop.best(n=2)
+    top2 = pop.best(n=TOP_N)
     fitnesses = [ind.fitness_ for ind in top2 if ind.fitness_ is not None]
     assert len(fitnesses) == len(top2)
     assert fitnesses == sorted(fitnesses, reverse=True)
-    assert len(top2) == 2
+    assert len(top2) == TOP_N
 
 
 def test_population_best_min_sort() -> None:

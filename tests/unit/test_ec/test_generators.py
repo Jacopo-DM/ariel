@@ -9,6 +9,11 @@ from ariel.ec.generators import (
     IntegersGenerator,
 )
 
+NUM_INTS = 5
+INT_HIGH = 10
+NUM_SAMPLES = 20
+NUM_POINTS = 5
+
 # ---------------------------------------------------------------------------
 # IntegersGenerator
 # ---------------------------------------------------------------------------
@@ -16,15 +21,15 @@ from ariel.ec.generators import (
 
 def test_integers_generator_returns_list() -> None:
     """IntegersGenerator.integers returns a list."""
-    result = IntegersGenerator.integers(0, 10, size=5)
+    result = IntegersGenerator.integers(0, 10, size=NUM_INTS)
     assert isinstance(result, list)
-    assert len(result) == 5
+    assert len(result) == NUM_INTS
 
 
 def test_integers_generator_in_range() -> None:
     """All generated integers fall within [low, high]."""
-    result = IntegersGenerator.integers(0, 10, size=100)
-    assert all(0 <= v <= 10 for v in result)
+    result = IntegersGenerator.integers(0, INT_HIGH, size=100)
+    assert all(0 <= v <= INT_HIGH for v in result)
 
 
 def test_integers_generator_choice_from_set() -> None:
@@ -55,8 +60,8 @@ def test_floats_generator_uniform_range() -> None:
 
 def test_floats_generator_normal_size() -> None:
     """FloatsGenerator.normal returns the requested number of samples."""
-    result = FloatsGenerator.normal(mean=0.0, std=1.0, size=20)
-    assert len(result) == 20
+    result = FloatsGenerator.normal(mean=0.0, std=1.0, size=NUM_SAMPLES)
+    assert len(result) == NUM_SAMPLES
 
 
 def test_floats_generator_lognormal_positive() -> None:
@@ -67,8 +72,8 @@ def test_floats_generator_lognormal_positive() -> None:
 
 def test_floats_generator_linspace() -> None:
     """FloatsGenerator.linspace returns evenly spaced values."""
-    result = FloatsGenerator.linspace(0.0, 1.0, 5)
-    assert len(result) == 5
+    result = FloatsGenerator.linspace(0.0, 1.0, NUM_POINTS)
+    assert len(result) == NUM_POINTS
     assert result[0] == pytest.approx(0.0)
     assert result[-1] == pytest.approx(1.0)
 

@@ -6,6 +6,9 @@ import pytest
 
 from ariel.ec.crossover import Crossover
 
+GENOME_LENGTH = 8
+UNIFORM_GENOME_LENGTH = 10
+
 
 def _genes(n: int) -> list[float]:
     return [float(i) for i in range(n)]
@@ -53,10 +56,10 @@ def test_one_point_symmetric() -> None:
 
 def test_n_point_valid_n() -> None:
     """n_point with valid n returns two same-length children."""
-    p_i, p_j = _genes(8), _genes(8)
+    p_i, p_j = _genes(GENOME_LENGTH), _genes(GENOME_LENGTH)
     c1, c2 = Crossover.n_point(p_i, p_j, n=3)
-    assert len(c1) == 8
-    assert len(c2) == 8
+    assert len(c1) == GENOME_LENGTH
+    assert len(c2) == GENOME_LENGTH
 
 
 def test_n_point_n_zero_raises() -> None:
@@ -84,10 +87,10 @@ def test_n_point_mismatched_shapes_raise() -> None:
 
 def test_uniform_returns_two_children() -> None:
     """Uniform crossover produces two same-length children."""
-    p_i, p_j = _genes(10), _genes(10)
+    p_i, p_j = _genes(UNIFORM_GENOME_LENGTH), _genes(UNIFORM_GENOME_LENGTH)
     c1, c2 = Crossover.uniform(p_i, p_j)
-    assert len(c1) == 10
-    assert len(c2) == 10
+    assert len(c1) == UNIFORM_GENOME_LENGTH
+    assert len(c2) == UNIFORM_GENOME_LENGTH
 
 
 def test_uniform_genes_come_from_parents() -> None:

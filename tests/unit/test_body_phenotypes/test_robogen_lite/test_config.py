@@ -14,13 +14,21 @@ from ariel.body_phenotypes.robogen_lite.config import (
     ModuleType,
 )
 
+HINGE_VALUE = 2
+NONE_VALUE = 3
+DEG_90_INDEX = 2
+DEG_45_VALUE = 45
+DEG_90_VALUE = 90
+CORE_FACE_COUNT = 4
+BRICK_FACE_COUNT = 5
+
 
 def test_module_type_members() -> None:
     """ModuleType enum has all expected members."""
     assert ModuleType.CORE.value == 0
     assert ModuleType.BRICK.value == 1
-    assert ModuleType.HINGE.value == 2
-    assert ModuleType.NONE.value == 3
+    assert ModuleType.HINGE.value == HINGE_VALUE
+    assert ModuleType.NONE.value == NONE_VALUE
 
 
 def test_module_faces_members() -> None:
@@ -33,14 +41,14 @@ def test_module_rotations_idx_members() -> None:
     """ModuleRotationsIdx enum has DEG_0, DEG_45, DEG_90."""
     assert ModuleRotationsIdx.DEG_0.value == 0
     assert ModuleRotationsIdx.DEG_45.value == 1
-    assert ModuleRotationsIdx.DEG_90.value == 2
+    assert ModuleRotationsIdx.DEG_90.value == DEG_90_INDEX
 
 
 def test_module_rotations_theta_members() -> None:
     """ModuleRotationsTheta enum maps to correct degree values."""
     assert ModuleRotationsTheta.DEG_0.value == 0
-    assert ModuleRotationsTheta.DEG_45.value == 45
-    assert ModuleRotationsTheta.DEG_90.value == 90
+    assert ModuleRotationsTheta.DEG_45.value == DEG_45_VALUE
+    assert ModuleRotationsTheta.DEG_90.value == DEG_90_VALUE
 
 
 def test_idx_of_core_is_zero() -> None:
@@ -57,12 +65,12 @@ def test_derived_constants() -> None:
 
 def test_allowed_faces_core_has_four_faces() -> None:
     """CORE is allowed four faces (FRONT, BACK, RIGHT, LEFT)."""
-    assert len(ALLOWED_FACES[ModuleType.CORE]) == 4
+    assert len(ALLOWED_FACES[ModuleType.CORE]) == CORE_FACE_COUNT
 
 
 def test_allowed_faces_brick_has_five_faces() -> None:
     """BRICK is allowed five faces."""
-    assert len(ALLOWED_FACES[ModuleType.BRICK]) == 5
+    assert len(ALLOWED_FACES[ModuleType.BRICK]) == BRICK_FACE_COUNT
 
 
 def test_allowed_faces_hinge_has_one_face() -> None:

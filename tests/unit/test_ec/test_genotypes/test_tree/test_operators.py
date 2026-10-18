@@ -19,6 +19,13 @@ from ariel.ec.genotypes.tree.operators import (
 from ariel.ec.genotypes.tree.tree_genome import TreeGenome
 from ariel.ec.genotypes.tree.validation import validate_genome_dict
 
+BRICK_ID = 2
+CORE_HINGE_NODE_COUNT = 2
+MAX_MODULES = 4
+MAX_NODES = MAX_MODULES + 1
+SINGLE_MODULE_MAX_NODES = 2
+CHAIN_DEPTH = 2
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -97,14 +104,14 @@ def test_remove_subtree_removes_descendants() -> None:
     g = _core_hinge_brick()
     remove_subtree(g, node_id=1)
     assert 1 not in g.nodes
-    assert 2 not in g.nodes
+    assert BRICK_ID not in g.nodes
 
 
 def test_remove_subtree_nonexistent_is_noop() -> None:
     """Removing a node that does not exist is silently ignored."""
     g = _core_hinge()
     remove_subtree(g, node_id=99)
-    assert len(g.nodes) == 2
+    assert len(g.nodes) == CORE_HINGE_NODE_COUNT
 
 
 # ---------------------------------------------------------------------------
@@ -139,8 +146,8 @@ def test_random_tree_has_core() -> None:
 
 def test_random_tree_within_budget() -> None:
     """random_tree produces at most max_modules + 1 nodes (core + budget)."""
-    g = random_tree(4)
-    assert len(g.nodes) <= 5
+    g = random_tree(MAX_MODULES)
+    assert len(g.nodes) <= MAX_NODES
 
 
 def test_random_tree_is_valid() -> None:
@@ -152,7 +159,7 @@ def test_random_tree_is_valid() -> None:
 def test_random_tree_single_module() -> None:
     """random_tree(1) produces at most 2 nodes."""
     g = random_tree(1)
-    assert len(g.nodes) <= 2
+    assert len(g.nodes) <= SINGLE_MODULE_MAX_NODES
 
 
 # ---------------------------------------------------------------------------
@@ -167,7 +174,7 @@ def test_get_tree_depth_core_only() -> None:
 
 def test_get_tree_depth_chain() -> None:
     """Core → hinge → brick has depth 2."""
-    assert get_tree_depth(_core_hinge_brick()) == 2
+    assert get_tree_depth(_core_hinge_brick()) == CHAIN_DEPTH
 
 
 def test_validate_tree_depth_within_limit() -> None:

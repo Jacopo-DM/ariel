@@ -10,6 +10,8 @@ from .activations import ACTIVATION_FUNCTIONS, DEFAULT_ACTIVATION
 from .connection import Connection
 from .node import Node
 
+MIN_NODES_FOR_CONNECTION = 2
+
 if TYPE_CHECKING:
     from collections.abc import Callable
 
@@ -146,7 +148,7 @@ class Genome:
         """Attempt to add a connection between two unconnected nodes."""
         all_nodes = list(self.nodes.keys())
         # We need at least two nodes to form a connection
-        if len(all_nodes) < 2:
+        if len(all_nodes) < MIN_NODES_FOR_CONNECTION:
             return
 
         # Pick two random distinct nodes

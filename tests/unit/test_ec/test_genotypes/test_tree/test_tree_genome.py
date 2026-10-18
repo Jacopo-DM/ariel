@@ -8,6 +8,9 @@ import networkx as nx
 
 from ariel.ec.genotypes.tree.tree_genome import TreeGenome
 
+NODE_COUNT = 2
+CHILD_ID = 2
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -66,7 +69,7 @@ def test_to_networkx_node_count() -> None:
     """DiGraph has the same number of nodes as TreeGenome."""
     g = _simple_genome()
     nxg = g.to_networkx()
-    assert len(nxg.nodes) == 2
+    assert len(nxg.nodes) == NODE_COUNT
 
 
 def test_to_networkx_edge_data() -> None:
@@ -118,11 +121,11 @@ def test_from_dict_string_keys() -> None:
             "0": {"type": "CORE", "rotation": "DEG_0"},
             "2": {"type": "BRICK", "rotation": "DEG_45"},
         },
-        "edges": [{"parent": 0, "child": 2, "face": "BACK"}],
+        "edges": [{"parent": 0, "child": CHILD_ID, "face": "BACK"}],
     }
     g = TreeGenome.from_dict(data)
     assert 0 in g.nodes
-    assert 2 in g.nodes
+    assert CHILD_ID in g.nodes
 
 
 def test_from_dict_list_nodes() -> None:

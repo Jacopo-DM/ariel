@@ -16,6 +16,8 @@ from ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding import (
 )
 from ariel.ec.genotypes.nde.nde import NeuralDevelopmentalEncoding
 
+NUM_OUTPUTS = 3
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -66,13 +68,13 @@ def test_nde_no_grad_params() -> None:
 def test_nde_output_layers_count() -> None:
     """There are exactly 3 output layers (type, connection, rotation)."""
     nde = _nde()
-    assert len(nde.output_layers) == 3
+    assert len(nde.output_layers) == NUM_OUTPUTS
 
 
 def test_nde_output_shapes_count() -> None:
     """There are exactly 3 expected output shapes."""
     nde = _nde()
-    assert len(nde.output_shapes) == 3
+    assert len(nde.output_shapes) == NUM_OUTPUTS
 
 
 def test_nde_type_shape() -> None:
@@ -112,7 +114,7 @@ def test_nde_forward_three_outputs() -> None:
     """forward() returns exactly 3 arrays (type, connection, rotation)."""
     nde = _nde()
     outputs = nde.forward(_genotype())
-    assert len(outputs) == 3
+    assert len(outputs) == NUM_OUTPUTS
 
 
 def test_nde_forward_type_shape() -> None:

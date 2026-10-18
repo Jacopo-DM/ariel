@@ -12,6 +12,10 @@ import pytest
 from ariel.utils.morphological_descriptor import MorphologicalMeasures
 from ariel.utils.noise_gen import PerlinNoise
 
+SPIDER_HINGES = 4
+SPIDER_MODULES = 5
+BRANCHING_BRICKS = 2
+
 # ---------------------------------------------------------------------------
 # PerlinNoise
 # ---------------------------------------------------------------------------
@@ -159,15 +163,15 @@ def test_morphological_single_core_no_bricks_or_hinges() -> None:
 def test_morphological_spider_graph_module_counts() -> None:
     """Spider graph has 4 hinges and 0 bricks."""
     m = MorphologicalMeasures(_make_spider_graph())
-    assert m.num_active_hinges == 4
+    assert m.num_active_hinges == SPIDER_HINGES
     assert m.num_bricks == 0
-    assert m.num_modules == 5
+    assert m.num_modules == SPIDER_MODULES
 
 
 def test_morphological_branching_graph_brick_count() -> None:
     """Branching graph has 2 bricks and 1 hinge."""
     m = MorphologicalMeasures(_make_branching_graph())
-    assert m.num_bricks == 2
+    assert m.num_bricks == BRANCHING_BRICKS
     assert m.num_active_hinges == 1
 
 

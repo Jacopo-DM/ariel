@@ -13,6 +13,8 @@ from ariel.body_phenotypes.robogen_lite.modules.brick import BrickModule
 from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
 from ariel.body_phenotypes.robogen_lite.modules.hinge import HingeModule
 
+HINGE_PROBABILITY = 0.6
+
 
 def random_spider20(seed: int = 1337) -> CoreModule:
     """Build a reproducible random 20-module morphology.
@@ -61,7 +63,7 @@ def random_spider20(seed: int = 1337) -> CoreModule:
         parent, attach_face = open_sites.pop(site_idx)
 
         # Slight hinge bias usually increases articulation in random bodies.
-        if rng.random() < 0.6:
+        if rng.random() < HINGE_PROBABILITY:
             child = HingeModule(index=idx)
             child.rotate(rng.choice(hinge_rotations))
         else:

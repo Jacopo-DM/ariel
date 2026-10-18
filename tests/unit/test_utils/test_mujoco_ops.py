@@ -10,6 +10,8 @@ from ariel.utils.mujoco_ops import (
     mjspec_deep_copy,
 )
 
+QUATERNION_LENGTH = 4
+
 # ---------------------------------------------------------------------------
 # euler_to_quat_conversion
 # ---------------------------------------------------------------------------
@@ -18,7 +20,7 @@ from ariel.utils.mujoco_ops import (
 def test_euler_to_quat_returns_length_4() -> None:
     """Conversion returns a quaternion of length 4."""
     q = euler_to_quat_conversion((0.0, 0.0, 0.0), "XYZ")
-    assert len(q) == 4
+    assert len(q) == QUATERNION_LENGTH
 
 
 def test_euler_zero_rotation_is_identity() -> None:

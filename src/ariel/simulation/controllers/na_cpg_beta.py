@@ -30,6 +30,8 @@ from rich.console import Console
 from rich.traceback import install
 from torch import nn
 
+MIN_SAMPLES_FOR_CURVATURE = 2
+
 # Global constants
 E = 1e-9
 
@@ -677,7 +679,7 @@ def main() -> None:
                 (w[2:] - 2 * w[1:-1] + w[:-2]) ** 2
                 + (y[2:] - 2 * y[1:-1] + y[:-2]) ** 2,
             )
-            if len(w) > 2
+            if len(w) > MIN_SAMPLES_FOR_CURVATURE
             else 0
         )
         losses_curvature.append(curvature)

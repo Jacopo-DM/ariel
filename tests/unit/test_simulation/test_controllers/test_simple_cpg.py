@@ -9,6 +9,10 @@ from ariel.simulation.controllers.simple_cpg import (
     create_fully_connected_adjacency,
 )
 
+NUM_ADJ_NODES = 4
+NUM_CPG_NODES = 3
+NUM_STEPS = 100
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -29,8 +33,8 @@ def _cpg(n: int = 3, seed: int = 0) -> SimpleCPG:
 
 def test_fully_connected_adjacency_size() -> None:
     """create_fully_connected_adjacency returns a dict with n keys."""
-    adj = create_fully_connected_adjacency(4)
-    assert len(adj) == 4
+    adj = create_fully_connected_adjacency(NUM_ADJ_NODES)
+    assert len(adj) == NUM_ADJ_NODES
 
 
 def test_fully_connected_adjacency_no_self_loops() -> None:
@@ -56,7 +60,7 @@ def test_fully_connected_adjacency_all_others() -> None:
 def test_simplecpg_initialization() -> None:
     """SimpleCPG initializes without error."""
     cpg = _cpg()
-    assert cpg.n == 3
+    assert cpg.n == NUM_CPG_NODES
 
 
 def test_simplecpg_parameter_count() -> None:
@@ -136,11 +140,11 @@ def test_simplecpg_forward_with_angle_tracking() -> None:
 def test_simplecpg_forward_no_bounds() -> None:
     """hard_bounds=None allows outputs outside [-pi/2, pi/2]."""
     cpg = SimpleCPG(_adj(3), hard_bounds=None, seed=0)
-    outputs = [cpg.forward() for _ in range(100)]
+    outputs = [cpg.forward() for _ in range(NUM_STEPS)]
     all_values = torch.stack(outputs).abs()
     # With no bounds, some values may exceed pi/2 over 100 steps
     # Just check it runs without error
-    assert all_values.shape[0] == 100
+    assert all_values.shape[0] == NUM_STEPS
 
 
 # ---------------------------------------------------------------------------

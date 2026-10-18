@@ -11,6 +11,18 @@ from ariel.ec.ea import EA, EAOperation
 from ariel.ec.individual import Individual
 from ariel.ec.population import Population
 
+MIN_ARCHIVE_SIZE = 20
+LAST_GENERATION = 5
+FITNESS_LOW = 5.0
+FITNESS_HIGH = 10.0
+SAMPLE_SIZE = 5
+FITNESS_CUTOFF = 5.0
+HALL_SIZE = 5
+NUM_WINNERS = 4
+MAX_WINNER_FITNESS = 19.0
+NUM_ALIVE = 20
+SAMPLE_LIMIT = 3
+
 # ---------------------------------------------------------------------------
 # Fixture helpers
 # ---------------------------------------------------------------------------
@@ -103,7 +115,7 @@ def test_archive_repr_contains_name(archive: Archive) -> None:
 
 def test_archive_size(archive: Archive) -> None:
     """Size returns the total number of evaluated individuals."""
-    assert archive.size >= 20
+    assert archive.size >= MIN_ARCHIVE_SIZE
 
 
 def test_archive_generation_range(archive: Archive) -> None:
@@ -118,7 +130,7 @@ def test_archive_generation_range_values(archive: Archive) -> None:
     """Individuals born at gen 0 and alive through gen 5."""
     lo, hi = archive.generation_range
     assert lo == 0
-    assert hi == 5
+    assert hi == LAST_GENERATION
 
 
 # ---------------------------------------------------------------------------
@@ -183,8 +195,8 @@ def test_random_individual_birth_range_filter(archive: Archive) -> None:
 
 def test_random_individual_fitness_range_filter(archive: Archive) -> None:
     """fitness_range restricts the returned individual's fitness."""
-    ind = archive.random_individual(fitness_range=(5.0, 10.0))
-    assert 5.0 <= _fitness(ind) <= 10.0
+    ind = archive.random_individual(fitness_range=(FITNESS_LOW, FITNESS_HIGH))
+    assert FITNESS_LOW <= _fitness(ind) <= FITNESS_HIGH
 
 
 def test_random_individual_no_match_raises(archive: Archive) -> None:
@@ -229,8 +241,8 @@ def test_random_population_returns_population(archive: Archive) -> None:
 
 def test_random_population_respects_n(archive: Archive) -> None:
     """random_population returns at most n individuals."""
-    pop = archive.random_population(5)
-    assert len(pop) <= 5
+    pop = archive.random_population(SAMPLE_SIZE)
+    assert len(pop) <= SAMPLE_SIZE
 
 
 def test_random_population_all_evaluated(archive: Archive) -> None:
@@ -242,9 +254,9 @@ def test_random_population_all_evaluated(archive: Archive) -> None:
 
 def test_random_population_fitness_range(archive: Archive) -> None:
     """fitness_range filter works for random_population."""
-    pop = archive.random_population(20, fitness_range=(0.0, 5.0))
+    pop = archive.random_population(20, fitness_range=(0.0, FITNESS_CUTOFF))
     for ind in pop:
-        assert 0.0 <= _fitness(ind) <= 5.0
+        assert 0.0 <= _fitness(ind) <= FITNESS_CUTOFF
 
 
 def test_random_population_n_larger_than_archive(archive: Archive) -> None:
@@ -266,8 +278,8 @@ def test_hall_of_fame_returns_population(archive: Archive) -> None:
 
 def test_hall_of_fame_size(archive: Archive) -> None:
     """hall_of_fame returns at most n individuals."""
-    hof = archive.hall_of_fame(n=5)
-    assert len(hof) <= 5
+    hof = archive.hall_of_fame(n=HALL_SIZE)
+    assert len(hof) <= HALL_SIZE
 
 
 def test_hall_of_fame_min_sorted(archive: Archive) -> None:
@@ -316,8 +328,8 @@ def test_tournament_population_returns_population(archive: Archive) -> None:
 
 def test_tournament_population_size(archive: Archive) -> None:
     """tournament_population returns exactly n individuals."""
-    pop = archive.tournament_population(n=4, tournament_size=2)
-    assert len(pop) == 4
+    pop = archive.tournament_population(n=NUM_WINNERS, tournament_size=2)
+    assert len(pop) == NUM_WINNERS
 
 
 def test_tournament_population_min_winners_are_low_fitness(
@@ -328,7 +340,7 @@ def test_tournament_population_min_winners_are_low_fitness(
         n=5, tournament_size=3, fitness_mode="min"
     )
     for ind in pop:
-        assert _fitness(ind) <= 19.0
+        assert _fitness(ind) <= MAX_WINNER_FITNESS
 
 
 def test_tournament_population_max_mode(archive: Archive) -> None:
@@ -362,13 +374,13 @@ def test_by_generation_returns_population(archive: Archive) -> None:
 def test_by_generation_correct_count(archive: Archive) -> None:
     """All 20 individuals were alive at generation 0."""
     pop = archive.by_generation(0)
-    assert len(pop) == 20
+    assert len(pop) == NUM_ALIVE
 
 
 def test_by_generation_mid_run(archive: Archive) -> None:
     """All individuals alive through generation 3 (born=0, died=5)."""
     pop = archive.by_generation(3)
-    assert len(pop) == 20
+    assert len(pop) == NUM_ALIVE
 
 
 def test_by_generation_out_of_range_empty(archive: Archive) -> None:
@@ -406,8 +418,8 @@ def test_fitness_percentile_in_band(archive: Archive) -> None:
 
 def test_fitness_percentile_with_n_sampling(archive: Archive) -> None:
     """N parameter limits the number of returned individuals."""
-    pop = archive.fitness_percentile_population(0.0, 100.0, n=3)
-    assert len(pop) <= 3
+    pop = archive.fitness_percentile_population(0.0, 100.0, n=SAMPLE_LIMIT)
+    assert len(pop) <= SAMPLE_LIMIT
 
 
 def test_fitness_percentile_impossible_birth_range_empty(
