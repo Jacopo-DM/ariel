@@ -12,6 +12,7 @@ Every page of the wiki, by topic folder. `tests/unit/test_wiki_structure.py` fai
 
 - [[mjcf_actuators]]
 - [[mjcf_compiler]]
+- [[mjcf_defaults_3_8_0]]
 - [[mjcf_geom_joint_defaults]]
 - [[mjcf_option]]
 - [[mjcf_size_statistic]]
@@ -59,6 +60,7 @@ Every page of the wiki, by topic folder. `tests/unit/test_wiki_structure.py` fai
 - [[mujoco_modeling_guidance]]
 - [[mujoco_named_access_api]]
 - [[mujoco_overview_units]]
+- [[mujoco_parameter_research]]
 - [[mujoco_rendering_pipeline]]
 - [[mujoco_resource_providers]]
 - [[mujoco_simulation_functions]]
@@ -67,6 +69,7 @@ Every page of the wiki, by topic folder. `tests/unit/test_wiki_structure.py` fai
 - [[mujoco_ui_functions]]
 - [[mujoco_viewer]]
 - [[mujoco_visualization_functions]]
+- [[Source - Deep Research Reports on MuJoCo Parameters]]
 - [[Source - MuJoCo Code Samples]]
 - [[Source - MuJoCo Data Class Variables (ARIEL)]]
 - [[Source - MuJoCo Docs for Physics Parameters]]

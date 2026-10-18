@@ -84,3 +84,9 @@
 - Files created: mujoco_overview_units.md, mujoco_computation_soft_constraints.md, mujoco_solver_parameters.md, mujoco_modeling_guidance.md, mjcf_option.md, mjcf_compiler.md, mjcf_size_statistic.md, mjcf_visual.md, mjcf_geom_joint_defaults.md, mjcf_actuators.md, mujoco_changelog_defaults.md, Source - MuJoCo Docs for Physics Parameters.md
 - Files updated: none
 - Model: Claude (subscription)
+
+## [2026-10-18] Ingest | AI deep-research reports on MuJoCo parameters, checked against the installed engine
+- Source: three reports pasted by the user (Gemini, ChatGPT, DeepSeek), compared with MuJoCo 3.8.0 read through MjSpec
+- Files created: mujoco_parameter_research.md, mjcf_defaults_3_8_0.md, Source - Deep Research Reports on MuJoCo Parameters.md
+- Note: the reports disagree on several defaults and on the solref formulas; the installed engine and the MuJoCo docs were used to decide. Errors are listed in mujoco_parameter_research.md.
+- Model: Claude (subscription)
