@@ -281,3 +281,6 @@ mujoco_user_config.json.lock
 
 # Obsidian window state (personal)
 .obsidian/
+
+# Generated type stubs (kept on disk for pyright, not tracked)
+.typings/

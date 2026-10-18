@@ -1,3 +1,0 @@
-from torch.types import Device as _device_t
-
-def _get_device_index(device: _device_t, optional: bool = False) -> int: ...
