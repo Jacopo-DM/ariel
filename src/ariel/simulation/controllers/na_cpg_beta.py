@@ -21,7 +21,6 @@ Todo
 
 # Standard library
 from pathlib import Path
-from typing import NamedTuple
 
 # Third-party libraries
 import numpy as np
@@ -30,6 +29,8 @@ from numpy.typing import NDArray
 from rich.console import Console
 from rich.traceback import install
 from torch import nn
+
+from ariel.parameters import FrozenModel
 
 MIN_SAMPLES_FOR_CURVATURE = 2
 
@@ -54,7 +55,7 @@ torch.set_printoptions(precision=4)  # type: ignore[no-untyped-call]  # known bu
 
 
 # --- Beta Parameters --- #
-class BetaParams(NamedTuple):
+class BetaParams(FrozenModel):
     """Shape parameters (a, b) and bounds (c, d) of a scaled beta."""
 
     a: float
@@ -293,7 +294,7 @@ class NaCPGBeta(nn.Module):
         ValueError
             If c or d is negative while negative_reflect is true.
         """
-        a, b, c, d = beta_params
+        a, b, c, d = beta_params.a, beta_params.b, beta_params.c, beta_params.d
 
         # a & b must be grater than 0
         lower = min(c, d)

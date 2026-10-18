@@ -1,7 +1,7 @@
 """MuJoCo world: flat world with a chequerboard floor."""
 
 # Standard library
-from dataclasses import dataclass
+from dataclasses import dataclass  # ruff: ignore[banned-api]  # behaviour first: a world builds its MjSpec after init; the fields are its settings
 
 # Third-party libraries
 import mujoco

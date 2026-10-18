@@ -1,7 +1,7 @@
 """Controller that applies a callback to a MuJoCo simulation."""
 
 # Standard library
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field  # ruff: ignore[banned-api]  # behaviour first: wraps a callback and a tracker; the fields are its settings
 from typing import Protocol
 
 # Third-party libraries

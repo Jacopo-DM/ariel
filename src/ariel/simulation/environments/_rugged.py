@@ -1,7 +1,7 @@
 """MuJoCo world: rugged heightmap terrain."""
 
 # Standard library
-from dataclasses import dataclass
+from dataclasses import dataclass  # ruff: ignore[banned-api]  # behaviour first: a world builds its MjSpec after init; the fields are its settings
 
 # Local libraries
 from ariel.parameters.ariel_types import Dimension

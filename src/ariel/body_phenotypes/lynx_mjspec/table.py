@@ -1,6 +1,6 @@
 """Table environment for MjSpec Lynx arm."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass  # ruff: ignore[banned-api]  # behaviour first: builds noise tables after init; the fields are its settings
 
 import mujoco
 

@@ -1,7 +1,7 @@
 """Module for generating Perlin noise using NumPy."""
 
 # Standard library
-from dataclasses import dataclass
+from dataclasses import dataclass  # ruff: ignore[banned-api]  # behaviour first: builds noise tables after init; the fields are its settings
 from typing import Literal, cast
 
 # Third-party libraries
