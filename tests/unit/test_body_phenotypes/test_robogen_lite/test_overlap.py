@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 from ariel.body_phenotypes.robogen_lite.overlap import (
     TOLERANCE,
     Overlap,
+    box_mesh,
     box_overlaps,
     find_overlaps,
     module_sizes,
@@ -212,3 +213,10 @@ def test_a_geom_that_is_not_a_box_is_rejected() -> None:
     )
     with pytest.raises(ValueError, match="box geoms"):
         find_overlaps(graph, core)
+
+
+def test_a_box_mesh_is_made_once_per_size() -> None:
+    first = box_mesh((0.1, 0.1, 0.1))
+    assert box_mesh((0.1, 0.1, 0.1)) is first
+    assert box_mesh((0.1, 0.2, 0.1)) is not first
+    assert first.extents.tolist() == pytest.approx([0.1, 0.1, 0.1])

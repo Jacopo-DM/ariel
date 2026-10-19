@@ -23,6 +23,7 @@ Notes
 # Standard library
 import re
 from collections.abc import Callable
+from functools import cache
 
 # Third-party libraries
 import mujoco
@@ -106,6 +107,28 @@ def module_sizes(
     return {node: (volumes[node], thinnest[node]) for node in volumes}
 
 
+@cache
+def box_mesh(extents: tuple[float, float, float]) -> trimesh.Trimesh:
+    """Make the Trimesh box of a size, once.
+
+    Trimesh tests every mesh for convexity when it is added to a collision
+    manager and keeps the answer on the mesh, so reusing one mesh for every
+    box of a size removes most of the time of a collision check.
+
+    Parameters
+    ----------
+    extents : tuple[float, float, float]
+        The full side lengths.
+
+    Returns
+    -------
+    trimesh.Trimesh
+        The box, centred on the origin. It is shared: do not change it.
+    """
+    mesh: trimesh.Trimesh = trimesh.creation.box(extents=extents)
+    return mesh
+
+
 def box_overlaps(
     graph: Graph,
     owners: list[int],
@@ -134,7 +157,7 @@ def box_overlaps(
     manager = CollisionManager()  # type: ignore[no-untyped-call]  # trimesh.collision is untyped
     for index, (half, pose) in enumerate(zip(halves, poses, strict=True)):
         manager.add_object(  # type: ignore[no-untyped-call]  # trimesh.collision is untyped
-            str(index), trimesh.creation.box(extents=2 * half), pose
+            str(index), box_mesh(tuple(float(side) for side in 2 * half)), pose
         )
     _, contacts = manager.in_collision_internal(return_data=True)  # type: ignore[no-untyped-call]  # trimesh.collision is untyped
     depths: dict[tuple[int, int], float] = {}

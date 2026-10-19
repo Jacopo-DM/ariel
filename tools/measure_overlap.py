@@ -1,10 +1,11 @@
 """Count robot bodies whose modules sit inside each other.
 
 Run from the repo root: ``uv run --no-sync python tools/measure_overlap.py``.
-Read-only. It builds 60 bodies from each of three sources with seed 42 (a
+Read-only. It draws 60 bodies from each of three sources with seed 42 (a
 random tree of 10 modules, a random tree of 20, and the probability decoder
-with 20), builds each with ``construct_mjspec_from_graph``, compiles it, and
-measures every pair of geoms at the rest pose. A body counts as overlapping when
+with 20), builds each with ``construct_mjspec_from_graph`` twice, as it is and
+with ``repair_overlaps=True``, compiles both, and measures every pair of geoms
+at the rest pose. A body counts as overlapping when
 two modules that are not parent and child touch deeper than the tolerance:
 1% of the thinnest side of the smaller of the two modules, so the rule does not
 depend on the size of the robot. MuJoCo does the counting on purpose: the
@@ -37,6 +38,7 @@ from ariel.body_phenotypes import (
     NUM_OF_TYPES_OF_MODULES,
     CoreModule,
     construct_mjspec_from_graph,
+    repair_overlaps,
 )
 from ariel.body_phenotypes.robogen_lite.decoders import HighProbabilityDecoder
 from ariel.ec.genotypes.tree import random_tree
@@ -48,7 +50,6 @@ CORE_NODE = 0
 GEOM_OWNER = re.compile(r"^\d+-(\d+)-\d+-")
 
 type Graph = nx.DiGraph[int]
-type Builder = Callable[[Graph], CoreModule]
 
 
 class Row(BaseModel):
@@ -58,8 +59,13 @@ class Row(BaseModel):
 
     source: str
     bodies: int
-    overlapping: int
-    mean_ms: float
+    overlapping: int  # built as they are
+    repaired_overlapping: int  # built with repair_overlaps=True
+    removed: float  # mean modules pruned per body
+    clean: int  # bodies the repair found nothing to prune in
+    identical: int  # of those, bodies whose XML is the same with the repair
+    build_ms: float  # mean time to build a body as it is
+    repair_ms: float  # mean time to build it with the repair
 
 
 def owner_of(model: mujoco.MjModel, geom: int) -> int:
@@ -174,13 +180,11 @@ def sources() -> dict[str, Callable[[], Graph]]:
     }
 
 
-def measure(builder: Builder, bodies: int = BODIES) -> list[Row]:
-    """Build bodies from every source and count the overlapping ones.
+def measure(bodies: int = BODIES) -> list[Row]:
+    """Draw bodies from every source and compare them with and without repair.
 
     Parameters
     ----------
-    builder : Callable
-        Turns a graph into a body, for example ``construct_mjspec_from_graph``.
     bodies : int
         How many bodies to draw from each source.
 
@@ -193,18 +197,36 @@ def measure(builder: Builder, bodies: int = BODIES) -> list[Row]:
     for name, draw in sources().items():
         random.seed(SEED)
         graphs = [draw() for _ in range(bodies)]
-        overlapping = 0
-        start = time.perf_counter()
+        overlapping = repaired_overlapping = clean = identical = 0
+        removed = 0
+        build_time = repair_time = 0.0
         for graph in graphs:
-            core = builder(graph)
-            overlapping += has_overlap(graph, core)
-        elapsed = time.perf_counter() - start
+            start = time.perf_counter()
+            plain = construct_mjspec_from_graph(graph)
+            build_time += time.perf_counter() - start
+            start = time.perf_counter()
+            repaired = construct_mjspec_from_graph(graph, repair_overlaps=True)
+            repair_time += time.perf_counter() - start
+            overlapping += has_overlap(graph, plain)
+            repaired_overlapping += has_overlap(graph, repaired)
+            pruned = len(graph) - len(
+                repair_overlaps(graph, construct_mjspec_from_graph)
+            )
+            removed += pruned
+            if not pruned:
+                clean += 1
+                identical += plain.spec.to_xml() == repaired.spec.to_xml()
         rows.append(
             Row(
                 source=name,
                 bodies=bodies,
                 overlapping=overlapping,
-                mean_ms=1000 * elapsed / bodies,
+                repaired_overlapping=repaired_overlapping,
+                removed=removed / bodies,
+                clean=clean,
+                identical=identical,
+                build_ms=1000 * build_time / bodies,
+                repair_ms=1000 * repair_time / bodies,
             )
         )
     return rows
@@ -218,11 +240,16 @@ def main() -> int:
     int
         Always 0.
     """
-    sys.stdout.write("source             bodies  overlapping  ms per body\n")
-    for row in measure(construct_mjspec_from_graph, BODIES):
+    sys.stdout.write(
+        "source             bodies  overlapping  after repair  "
+        "modules pruned  clean  identical  build ms  repair ms\n"
+    )
+    for row in measure(BODIES):
         sys.stdout.write(
             f"{row.source:<18} {row.bodies:>6}  {row.overlapping:>11}  "
-            f"{row.mean_ms:>11.1f}\n"
+            f"{row.repaired_overlapping:>12}  {row.removed:>14.2f}  "
+            f"{row.clean:>5}  {row.identical:>9}  {row.build_ms:>8.1f}  "
+            f"{row.repair_ms:>9.1f}\n"
         )
     return 0
 

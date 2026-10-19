@@ -92,22 +92,30 @@ def test_the_geoms_of_a_hinge_belong_to_the_hinge() -> None:
 
 def test_measure_gives_one_row_per_source() -> None:
     script = _load()
-    rows = script.measure(construct_mjspec_from_graph, bodies=SMALL)
+    rows = script.measure(bodies=SMALL)
     assert [row.source for row in rows] == [
         "tree 10 modules",
         "tree 20 modules",
         "probability 20",
     ]
-    assert all(row.bodies == SMALL for row in rows)
-    assert all(0 <= row.overlapping <= SMALL for row in rows)
-    assert all(row.mean_ms > 0 for row in rows)
+    for row in rows:
+        assert row.bodies == SMALL
+        assert 0 <= row.overlapping <= SMALL
+        assert row.repaired_overlapping == 0  # the repair leaves none
+        assert 0 <= row.identical <= row.clean <= SMALL
+        assert row.identical == row.clean  # clean bodies are unchanged
+        assert row.build_ms > 0
+        assert row.repair_ms > 0
 
 
 def test_measure_is_repeatable() -> None:
     script = _load()
-    first = script.measure(construct_mjspec_from_graph, bodies=SMALL)
-    second = script.measure(construct_mjspec_from_graph, bodies=SMALL)
-    assert [r.overlapping for r in first] == [r.overlapping for r in second]
+    first = script.measure(bodies=SMALL)
+    second = script.measure(bodies=SMALL)
+    keys = ("overlapping", "repaired_overlapping", "removed", "clean")
+    assert [[getattr(r, k) for k in keys] for r in first] == [
+        [getattr(r, k) for k in keys] for r in second
+    ]
 
 
 def test_main_prints_the_table(
