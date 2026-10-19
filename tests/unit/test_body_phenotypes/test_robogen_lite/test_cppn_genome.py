@@ -253,30 +253,47 @@ def test_crossover_minimisation_prefers_lower_fitness() -> None:
     assert {0, 1} <= set(child.connections)
 
 
-def test_crossover_minimisation_self_better_known_bug() -> None:
-    """Known bug: `less_fit_parent` is overwritten with self in this branch.
-
-    See PLAN.md, Known problems. The child still gets the genes of self.
-    """
+def test_crossover_minimisation_self_better_drops_other_genes() -> None:
+    """Minimisation, self fitter: the other parent's own genes are dropped."""
     random.seed(6)
-    better = _parent_with_extra_gene(LESS_FIT)
-    worse = _chain_genome()
-    worse.fitness = FITTER
+    better = _chain_genome()
+    better.fitness = LESS_FIT
+    worse = _parent_with_extra_gene(FITTER)
     child = better.crossover(worse, is_maximisation=False)
+    assert set(child.connections) == {0, 1}
+
+
+def test_crossover_maximisation_self_worse_inherits_from_other() -> None:
+    """Maximisation, self is worse: the child gets the genes of the other."""
+    worse = _chain_genome()
+    worse.fitness = LESS_FIT
+    better = _parent_with_extra_gene(FITTER)
+    child = worse.crossover(better)
     assert set(child.connections) == {0, 1, 5}
 
 
-def test_crossover_maximisation_self_worse_known_bug() -> None:
-    """Known bug: `less_fit_parent` is never set when self is the worse one.
-
-    See PLAN.md, Known problems.
-    """
-    worse = _chain_genome()
-    worse.fitness = LESS_FIT
-    better = _chain_genome()
-    better.fitness = FITTER
-    with pytest.raises(UnboundLocalError):
-        worse.crossover(better)
+@pytest.mark.parametrize("is_maximisation", [True, False])
+def test_crossover_1000_pairs_inherit_every_gene_of_the_fitter_parent(
+    *, is_maximisation: bool
+) -> None:
+    """1000 random pairs never raise and keep all genes of the fitter one."""
+    rng = random.Random(42)  # ruff: ignore[suspicious-non-cryptographic-random-usage]  # test data
+    random.seed(42)
+    for _ in range(1000):
+        a = _chain_genome()
+        b = _chain_genome()
+        for genome in (a, b):
+            genome.fitness = float(rng.randint(0, 3))
+            for innov in rng.sample(range(5, 12), rng.randint(0, 4)):
+                genome.add_connection(
+                    Connection(1, 2, 1.0, enabled=True, innov_id=innov)
+                )
+        child = a.crossover(b, is_maximisation=is_maximisation)
+        if a.fitness == b.fitness:
+            continue
+        a_fitter = (a.fitness > b.fitness) == is_maximisation
+        fitter = a if a_fitter else b
+        assert set(fitter.connections) <= set(child.connections)
 
 
 def test_crossover_skips_genes_only_the_less_fit_parent_has() -> None:
