@@ -22,9 +22,8 @@ import numpy as np
 
 # Local libraries
 from ariel import log
-from ariel.parameters.ariel_types import Position, Rotation
-from ariel.parameters.mujoco_params import MujocoConfig
-from ariel.simulators.mujoco import Seeds, build_spec
+from ariel.parameters import MujocoConfig, Position, Rotation
+from ariel.simulators import Seeds, build_spec
 from ariel.utils.mujoco_ops import euler_to_quat_conversion
 
 

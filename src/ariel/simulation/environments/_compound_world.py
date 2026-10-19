@@ -18,7 +18,7 @@ Todo
 import mujoco
 
 # Local libraries
-from ariel.parameters.ariel_types import (
+from ariel.parameters import (
     Dimension,
     FloatArray,
     Rotation,

@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 
 # Local libraries
-from ariel.parameters.ariel_types import (
+from ariel.parameters import (
     ND_FLOAT_PRECISION,
     FloatArray,
 )

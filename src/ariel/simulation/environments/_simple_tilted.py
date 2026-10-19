@@ -7,7 +7,7 @@ from dataclasses import dataclass  # ruff: ignore[banned-api]  # behaviour first
 import mujoco
 
 # Local libraries
-from ariel.parameters.ariel_types import Dimension, Rotation
+from ariel.parameters import Dimension, Rotation
 from ariel.simulation.environments._base_world import BaseWorld
 from ariel.utils.mujoco_ops import euler_to_quat_conversion
 

@@ -4,7 +4,7 @@
 from dataclasses import dataclass  # ruff: ignore[banned-api]  # behaviour first: a world builds its MjSpec after init; the fields are its settings
 
 # Local libraries
-from ariel.parameters.ariel_types import Dimension
+from ariel.parameters import Dimension
 from ariel.simulation.environments._compound_world import CompoundWorld
 from ariel.simulation.environments.heightmap_functions import (
     rugged_heightmap,

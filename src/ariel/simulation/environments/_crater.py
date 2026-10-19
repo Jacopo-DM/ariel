@@ -5,7 +5,7 @@ from dataclasses import dataclass  # ruff: ignore[banned-api]  # behaviour first
 
 # Third-party libraries
 # Local libraries
-from ariel.parameters.ariel_types import (
+from ariel.parameters import (
     Dimension,
     Rotation,
 )

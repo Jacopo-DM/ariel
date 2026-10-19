@@ -7,7 +7,7 @@ from dataclasses import dataclass  # ruff: ignore[banned-api]  # behaviour first
 import mujoco
 
 # Local libraries
-from ariel.parameters.ariel_types import Dimension
+from ariel.parameters import Dimension
 from ariel.simulation.environments._base_world import BaseWorld
 
 

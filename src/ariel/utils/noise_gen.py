@@ -8,7 +8,7 @@ from typing import Literal, cast
 import numpy as np
 
 # Local libraries
-from ariel.parameters.ariel_types import (
+from ariel.parameters import (
     ND_FLOAT_PRECISION,
     ND_INT_PRECISION,
     FloatArray,

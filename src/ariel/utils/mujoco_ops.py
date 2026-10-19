@@ -19,7 +19,7 @@ import mujoco
 import numpy as np
 
 # Local libraries
-from ariel.parameters.ariel_types import FloatArray, Rotation
+from ariel.parameters import FloatArray, Rotation
 
 # Global constants
 # Global functions
