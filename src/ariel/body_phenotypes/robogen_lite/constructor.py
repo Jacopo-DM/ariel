@@ -17,6 +17,9 @@ from ariel.body_phenotypes.robogen_lite.config import (
 from ariel.body_phenotypes.robogen_lite.modules.brick import BrickModule
 from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
 from ariel.body_phenotypes.robogen_lite.modules.hinge import HingeModule
+from ariel.body_phenotypes.robogen_lite.overlap import (
+    repair_overlaps as repair_graph_overlaps,
+)
 
 # Type checking
 if TYPE_CHECKING:
@@ -25,12 +28,39 @@ if TYPE_CHECKING:
     from ariel.body_phenotypes.robogen_lite.modules.module import Module
 
 
-def construct_mjspec_from_graph(graph: DiGraph[int]) -> CoreModule:
+def construct_mjspec_from_graph(
+    graph: DiGraph[int], *, repair_overlaps: bool = False
+) -> CoreModule:
     """
     Construct a MuJoCo specification from a graph representation.
 
     Can be used for constructing the body of a robot after crossover using the
     graph representation.
+
+    Parameters
+    ----------
+    graph : Graph
+        A graph representation of the robot's structure.
+    repair_overlaps : bool
+        When True, modules that sit inside each other are pruned first (the
+        deeper module of an overlapping pair goes, with everything attached
+        beyond it) and the body is built from the pruned copy; the graph
+        itself is not changed. See the ``overlap`` module of this package.
+
+    Returns
+    -------
+    CoreModule
+        The core module of the robot, which contains all other modules;
+        an unknown module type raises ``ValueError``.
+    """
+    if repair_overlaps:
+        graph = repair_graph_overlaps(graph, _construct)
+    return _construct(graph)
+
+
+def _construct(graph: DiGraph[int]) -> CoreModule:
+    """
+    Build the body of a graph as it is.
 
     Parameters
     ----------

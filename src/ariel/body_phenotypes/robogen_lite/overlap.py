@@ -14,10 +14,15 @@ Notes
     * The size of a module is the total volume of its geoms; its thinnest
       side is twice the smallest half-size among them.
     * Poses are at joint angle zero, as compiled.
+    * The later module of an overlapping pair is the deeper one in the tree;
+      at equal depth, the one whose path from the core takes the later face
+      (``ModuleFaces`` order) at the first edge where the two paths differ.
+      The repair removes it with everything attached beyond it.
 """
 
 # Standard library
 import re
+from collections.abc import Callable
 
 # Third-party libraries
 import mujoco
@@ -28,7 +33,8 @@ from numpy.typing import NDArray
 from trimesh.collision import CollisionManager
 
 # Local libraries
-from ariel.body_phenotypes.robogen_lite.config import IDX_OF_CORE
+from ariel import log
+from ariel.body_phenotypes.robogen_lite.config import IDX_OF_CORE, ModuleFaces
 from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
 from ariel.parameters import FrozenModel
 
@@ -37,6 +43,7 @@ TOLERANCE = 0.01  # share of the thinnest side of the smaller module
 GEOM_OWNER = re.compile(r"^\d+-(\d+)-\d+-")
 
 type Graph = nx.DiGraph[int]
+type Builder = Callable[[Graph], CoreModule]
 type Floats = NDArray[np.float64]
 
 
@@ -209,3 +216,131 @@ def find_overlaps(graph: Graph, core: CoreModule) -> list[Overlap]:
     poses[:, :3, :3] = data.geom_xmat.reshape(-1, 3, 3)
     poses[:, :3, 3] = data.geom_xpos
     return box_overlaps(graph, owners, np.array(model.geom_size), poses)
+
+
+def depth_of(graph: Graph, node: int) -> int:
+    """Count the edges between the core and a module.
+
+    Parameters
+    ----------
+    graph : nx.DiGraph[int]
+        The robot graph.
+    node : int
+        The module.
+
+    Returns
+    -------
+    int
+        The number of edges on the path from the core.
+    """
+    return int(nx.shortest_path_length(graph, IDX_OF_CORE, node))
+
+
+def later_module(graph: Graph, first: int, second: int) -> int:
+    """Pick which of two overlapping modules counts as the later one.
+
+    Parameters
+    ----------
+    graph : nx.DiGraph[int]
+        The robot graph.
+    first : int
+        One module.
+    second : int
+        The other module.
+
+    Returns
+    -------
+    int
+        The deeper module; at equal depth, the one whose path from the core
+        leaves the common part through the later face. The answer does not
+        depend on the order of the arguments.
+    """
+    depths = depth_of(graph, first), depth_of(graph, second)
+    if depths[0] != depths[1]:
+        return first if depths[0] > depths[1] else second
+    paths = [
+        nx.shortest_path(graph, IDX_OF_CORE, node) for node in (first, second)
+    ]
+    step = next(
+        index
+        for index, (one, other) in enumerate(zip(*paths, strict=True))
+        if one != other
+    )
+    faces = [
+        ModuleFaces[graph.edges[path[step - 1], path[step]]["face"]].value
+        for path in paths
+    ]
+    return first if faces[0] > faces[1] else second
+
+
+def prune_subtree(graph: Graph, node: int) -> Graph:
+    """Remove a module and everything attached beyond it.
+
+    Parameters
+    ----------
+    graph : nx.DiGraph[int]
+        The robot graph; it is not changed.
+    node : int
+        The module to remove.
+
+    Returns
+    -------
+    nx.DiGraph[int]
+        A copy without the module and its descendants.
+
+    Raises
+    ------
+    ValueError
+        If the module is the core.
+    """
+    if node == IDX_OF_CORE:
+        msg = "The core cannot be pruned."
+        raise ValueError(msg)
+    pruned = graph.copy()
+    pruned.remove_nodes_from([node, *nx.descendants(graph, node)])
+    return pruned
+
+
+def repair_overlaps(graph: Graph, build: Builder) -> Graph:
+    """Prune modules until no two modules overlap beyond the tolerance.
+
+    Each round builds the body, finds the overlapping pairs, and removes the
+    later module of the pair whose later module is deepest (ties: the smaller
+    node id), with its subtree; removing the deepest first keeps the most of
+    the body. Every round removes at least one module, so the loop ends.
+
+    Parameters
+    ----------
+    graph : nx.DiGraph[int]
+        The robot graph; it is not changed.
+    build : Callable
+        Builds the body of a graph, for example the constructor.
+
+    Returns
+    -------
+    nx.DiGraph[int]
+        A copy of the graph without overlaps; the graph itself when there
+        were none.
+    """
+    repaired = graph.copy()
+    while found := find_overlaps(repaired, build(repaired)):
+        victims = {
+            overlap: later_module(repaired, overlap.first, overlap.second)
+            for overlap in found
+        }
+        overlap, victim = min(
+            victims.items(),
+            key=lambda item: (-depth_of(repaired, item[1]), item[1]),
+        )
+        other = overlap.first if victim == overlap.second else overlap.second
+        gone = sorted(
+            {victim, *nx.descendants(repaired, victim)},
+        )
+        log.debug(
+            "pruned %d modules (ids %s) for overlap with %d",
+            len(gone),
+            ", ".join(str(node) for node in gone),
+            other,
+        )
+        repaired = prune_subtree(repaired, victim)
+    return repaired

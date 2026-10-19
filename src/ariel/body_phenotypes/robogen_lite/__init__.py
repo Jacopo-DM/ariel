@@ -21,7 +21,11 @@ from ariel.body_phenotypes.robogen_lite.decoders.cppn_best_first import (
     MorphologyDecoderBestFirst,
 )
 from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
-from ariel.body_phenotypes.robogen_lite.overlap import Overlap, find_overlaps
+from ariel.body_phenotypes.robogen_lite.overlap import (
+    Overlap,
+    find_overlaps,
+    repair_overlaps,
+)
 
 __all__ = [
     "ALLOWED_FACES",
@@ -40,4 +44,5 @@ __all__ = [
     "Overlap",
     "construct_mjspec_from_graph",
     "find_overlaps",
+    "repair_overlaps",
 ]

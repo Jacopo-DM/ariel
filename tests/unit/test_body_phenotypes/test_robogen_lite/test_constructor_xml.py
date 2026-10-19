@@ -69,7 +69,7 @@ SPECS = {
 }
 
 
-def _graph(spec: Spec) -> nx.DiGraph[int]:
+def graph_from(spec: Spec) -> nx.DiGraph[int]:
     graph: nx.DiGraph[int] = nx.DiGraph()
     for node, (kind, rotation) in spec[0].items():
         graph.add_node(node, type=kind, rotation=rotation)
@@ -80,5 +80,5 @@ def _graph(spec: Spec) -> nx.DiGraph[int]:
 
 @pytest.mark.parametrize("name", list(SPECS))
 def test_the_body_xml_is_pinned(name: str) -> None:
-    xml = construct_mjspec_from_graph(_graph(SPECS[name])).spec.to_xml()
+    xml = construct_mjspec_from_graph(graph_from(SPECS[name])).spec.to_xml()
     assert hashlib.sha256(xml.encode()).hexdigest() == XML_HASHES[name]

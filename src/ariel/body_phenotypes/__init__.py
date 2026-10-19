@@ -19,6 +19,7 @@ from ariel.body_phenotypes.robogen_lite import (
     Overlap,
     construct_mjspec_from_graph,
     find_overlaps,
+    repair_overlaps,
 )
 
 __all__ = [
@@ -39,4 +40,5 @@ __all__ = [
     "Overlap",
     "construct_mjspec_from_graph",
     "find_overlaps",
+    "repair_overlaps",
 ]
