@@ -52,9 +52,9 @@ row, a row names a notebook that does not exist, or a notebook has no row.
 
 | Area | Notebook |
 |---|---|
-| `body_phenotypes` | `decoders` |
+| `body_phenotypes` | `decoders`, `cppn_genome` |
 | `body_phenotypes/lynx_mjspec` | none yet |
-| `body_phenotypes/robogen_lite` | `decoders` |
+| `body_phenotypes/robogen_lite` | `decoders`, `cppn_genome` |
 | `ec` | `ec_engine` |
 | `ec/generators` | `ec_engine` |
 | `ec/genotypes` | `nde`, `tree_genome` |
