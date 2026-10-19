@@ -213,19 +213,7 @@ Code examples inside docstrings are auto-formatted by Ruff.
 ### Running the test suite
 
 ```console
-$ nox
-```
-
-List all available Nox sessions:
-
-```console
-$ nox --list-sessions
-```
-
-Run only unit tests:
-
-```console
-$ nox --session=tests
+$ uv run pytest
 ```
 
 Run tests directly with pytest (faster iteration):
@@ -275,7 +263,7 @@ This cleans the `docs/_build/` and `docs/_autoapi/` directories, then launches a
    $ git checkout -b feat/my-feature
    ```
 3. Make your changes, ensuring:
-   - The full test suite passes (`nox`)
+   - The full test suite passes (`uv run pytest`)
    - Code coverage is maintained
    - New public APIs are fully typed and documented
 4. Push your branch and open a Pull Request against `main`.
@@ -283,7 +271,7 @@ This cleans the `docs/_build/` and `docs/_autoapi/` directories, then launches a
 
 ### PR checklist
 
-- [ ] Tests pass (`nox`)
+- [ ] Tests pass (`uv run pytest`)
 - [ ] Code coverage (`uv run pytest --cov=ariel`)
 - [ ] Type checks pass (`uv run mypy src/` and `uv run pyright`)
 - [ ] All new public symbols have NumPy-style docstrings

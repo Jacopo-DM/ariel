@@ -61,24 +61,19 @@ $ uv run ariel
 
 ## How to test the project
 
-Run the full test suite:
+Run the full test suite (it also checks the 100% coverage floor):
 
 ```console
-$ nox
+$ uv run pytest
 ```
 
-List the available Nox sessions:
+Run only the unit tests:
 
 ```console
-$ nox --list-sessions
+$ uv run pytest tests/unit
 ```
 
-You can also run a specific Nox session.
-For example, invoke the unit test suite like this:
-
-```console
-$ nox --session=tests
-```
+The only Nox session is `docs` (`nox --session=docs`).
 
 Unit tests are located in the _tests_ directory,
 and are written using the [pytest] testing framework.
@@ -91,7 +86,7 @@ Open a [pull request] to submit changes to this project.
 
 Your pull request needs to meet the following guidelines for acceptance:
 
-- The Nox test suite must pass without errors and warnings.
+- `uv run pytest` must pass without errors and warnings.
 - Include unit tests. This project maintains 100% code coverage.
 - If your changes add functionality, update the documentation accordingly.
 
@@ -100,7 +95,7 @@ Feel free to submit early, though—we can always iterate on this.
 To run linting and code formatting checks before committing your change, you can install pre-commit as a Git hook by running the following command:
 
 ```console
-$ nox --session=pre-commit -- install
+$ uv run pre-commit install
 ```
 
 It is recommended to open an issue before starting work on anything.
