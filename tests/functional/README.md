@@ -66,8 +66,8 @@ row, a row names a notebook that does not exist, or a notebook has no row.
 | `simulation/controllers` | `cpg` |
 | `simulation/environments` | `sim_environments`, `utils` |
 | `simulation/tasks` | none yet |
-| `simulators` | none yet |
-| `simulators/mujoco` | none yet |
+| `simulators` | `mujoco_settings` |
+| `simulators/mujoco` | `mujoco_settings` |
 | `visualisation` | none yet |
 | `visualisation/analysis` | none yet |
 | (third-party libraries, not an ARIEL area) | `external_libs` |

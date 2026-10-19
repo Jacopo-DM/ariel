@@ -89,6 +89,9 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 "*/test_*.py" = [
     "assert", # asserts not allowed --> ok in tests
 ]
+"**/tests/**/*.ipynb" = [
+    "assert", # functional notebooks close each section with plain asserts
+]
 
 # --- Standards additions (python-standards) --- #
 # Ruff's own rule set cannot say "no Any, no dataclass"; banned-api can.
