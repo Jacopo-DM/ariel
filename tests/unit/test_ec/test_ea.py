@@ -1,234 +1,27 @@
-"""Test: EASettings, EAOperation, and EA classes."""
+"""Test: the EA class."""
 
-from collections.abc import Sequence
 from pathlib import Path
-from typing import Literal, cast
 
 import pytest
-from sqlmodel import SQLModel, create_engine
 
-from ariel.ec import EA, DBHandlingMode, EAOperation, EASettings
-from ariel.ec.ea_operation import Operation
+from ariel.ec import EA, EAOperation
 from ariel.ec.individual import Individual
 from ariel.ec.population import Population
-
-DEFAULT_NUM_STEPS = 100
-DEFAULT_POPULATION_SIZE = 100
-CUSTOM_NUM_STEPS = 50
-SIZE_BEFORE_DOUBLING = 3
-SIZE_AFTER_DOUBLING = 2 * SIZE_BEFORE_DOUBLING
-INITIAL_POP_SIZE = 5
-FIRST_GENERATION_ID = 10
-ALIVE_COUNT = 6
-STEPS_TAKEN = 2
-NUM_STEPS_RUN = 5
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-
-def _make_ind(i: int) -> Individual:
-    ind = Individual()
-    ind.genotype = [float(i)]
-    ind.fitness = float(i)
-    return ind
-
-
-def _make_pop(n: int = 4) -> Population:
-    return Population([_make_ind(i) for i in range(n)])
-
-
-@EAOperation
-def noop(population: Population) -> Population:
-    return population
-
-
-@EAOperation
-def double_pop(population: Population) -> Population:
-    return Population(population.to_list() + population.to_list())
-
-
-def _ea(
-    tmp_path: Path,
-    pop: Population | None = None,
-    ops: Sequence[Operation] | None = None,
-    *,
-    num_steps: int | None = None,
-    first_generation_id: int | None = None,
-) -> EA:
-    return EA(
-        population=pop or _make_pop(),
-        operations=ops or [noop],
-        db_file_path=tmp_path / "test.db",
-        quiet=True,
-        num_steps=num_steps,
-        first_generation_id=first_generation_id,
-    )
-
-
-# ---------------------------------------------------------------------------
-# EASettings
-# ---------------------------------------------------------------------------
-
-
-def test_easettings_defaults() -> None:
-    """EASettings initializes with expected defaults."""
-    s = EASettings()
-    assert s.num_steps == DEFAULT_NUM_STEPS
-    assert s.target_population_size == DEFAULT_POPULATION_SIZE
-    assert s.db_file_name == "database.db"
-    assert s.db_handling == "delete"
-    assert s.is_maximisation is True
-    assert s.first_generation_id == 0
-    assert s.quiet is False
-
-
-def test_easettings_db_file_path() -> None:
-    """db_file_path computed field combines output_folder and db_file_name."""
-    s = EASettings(output_folder=Path("/tmp/ea"), db_file_name="run.db")  # ruff: ignore[hardcoded-temp-file]
-    assert s.db_file_path == Path("/tmp/ea/run.db")  # ruff: ignore[hardcoded-temp-file]
-
-
-def test_easettings_override() -> None:
-    """EASettings fields can be overridden at construction."""
-    s = EASettings(num_steps=CUSTOM_NUM_STEPS, quiet=True)
-    assert s.num_steps == CUSTOM_NUM_STEPS
-    assert s.quiet is True
-
-
-# ---------------------------------------------------------------------------
-# EAOperation — decorator validation
-# ---------------------------------------------------------------------------
-
-
-def test_eaoperation_valid_decoration() -> None:
-    """@EAOperation on a valid function returns an EAOperation."""
-    assert isinstance(noop, EAOperation)
-
-
-def test_eaoperation_no_params_raises() -> None:
-    """@EAOperation on a zero-parameter function raises TypeError."""
-
-    def bad() -> Population:  # no params
-        return Population([])
-
-    assert len(bad()) == 0
-    with pytest.raises(TypeError, match="first argument"):
-        EAOperation(bad)  # type: ignore[arg-type]  # deliberately wrong signature
-
-
-def test_eaoperation_wrong_first_param_type_raises() -> None:
-    """First parameter not annotated as Population raises TypeError."""
-
-    def bad(x: int) -> Population:
-        return Population([_make_ind(x)])
-
-    assert len(bad(1)) == 1
-    with pytest.raises(TypeError, match="Population"):
-        EAOperation(bad)  # type: ignore[arg-type]  # deliberately wrong signature
-
-
-def test_eaoperation_wrong_return_type_raises() -> None:
-    """Return annotation not Population raises TypeError."""
-
-    def bad(population: Population) -> list[int]:
-        return [len(population)]
-
-    assert bad(_make_pop()) == [4]
-    with pytest.raises(TypeError, match="Population"):
-        EAOperation(bad)  # type: ignore[arg-type]  # deliberately wrong signature
-
-
-# ---------------------------------------------------------------------------
-# EAOperation — __call__ with Population (execute)
-# ---------------------------------------------------------------------------
-
-
-def test_eaoperation_call_with_population_executes() -> None:
-    """Calling an EAOperation with a Population returns a Population."""
-    pop = _make_pop()
-    result = noop(pop)
-    assert isinstance(result, Population)
-    assert len(result) == len(pop)
-
-
-def test_eaoperation_call_result_is_population() -> None:
-    """double_pop operation doubles the population size."""
-    pop = _make_pop(SIZE_BEFORE_DOUBLING)
-    result = double_pop(pop)
-    assert isinstance(result, Population)
-    assert len(result) == SIZE_AFTER_DOUBLING
-
-
-# ---------------------------------------------------------------------------
-# EAOperation — __call__ with config args (bind)
-# ---------------------------------------------------------------------------
-
-
-def test_eaoperation_call_with_kwargs_returns_bound_op() -> None:
-    """Calling with kwargs returns a new bound EAOperation (not executing)."""
-
-    @EAOperation
-    def with_param(population: Population, factor: float = 1.0) -> Population:  # ruff: ignore[unused-function-argument]
-        return population
-
-    bound = with_param(factor=2.0)
-    assert isinstance(bound, EAOperation)
-    result = bound(_make_pop())
-    assert isinstance(result, Population)
-    # mypy 1.18 crashes on `bound.kwargs` (ParamSpec attribute), so read it
-    # through the instance dict.
-    assert vars(bound)["kwargs"] == {"factor": 2.0}
-
-
-def test_eaoperation_bound_executes_with_population() -> None:
-    """A bound EAOperation executes correctly when called with a Population."""
-    results = []
-
-    @EAOperation
-    def capture(population: Population, tag: str = "x") -> Population:
-        results.append(tag)
-        return population
-
-    op = capture(tag="hello")
-    assert isinstance(op, EAOperation)
-    pop = _make_pop()
-    op(pop)
-    assert results == ["hello"]
-
-
-# ---------------------------------------------------------------------------
-# EAOperation — __repr__
-# ---------------------------------------------------------------------------
-
-
-def test_eaoperation_repr() -> None:
-    """__repr__ includes the function name."""
-    assert "noop" in repr(noop)
-
-
-def test_eaoperation_repr_with_kwargs() -> None:
-    """__repr__ includes bound kwargs."""
-
-    @EAOperation
-    def op(population: Population, k: int = 1) -> Population:  # ruff: ignore[unused-function-argument]
-        return population
-
-    bound = op(k=42)
-    assert isinstance(bound, EAOperation)
-    assert "42" in repr(bound)
-    assert isinstance(bound(_make_pop()), Population)
-
-
-# ---------------------------------------------------------------------------
-# EA — initialization
-# ---------------------------------------------------------------------------
+from tests.unit.test_ec.ea_helpers import (
+    ALIVE_COUNT,
+    FIRST_GENERATION_ID,
+    INITIAL_POP_SIZE,
+    NUM_STEPS_RUN,
+    STEPS_TAKEN,
+    make_ea,
+    make_pop,
+    noop,
+)
 
 
 def test_ea_initializes(tmp_path: Path) -> None:
     """EA initializes without error given population and ops."""
-    ea = _ea(tmp_path)
+    ea = make_ea(tmp_path)
     assert ea.current_generation == 0
 
 
@@ -236,7 +29,7 @@ def test_ea_no_operations_raises(tmp_path: Path) -> None:
     """EA raises ValueError when operations is None."""
     with pytest.raises(ValueError, match="operations"):
         EA(
-            population=_make_pop(),
+            population=make_pop(),
             operations=None,
             db_file_path=tmp_path / "db.db",
             quiet=True,
@@ -257,7 +50,7 @@ def test_ea_no_population_no_restart_raises(tmp_path: Path) -> None:
 def test_ea_creates_database_file(tmp_path: Path) -> None:
     """EA creates the SQLite database file on disk."""
     db = tmp_path / "ea.db"
-    _ea(tmp_path, ops=[noop])
+    make_ea(tmp_path, ops=[noop])
     assert db.exists() or (tmp_path / "test.db").exists()
 
 
@@ -267,7 +60,7 @@ def test_ea_db_handling_halt_raises(tmp_path: Path) -> None:
     db.touch()
     with pytest.raises(FileExistsError):
         EA(
-            population=_make_pop(),
+            population=make_pop(),
             operations=[noop],
             db_file_path=db,
             quiet=True,
@@ -279,7 +72,7 @@ def test_ea_db_handling_delete_overwrites(tmp_path: Path) -> None:
     """db_handling='delete' recreates the db without raising."""
     db = tmp_path / "run.db"
     ea1 = EA(
-        population=_make_pop(),
+        population=make_pop(),
         operations=[noop],
         db_file_path=db,
         quiet=True,
@@ -290,7 +83,7 @@ def test_ea_db_handling_delete_overwrites(tmp_path: Path) -> None:
     del ea1
     # Second run on same path — should succeed
     EA(
-        population=_make_pop(),
+        population=make_pop(),
         operations=[noop],
         db_file_path=db,
         quiet=True,
@@ -300,25 +93,20 @@ def test_ea_db_handling_delete_overwrites(tmp_path: Path) -> None:
 
 def test_ea_population_stored(tmp_path: Path) -> None:
     """EA stores the initial population."""
-    pop = _make_pop(INITIAL_POP_SIZE)
-    ea = _ea(tmp_path, pop=pop)
+    pop = make_pop(INITIAL_POP_SIZE)
+    ea = make_ea(tmp_path, pop=pop)
     assert len(ea.population) == INITIAL_POP_SIZE
 
 
 def test_ea_custom_first_generation(tmp_path: Path) -> None:
     """first_generation_id is stored on the EA."""
-    ea = _ea(tmp_path, first_generation_id=FIRST_GENERATION_ID)
+    ea = make_ea(tmp_path, first_generation_id=FIRST_GENERATION_ID)
     assert ea.current_generation == FIRST_GENERATION_ID
-
-
-# ---------------------------------------------------------------------------
-# EA — _commit and _fetch
-# ---------------------------------------------------------------------------
 
 
 def test_ea_commit_sets_time_of_birth(tmp_path: Path) -> None:
     """_commit assigns time_of_birth=-1 individuals the current generation."""
-    ea = _ea(tmp_path)
+    ea = make_ea(tmp_path)
     # Fetch fresh from DB so SQLAlchemy session context is active
     pop = ea._fetch()  # ruff: ignore[private-member-access]
     for ind in pop:
@@ -327,21 +115,21 @@ def test_ea_commit_sets_time_of_birth(tmp_path: Path) -> None:
 
 def test_ea_fetch_returns_population(tmp_path: Path) -> None:
     """_fetch returns a Population instance."""
-    ea = _ea(tmp_path)
+    ea = make_ea(tmp_path)
     pop = ea._fetch()  # ruff: ignore[private-member-access]
     assert isinstance(pop, Population)
 
 
 def test_ea_fetch_only_alive(tmp_path: Path) -> None:
     """_fetch(only_alive=True) returns only alive individuals."""
-    ea = _ea(tmp_path)
+    ea = make_ea(tmp_path)
     pop = ea._fetch(only_alive=True)  # ruff: ignore[private-member-access]
     assert all(ind.alive for ind in pop)
 
 
 def test_ea_fetch_sort_desc(tmp_path: Path) -> None:
     """_fetch(sort='desc') returns individuals sorted by fitness descending."""
-    ea = _ea(tmp_path)
+    ea = make_ea(tmp_path)
     pop = ea._fetch(sort="desc")  # ruff: ignore[private-member-access]
     fitnesses = [ind.fitness_ for ind in pop if ind.fitness_ is not None]
     assert fitnesses == sorted(fitnesses, reverse=True)
@@ -349,7 +137,7 @@ def test_ea_fetch_sort_desc(tmp_path: Path) -> None:
 
 def test_ea_fetch_sort_asc(tmp_path: Path) -> None:
     """_fetch(sort='asc') returns individuals sorted by fitness ascending."""
-    ea = _ea(tmp_path)
+    ea = make_ea(tmp_path)
     pop = ea._fetch(sort="asc")  # ruff: ignore[private-member-access]
     fitnesses = [ind.fitness_ for ind in pop if ind.fitness_ is not None]
     assert fitnesses == sorted(fitnesses)
@@ -357,69 +145,49 @@ def test_ea_fetch_sort_asc(tmp_path: Path) -> None:
 
 def test_ea_fetch_requires_eval_false(tmp_path: Path) -> None:
     """_fetch(requires_eval=False) returns only evaluated individuals."""
-    ea = _ea(tmp_path)
+    ea = make_ea(tmp_path)
     pop = ea._fetch(requires_eval=False)  # ruff: ignore[private-member-access]
     assert all(not ind.requires_eval for ind in pop)
 
 
-# ---------------------------------------------------------------------------
-# EA — fetch_population
-# ---------------------------------------------------------------------------
-
-
 def test_ea_fetch_population_updates_self(tmp_path: Path) -> None:
     """fetch_population() updates self.population from the database."""
-    ea = _ea(tmp_path)
+    ea = make_ea(tmp_path)
     original_len = len(ea.population)
     ea.fetch_population()
     assert len(ea.population) == original_len
 
 
-# ---------------------------------------------------------------------------
-# EA — size property
-# ---------------------------------------------------------------------------
-
-
 def test_ea_size_property(tmp_path: Path) -> None:
     """Size returns the number of alive individuals."""
-    ea = _ea(tmp_path, pop=_make_pop(ALIVE_COUNT))
+    ea = make_ea(tmp_path, pop=make_pop(ALIVE_COUNT))
     assert ea.size == ALIVE_COUNT
-
-
-# ---------------------------------------------------------------------------
-# EA — get_solution
-# ---------------------------------------------------------------------------
 
 
 def test_ea_get_solution_best(tmp_path: Path) -> None:
     """get_solution('best') returns an Individual."""
-    ea = _ea(tmp_path)
+    ea = make_ea(tmp_path)
     sol = ea.get_solution(mode="best")
     assert isinstance(sol, Individual)
 
 
 def test_ea_get_solution_median(tmp_path: Path) -> None:
     """get_solution('median') returns an Individual."""
-    ea = _ea(tmp_path)
+    ea = make_ea(tmp_path)
     sol = ea.get_solution(mode="median")
     assert isinstance(sol, Individual)
 
 
 def test_ea_get_solution_worst(tmp_path: Path) -> None:
     """get_solution('worst') returns an Individual."""
-    ea = _ea(tmp_path)
+    ea = make_ea(tmp_path)
     sol = ea.get_solution(mode="worst")
     assert isinstance(sol, Individual)
 
 
-# ---------------------------------------------------------------------------
-# EA — step
-# ---------------------------------------------------------------------------
-
-
 def test_ea_step_increments_generation(tmp_path: Path) -> None:
     """step() increments current_generation by 1."""
-    ea = _ea(tmp_path)
+    ea = make_ea(tmp_path)
     ea.step()
     assert ea.current_generation == 1
 
@@ -433,170 +201,28 @@ def test_ea_step_applies_operations(tmp_path: Path) -> None:
         called.append(True)
         return population
 
-    ea = _ea(tmp_path, pop=_make_pop(3), ops=[recording_op])
+    ea = make_ea(tmp_path, pop=make_pop(3), ops=[recording_op])
     ea.step()
     assert len(called) == 1
 
 
 def test_ea_step_twice(tmp_path: Path) -> None:
     """Two steps advance generation to 2."""
-    ea = _ea(tmp_path)
+    ea = make_ea(tmp_path)
     ea.step()
     ea.step()
     assert ea.current_generation == STEPS_TAKEN
 
 
-# ---------------------------------------------------------------------------
-# EA — run
-# ---------------------------------------------------------------------------
-
-
 def test_ea_run_executes_num_steps(tmp_path: Path) -> None:
     """run() executes exactly num_steps generations."""
-    ea = _ea(tmp_path, num_steps=NUM_STEPS_RUN)
+    ea = make_ea(tmp_path, num_steps=NUM_STEPS_RUN)
     ea.run()
     assert ea.current_generation == NUM_STEPS_RUN
 
 
 def test_ea_run_zero_steps(tmp_path: Path) -> None:
     """run() with num_steps=0 leaves generation unchanged."""
-    ea = _ea(tmp_path, num_steps=0)
+    ea = make_ea(tmp_path, num_steps=0)
     ea.run()
     assert ea.current_generation == 0
-
-
-# ---------------------------------------------------------------------------
-# Restart from a database, odd arguments, solutions and filters
-# ---------------------------------------------------------------------------
-
-RESTART_STEPS = 3
-RESTART_GENERATION = 1
-
-
-@EAOperation
-def returns_a_list(population: Population) -> Population:
-    # Lies about its return value to reach the runtime check.
-    return cast("Population", [len(population)])
-
-
-def _finished_run(tmp_path: Path) -> Path:
-    # Run a few generations and return the database that was written.
-    ea = _ea(tmp_path, num_steps=RESTART_STEPS)
-    ea.run()
-    return tmp_path / "test.db"
-
-
-def _restart(
-    tmp_path: Path,
-    source: Path | tuple[Path, int],
-    *,
-    name: str = "restarted.db",
-) -> EA:
-    return EA(
-        restart=source,
-        operations=[noop],
-        db_file_path=tmp_path / name,
-        quiet=True,
-    )
-
-
-def test_operation_returning_a_list_is_rejected() -> None:
-    """An operation must hand back a Population."""
-    with pytest.raises(TypeError, match="expected a Population as return"):
-        returns_a_list(_make_pop())
-
-
-def test_restart_continues_after_the_last_generation(tmp_path: Path) -> None:
-    """Restarting from a path alone resumes after the latest generation."""
-    source = _finished_run(tmp_path / "first")
-    ea = _restart(tmp_path / "second", source)
-    assert ea.current_generation >= RESTART_STEPS
-    assert ea.size > 0
-
-
-def test_restart_from_a_chosen_generation(tmp_path: Path) -> None:
-    """A (path, generation) pair restarts from that generation."""
-    source = _finished_run(tmp_path / "first")
-    ea = _restart(tmp_path / "second", (source, RESTART_GENERATION))
-    assert ea.current_generation == RESTART_GENERATION + 1
-
-
-def test_restart_from_a_string_path(tmp_path: Path) -> None:
-    """A path may be given as a string."""
-    source = _finished_run(tmp_path / "first")
-    ea = EA(
-        restart=str(source),
-        operations=[noop],
-        db_file_path=tmp_path / "second" / "restarted.db",
-        quiet=True,
-    )
-    assert ea.size > 0
-
-
-def test_restart_database_must_exist(tmp_path: Path) -> None:
-    """A missing source database is an error."""
-    with pytest.raises(FileNotFoundError, match="Restart database not found"):
-        _restart(tmp_path, tmp_path / "missing.db")
-
-
-def test_restart_from_an_empty_database_fails(tmp_path: Path) -> None:
-    """A database without individuals cannot be restarted from."""
-    empty = tmp_path / "empty.db"
-    SQLModel.metadata.create_all(create_engine(f"sqlite:///{empty}"))
-    with pytest.raises(ValueError, match="contains no individuals"):
-        _restart(tmp_path, empty)
-
-
-def test_restart_from_a_generation_without_individuals(tmp_path: Path) -> None:
-    """A generation that no evaluated individual lived through is an error."""
-    source = _finished_run(tmp_path / "first")
-    with pytest.raises(ValueError, match="No evaluated individuals"):
-        _restart(tmp_path / "second", (source, RESTART_STEPS * 100))
-
-
-def test_unknown_db_handling_keeps_the_existing_file(tmp_path: Path) -> None:
-    """A handling mode that is neither delete nor halt changes nothing."""
-    first = _ea(tmp_path)
-    del first
-    second = EA(
-        population=_make_pop(),
-        operations=[noop],
-        db_file_path=tmp_path / "test.db",
-        db_handling=cast("DBHandlingMode", "keep"),
-        quiet=True,
-    )
-    # Both populations are in the file: the old one was not deleted.
-    assert second.size == 2 * len(_make_pop())
-
-
-def test_get_solution_with_an_unknown_mode_returns_nothing(
-    tmp_path: Path,
-) -> None:
-    """An unknown mode falls through every case."""
-    ea = _ea(tmp_path)
-    mode = cast("Literal['best']", "unknown")
-    assert ea.get_solution(mode) is None
-
-
-def test_fetch_population_can_include_dead_and_unevaluated(
-    tmp_path: Path,
-) -> None:
-    """The filters of fetch_population are optional."""
-    ea = _ea(tmp_path)
-    ea.fetch_population(only_alive=False, requires_eval=None)
-    assert ea.population.size == len(_make_pop())
-    ea.fetch_population(only_alive=True, requires_eval=True)
-    assert ea.population.size == 0
-
-
-def test_restart_keeps_an_explicit_first_generation(tmp_path: Path) -> None:
-    """first_generation_id overrides the generation derived from the restart."""
-    source = _finished_run(tmp_path / "first")
-    ea = EA(
-        restart=source,
-        operations=[noop],
-        db_file_path=tmp_path / "second" / "restarted.db",
-        first_generation_id=FIRST_GENERATION_ID,
-        quiet=True,
-    )
-    assert ea.current_generation == FIRST_GENERATION_ID
