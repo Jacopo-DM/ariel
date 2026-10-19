@@ -77,6 +77,7 @@ Parallelising Robot Simulations <source/parallel_robot_eval/index>
 GUI <source/GUI>
 ARIEL Database Handling <source/Db_examples/index>
 MuJoCo Data Variables Documentation <source/Mujoco_docs/mujoco_docs>
+MuJoCo Parameters <source/mujoco_parameters>
 ```
 ---
 

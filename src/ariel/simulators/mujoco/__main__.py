@@ -1,7 +1,7 @@
 """Print the derivation of the MuJoCo settings and what differs from MuJoCo.
 
 Run ``python -m ariel.simulators.mujoco``; add ``--out FILE`` to write the
-MJCF file.
+MJCF file and ``--write-docs`` to refresh ``docs/source/mujoco_parameters.md``.
 """
 
 # Standard library
@@ -12,6 +12,7 @@ from pathlib import Path
 from ariel import console
 from ariel.simulators.mujoco.bands import evaluate_bands, warn_outside
 from ariel.simulators.mujoco.bands import summary as band_summary
+from ariel.simulators.mujoco.docs import write_docs
 from ariel.simulators.mujoco.mjcf import differences, generate_xml
 from ariel.simulators.mujoco.mjcf import summary as difference_summary
 from ariel.simulators.mujoco.seeds import Seeds
@@ -65,6 +66,11 @@ def main(argv: list[str] | None = None) -> int:
     """
     parser = argparse.ArgumentParser(prog="python -m ariel.simulators.mujoco")
     parser.add_argument("--out", type=Path, help="write the MJCF file here")
+    parser.add_argument(
+        "--write-docs",
+        action="store_true",
+        help="write docs/source/mujoco_parameters.md",
+    )
     arguments = parser.parse_args(argv)
     seeds = Seeds()
     _say("Derivation (seeds and formulas)")
@@ -85,6 +91,8 @@ def main(argv: list[str] | None = None) -> int:
     if arguments.out is not None:
         arguments.out.write_text(generate_xml(seeds), encoding="utf-8")
         _say(f"Wrote {arguments.out}")
+    if arguments.write_docs:
+        _say(f"Wrote {write_docs()}")
     return 0
 
 
