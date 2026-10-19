@@ -165,16 +165,11 @@ def test_spawn_reports_robot_to_robot_contact() -> None:
     del world
 
 
-def test_world_with_an_explicit_config_never_stores_it_as_a_known_bug() -> None:
-    """Known bug (PLAN.md): a mujoco_config argument is never stored.
-
-    Building the spec no longer reads the config (MU8), so the world is
-    created, but the attribute is still missing.
-    """
+def test_world_no_longer_takes_a_mujoco_config() -> None:
+    """The config argument was dropped silently; passing it now fails."""
     config = SimpleFlatWorld(load_precompiled=False).mujoco_config
-    world = BaseWorld(mujoco_config=config, load_precompiled=False)  # type: ignore[abstract]  # known bug
-    with pytest.raises(AttributeError, match="mujoco_config"):
-        _ = world.mujoco_config
+    with pytest.raises(TypeError, match="mujoco_config"):
+        BaseWorld(mujoco_config=config, load_precompiled=False)  # type: ignore[abstract,call-arg]  # the removed argument is the point of the test
 
 
 def test_worlds_start_from_the_generated_settings() -> None:

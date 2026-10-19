@@ -42,7 +42,6 @@ class BaseWorld:
     def __init__(
         self,
         name: str | None = None,
-        mujoco_config: MujocoConfig | None = None,
         *,
         load_precompiled: bool = True,
     ) -> None:
@@ -53,14 +52,10 @@ class BaseWorld:
         ----------
         name : str, optional
             Name of the world, by default None
-        mujoco_config : MujocoConfig, optional
-            Configuration parameters for MuJoCo, by default None
         load_precompiled : bool, optional
             Whether to load a precompiled XML file if available, by default True
         """
-        # Use default mujoco config if none is provided
-        if mujoco_config is None:
-            self.mujoco_config = MujocoConfig()
+        self.mujoco_config = MujocoConfig()
 
         # Set world name
         if name is not None:
