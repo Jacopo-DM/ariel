@@ -155,3 +155,16 @@ def test_crossover_1000_pairs_validate_and_often_differ() -> None:
         if c1.to_dict() != a.to_dict() or c2.to_dict() != b.to_dict():
             differing += 1
     assert differing > 0
+
+
+def test_subtree_swap_of_parentless_roots_attaches_nothing() -> None:
+    """A subtree root with no incoming edge has no slot to refill."""
+    a = core_hinge_brick()
+    b = core_hinge_brick()
+    a.edges = []
+    b.edges = []
+    subtree_swap(a, b, 1, 1)
+    assert 0 in a.nodes
+    assert 0 in b.nodes
+    assert not a.edges
+    assert not b.edges
