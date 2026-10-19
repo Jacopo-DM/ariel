@@ -77,7 +77,7 @@ Tasks (one commit each, all checks passing before and after; each flips its know
 - P1 Remove the `mujoco_config` argument from `BaseWorld` (`_base_world.py`), set `self.mujoco_config = MujocoConfig()` always; check examples and docs for callers first. Risk low. Verify: the known-bug test becomes a `TypeError` test.
 - P2 `MorphologicalMeasures`: validate the face of every edge in `__init__` (`morphological_grid.py`) and raise `ValueError`. Risk low. Verify: tests with no face and an unknown face; the existing 40 measure tests unchanged.
 - P3 Symmetry: include the outermost layer (`morphological_grid.py`). Risk medium (changes numbers). First record the old symmetry of the test robots in DESIGN.md; tests: a mirror-symmetric robot 5 and 7 cells wide gives 1.0, values stay in [0, 1].
-- P4 Floor colours: one module of constants in `simulation/environments/` used by all worlds, the tilted-world bug gone. Risk low (looks only; physics unchanged). Verify: a test per world that the floor texture or geom colour equals the constant; the compiled models still step.
+- P4 Floor colours: one module of constants in `simulation/environments/` used by all worlds, the tilted-world bug gone, and `tools/render_floors.py` (renders one PNG per world into `__data__/floors/` for the Lenovo check). Risk low (looks only; physics unchanged). Verify: a test per world that the floor texture or geom colour equals the constant; the compiled models still step.
 Tier 3 (not done): the `display_genome` crash and the CPPN and tree-crossover bugs belong to cppn-working; the `bounding_box_volume` normaliser TODO in `morphological_descriptor.py` needs its own decision.
 
 ### Last task: gl-autodetect check on the Lenovo (Linux)
