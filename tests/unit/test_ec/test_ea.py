@@ -7,13 +7,8 @@ from typing import Literal, cast
 import pytest
 from sqlmodel import SQLModel, create_engine
 
-from ariel.ec.ea import (
-    EA,
-    DBHandlingMode,
-    EAOperation,
-    EASettings,
-    Operation,
-)
+from ariel.ec import EA, DBHandlingMode, EAOperation, EASettings
+from ariel.ec.ea_operation import Operation
 from ariel.ec.individual import Individual
 from ariel.ec.population import Population
 

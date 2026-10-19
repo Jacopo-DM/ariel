@@ -2,7 +2,9 @@
 
 from ariel.ec.archive import Archive
 from ariel.ec.crossover import Crossover
-from ariel.ec.ea import EA, DBHandlingMode, EAOperation, EASettings, config
+from ariel.ec.ea import EA
+from ariel.ec.ea_operation import EAOperation
+from ariel.ec.ea_settings import DBHandlingMode, EASettings, config
 from ariel.ec.generators import (
     SEED,
     FloatMutator,

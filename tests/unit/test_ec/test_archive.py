@@ -7,8 +7,8 @@ from typing import cast
 import numpy as np
 import pytest
 
+from ariel.ec import EA, EAOperation
 from ariel.ec.archive import Archive, FitnessMode
-from ariel.ec.ea import EA, EAOperation
 from ariel.ec.individual import Individual
 from ariel.ec.population import Population
 
