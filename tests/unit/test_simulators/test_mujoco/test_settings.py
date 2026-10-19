@@ -8,6 +8,7 @@ import pytest
 # Local libraries
 from ariel.simulators.mujoco.seeds import Seeds
 from ariel.simulators.mujoco.settings import (
+    CHOICES,
     SECTIONS,
     Setting,
     engine_defaults,
@@ -22,6 +23,7 @@ LONG_SCALE_M = 0.5
 DEFAULT_SOLREF_DAMPING = 1.0
 OFFSCREEN_HEIGHT = 960
 OFFSCREEN_WIDTH = 1280
+SHADOW_SIZE = 8192
 
 
 def by_name(rows: list[Setting]) -> dict[str, Setting]:
@@ -72,15 +74,8 @@ def test_untouched_settings_keep_the_engine_value() -> None:
     defaults = engine_defaults()
     kept = [row for row in settings(Seeds()) if row.kind == "fixed"]
     assert kept
-    changed = {
-        "option.integrator",
-        "compiler.balanceinertia",
-        "compiler.degree",
-        "visual.global_.offheight",
-        "visual.global_.offwidth",
-    }
     for row in kept:
-        if row.name not in changed:
+        if row.name not in CHOICES:
             assert row.value == defaults[row.name]
 
 
@@ -170,3 +165,20 @@ def test_read_object_can_be_limited_to_some_names() -> None:
     assert read_object(_Outer(), "thing", ("visible", "_private")) == {
         "thing.visible": 1.5,
     }
+
+
+def test_every_choice_names_a_real_setting() -> None:
+    assert set(CHOICES) <= set(engine_defaults())
+
+
+def test_choices_are_applied_with_their_value() -> None:
+    rows = by_name(settings(Seeds()))
+    for name, choice in CHOICES.items():
+        assert rows[name].value == choice.value
+        assert rows[name].kind == "fixed"
+
+
+def test_viewer_look_is_held_as_settings() -> None:
+    rows = by_name(settings(Seeds()))
+    assert rows["visual.headlight.diffuse"].value == (0.6, 0.6, 0.6)
+    assert rows["visual.quality.shadowsize"].value == SHADOW_SIZE

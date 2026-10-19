@@ -22,6 +22,7 @@ from ariel.simulation.environments import (
     heightmap_functions,
     olympic_arena,
 )
+from ariel.simulators.mujoco import Seeds
 
 _base_world = importlib.import_module(
     "ariel.simulation.environments._base_world"
@@ -164,11 +165,26 @@ def test_spawn_reports_robot_to_robot_contact() -> None:
     del world
 
 
-def test_world_with_an_explicit_config_fails_as_a_known_bug() -> None:
-    """Known bug (PLAN.md): a mujoco_config argument is never stored."""
+def test_world_with_an_explicit_config_never_stores_it_as_a_known_bug() -> None:
+    """Known bug (PLAN.md): a mujoco_config argument is never stored.
+
+    Building the spec no longer reads the config (MU8), so the world is
+    created, but the attribute is still missing.
+    """
     config = SimpleFlatWorld(load_precompiled=False).mujoco_config
+    world = BaseWorld(mujoco_config=config, load_precompiled=False)  # type: ignore[abstract]  # known bug
     with pytest.raises(AttributeError, match="mujoco_config"):
-        BaseWorld(mujoco_config=config, load_precompiled=False)  # type: ignore[abstract]  # known bug
+        _ = world.mujoco_config
+
+
+def test_worlds_start_from_the_generated_settings() -> None:
+    """Every world carries the timestep and gravity derived from the seeds."""
+    seeds = Seeds()
+    spec = SimpleFlatWorld(load_precompiled=False).spec
+    assert spec.option.timestep == pytest.approx(seeds.timestep)
+    assert spec.option.gravity[2] == pytest.approx(-seeds.gravity.value)
+    assert spec.option.integrator == mujoco.mjtIntegrator.mjINT_IMPLICITFAST
+    assert spec.modelname == "Simple Flat World"
 
 
 # --- worlds ----------------------------------------------------------------- #

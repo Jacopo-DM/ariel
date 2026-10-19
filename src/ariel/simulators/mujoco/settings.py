@@ -58,8 +58,6 @@ GEOM_CONTACT_FIELDS = (
 ALIASES = frozenset({"global"})  # visual.global is the same object as global_
 SKIPPED = frozenset({"eulerseq", "authored"})
 DAMPING_RATIO = 1.0  # critical damping, the MuJoCo default for solref
-OFFSCREEN_HEIGHT = 960  # ARIEL's offscreen render size (old MujocoConfig)
-OFFSCREEN_WIDTH = 1280
 
 DOCS = "https://mujoco.readthedocs.io/en/stable/XMLreference.html"
 KEPT_REASON = {
@@ -92,6 +90,112 @@ class Setting(FrozenModel):
     kind: Literal["seed", "formula", "fixed"]
     reason: str
     source: str
+
+
+class Choice(FrozenModel):
+    """A value ARIEL fixes on purpose, with the reason."""
+
+    value: Value
+    reason: str
+    source: str
+
+
+OLD_CONFIG = "what ARIEL already used (old MujocoConfig)"
+OLD_WORLD = "what ARIEL already used (old BaseWorld._init_spec)"
+LOOK = "ARIEL's own look of the viewer"
+CHOICES = {
+    "option.integrator": Choice(
+        value=int(mujoco.mjtIntegrator.mjINT_IMPLICITFAST),
+        reason=(
+            "implicitfast is the documented general recommendation and "
+            f"{OLD_CONFIG}"
+        ),
+        source=f"{DOCS}#option-integrator; wiki mujoco_modeling_guidance",
+    ),
+    "compiler.balanceinertia": Choice(
+        value=True,
+        reason=(
+            "accept slightly inconsistent inertias of generated bodies; "
+            f"{OLD_CONFIG}"
+        ),
+        source=f"{DOCS}#compiler-balanceinertia",
+    ),
+    "compiler.degree": Choice(
+        value=False,
+        reason=f"ARIEL code uses radians; {OLD_CONFIG}",
+        source=f"{DOCS}#compiler-angle",
+    ),
+    "visual.global_.offheight": Choice(
+        value=960,
+        reason=f"offscreen render height; {OLD_CONFIG}",
+        source=f"{DOCS}#visual-global",
+    ),
+    "visual.global_.offwidth": Choice(
+        value=1280,
+        reason=f"offscreen render width; {OLD_CONFIG}",
+        source=f"{DOCS}#visual-global",
+    ),
+    "visual.global_.azimuth": Choice(
+        value=140.0,
+        reason=f"{LOOK}; {OLD_WORLD}",
+        source=f"{DOCS}#visual-global",
+    ),
+    "visual.global_.elevation": Choice(
+        value=-20.0,
+        reason=f"{LOOK}; {OLD_WORLD}",
+        source=f"{DOCS}#visual-global",
+    ),
+    "visual.headlight.diffuse": Choice(
+        value=(0.6, 0.6, 0.6),
+        reason=f"{LOOK}; {OLD_WORLD}",
+        source=f"{DOCS}#visual-headlight",
+    ),
+    "visual.headlight.ambient": Choice(
+        value=(0.1, 0.1, 0.1),
+        reason=f"{LOOK}; {OLD_WORLD}",
+        source=f"{DOCS}#visual-headlight",
+    ),
+    "visual.headlight.specular": Choice(
+        value=(0.9, 0.9, 0.9),
+        reason=f"{LOOK}; {OLD_WORLD}",
+        source=f"{DOCS}#visual-headlight",
+    ),
+    "visual.rgba.force": Choice(
+        value=(1.0, 0.0, 0.0, 1.0),
+        reason=f"{LOOK}; {OLD_WORLD}",
+        source=f"{DOCS}#visual-rgba",
+    ),
+    "visual.rgba.haze": Choice(
+        value=(0.15, 0.25, 0.35, 1.0),
+        reason=f"{LOOK}; {OLD_WORLD}",
+        source=f"{DOCS}#visual-rgba",
+    ),
+    "visual.map.force": Choice(
+        value=0.01,
+        reason=f"{LOOK}; {OLD_WORLD}",
+        source=f"{DOCS}#visual-map",
+    ),
+    "visual.scale.forcewidth": Choice(
+        value=0.3,
+        reason=f"{LOOK}; {OLD_WORLD}",
+        source=f"{DOCS}#visual-scale",
+    ),
+    "visual.scale.contactwidth": Choice(
+        value=0.5,
+        reason=f"{LOOK}; {OLD_WORLD}",
+        source=f"{DOCS}#visual-scale",
+    ),
+    "visual.scale.contactheight": Choice(
+        value=0.2,
+        reason=f"{LOOK}; {OLD_WORLD}",
+        source=f"{DOCS}#visual-scale",
+    ),
+    "visual.quality.shadowsize": Choice(
+        value=8192,
+        reason=f"{LOOK}; {OLD_WORLD}",
+        source=f"{DOCS}#visual-quality",
+    ),
+}
 
 
 def _plain(value: object) -> Value | None:
@@ -235,54 +339,6 @@ def settings(seeds: Seeds) -> list[Setting]:
             reason="air viscosity seed (medium for fluid forces)",
             source="consensus of the research reports, wiki mjcf_option",
         ),
-        "option.integrator": Setting(
-            name="option.integrator",
-            value=int(mujoco.mjtIntegrator.mjINT_IMPLICITFAST),
-            kind="fixed",
-            reason=(
-                "implicitfast is the documented general recommendation and "
-                "what ARIEL already used (old MujocoConfig)"
-            ),
-            source=f"{DOCS}#option-integrator; wiki mujoco_modeling_guidance",
-        ),
-        "compiler.balanceinertia": Setting(
-            name="compiler.balanceinertia",
-            value=True,
-            kind="fixed",
-            reason=(
-                "accept slightly inconsistent inertias of generated bodies; "
-                "what ARIEL already used (old MujocoConfig)"
-            ),
-            source=f"{DOCS}#compiler-balanceinertia",
-        ),
-        "compiler.degree": Setting(
-            name="compiler.degree",
-            value=False,
-            kind="fixed",
-            reason=(
-                "ARIEL code uses radians; what it already used "
-                "(old MujocoConfig)"
-            ),
-            source=f"{DOCS}#compiler-angle",
-        ),
-        "visual.global_.offheight": Setting(
-            name="visual.global_.offheight",
-            value=OFFSCREEN_HEIGHT,
-            kind="fixed",
-            reason=(
-                "offscreen render height ARIEL already used (old MujocoConfig)"
-            ),
-            source=f"{DOCS}#visual-global",
-        ),
-        "visual.global_.offwidth": Setting(
-            name="visual.global_.offwidth",
-            value=OFFSCREEN_WIDTH,
-            kind="fixed",
-            reason=(
-                "offscreen render width ARIEL already used (old MujocoConfig)"
-            ),
-            source=f"{DOCS}#visual-global",
-        ),
         "default.geom.solref": Setting(
             name="default.geom.solref",
             value=(seeds.contact_time_constant, DAMPING_RATIO),
@@ -297,6 +353,16 @@ def settings(seeds: Seeds) -> list[Setting]:
             reason="sliding friction seed; torsional and rolling terms kept",
             source=f"{DOCS}#default-geom-friction",
         ),
+    }
+    overrides |= {
+        name: Setting(
+            name=name,
+            value=choice.value,
+            kind="fixed",
+            reason=choice.reason,
+            source=choice.source,
+        )
+        for name, choice in CHOICES.items()
     }
     rows: list[Setting] = []
     for name, value in defaults.items():

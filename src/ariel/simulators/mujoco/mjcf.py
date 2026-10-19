@@ -26,7 +26,7 @@ from ariel.simulators.mujoco.settings import (
 )
 
 ABSOLUTE_TOLERANCE = 0.0
-RELATIVE_TOLERANCE = 1e-9
+RELATIVE_TOLERANCE = 1e-6  # the engine stores some values as float32
 
 
 def _assign(spec: mujoco.MjSpec, name: str, value: Value) -> None:
@@ -120,7 +120,7 @@ def _equal(left: Value, right: Value) -> bool:
 
 
 def _close(left: float, right: float) -> bool:
-    """Tell whether two floats agree to a relative 1e-9.
+    """Tell whether two floats agree to a relative 1e-6.
 
     Parameters
     ----------

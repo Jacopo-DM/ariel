@@ -24,6 +24,7 @@ import numpy as np
 from ariel import log
 from ariel.parameters.ariel_types import Position, Rotation
 from ariel.parameters.mujoco_params import MujocoConfig
+from ariel.simulators.mujoco import Seeds, build_spec
 from ariel.utils.mujoco_ops import euler_to_quat_conversion
 
 
@@ -89,45 +90,14 @@ class BaseWorld:
         mj.MjSpec
             The new specification.
         """
-        spec = mj.MjSpec()
+        # Every physics, compiler and visual setting comes from the seeds
+        spec = build_spec(Seeds())
 
         # Model name
         spec.modelname = self.name.replace("-", " ").title()
 
         # Copy during attach
         spec.copy_during_attach = True
-
-        # --- Option --- #
-        spec.option.integrator = self.mujoco_config.integrator
-
-        # --- Compiler --- #
-        spec.compiler.autolimits = self.mujoco_config.autolimits
-        spec.compiler.balanceinertia = self.mujoco_config.balanceinertia
-        spec.compiler.degree = self.mujoco_config.degree
-
-        # --- Visual --- #
-        spec.visual.global_.offheight = self.mujoco_config.offheight
-        spec.visual.global_.offwidth = self.mujoco_config.offwidth
-
-        # Headlight: diffuse, ambient, specular
-        spec.visual.headlight.diffuse = [0.6, 0.6, 0.6]
-        spec.visual.headlight.ambient = [0.1, 0.1, 0.1]
-        spec.visual.headlight.specular = [0.9, 0.9, 0.9]
-
-        # RGBA and Global
-        spec.visual.rgba.force = [1, 0, 0, 1]
-        spec.visual.rgba.haze = [0.15, 0.25, 0.35, 1]
-        spec.visual.global_.azimuth = 140
-        spec.visual.global_.elevation = -20
-
-        # Map and Scale
-        spec.visual.map.force = 0.01
-        spec.visual.scale.forcewidth = 0.3
-        spec.visual.scale.contactwidth = 0.5
-        spec.visual.scale.contactheight = 0.2
-
-        # Quality
-        spec.visual.quality.shadowsize = 8192
 
         # --- Assets ---
         # Skybox Texture
