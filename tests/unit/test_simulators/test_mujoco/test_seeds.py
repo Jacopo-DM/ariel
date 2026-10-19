@@ -11,7 +11,7 @@ from ariel.simulators.mujoco.seeds import Seeds
 
 DEFAULT_LENGTH_M = 0.05
 DEFAULT_SPEED_M_S = 1.0
-DEFAULT_JOINT_RAD_S = 200.0
+DEFAULT_JOINT_RAD_S = 100.0
 DEFAULT_ALPHA = 0.05
 DEFAULT_KAPPA = 0.28
 DEFAULT_GAMMA = 0.5
@@ -96,3 +96,57 @@ def test_replace_validates_the_change() -> None:
 def test_replace_rejects_an_unknown_seed() -> None:
     with pytest.raises(ValidationError, match="extra"):
         Seeds().replace(mass=1.0 * u.kg)
+
+
+ADVECTION_S = 0.0025
+CONTACT_S = 0.014
+JOINT_S = 0.005
+LONG_SCALE_M = 0.5
+FAST_M_S = 10.0
+FAST_ADVECTION_S = 0.00025
+STIFF_RAD_S = 1000.0
+STIFF_JOINT_S = 0.5 / STIFF_RAD_S
+SLOW_JOINT_RAD_S = 50.0
+LARGE_ALPHA = 10.0
+
+
+def test_derived_times_follow_the_chain() -> None:
+    seeds = Seeds()
+    assert seeds.advection_limit == pytest.approx(ADVECTION_S)
+    assert seeds.contact_time_constant == pytest.approx(CONTACT_S)
+    assert seeds.joint_limit == pytest.approx(JOINT_S)
+    assert seeds.timestep == pytest.approx(ADVECTION_S)
+
+
+def test_the_timestep_is_the_smallest_limit() -> None:
+    fast = Seeds().replace(top_speed=FAST_M_S * u.m / u.s)
+    assert fast.timestep == pytest.approx(FAST_ADVECTION_S)
+    assert fast.timestep_limit == "advection"
+    stiff = Seeds().replace(joint_frequency=STIFF_RAD_S * u.rad / u.s)
+    assert stiff.timestep == pytest.approx(STIFF_JOINT_S)
+    assert stiff.timestep_limit == "joint"
+
+
+def test_the_contact_limit_can_bind() -> None:
+    seeds = Seeds().replace(
+        alpha=LARGE_ALPHA, joint_frequency=SLOW_JOINT_RAD_S * u.rad / u.s
+    )
+    assert seeds.timestep == pytest.approx(CONTACT_S / 2)
+    assert seeds.timestep_limit == "contact"
+
+
+def test_replace_recomputes_the_derived_values() -> None:
+    longer = Seeds().replace(length_scale=LONG_SCALE_M * u.m)
+    assert longer.advection_limit == pytest.approx(ADVECTION_S * 10)
+    assert longer.contact_time_constant == pytest.approx(CONTACT_S * 10)
+
+
+def test_the_contact_time_constant_respects_the_documented_floor() -> None:
+    seeds = Seeds()
+    assert seeds.contact_time_constant >= 2 * seeds.timestep
+
+
+def test_derived_values_are_part_of_the_dump() -> None:
+    dumped = Seeds().model_dump()
+    assert dumped["timestep_limit"] == "advection"
+    assert dumped["timestep"] == pytest.approx(ADVECTION_S)

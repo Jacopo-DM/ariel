@@ -14,12 +14,12 @@ Notes
 
 # Standard library
 from collections.abc import Callable
-from typing import Annotated, Self
+from typing import Annotated, Literal, Self
 
 # Third-party libraries
 import astropy.units as u
 import numpy as np
-from pydantic import Field, PlainValidator
+from pydantic import Field, PlainValidator, computed_field
 
 # Local libraries
 from ariel.parameters import FrozenModel
@@ -30,7 +30,7 @@ AIR_DENSITY_20C = 1.204  # kg / m^3, consensus of the research reports
 AIR_VISCOSITY_20C = 1.81e-5  # Pa s, consensus of the research reports
 DEFAULT_LENGTH_SCALE = 0.05  # m, one brick
 DEFAULT_TOP_SPEED = 1.0  # m / s
-DEFAULT_JOINT_FREQUENCY = 200.0  # rad / s, about 30 Hz for a stiff servo
+DEFAULT_JOINT_FREQUENCY = 100.0  # rad / s, about 16 Hz for a stiff servo
 DEFAULT_FRICTION = 1.0  # MuJoCo's own default
 DEFAULT_ALPHA = 0.05  # advection limit
 DEFAULT_KAPPA = 0.28  # contact time constant, 14 ms for the default scales
@@ -127,6 +127,7 @@ type AngularFrequency = Annotated[u.Quantity, _quantity_of(u.rad / u.s)]
 type Acceleration = Annotated[u.Quantity, _quantity_of(u.m / u.s**2)]
 type Density = Annotated[u.Quantity, _quantity_of(u.kg / u.m**3)]
 type Viscosity = Annotated[u.Quantity, _quantity_of(u.Pa * u.s)]
+type TimestepLimit = Literal["advection", "contact", "joint"]
 type Positive = Annotated[float, PlainValidator(_positive)]
 
 
@@ -191,4 +192,64 @@ class Seeds(FrozenModel):
         Seeds
             A new object; derived values recompute from it.
         """
-        return type(self).model_validate(self.model_dump() | changes)
+        seeds = self.model_dump(exclude=set(type(self).model_computed_fields))
+        return type(self).model_validate(seeds | changes)
+
+    @computed_field  # type: ignore[prop-decorator]  # pydantic documents this stacking
+    @property
+    def contact_time_constant(self) -> float:
+        """Contact softness time constant ``tc`` in seconds.
+
+        ``tc = kappa * L / v_max``. Judgement: ``kappa`` 0.28 reproduces the
+        14 ms that ARIEL calibrated for robot-to-robot contact.
+        """
+        return self.kappa * self._length_over_speed
+
+    @computed_field  # type: ignore[prop-decorator]  # pydantic documents this stacking
+    @property
+    def advection_limit(self) -> float:
+        """Largest step in seconds before a part crosses ``alpha`` lengths.
+
+        ``alpha * L / v_max``. Judgement, see the research page.
+        """
+        return self.alpha * self._length_over_speed
+
+    @computed_field  # type: ignore[prop-decorator]  # pydantic documents this stacking
+    @property
+    def joint_limit(self) -> float:
+        """Largest step in seconds for the stiffest joint.
+
+        ``gamma / omega_max``. Judgement, see the research page.
+        """
+        return self.gamma / float(self.joint_frequency.value)
+
+    @computed_field  # type: ignore[prop-decorator]  # pydantic documents this stacking
+    @property
+    def timestep(self) -> float:
+        """Integration step ``h`` in seconds.
+
+        ``min(alpha * L / v_max, tc / 2, gamma / omega_max)``. The ``tc / 2``
+        term is documented: MuJoCo clamps ``tc`` to at least ``2 h``
+        (``refsafe``).
+        """
+        return min(
+            self.advection_limit,
+            self.contact_time_constant / 2,
+            self.joint_limit,
+        )
+
+    @computed_field  # type: ignore[prop-decorator]  # pydantic documents this stacking
+    @property
+    def timestep_limit(self) -> TimestepLimit:
+        """Name of the term that sets the timestep."""
+        limits: dict[TimestepLimit, float] = {
+            "advection": self.advection_limit,
+            "contact": self.contact_time_constant / 2,
+            "joint": self.joint_limit,
+        }
+        return min(limits, key=limits.__getitem__)
+
+    @property
+    def _length_over_speed(self) -> float:
+        """``L / v_max`` in seconds."""
+        return float(self.length_scale.value) / float(self.top_speed.value)
