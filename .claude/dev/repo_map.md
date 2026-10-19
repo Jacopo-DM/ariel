@@ -19,8 +19,11 @@ same packages (public imports + snippets), see [../user/00_index.md](../user/00_
 | [simulation/controllers/](../../src/ariel/simulation/controllers/) | `Controller`, `Tracker` glue + CPGs (`SimpleCPG`, `NaCPG`, `nn.Module`) | new controllers |
 | [simulation/tasks/](../../src/ariel/simulation/tasks/) | Fitness functions (`targeted_locomotion`, `gait_learning`, `turning_in_place`) | new fitness/evaluation metrics (free functions) |
 | [parameters/](../../src/ariel/parameters/) | Type aliases (`ariel_types.py`), MuJoCo & module params (Pydantic) | shared types or config constants |
-| [utils/](../../src/ariel/utils/) | `Tracker`, renderers, `VideoRecorder`, `MorphologicalMeasures`, `file_ops`, `mujoco_ops`, `optimizers/` (`RevDE`) | cross-cutting helpers |
+| [opengl/](../../src/ariel/opengl/) | OpenGL backend probe and `MUJOCO_GL` setup | runs before MuJoCo loads |
+| [rendering/](../../src/ariel/rendering/) | renderers, `VideoRecorder`, `file_ops` | frames and videos |
 | [visualisation/](../../src/ariel/visualisation/) | Analysis tooling (dashboards moved to the `feature-dashboard` branch) | analysis code |
+
+The old `utils/` folder was dissolved (restructure goal): `Tracker`, `mujoco_ops` and runners are in `simulation/`, `MorphologicalMeasures` and `quaternions` in `body_phenotypes/`, `RevDE` in `ec/optimizers/`, `noise_gen` in `simulation/environments/`.
 
 ## Conventions when adding code
 

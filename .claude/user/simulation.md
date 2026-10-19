@@ -57,7 +57,7 @@ Add cameras / target bodies via `world.spec.worldbody.add_camera(...)` /
 
 ## Rendering & recording
 
-From [ariel.rendering](../../src/ariel/utils/renderers.py):
+From [ariel.rendering](../../src/ariel/rendering/renderers.py):
 
 | Function | Use |
 |---|---|

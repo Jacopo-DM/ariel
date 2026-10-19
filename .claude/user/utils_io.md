@@ -40,14 +40,14 @@ video_renderer(model, data, duration=30, video_recorder=rec)
 
 `VideoRecorder` also has the manual API used in custom render loops:
 `rec.write(frame=...)` then `rec.release()`
-([video_recorder.py](../../src/ariel/utils/video_recorder.py)). Example:
+([video_recorder.py](../../src/ariel/rendering/video_recorder.py)). Example:
 [examples/a_mujoco/2_video_recorder.py](../../examples/a_mujoco/2_video_recorder.py).
 
 ## Morphological measures
 
 `from ariel.body_phenotypes.morphological_descriptor import MorphologicalMeasures` —
 descriptors of a body (proportions, branching, etc.)
-([morphological_descriptor.py](../../src/ariel/utils/morphological_descriptor.py)).
+([morphological_descriptor.py](../../src/ariel/body_phenotypes/morphological_descriptor.py)).
 Used in [examples/c_genotypes/1_body_evolution_tree.py](../../examples/c_genotypes/1_body_evolution_tree.py).
 
 ## Other utils

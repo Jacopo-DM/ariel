@@ -194,4 +194,6 @@ Key internal modules to link when relevant:
 | `src/ariel/simulation/environments/` | Terrain generators (flat, rugged, crater, etc.) |
 | `src/ariel/simulation/tasks/` | Evaluation tasks (gait, locomotion, turning) |
 | `src/ariel/parameters/` | Pydantic configs (servo specs, MuJoCo params) |
-| `src/ariel/utils/` | Tracker, runners, renderers, morphological descriptors |
+| `src/ariel/opengl/` | OpenGL backend choice before MuJoCo loads |
+| `src/ariel/rendering/` | Frame and video renderers, `VideoRecorder`, save paths |
+| `src/ariel/simulation/` (top level) | `Tracker`, runners, `mujoco_ops` |
