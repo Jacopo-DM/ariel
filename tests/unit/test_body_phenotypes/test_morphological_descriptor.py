@@ -246,3 +246,81 @@ def test_a_module_with_two_valid_parents_is_placed_once() -> None:
     graph.add_edge(1, 2, face="TOP")
     measures = MorphologicalMeasures(graph)
     assert measures.num_modules == THREE_MODULES
+
+
+def _arms(
+    right: list[str],
+    left: list[str],
+    faces: tuple[str, str] = ("RIGHT", "LEFT"),
+) -> nx.DiGraph[int]:
+    """Build a core with a chain of modules on two opposite faces.
+
+    Returns
+    -------
+    nx.DiGraph[int]
+        The robot graph.
+    """
+    types = {0: "CORE"}
+    edges: list[tuple[int, int, str]] = []
+    next_id = 1
+    for face, chain in zip(faces, (right, left), strict=True):
+        previous = 0
+        for kind in chain:
+            types[next_id] = kind
+            edges.append((previous, next_id, face))
+            previous = next_id
+            next_id += 1
+    return _graph(types, edges)
+
+
+@pytest.mark.parametrize("arm_length", [1, 2, 3])
+def test_a_mirror_symmetric_cross_scores_one_in_every_plane(
+    arm_length: int,
+) -> None:
+    """The outermost layer counts, so wide robots reach 1.0 too."""
+    types = {0: "CORE"}
+    edges: list[tuple[int, int, str]] = []
+    next_id = 1
+    for face in CORE_FACES:
+        previous = 0
+        for _ in range(arm_length):
+            types[next_id] = "BRICK"
+            edges.append((previous, next_id, face))
+            previous = next_id
+            next_id += 1
+    measures = MorphologicalMeasures(_graph(types, edges))
+    assert measures.xy_symmetry == pytest.approx(1.0)
+    assert measures.xz_symmetry == pytest.approx(1.0)
+    assert measures.yz_symmetry == pytest.approx(1.0)
+
+
+@pytest.mark.parametrize("arm_length", [1, 2, 3])
+def test_a_symmetric_line_is_symmetric_across_its_length_only(
+    arm_length: int,
+) -> None:
+    """A flat line has everything on the other two planes, which count 0.0."""
+    arm = ["BRICK"] * arm_length
+    measures = MorphologicalMeasures(_arms(arm, arm))
+    assert measures.xz_symmetry == pytest.approx(1.0)
+    assert measures.xy_symmetry == pytest.approx(0.0)
+    assert measures.yz_symmetry == pytest.approx(0.0)
+
+
+def test_a_mismatch_in_the_outer_layer_lowers_the_score() -> None:
+    """The outer pair (brick against hinge) is compared and does not match."""
+    measures = MorphologicalMeasures(
+        _arms(["BRICK", "BRICK"], ["BRICK", "HINGE"])
+    )
+    assert measures.xz_symmetry == pytest.approx(0.5)
+
+
+def test_an_arm_without_a_mirror_scores_zero() -> None:
+    """Modules on one side only have nothing to match."""
+    measures = MorphologicalMeasures(_arms(["BRICK"] * 3, []))
+    assert measures.xz_symmetry == pytest.approx(0.0)
+
+
+def test_a_core_off_the_middle_compares_the_layers_both_sides_reach() -> None:
+    """Three modules right, one left: only the first layer has a pair."""
+    measures = MorphologicalMeasures(_arms(["BRICK"] * 3, ["BRICK"]))
+    assert measures.xz_symmetry == pytest.approx(2 / 4)

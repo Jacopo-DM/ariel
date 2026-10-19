@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from itertools import product
 from typing import TYPE_CHECKING, cast
 
 import numpy as np
@@ -262,68 +261,49 @@ class MorphologicalGrid:
         )
         self.symmetry_grid[:x, :y, :z] = self.grid
 
-    def _calculate_xy_symmetry(self) -> float:
-        on_plane = off_sym = 0
-        cz = self.core_grid_position[2]
-        for x, y, z in product(
-            range(self.bounding_box_depth),
-            range(self.bounding_box_width),
-            range(1, (self.bounding_box_height - 1) // 2),
-        ):
-            if self.symmetry_grid[x, y, cz] is not None:
-                on_plane += 1
-            pos = self.symmetry_grid[x, y, cz + z]
-            neg = self.symmetry_grid[x, y, cz - z]
-            if (
-                pos is not None
-                and neg is not None
-                and self._get_node_type(pos) == self._get_node_type(neg)
+    def _mirror_symmetry(self, axis: int) -> float:
+        """Share of off-plane modules that have a matching mirror module.
+
+        Parameters
+        ----------
+        axis : int
+            The axis the mirror plane is perpendicular to (0 x, 1 y, 2 z).
+
+        Returns
+        -------
+        float
+            The number of mirrored modules of the same type divided by the
+            number of modules off the plane through the core; 0.0 when every
+            module is on the plane.
+        """
+        grid = np.moveaxis(self.symmetry_grid, axis, 0)
+        centre = int(self.core_grid_position[axis])
+        reach = max(centre, int(self.grid.shape[axis]) - 1 - centre)
+        on_plane = sum(cell is not None for cell in grid[centre].ravel())
+        off_sym = 0
+        for layer in range(1, min(reach, centre) + 1):
+            for pos, neg in zip(
+                grid[centre + layer].ravel(),
+                grid[centre - layer].ravel(),
+                strict=True,
             ):
-                off_sym += 2
+                if (
+                    pos is not None
+                    and neg is not None
+                    and self._get_node_type(pos) == self._get_node_type(neg)
+                ):
+                    off_sym += 2
         diff = self.num_modules - on_plane
         return off_sym / diff if diff > 0 else 0.0
+
+    def _calculate_xy_symmetry(self) -> float:
+        return self._mirror_symmetry(2)
 
     def _calculate_xz_symmetry(self) -> float:
-        on_plane = off_sym = 0
-        cy = self.core_grid_position[1]
-        for x, y, z in product(
-            range(self.bounding_box_depth),
-            range(1, (self.bounding_box_width - 1) // 2),
-            range(self.bounding_box_height),
-        ):
-            if self.symmetry_grid[x, cy, z] is not None:
-                on_plane += 1
-            pos = self.symmetry_grid[x, cy + y, z]
-            neg = self.symmetry_grid[x, cy - y, z]
-            if (
-                pos is not None
-                and neg is not None
-                and self._get_node_type(pos) == self._get_node_type(neg)
-            ):
-                off_sym += 2
-        diff = self.num_modules - on_plane
-        return off_sym / diff if diff > 0 else 0.0
+        return self._mirror_symmetry(1)
 
     def _calculate_yz_symmetry(self) -> float:
-        on_plane = off_sym = 0
-        cx = self.core_grid_position[0]
-        for x, y, z in product(
-            range(1, (self.bounding_box_depth - 1) // 2),
-            range(self.bounding_box_width),
-            range(self.bounding_box_height),
-        ):
-            if self.symmetry_grid[cx, y, z] is not None:
-                on_plane += 1
-            pos = self.symmetry_grid[cx + x, y, z]
-            neg = self.symmetry_grid[cx - x, y, z]
-            if (
-                pos is not None
-                and neg is not None
-                and self._get_node_type(pos) == self._get_node_type(neg)
-            ):
-                off_sym += 2
-        diff = self.num_modules - on_plane
-        return off_sym / diff if diff > 0 else 0.0
+        return self._mirror_symmetry(0)
 
     # ------------------------------------------------------------------
     # Bounding-box geometry
