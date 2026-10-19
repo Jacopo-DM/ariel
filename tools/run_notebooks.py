@@ -99,17 +99,23 @@ def needs_opengl(notebook: nbformat.NotebookNode) -> bool:
 
 
 def failing_cell(notebook: nbformat.NotebookNode) -> int:
-    """Find the number (from 1) of the first code cell that has an error.
+    """Find the number (from 1) of the cell that stopped the run.
+
+    Cells run in order and the run stops at the first error, so the failing
+    cell is the last one that was started (it has an execution count). The
+    error output itself may not be stored yet when the exception arrives.
 
     Returns
     -------
     int
-        The cell number, or 0 when no cell holds an error.
+        The cell number, or 0 when no cell was started.
     """
-    for number, cell in enumerate(notebook.cells, start=1):
-        if any(o.output_type == "error" for o in cell.get("outputs", [])):
-            return number
-    return 0
+    started = [
+        number
+        for number, cell in enumerate(notebook.cells, start=1)
+        if cell.cell_type == "code" and cell.get("execution_count") is not None
+    ]
+    return started[-1] if started else 0
 
 
 def is_slow(notebook: nbformat.NotebookNode) -> bool:

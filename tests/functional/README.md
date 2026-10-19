@@ -55,8 +55,8 @@ row, a row names a notebook that does not exist, or a notebook has no row.
 | `body_phenotypes` | `decoders` |
 | `body_phenotypes/lynx_mjspec` | none yet |
 | `body_phenotypes/robogen_lite` | `decoders` |
-| `ec` | none yet |
-| `ec/generators` | none yet |
+| `ec` | `ec_engine` |
+| `ec/generators` | `ec_engine` |
 | `ec/genotypes` | `nde` |
 | `ec/optimizers` | none yet |
 | `opengl` | none yet |

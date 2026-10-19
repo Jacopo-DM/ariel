@@ -164,6 +164,9 @@ Decisions and research notes of the mujoco-units goal, moved word for word from 
 
 ## Gotchas
 
+- `EA(restart=path)` copies the alive individuals of the last generation into a **new** database at `db_file_path` (or `config.db_file_path`); it does not append to the source file, so give the restarted run its own path (found 2026-10-19 while writing `ec_engine.ipynb`).
+- nbclient raises `CellExecutionError` before the failing cell's error output is stored, so `tools/run_notebooks.py` finds the failing cell as the last one with an execution count.
+
 See "Things that bite" in CLAUDE.md for repo-wide ones. Design-specific ones:
 
 - Band edges need a tolerance. With the default seeds the timestep is advection-limited, so `courant = h * v_max / L` equals `alpha` (0.05) up to rounding (0.05000000000000001), which is the upper edge of its band; `simulators/mujoco/bands.py` compares edges with a relative tolerance of 1e-9. Likewise a default that ties two limits of the timestep flips the binding term on rounding (`joint_frequency` 200 rad/s tied with the advection limit and was changed to 100).

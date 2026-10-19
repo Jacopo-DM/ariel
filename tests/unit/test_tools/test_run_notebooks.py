@@ -61,7 +61,7 @@ def test_a_clean_notebook_passes(tmp_path: Path) -> None:
 def test_a_failing_cell_is_named_in_the_detail(tmp_path: Path) -> None:
     script = _load()
     path = tmp_path / "bad.ipynb"
-    _write(path, "x = 1", "raise ValueError('boom')")
+    _write(path, "x = 1", "raise ValueError('boom')", "y = 2")
     outcome = script.run_notebook(path, opengl=False)
     assert outcome.status == "FAIL"
     assert outcome.detail == "cell 2: ValueError: boom"
@@ -193,3 +193,10 @@ def test_an_error_without_a_cell_leaves_out_the_cell_number(
     path = tmp_path / "bad.ipynb"
     _write(path, "raise ValueError('boom')")
     assert script.run_notebook(path, opengl=False).detail == "ValueError: boom"
+
+
+def test_failing_cell_is_zero_when_nothing_ran() -> None:
+    script = _load()
+    notebook = nbformat.v4.new_notebook()  # type: ignore[no-untyped-call]  # nbformat is untyped
+    notebook.cells = [nbformat.v4.new_code_cell("x = 1")]  # type: ignore[no-untyped-call]  # nbformat is untyped
+    assert script.failing_cell(notebook) == 0
