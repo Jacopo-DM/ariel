@@ -25,5 +25,19 @@ repos:
         language: system
         types_or: [python, pyi]
         files: ^(src|tests)/
+      # Functional notebooks (tests/functional): see tests/functional/README.md.
+      # At commit, only the notebooks in the commit; at push, all non-slow ones.
+      - id: notebooks-commit
+        name: notebooks (committed ones)
+        entry: uv run --no-sync python tools/run_notebooks.py --timeout 300
+        language: system
+        files: ^tests/functional/.*\.ipynb$
+      - id: notebooks-push
+        name: notebooks (all, non-slow)
+        entry: uv run --no-sync python tools/run_notebooks.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
       # pydoclint is left out on purpose: `uv run pydoclint src` still reports
       # findings (see PLAN.md, Known problems).

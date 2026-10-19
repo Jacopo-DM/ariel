@@ -21,6 +21,22 @@ notebooks.
 A notebook that needs a working OpenGL backend carries `"requires": ["opengl"]`
 in its metadata and prints SKIP, with the reason, on a machine without one.
 
+## Hooks
+
+Two pre-commit hooks run the notebooks (`.pre-commit-config.yaml`). At commit,
+only the notebooks in the commit run, each with a 300 second limit (a slow
+notebook named on the command line runs even without `--slow`, so editing
+`speed_tests` takes about two minutes at commit). At push, every non-slow
+notebook runs, so a library change that breaks a notebook nobody edited is
+caught. pre-commit installs the push hook only when asked:
+
+```bash
+uv run --no-sync pre-commit install --hook-type pre-commit --hook-type pre-push
+```
+
+Skipping hooks with `--no-verify` skips this check too. There is no CI job: CI
+has no OpenGL either, so the OpenGL notebooks would only SKIP there.
+
 ## When to run them
 
 Before a release, and after changing the area a notebook covers. A FAIL means a
