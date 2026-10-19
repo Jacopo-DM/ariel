@@ -16,13 +16,13 @@ from ariel.body_phenotypes.robogen_lite import (
     MorphologyDecoderBestFirst,
     construct_mjspec_from_graph,
 )
+from ariel.rendering import single_frame_renderer
 from ariel.simulation.controllers import (
     Controller,
     NaCPG,
     create_fully_connected_adjacency,
 )
 from ariel.simulation.environments import SimpleFlatWorld
-from ariel.utils.renderers import single_frame_renderer
 
 SCRIPT_NAME = Path(__file__).stem
 CWD = Path.cwd()

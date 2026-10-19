@@ -61,7 +61,7 @@ import mujoco
 
 # Local libraries
 from ariel.environments.simple_flat_world import SimpleFlatWorld
-from ariel.utils.renderers import single_frame_renderer
+from ariel.rendering import single_frame_renderer
 
 
 def main() -> None:

@@ -10,7 +10,7 @@ from ariel.body_phenotypes.robogen_lite.modules.hinge import HingeModule
 
 # Local libraries
 from ariel.simulation.environments import SimpleFlatWorld
-from ariel.utils.renderers import single_frame_renderer
+from ariel.rendering import single_frame_renderer
 
 
 def show_module(module: str) -> Image | None:

@@ -46,7 +46,7 @@ from torch import nn
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider_with_blocks import body_spider45
 from ariel.simulation.controllers.utils.data_get import get_state_from_data as get_robot_state
 from ariel.simulation.environments import SimpleFlatWorld
-from ariel.utils.renderers import VideoRecorder
+from ariel.rendering import VideoRecorder
 
 install()
 console = Console()

@@ -57,7 +57,7 @@ Add cameras / target bodies via `world.spec.worldbody.add_camera(...)` /
 
 ## Rendering & recording
 
-From [ariel.utils.renderers](../../src/ariel/utils/renderers.py):
+From [ariel.rendering](../../src/ariel/utils/renderers.py):
 
 | Function | Use |
 |---|---|
@@ -68,7 +68,7 @@ From [ariel.utils.renderers](../../src/ariel/utils/renderers.py):
 `VideoRecorder` is re-exported from `renderers` for convenience:
 
 ```python
-from ariel.utils.renderers import VideoRecorder, video_renderer
+from ariel.rendering import VideoRecorder, video_renderer
 
 rec = VideoRecorder(file_name="run", output_folder=str(out_dir))
 video_renderer(model, data, duration=30, video_recorder=rec)

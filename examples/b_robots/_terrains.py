@@ -44,7 +44,7 @@ from ariel.simulation.environments import (
     SimpleFlatWorld,
     SimpleTiltedWorld,
 )
-from ariel.utils.renderers import single_frame_renderer
+from ariel.rendering import single_frame_renderer
 
 if TYPE_CHECKING:
     from networkx import DiGraph

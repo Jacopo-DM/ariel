@@ -10,9 +10,9 @@ import mujoco
 import mujoco.viewer
 import pytest
 
+from ariel import rendering
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots.gecko import gecko
 from ariel.ec.genotypes.cppn import cppn_decoding
-from ariel.utils import renderers
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -45,7 +45,7 @@ def captured(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> _Captured:
         seen.control(model, data)
 
     monkeypatch.setattr(
-        renderers, "single_frame_renderer", lambda *_args, **_kwargs: None
+        rendering, "single_frame_renderer", lambda *_args, **_kwargs: None
     )
     monkeypatch.setattr(mujoco, "set_mjcb_control", remember_control)
     monkeypatch.setattr(mujoco.viewer, "launch", launch)

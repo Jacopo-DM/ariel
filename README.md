@@ -80,7 +80,7 @@ uv run examples/re_book/1_brain_evolution.py
 
 ## Rendering and OpenGL
 
-ARIEL renders with MuJoCo, which needs an OpenGL backend (`glfw`, `egl` or `osmesa`). The first time you import `ariel.utils.renderers` in a folder, ARIEL tests which backends work on your machine (a few seconds, one-off) and saves the answer in `mujoco_user_config.json` in the current folder. Later `import ariel` calls read that file and set `MUJOCO_GL` before MuJoCo is imported, so a missing display or library does not crash your run.
+ARIEL renders with MuJoCo, which needs an OpenGL backend (`glfw`, `egl` or `osmesa`). The first time you import `ariel.rendering` in a folder, ARIEL tests which backends work on your machine (a few seconds, one-off) and saves the answer in `mujoco_user_config.json` in the current folder. Later `import ariel` calls read that file and set `MUJOCO_GL` before MuJoCo is imported, so a missing display or library does not crash your run.
 
 - A `MUJOCO_GL` you set yourself always wins.
 - To test again (new driver, new machine): `uv run python -m ariel.opengl.gl_manager`.

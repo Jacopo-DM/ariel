@@ -10,7 +10,7 @@ import numpy as np
 
 # Local libraries
 from ariel.simulation.environments import OlympicArena
-from ariel.utils.renderers import single_frame_renderer
+from ariel.rendering import single_frame_renderer
 
 # --- DATA SETUP ---
 SCRIPT_NAME = __file__.split("/")[-1][:-3]

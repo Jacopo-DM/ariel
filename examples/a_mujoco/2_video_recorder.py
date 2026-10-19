@@ -16,8 +16,8 @@ import mujoco
 
 # Local libraries
 from ariel.simulation.environments import SimpleFlatWorld
-from ariel.utils.renderers import video_renderer
-from ariel.utils.video_recorder import VideoRecorder
+from ariel.rendering import video_renderer
+from ariel.rendering import VideoRecorder
 
 # Global constants
 SCRIPT_NAME = __file__.split("/")[-1][:-3]

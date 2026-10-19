@@ -371,9 +371,9 @@ def test_ensure_in_read_only_folder_only_warns(tmp_path: Path) -> None:
 
 
 def test_import_renderers_probes_once_for_real(tmp_path: Path) -> None:
-    """Importing ariel.utils.renderers creates the file the first time only."""
+    """Importing ariel.rendering creates the file the first time only."""
     env = {k: v for k, v in os.environ.items() if k != "MUJOCO_GL"}
-    command = [sys.executable, "-c", "import ariel.utils.renderers"]
+    command = [sys.executable, "-c", "import ariel.rendering"]
     first = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true]
         command,
         cwd=tmp_path,

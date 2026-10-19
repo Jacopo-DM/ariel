@@ -14,7 +14,7 @@ from pathlib import Path
 
 # Local libraries
 from ariel.simulation.environments import SimpleFlatWorld
-from ariel.utils.renderers import single_frame_renderer
+from ariel.rendering import single_frame_renderer
 
 
 def main() -> None:

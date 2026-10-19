@@ -5,14 +5,6 @@ Todo:
     [ ] ".rotate" as superclass method?
     [ ] Better documentation
 """
-# ruff: file-ignore[module-import-not-at-top-of-file] (the OpenGL backend must be chosen before importing mujoco)
-
-from ariel.opengl import ensure_gl_backend
-
-# MuJoCo reads MUJOCO_GL when it is imported, so decide the backend first.
-ensure_gl_backend()
-
-# isort: split
 
 # Standard library
 import math
@@ -25,8 +17,8 @@ from PIL import Image
 
 # Local libraries
 from ariel import log
-from ariel.utils.file_ops import generate_save_path
-from ariel.utils.video_recorder import VideoRecorder
+from ariel.rendering.file_ops import generate_save_path
+from ariel.rendering.video_recorder import VideoRecorder
 
 
 def single_frame_renderer(  # ruff: ignore[too-many-arguments]

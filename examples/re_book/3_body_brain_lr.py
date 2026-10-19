@@ -48,9 +48,9 @@ from ariel.simulation.controllers.controller import Controller, Tracker
 from ariel.simulation.controllers.na_cpg import create_fully_connected_adjacency
 from ariel.simulation.controllers.simple_cpg import SimpleCPG
 from ariel.simulation.environments import SimpleFlatWorld
-from ariel.utils.renderers import single_frame_renderer, video_renderer
+from ariel.rendering import single_frame_renderer, video_renderer
 from ariel.simulation.runners import simple_runner
-from ariel.utils.video_recorder import VideoRecorder
+from ariel.rendering import VideoRecorder
 
 # Type Checking
 type ViewerTypes = Literal["launcher", "video", "simple", "no_control", "frame"]

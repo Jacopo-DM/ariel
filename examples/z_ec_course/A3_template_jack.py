@@ -24,14 +24,14 @@ from ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding import (
 from ariel.ec.genotypes.nde import NeuralDevelopmentalEncoding
 from ariel.simulation.controllers.controller import Controller
 from ariel.simulation.environments import OlympicArena
-from ariel.utils.renderers import (
+from ariel.rendering import (
     single_frame_renderer,
     tracking_video_renderer,
     video_renderer,
 )
 from ariel.simulation.runners import simple_runner
 from ariel.simulation.tracker import Tracker
-from ariel.utils.video_recorder import VideoRecorder
+from ariel.rendering import VideoRecorder
 
 # Type Checking
 if TYPE_CHECKING:

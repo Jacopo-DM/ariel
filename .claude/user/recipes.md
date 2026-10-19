@@ -55,7 +55,7 @@ while data.time < 30:
 Source: [examples/a_mujoco/2_video_recorder.py](../../examples/a_mujoco/2_video_recorder.py)
 
 ```python
-from ariel.utils.renderers import VideoRecorder, video_renderer
+from ariel.rendering import VideoRecorder, video_renderer
 
 rec = VideoRecorder(file_name="run", output_folder="__data__/videos")
 video_renderer(model, data, duration=30, video_recorder=rec)

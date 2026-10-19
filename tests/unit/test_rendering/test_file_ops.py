@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from ariel.utils.file_ops import generate_save_path
+from ariel.rendering import generate_save_path
 
 
 def test_generate_save_path_with_name_and_extension(tmp_path: Path) -> None:

@@ -27,10 +27,10 @@ also plugs into `Controller` (see [controllers.md](controllers.md)).
 ## Video & frames
 
 ```python
-from ariel.utils.video_recorder import (
+from ariel.rendering import (
     VideoRecorder,
-)  # or: from ariel.utils.renderers import VideoRecorder
-from ariel.utils.renderers import video_renderer, single_frame_renderer
+)  # or: from ariel.rendering import VideoRecorder
+from ariel.rendering import video_renderer, single_frame_renderer
 
 rec = VideoRecorder(
     file_name="run", output_folder=str(out), width=640, height=480, fps=30
@@ -54,7 +54,7 @@ Used in [examples/c_genotypes/1_body_evolution_tree.py](../../examples/c_genotyp
 
 | Import | Use |
 |---|---|
-| `from ariel.utils.file_ops import generate_save_path` | build timestamped output paths |
+| `from ariel.rendering import generate_save_path` | build timestamped output paths |
 | `from ariel.simulation.mujoco_ops import euler_to_quat_conversion, has_self_collision` | geometry/collision helpers |
 | `from ariel.simulation.runners import simple_runner, thread_safe_runner` | drive a sim loop |
 | `from ariel.utils.optimizers.revde import RevDE` | reversible differential evolution operator |

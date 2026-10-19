@@ -52,9 +52,9 @@ from ariel.simulation.controllers.simple_cpg import (
 from ariel.simulation.environments._simple_flat_with_target import (
     SimpleFlatWorldWithTarget,
 )
-from ariel.utils.renderers import video_renderer
+from ariel.rendering import video_renderer
 from ariel.simulation.tracker import Tracker
-from ariel.utils.video_recorder import VideoRecorder
+from ariel.rendering import VideoRecorder
 
 # Initialize rich console
 install()

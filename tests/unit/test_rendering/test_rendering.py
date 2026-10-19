@@ -10,8 +10,7 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from ariel.utils import renderers
-from ariel.utils.video_recorder import VideoRecorder
+from ariel.rendering import VideoRecorder, renderers
 
 if TYPE_CHECKING:
     from pathlib import Path

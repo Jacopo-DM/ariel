@@ -35,7 +35,7 @@ import nevergrad as ng
 from ariel.simulation.environments import SimpleFlatWorld
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider_with_blocks import body_spider45
 from ariel.simulation.controllers.utils.data_get import get_state_from_data as get_robot_state
-from ariel.utils.renderers import VideoRecorder, video_renderer
+from ariel.rendering import VideoRecorder, video_renderer
 from ariel.simulation.tasks.targeted_locomotion import (
     fitness_delta_distance,
     fitness_distance_and_efficiency,

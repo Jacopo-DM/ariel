@@ -21,9 +21,9 @@ from rich.console import Console
 from ariel.ec.genotypes.nde import nde
 from ariel.opengl import gl_backend, gl_manager
 from ariel.opengl.gl_backend import GLConfig
+from ariel.rendering import file_ops
 from ariel.simulation import runners
 from ariel.simulation.mujoco_ops import has_self_collision
-from ariel.utils import file_ops
 from ariel.utils.optimizers import revde
 
 if TYPE_CHECKING:
