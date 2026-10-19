@@ -4,7 +4,7 @@ import mujoco
 
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider import spider
 from ariel.simulation.environments import SimpleFlatWorld
-from ariel.utils.tracker import Tracker
+from ariel.simulation.tracker import Tracker
 
 
 def _build_spider_in_world() -> tuple[

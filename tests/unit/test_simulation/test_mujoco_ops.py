@@ -4,7 +4,7 @@ import mujoco
 import numpy as np
 import pytest
 
-from ariel.utils.mujoco_ops import (
+from ariel.simulation.mujoco_ops import (
     euler_to_quat_conversion,
     has_self_collision,
     mjspec_deep_copy,

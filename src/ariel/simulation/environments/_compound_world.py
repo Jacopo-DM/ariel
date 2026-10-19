@@ -25,7 +25,7 @@ from ariel.parameters import (
 )
 from ariel.simulation.environments._base_world import BaseWorld
 from ariel.simulation.environments.heightmap_functions import flat_heightmap
-from ariel.utils.mujoco_ops import euler_to_quat_conversion
+from ariel.simulation.mujoco_ops import euler_to_quat_conversion
 
 
 class CompoundWorld(BaseWorld):

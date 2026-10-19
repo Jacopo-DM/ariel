@@ -6,7 +6,7 @@ morphology, and read back the results database.
 ## Tracker — record state during a run
 
 ```python
-from ariel.utils.tracker import Tracker
+from ariel.simulation.tracker import Tracker
 import mujoco
 
 tracker = Tracker(
@@ -21,7 +21,7 @@ traj = tracker.history["xpos"]  # {body_id: [pos, pos, ...]}
 
 Signature: `Tracker(mujoco_obj_to_find=None, name_to_bind=None,
 observable_attributes=None, quiet=False)` — defaults to all `core` geoms /
-`xpos` if omitted. [tracker.py](../../src/ariel/utils/tracker.py). `Tracker`
+`xpos` if omitted. [tracker.py](../../src/ariel/simulation/tracker.py). `Tracker`
 also plugs into `Controller` (see [controllers.md](controllers.md)).
 
 ## Video & frames
@@ -55,8 +55,8 @@ Used in [examples/c_genotypes/1_body_evolution_tree.py](../../examples/c_genotyp
 | Import | Use |
 |---|---|
 | `from ariel.utils.file_ops import generate_save_path` | build timestamped output paths |
-| `from ariel.utils.mujoco_ops import euler_to_quat_conversion, has_self_collision` | geometry/collision helpers |
-| `from ariel.utils.runners import simple_runner, thread_safe_runner` | drive a sim loop |
+| `from ariel.simulation.mujoco_ops import euler_to_quat_conversion, has_self_collision` | geometry/collision helpers |
+| `from ariel.simulation.runners import simple_runner, thread_safe_runner` | drive a sim loop |
 | `from ariel.utils.optimizers.revde import RevDE` | reversible differential evolution operator |
 
 ## Reading the results DB

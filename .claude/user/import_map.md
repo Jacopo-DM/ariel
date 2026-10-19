@@ -64,11 +64,11 @@ Full exported list: `AmphitheatreTerrainWorld`, `BaseWorld`, `CompoundWorld`,
 
 | Symbol | Import |
 |---|---|
-| `Tracker` | `from ariel.utils.tracker import Tracker` |
+| `Tracker` | `from ariel.simulation.tracker import Tracker` |
 | `VideoRecorder` | `from ariel.utils.video_recorder import VideoRecorder` *(also `from ariel.utils.renderers import VideoRecorder`)* |
 | `video_renderer`, `single_frame_renderer`, `tracking_video_renderer` | `from ariel.utils.renderers import video_renderer, single_frame_renderer` |
 | `MorphologicalMeasures` | `from ariel.utils.morphological_descriptor import MorphologicalMeasures` |
 | `generate_save_path` | `from ariel.utils.file_ops import generate_save_path` |
-| `simple_runner`, `thread_safe_runner` | `from ariel.utils.runners import simple_runner, thread_safe_runner` |
+| `simple_runner`, `thread_safe_runner` | `from ariel.simulation.runners import simple_runner, thread_safe_runner` |
 | `RevDE` | `from ariel.utils.optimizers.revde import RevDE` |
 | type aliases (`Dimension`, `Position`, `FloatArray`) | `from ariel.parameters.ariel_types import Dimension, Position, FloatArray` |

@@ -37,7 +37,7 @@ def xy_displacement(
 
 For longer, real-world Parameters blocks see `EASettings` in
 [src/ariel/ec/ea.py](../../src/ariel/ec/ea.py) and `Tracker` in
-[src/ariel/utils/tracker.py](../../src/ariel/utils/tracker.py).
+[src/ariel/simulation/tracker.py](../../src/ariel/simulation/tracker.py).
 
 ## Type hints — strict everywhere
 

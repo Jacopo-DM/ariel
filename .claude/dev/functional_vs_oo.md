@@ -26,7 +26,7 @@ Real examples to imitate:
 - Tree operators — [src/ariel/ec/genotypes/tree/operators.py](../../src/ariel/ec/genotypes/tree/operators.py)
   (`add_node`, `subtree_swap`, `mutate_hoist`): take a `TreeGenome` as the first
   arg, mutate in place or return a new genome. **No operator class.**
-- MuJoCo helpers — [src/ariel/utils/mujoco_ops.py](../../src/ariel/utils/mujoco_ops.py)
+- MuJoCo helpers — [src/ariel/simulation/mujoco_ops.py](../../src/ariel/simulation/mujoco_ops.py)
   (`euler_to_quat_conversion`, `has_self_collision`).
 
 Use a **`@dataclass`** when you need a typed bag of fields with defaults but no

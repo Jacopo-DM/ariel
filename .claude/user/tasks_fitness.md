@@ -44,7 +44,7 @@ a trajectory.
 ## Wiring fitness into an EA
 
 Inside your `evaluate` operation, run the sim, pull the robot's positions (from a
-[Tracker](../../src/ariel/utils/tracker.py), see [utils_io.md](utils_io.md)),
+[Tracker](../../src/ariel/simulation/tracker.py), see [utils_io.md](utils_io.md)),
 score, and assign:
 
 ```python

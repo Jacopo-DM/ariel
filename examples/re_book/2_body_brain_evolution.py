@@ -48,7 +48,7 @@ from ariel.simulation.environments._simple_flat_with_target import (
     SimpleFlatWorldWithTarget,
 )
 from ariel.utils.renderers import video_renderer
-from ariel.utils.tracker import Tracker
+from ariel.simulation.tracker import Tracker
 from ariel.utils.video_recorder import VideoRecorder
 
 # Initialize rich console

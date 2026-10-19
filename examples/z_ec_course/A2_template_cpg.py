@@ -17,7 +17,7 @@ from ariel.simulation.controllers import NaCPG
 from ariel.simulation.controllers.controller import Controller, Tracker
 from ariel.simulation.controllers.na_cpg import create_fully_connected_adjacency
 from ariel.simulation.environments import SimpleFlatWorld
-from ariel.utils.runners import simple_runner
+from ariel.simulation.runners import simple_runner
 
 # --- DATA SETUP ---
 SCRIPT_NAME = __file__.split("/")[-1][:-3]

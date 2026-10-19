@@ -18,7 +18,7 @@ from ariel.simulation.controllers.na_cpg import NaCPG, create_fully_connected_ad
 from ariel.simulation.environments import SimpleFlatWorld as World
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots.gecko import gecko
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider import spider
-from ariel.utils.tracker import Tracker
+from ariel.simulation.tracker import Tracker
 
 
 # --- DATA SETUP --- #

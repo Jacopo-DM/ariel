@@ -49,7 +49,7 @@ from ariel.simulation.controllers.na_cpg import create_fully_connected_adjacency
 from ariel.simulation.controllers.simple_cpg import SimpleCPG
 from ariel.simulation.environments import SimpleFlatWorld
 from ariel.utils.renderers import single_frame_renderer, video_renderer
-from ariel.utils.runners import simple_runner
+from ariel.simulation.runners import simple_runner
 from ariel.utils.video_recorder import VideoRecorder
 
 # Type Checking

@@ -57,7 +57,7 @@ from ariel.simulation.controllers.utils.data_get import get_state_from_data
 from ariel.simulation.environments import (
     SimpleFlatWorld,
 )
-from ariel.utils.runners import simple_runner
+from ariel.simulation.runners import simple_runner
 
 if TYPE_CHECKING:
     from networkx import DiGraph

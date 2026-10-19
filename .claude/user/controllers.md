@@ -38,7 +38,7 @@ from a genome vector — see `map_genotype_to_brain` in
 
 ```python
 from ariel.simulation.controllers.controller import Controller
-from ariel.utils.tracker import Tracker
+from ariel.simulation.tracker import Tracker
 
 tracker = Tracker(mujoco.mjtObj.mjOBJ_BODY, "core", ["xpos"])
 ctrl = Controller(

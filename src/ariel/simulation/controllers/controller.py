@@ -9,7 +9,7 @@ import mujoco as mj
 import numpy as np
 
 # Local libraries
-from ariel.utils.tracker import Tracker
+from ariel.simulation.tracker import Tracker
 
 
 class ControlCallback(Protocol):

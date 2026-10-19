@@ -56,7 +56,7 @@ from ariel.simulation.tasks.targeted_locomotion import (
     fitness_survival_and_locomotion,
 )
 from ariel.utils.renderers import VideoRecorder, video_renderer
-from ariel.utils.tracker import Tracker
+from ariel.simulation.tracker import Tracker
 
 parser = argparse.ArgumentParser(
     description="Evolution simulation with configurable budget"

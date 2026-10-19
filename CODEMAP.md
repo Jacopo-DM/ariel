@@ -25,10 +25,10 @@ Generated from `src/ariel/` on 2026-10-17. Ignore list: see CLAUDE.md.
 | `ariel.simulation.environments` | MuJoCo worlds | `BaseWorld` and terrain worlds (`SimpleFlatWorld`, rugged, tilted, crater, amphitheatre, `OlympicArena`) |
 | `ariel.simulation.controllers` | controllers | `Controller`, `ControlCallback` (protocol), `SimpleCPG`, `NaCPG` (one class, after the paper); the package exports `Controller`, `NaCPG`, `create_fully_connected_adjacency` |
 | `ariel.simulation.tasks` | fitness functions | `targeted_locomotion`, `gait_learning`, `turning_in_place` |
-| `ariel.simulation` | MuJoCo worker base class | `mujoco_worker` |
+| `ariel.simulation` | MuJoCo worker base class and tools that run or watch a simulation | `mujoco_worker`, `tracker` (`Tracker`), `mujoco_ops` (`euler_to_quat_conversion`, `has_self_collision`), `runners` |
 | `ariel.parameters` | shared types and params | `ariel_types`, `ariel_modules`, `mujoco_params`, `base_model` (`FrozenModel`, `MutableModel`: the base classes of every pydantic record); the package exports the types of `ariel_types`, `ArielModulesConfig`, `MujocoConfig`, `ArielConfig` |
 | `ariel.opengl` | OpenGL backend probe and `MUJOCO_GL` setup | exports `configure_from_file`, `ensure_gl_backend`; `gl_backend` (imports neither mujoco nor any ariel package; `GLConfig` and `BackendResult` are the models of the saved result), `gl_manager` (the probe command), `_gl_probe_worker`; import-order sensitive: `ariel/__init__` imports it first, and `renderers` calls `ensure_gl_backend()` before `import mujoco` (a test pins that `import ariel` and `import ariel.opengl` do not load mujoco) |
-| `ariel.utils` | helpers | `Tracker`, renderers, `VideoRecorder`, `file_ops`, `mujoco_ops`, `quaternions` (typed wrappers for the untyped numpy-quaternion), `runners`, `noise_gen`, `morphological_descriptor`, `optimizers.RevDE`; the package exports only `NormMethod` and `PerlinNoise` (being dissolved, goal restructure R2d) |
+| `ariel.utils` | helpers | renderers, `VideoRecorder`, `file_ops`, `quaternions` (typed wrappers for the untyped numpy-quaternion), `noise_gen`, `morphological_descriptor`, `optimizers.RevDE`; the package exports only `NormMethod` and `PerlinNoise` (being dissolved, goal restructure R2d) |
 | `ariel.visualisation` | analysis tooling (dashboards are on branch `feature-dashboard`) | `analysis/` |
 
 ## Import direction

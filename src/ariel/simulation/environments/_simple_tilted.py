@@ -9,7 +9,7 @@ import mujoco
 # Local libraries
 from ariel.parameters import Dimension, Rotation
 from ariel.simulation.environments._base_world import BaseWorld
-from ariel.utils.mujoco_ops import euler_to_quat_conversion
+from ariel.simulation.mujoco_ops import euler_to_quat_conversion
 
 
 @dataclass

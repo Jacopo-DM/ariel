@@ -23,8 +23,8 @@ from ariel.ec.genotypes.nde import NeuralDevelopmentalEncoding
 from ariel.simulation.controllers.controller import Controller
 from ariel.simulation.environments import OlympicArena
 from ariel.utils.renderers import single_frame_renderer, video_renderer
-from ariel.utils.runners import simple_runner
-from ariel.utils.tracker import Tracker
+from ariel.simulation.runners import simple_runner
+from ariel.simulation.tracker import Tracker
 from ariel.utils.video_recorder import VideoRecorder
 
 # Type Checking

@@ -29,8 +29,8 @@ from ariel.utils.renderers import (
     tracking_video_renderer,
     video_renderer,
 )
-from ariel.utils.runners import simple_runner
-from ariel.utils.tracker import Tracker
+from ariel.simulation.runners import simple_runner
+from ariel.simulation.tracker import Tracker
 from ariel.utils.video_recorder import VideoRecorder
 
 # Type Checking

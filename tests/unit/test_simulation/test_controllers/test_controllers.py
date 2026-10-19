@@ -8,7 +8,7 @@ import pytest
 
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider import spider
 from ariel.simulation.controllers.controller import Controller
-from ariel.utils.tracker import Tracker
+from ariel.simulation.tracker import Tracker
 
 DEFAULT_CTRL_STEP = 50
 DEFAULT_SAVE_STEP = 500

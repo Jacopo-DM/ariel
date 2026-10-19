@@ -36,7 +36,7 @@ from ariel.simulation.controllers.simple_cpg import (
     SimpleCPG,
     create_fully_connected_adjacency,
 )
-from ariel.utils.tracker import Tracker
+from ariel.simulation.tracker import Tracker
 
 cpg = SimpleCPG(create_fully_connected_adjacency(model.nu))
 tracker = Tracker(mujoco.mjtObj.mjOBJ_BODY, "core", ["xpos"])

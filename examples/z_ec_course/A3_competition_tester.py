@@ -18,7 +18,7 @@ from ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding import (
 from ariel.simulation.controllers.controller import Controller
 from ariel.simulation.environments import OlympicArena
 from ariel.utils.renderers import video_renderer
-from ariel.utils.tracker import Tracker
+from ariel.simulation.tracker import Tracker
 from ariel.utils.video_recorder import VideoRecorder
 
 # --- DATA SETUP --- #
