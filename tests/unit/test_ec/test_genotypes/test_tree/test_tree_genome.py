@@ -10,6 +10,7 @@ import pytest
 from ariel.ec.genotypes.tree.io import (
     genome_to_networkx_dict,
     load_genome,
+    save_genome,
 )
 from ariel.ec.genotypes.tree.tree_genome import (
     TreeEdge,
@@ -194,3 +195,14 @@ def test_io_helpers_read_what_save_json_wrote(tmp_path: Path) -> None:
     genome.save_json(str(path))
     assert load_genome(str(path)).to_dict() == genome.to_dict()
     assert genome_to_networkx_dict(genome) == genome.to_dict()
+
+
+def test_save_genome_writes_a_file_that_load_genome_reads_back(
+    tmp_path: Path,
+) -> None:
+    """save_genome and load_genome round-trip a genome."""
+    genome = _simple_genome()
+    path = tmp_path / "saved.json"
+    save_genome(genome, str(path))
+    assert path.is_file()
+    assert load_genome(str(path)) == genome

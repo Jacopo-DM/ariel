@@ -33,8 +33,10 @@ def save_genome(genome: TreeGenome, path: str) -> None:
     ----------
     genome : TreeGenome
         The TreeGenome instance to save.
-    genome.save_json(path)
+    path : str
+        Path of the JSON file to write.
     """
+    genome.save_json(path)
 
 
 def genome_to_networkx_dict(genome: TreeGenome) -> dict[str, JsonValue]:
