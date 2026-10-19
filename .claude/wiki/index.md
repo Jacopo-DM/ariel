@@ -13,6 +13,7 @@ Every page of the wiki, by topic folder. `tests/unit/test_wiki_structure.py` fai
 - [[mjcf_actuators]]
 - [[mjcf_compiler]]
 - [[mjcf_defaults_3_8_0]]
+- [[mjcf_defaults_3_16_0]]
 - [[mjcf_geom_joint_defaults]]
 - [[mjcf_option]]
 - [[mjcf_size_statistic]]

@@ -90,3 +90,9 @@
 - Files created: mujoco_parameter_research.md, mjcf_defaults_3_8_0.md, Source - Deep Research Reports on MuJoCo Parameters.md
 - Note: the reports disagree on several defaults and on the solref formulas; the installed engine and the MuJoCo docs were used to decide. Errors are listed in mujoco_parameter_research.md.
 - Model: Claude (subscription)
+
+## [2026-10-19] Measure | MuJoCo 3.16.0 defaults after the upgrade
+- Source: installed mujoco 3.16.0 read through MjSpec, diffed with 3.8.0
+- Files created: mjcf_defaults_3_16_0.md
+- Note: only sleep_tolerance and visual.global_.bvactive changed value; compiler gained authored, savecanonical, savecompiled, conflict.
+- Model: Claude (subscription)
