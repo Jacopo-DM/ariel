@@ -78,6 +78,7 @@ Ruff is pinned to 0.17.* and does not fix by default; `ruff check --fix` is opt-
 ## Things that bite
 
 - `ruff check --fix` is opt-in (config has `fix = false`), and the pre-commit ruff hook does not pass it either. The whitespace and end-of-file hooks do edit files.
+- `ruff format <folder>` with an explicit path ignores the `exclude` in `ruff.toml` and reformats `examples/` and `docs/`; run it on `src tests tools` only. A bare `import ariel.rendering` or `ariel.opengl.gl_manager` run from the repo root probes the OpenGL backends the first time and writes `mujoco_user_config.json` there (git-ignored); preset `MUJOCO_GL=glfw` for ad-hoc imports, or delete the file after.
 - Suppressions use ruff 0.17 syntax, not `# noqa`: `# ruff: ignore[rule-name]  # reason` on the line, `# ruff: file-ignore[rule-name]  # reason` for a file; ruff reports `# noqa` (RUF105). Names, not codes (RUF201).
 - `ruff check --select X --fix` with a narrow `--select` makes `RUF100` flag valid `# noqa` comments for the rules you did not select (it removed three needed `E712` ones). Never select `RUF100` alone; check with the full rule set.
 - mypy only honours `# type: ignore[code]` when it is the first comment on the line (`  # type: ignore[code]  # noqa: X  # known bug`), and `ruff format` can move a trailing comment to another line when it re-wraps. Run mypy after formatting.
