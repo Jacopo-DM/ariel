@@ -14,3 +14,7 @@ Official MuJoCo documentation for the native UI framework (`mjui.h`). Covers the
 - [[mjUI]] — Complete reference for `mjUI`, `mjuiSection`, `mjuiItem`, `mjuiDef`, `mjuiThemeSpacing`, `mjuiThemeColor` structs; all `mjtItem`, `mjtSection` enumerations; capacity constants and key codes
 - [[mjuiState]] — Reference for `mjuiState` global input struct; `mjtButton` and `mjtEvent` enumerations; usage pattern for platform integration
 - [[mujoco_ui_functions]] — All eight `mjui_*` API functions with exact C signatures, parameter tables, and initialization/render-loop examples
+
+## Refresh 2026-10-19
+
+Rechecked 2026-10-19, nothing changed: mjui.h of 3.16.0 matches the pages (only the F-key range is spelled out differently).

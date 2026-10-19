@@ -17,3 +17,7 @@ MuJoCo's programming reference for the Simulation chapter, covering initializati
 - [[mujoco_data_layout]] — Row-major layout, quaternion convention, sparse matrix (CSR) format, buffer aliasing gotchas, internal stack (`mj_markStack`/`mj_stackAllocNum`/`mj_freeStack`), arena memory monitoring
 - [[mujoco_diagnostics]] — Warnings (`data.warning`), timers (`data.timer`, `mjcb_time`), solver diagnostics (`solver_niter`, `solver_fwdinv`), energy monitoring, memory diagnostics (`maxuse_arena`)
 - [[mujoco_simulation_functions]] — **Updated**: added `mj_forwardSkip`/`mj_inverseSkip` with skip levels (`mjSTAGE_NONE/POS/VEL`), multi-threading pattern with per-thread `MjData`, `mj_setConst` for safe runtime model modifications
+
+## Refresh 2026-10-19
+
+Rechecked 2026-10-19, nothing changed: no change found against the 3.16.0 headers and the page.

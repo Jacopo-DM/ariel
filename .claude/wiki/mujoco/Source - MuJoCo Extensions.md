@@ -3,7 +3,7 @@ type: source_summary
 tags: [source]
 source: https://mujoco.readthedocs.io/en/stable/programming/extension.html
 author: Google DeepMind
-date_ingested: 2026-04-13
+date_ingested: 2026-10-19
 ---
 # Source - MuJoCo Extensions
 
@@ -14,3 +14,7 @@ MuJoCo's official documentation page on the two extensibility mechanisms: engine
 - [[mujoco_engine_plugins]] — Full engine plugin system: capabilities, MJCF declaration, configuration, plugin state vs plugin data, actuator act integration, registration (static + dynamic), SDF plugin interface, first-party plugin directory overview
 - [[mjpPlugin]] — C struct definition, `mjtPluginCapabilityBit` enum, all callback signatures (nstate, init, destroy, copy, compute, advance, sdf_*), mjModel/mjData fields for plugin state
 - [[mujoco_resource_providers]] — `mjpResourceProvider` and `mjResource` structs, all callback typedefs (open/read/close/getdir/modified), registration API, complete data-URI provider example with MJCF usage
+
+## Refresh 2026-10-19
+
+Rechecked against MuJoCo 3.16.0 (installed headers and the page fetched 2026-10-19). Updated: mujoco_resource_providers: decoder, encoder and registration functions added.

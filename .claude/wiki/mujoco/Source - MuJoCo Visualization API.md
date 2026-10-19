@@ -3,7 +3,7 @@ type: source_summary
 tags: [source, mujoco, visualization, rendering]
 source: https://mujoco.readthedocs.io/en/stable/programming/visualization.html
 author: Google DeepMind
-date_ingested: 2026-04-13
+date_ingested: 2026-10-19
 ---
 # Source - MuJoCo Visualization API
 
@@ -22,3 +22,7 @@ MuJoCo's official visualization programming page and C header files (`mujoco.h`,
 - [[MjvOption]] — Added `flexgroup`, `skingroup`, `bvh_depth`, `flex_layer`; expanded `mjtVisFlag` list to 31 flags
 - [[MjvScene]] — Added `geomorder`, `camera[2]`, stereo/transform fields, `framewidth`, `framergb`; full attribute table
 - [[mujoco_enumerations]] — Added `mjtPertBit`, `mjtLabel` (17 values), `mjtFrame` (8 values); expanded `mjtRndFlag` to 11 flags with descriptions; updated `mjtVisFlag` to 31 values
+
+## Refresh 2026-10-19
+
+Rechecked against MuJoCo 3.16.0 (installed headers and the page fetched 2026-10-19). Updated: mujoco_enumerations and MjvCamera: 3.16.0 enums and the camera model added.

@@ -140,3 +140,31 @@ data = mujoco.MjData(model)
   mujoco.set_mjcb_control(my_controller)
   ```
 - See [[mujoco_callbacks]] for callback management.
+
+## From: Python bindings page, 2026-10-19 refresh
+
+Source: https://mujoco.readthedocs.io/en/stable/python.html, fetched 2026-10-19 (MuJoCo 3.16.0); the calls below exist in the installed 3.16.0 bindings.
+
+* Virtual file system: `vfs = mujoco.MjVfs()`, then `vfs["model.xml"] = some_xml_string.encode("utf-8")`, `del vfs["name"]`, `"name" in vfs`, and `vfs.close()` when done. `MjModel.from_xml_string`, `MjModel.from_xml_path`, `MjSpec.from_string`, `MjSpec.from_file` and `spec.compile()` take an optional `vfs` argument:
+
+```python
+vfs = mujoco.MjVfs()
+vfs["model.xml"] = some_xml_string.encode("utf-8")
+spec = mujoco.MjSpec.from_file("model.xml", vfs=vfs)
+spec.compile(vfs=vfs)
+vfs.close()
+```
+
+* `from_string()` and `from_file()` can only be called at construction time.
+* `spec.encode(...)` takes the target filename, an optional compiled model, an optional `vfs` and an optional `content_type`; the format follows the extension (`.xml`, `.mjb`, `.txt`, `.mjz`) or the content type.
+* `spec.copy_back(model)` writes values changed in a compiled model back into the spec, so later compiles and saves include them:
+
+```python
+model = spec.compile()
+model.geom('my_geom').size[0] = 2
+spec.copy_back(model)
+print(spec.geom('my_geom').size[0])  # 2.0
+```
+
+* Serialization with assets: `spec.to_zip(file)` and `MjSpec.from_zip(file)`; `file` is a path or a file object.
+* Any element, bodies and frames included, has a `parent` property (for example `site.parent`).

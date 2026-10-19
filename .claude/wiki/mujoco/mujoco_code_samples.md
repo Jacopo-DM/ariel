@@ -197,3 +197,10 @@ The MuJoCo rendering code is identical regardless of which backend is used — o
 - [[MjrContext]] — rendering context
 - [[mujoco_callbacks]] — `mjcb_control` for injecting control in `testspeed`
 - [[mujoco_simulation_functions]] — `mj_step`, `mj_forward`
+
+## From: Code samples page, 2026-10-19 refresh
+
+Source: https://mujoco.readthedocs.io/en/stable/programming/samples.html, fetched 2026-10-19 (MuJoCo 3.16.0).
+
+* `testspeed` has a solver flag `--sleep_tolerance=X` (default 1e-4) next to `--tolerance=X` (default 1e-8).
+* Compiler timings are the `mjtCTimer` fields and are read programmatically with `mjs_getTimer` (see [[mujoco_mjspec_enums]]).

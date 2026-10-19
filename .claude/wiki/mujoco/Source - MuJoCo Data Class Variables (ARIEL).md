@@ -18,3 +18,7 @@ Reference documentation for the MuJoCo `MjData` class variables as used in the A
 - [[MjData_Force_Variables]] — `qfrc_*` and `cfrc_*` force arrays
 - [[MjData_Spatial_Variables]] — `xpos`, `xmat`, `xquat`, `geom_xpos`, `site_xpos`, `cam_xpos`, `xfrc_applied`
 - [[MjData_Sensor_Variables]] — `sensordata`, `mocap_pos`, `mocap_quat`, `energy`, `M`, `bind`
+
+## Refresh 2026-10-19
+
+Rechecked 2026-10-19, nothing changed: the ARIEL docs page is a module index; the MjData pages need no change.

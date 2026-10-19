@@ -134,3 +134,13 @@ typedef enum mjtOrientation_ {
 - `mjtLimited_AUTO` is convenient: if you set `range[2]`, limits are automatically enabled.
 - `mjtInertiaFromGeom_AUTO` (default in practice) means explicit `<inertial>` in the MJCF takes priority; if absent, geom inertias are summed.
 - See [[mjsJoint]], [[mjsGeom]], [[mjsActuator]] for where these enums appear. See [[mujoco_enumerations]] for enums defined in `mjmodel.h`.
+
+## From: MuJoCo 3.16.0 headers
+
+Source: installed MuJoCo 3.16.0 headers (`mujoco/include/mujoco/`), refreshed 2026-10-19. Values are in declaration order.
+
+* `mjtActuator` (`mjspec.h`): `mjACTUATOR_GENERAL = 0`, `MOTOR`, `POSITION`, `VELOCITY`, `INTVELOCITY`, `DAMPER`, `CYLINDER`, `MUSCLE`, `ADHESION`, `PID`, `ORIENTATION`, `DCMOTOR` (the last, a DC motor, is new since the 3.8 ingest).
+* `mjtConflict`: `mjCONFLICT_WARNING = 0`, `MERGE`, `ERROR`.
+* `mjtScaling`: `mjSCALING_SIMILAR = 0`, `GEOMETRY`.
+* `mjtCTimer` (compiler timers): `mjCTIMER_TOTAL = 0`, `ASSETS`, `TEXTURE`, `MESH_LOAD`, `MESH_HULL`, `MESH_POLYGON`, `MESH_INERTIA`, `MESH_BVH`, `MESH_OCTREE`, `mjNCTIMER`.
+* `mjtSize` (`mjtype.h`): `int64_t`, used for buffer sizes.

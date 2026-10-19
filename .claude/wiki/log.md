@@ -96,3 +96,8 @@
 - Files created: mjcf_defaults_3_16_0.md
 - Note: only sleep_tolerance and visual.global_.bvactive changed value; compiler gained authored, savecanonical, savecompiled, conflict.
 - Model: Claude (subscription)
+
+## [2026-10-19] Refresh | the 12 April source pages (W8)
+- Files created: none
+- Files updated: mujoco/mujoco_mjspec_enums.md, mujoco/mujoco_enumerations.md, mujoco/mujoco_resource_providers.md, mujoco/MjSpec.md, mujoco/MjvCamera.md, mujoco/mujoco_code_samples.md, mjx/mjx_performance.md, nevergrad/Nevergrad_Optimizers.md, and the 12 `Source - ...` pages (a Refresh section each; date_ingested bumped on the 7 whose pages changed)
+- Model: Claude (subscription)

@@ -63,3 +63,12 @@ mujoco.mjv_moveCamera(
 ```
 
 See [[MjvOption]], [[MjvScene]], [[mujoco_rendering_pipeline]].
+
+## From: Visualization page, 2026-10-19 refresh
+
+Source: https://mujoco.readthedocs.io/en/stable/programming/visualization.html, fetched 2026-10-19.
+
+* There are two camera types: the abstract `mjvCamera` (stand-alone struct) and the low-level `mjvGLCamera` (aliased `mjrCamera`), embedded in `mjvScene` or computed directly with `mjv_camera2GLCamera`. When an abstract camera is present, it sets the low-level parameters that the renderer uses; the low-level camera can also be set directly.
+* `mjvScene` embeds two `mjvGLCamera`, one per eye. Each has a position, a forward direction (the negative Z axis of the camera frame) and an up direction (the positive Y axis). The frustum stores the average of the left and right edges; the real edges are computed at render time from the viewport aspect ratio, assuming square pixels. The distance between the two positions is the inter-pupillary distance (ipd).
+* For free and tracking cameras the ipd and `fovy` come from `mjModel.vis.global.ipd/fovy`; for cameras defined in the model they come from `mjModel.cam_ipd/fovy`.
+* `mjv_select` calls the engine function `mj_ray` internally.

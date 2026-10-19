@@ -146,3 +146,12 @@ optimizer.parametrization.random_state.seed(12)  # direct seeding
 optimizer = ng.optimizers.CMA(parametrization=..., budget=..., verbosity=1)
 # verbosity=0: silent, 1: basic, 2: verbose
 ```
+
+## From: Optimization page, 2026-10-19 refresh
+
+Source: https://facebookresearch.github.io/nevergrad/optimization.html, fetched 2026-10-19.
+
+* `ng.optimizers.NgIohTuned` equals `ng.optimizers.registry["NgIohTuned"]`; `sorted(ng.optimizers.registry.keys())` lists every optimizer. The page calls `NgIohTuned` a meta-optimizer that adapts to budget, number of workers and parametrization, and a good default.
+* Rules of thumb on the page: `TwoPointsDE` for many cases including very high `num_workers`; `PortfolioDiscreteOnePlusOne` for discrete or mixed settings where high precision is not needed; `OnePlusOne` for continuous parameters with `num_workers < 8`.
+* `optim.tell(candidate, value)` with a candidate that was never asked ("inoculation") is not supported by every optimizer; those raise `TellNotAskedNotSupportedError`.
+* Two ready-made callbacks live in `ng.callbacks`.

@@ -82,3 +82,10 @@ GPU branching penalties affect broadphase collision detection. As a scene adds m
 - [[mjx_overview]] — feature parity table, implementation comparison
 - [[mjx_core_functions]] — `put_model`, `make_data`, `step`
 - [[mjx_warp]] — MJX-Warp graph modes that mitigate these issues
+
+## From: MJX page, 2026-10-19 refresh
+
+Source: https://mujoco.readthedocs.io/en/stable/mjx.html, fetched 2026-10-19 (MuJoCo 3.16.0).
+
+* NumPy arrays in `mjx.Model` and `mjx.Data` are structural fields that control JIT compilation. Changing one forces JAX to recompile the MJX functions. Example: `jnt_limited` is a NumPy array passed by reference from `mjModel` and decides whether joint-limit constraints apply; modifying it recompiles. `jnt_range` is a JAX array, can change at run time, and only applies to the joints that `jnt_limited` marks as limited.
+* Resetting only the finished environments of a batch: `data = data.where(done, reset_data)`, or `jax.tree.map(jax.numpy.where, done, reset_data, data)`.

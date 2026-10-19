@@ -143,3 +143,57 @@ if (!mjp_registerResourceProvider(&resourceProvider)) {
 - Providers are global once registered; there is no per-model scoping.
 - Memory allocated in `open` must be freed in `close` — MuJoCo will not manage it.
 - See [[mujoco_engine_plugins]] for the plugin extension system.
+
+## From: MuJoCo 3.16.0 headers
+
+Source: installed MuJoCo 3.16.0 headers (`mujoco/include/mujoco/`), refreshed 2026-10-19. (`mjplugin.h`)
+
+The provider struct gained optional callbacks:
+
+```c
+typedef struct mjpResourceProvider {
+  const char* prefix;               // prefix for match against a resource name
+  mjfOpenResource open;             // opening callback
+  mjfReadResource read;             // reading callback
+  mjfCloseResource close;           // closing callback
+  mjfMountResource mount;           // mounting callback (optional)
+  mjfUnmountResource unmount;       // unmounting callback (optional)
+  mjfResourceModified modified;     // resource modified callback (optional)
+  mjfWriteResource write;           // writing callback (optional)
+  void* data;                       // opaque data pointer (resource invariant)
+} mjpResourceProvider;
+```
+
+`mjfWriteResource` is `mjtSize (*)(mjResource* resource, const void* buffer, mjtSize nbytes)`; it returns the bytes written, or -1 on error.
+
+Decoders and encoders turn a resource into an `mjSpec` and back:
+
+```c
+typedef mjSpec* (*mjfDecode)(mjResource* resource, const mjVFS* vfs, char* error, int error_sz);
+typedef int (*mjfCanDecode)(const mjResource* resource);
+
+typedef struct mjpDecoder {
+  const char* content_type;
+  const char* extension;
+  mjfCanDecode can_decode;  // quickly check if this decoder can handle the resource
+  mjfDecode decode;         // main decoding function
+} mjpDecoder;
+
+typedef mjtSize (*mjfEncode)(const mjSpec* s, const mjModel* m, const mjVFS* vfs, mjResource* resource);
+
+typedef struct mjpEncoder {
+  const char* content_type;
+  const char* extension;
+  mjfEncode encode;                 // encode an mjSpec and mjModel to an mjResource
+  mjfCloseResource close_resource;  // close/free the resource
+} mjpEncoder;
+```
+
+The caller owns the spec that `decode` returns. `mjtSDFType` (`mjtype.h`): `mjSDFTYPE_SINGLE = 0`, `INTERSECTION`, `MIDSURFACE`, `COLLISION`.
+
+### Registration functions (extension page, 2026-10-19 refresh)
+
+Source: https://mujoco.readthedocs.io/en/stable/programming/extension.html, fetched 2026-10-19.
+
+* `mjp_defaultDecoder(&decoder)` initializes an `mjpDecoder`; `mjp_registerDecoder(&decoder)` registers it. `mjp_defaultEncoder(&encoder)` and `mjp_registerEncoder(&encoder)` do the same for an `mjpEncoder`.
+* `mjp_registerProvider` adds a resource provider to the global table; once registered, all loading paths can use it.

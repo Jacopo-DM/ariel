@@ -13,3 +13,7 @@ Covers optimizer selection by use case (hyperparameter tuning, neural network we
 ## Entity pages created
 
 - [[Nevergrad_ML_Patterns]] — Optimizer recommendations by problem type, synchronous/async ask-tell patterns, budget guidelines, RL-specific advice
+
+## Refresh 2026-10-19
+
+Rechecked 2026-10-19, nothing changed: no change found against the page.

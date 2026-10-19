@@ -3,7 +3,7 @@ type: source_summary
 tags: [source, mujoco, mjspec, model-building]
 source: https://mujoco.readthedocs.io/en/stable/programming/modeledit.html
 author: DeepMind Technologies
-date_ingested: 2026-04-13
+date_ingested: 2026-10-19
 ---
 # Source - MuJoCo Model Editing
 
@@ -21,3 +21,7 @@ Source included content from `mujoco/mjspec.h` and `mujoco/mujoco.h` (local inst
 - [[mjsSensor]] — `mjsSensor` struct fields; common sensor type table
 - [[mujoco_mjspec_enums]] — All `mjspec.h` enums: `mjtGeomInertia`, `mjtMeshInertia`, `mjtLimited`, `mjtOrientation`, `mjtInertiaFromGeom`, etc.
 - [[MjSpec]] — Updated: added Default Classes section, Attachment section, In-Place Recompilation section, `mjSpec`/`mjsCompiler` struct field tables
+
+## Refresh 2026-10-19
+
+Rechecked against MuJoCo 3.16.0 (installed headers and the page fetched 2026-10-19). Updated: mujoco_mjspec_enums: 3.16.0 enums added (mjtActuator with DCMOTOR, mjtConflict, mjtScaling, mjtCTimer, mjtSize).

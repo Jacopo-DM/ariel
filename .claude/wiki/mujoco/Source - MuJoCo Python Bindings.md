@@ -3,7 +3,7 @@ type: source_summary
 tags: [mujoco, python, bindings, google-deepmind]
 source: https://mujoco.readthedocs.io/en/stable/python.html
 title: "MuJoCo Python Bindings"
-date_ingested: 2026-04-24
+date_ingested: 2026-10-19
 ---
 
 # Source - MuJoCo Python Bindings
@@ -38,3 +38,7 @@ Official Python bindings for the MuJoCo physics engine, maintained by Google Dee
 - [[mujoco_viewer]] — interactive passive/blocking viewer
 - [[mujoco_callbacks]] — mjcb_control, mjcb_sensor, and other callbacks
 - [[mujoco_enumerations]] — mjtObj, mjtJoint, mjtGeom, mjtCamera, constants
+
+## Refresh 2026-10-19
+
+Rechecked against MuJoCo 3.16.0 (installed headers and the page fetched 2026-10-19). Updated: MjSpec: MjVfs, encode, copy_back, to_zip and from_zip added.

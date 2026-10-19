@@ -101,3 +101,19 @@ opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = True
 ```
 
 See [[mujoco_named_access_api]], [[mujoco_simulation_functions]], [[MjvOption]].
+
+## From: MuJoCo 3.16.0 headers
+
+Source: installed MuJoCo 3.16.0 headers (`mujoco/include/mujoco/`), refreshed 2026-10-19. Values are in declaration order; the first is 0 unless shown.
+
+* `mjtLabel` (`mjvisualize.h`): `mjLABEL_NONE = 0`, `BODY`, `JOINT`, `GEOM`, `SITE`, `CAMERA`, `LIGHT`, `TENDON`, `ACTUATOR`, `CONSTRAINT`, `FLEX`, `SKIN`, `SELECTION`, `SELPNT`, `CONTACTPOINT`, `CONTACTFORCE`, `ISLAND`, `mjNLABEL`.
+* `mjtFrame`: `mjFRAME_NONE = 0`, `BODY`, `GEOM`, `SITE`, `CAMERA`, `LIGHT`, `CONTACT`, `WORLD`, `mjNFRAME`.
+* `mjtMouse`: `mjMOUSE_NONE = 0`, `ROTATE_V`, `ROTATE_H`, `MOVE_V`, `MOVE_H`, `ZOOM`, `MOVE_V_REL`, `MOVE_H_REL`, `TURN_V`, `TURN_H`.
+* `mjtStereo`: `mjSTEREO_NONE = 0`, `QUADBUFFERED`, `SIDEBYSIDE`.
+* `mjtFramebuffer` (`mjrender.h`): `mjFB_WINDOW = 0`, `mjFB_OFFSCREEN`. `mjtDepthMap`: `mjDEPTH_ZERONEAR = 0`, `mjDEPTH_ZEROFAR = 1`.
+* `mjtLightType` (`mjtype.h`): `mjLIGHT_SPOT = 0`, `DIRECTIONAL`, `POINT`, `IMAGE`. `mjtCamLight`: `mjCAMLIGHT_FIXED = 0`, `TRACK`, `TRACKCOM`, `TARGETBODY`, `TARGETBODYCOM`. `mjtProjection`: `mjPROJ_PERSPECTIVE = 0`, `ORTHOGRAPHIC`.
+* `mjtTexture`: `mjTEXTURE_2D = 0`, `CUBE`, `SKYBOX`. `mjtColorSpace`: `mjCOLORSPACE_AUTO = 0`, `LINEAR`, `SRGB`.
+* `mjtEq`: `mjEQ_CONNECT = 0`, `WELD`, `JOINT`, `TENDON`, `FLEX`, `FLEXVERT`, `FLEXSTRAIN`, `DISTANCE`. `mjtWrap`: `mjWRAP_NONE = 0`, `JOINT`, `PULLEY`, `SITE`, `SPHERE`, `CYLINDER`.
+* `mjtJacobian`: `mjJAC_DENSE = 0`, `SPARSE`, `AUTO`. `mjtLRMode`: `mjLRMODE_NONE = 0`, `MUSCLE`, `MUSCLEUSER`, `ALL`. `mjtFlexSelf`: `mjFLEXSELF_NONE = 0`, `NARROW`, `BVH`, `SAP`, `AUTO`.
+* `mjtSleepPolicy`: `mjSLEEP_AUTO = 0`, `AUTO_NEVER`, `AUTO_ALLOWED`, `NEVER`, `ALLOWED`, `INIT`. `mjtSleepState`: `mjS_STATIC = -1`, `mjS_ASLEEP = 0`, `mjS_AWAKE = 1`.
+* `mjtConstraint`: `mjCNSTR_EQUALITY = 0`, `FRICTION_DOF`, `FRICTION_TENDON`, `LIMIT_JOINT`, `LIMIT_TENDON`, `CONTACT_FRICTIONLESS`, `CONTACT_PYRAMIDAL`, `CONTACT_ELLIPTIC`. `mjtConstraintState`: `mjCNSTRSTATE_SATISFIED = 0`, `QUADRATIC`, `LINEARNEG`, `LINEARPOS`, `CONE`.
