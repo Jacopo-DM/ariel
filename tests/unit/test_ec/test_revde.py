@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from ariel.utils.optimizers.revde import RevDE
+from ariel.ec.optimizers.revde import RevDE
 
 NUM_CHILDREN = 3
 

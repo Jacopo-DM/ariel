@@ -31,6 +31,9 @@ from ariel.ec.genotypes.tree.validation import validate_genome_dict
 BRICK_ID = 2
 CORE_HINGE_NODE_COUNT = 2
 MAX_MODULES = 4
+BRANCH_ID = 1
+KEPT_ID = 2
+SIBLING_ID = 3
 MAX_NODES = MAX_MODULES + 1
 SINGLE_MODULE_MAX_NODES = 2
 CHAIN_DEPTH = 2
@@ -546,3 +549,56 @@ def test_subtree_replacement_of_a_detached_node_adds_nothing() -> None:
     random.seed(0)
     mutate_subtree_replacement(g)
     assert list(g.nodes) == [0]
+
+
+def _brick_with_two_children() -> TreeGenome:
+    return TreeGenome(
+        nodes={
+            0: TreeNode(type="CORE", rotation="DEG_0"),
+            1: TreeNode(type="BRICK", rotation="DEG_0"),
+            2: TreeNode(type="BRICK", rotation="DEG_0"),
+            3: TreeNode(type="BRICK", rotation="DEG_0"),
+        },
+        edges=[
+            TreeEdge(parent=0, child=1, face="FRONT"),
+            TreeEdge(parent=1, child=2, face="FRONT"),
+            TreeEdge(parent=1, child=3, face="LEFT"),
+        ],
+    )
+
+
+def test_replace_node_drops_children_on_faces_the_new_type_lacks(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A hinge only has a FRONT face, so a LEFT child of the node goes."""
+    g = _brick_with_two_children()
+
+    def choose(options: list[object]) -> object:
+        if all(isinstance(o, int) for o in options):
+            return BRANCH_ID  # the node to replace
+        return next(
+            (o for o in options if getattr(o, "name", "") == "HINGE"),
+            options[0],
+        )
+
+    monkeypatch.setattr(random, "choice", choose)
+    mutate_replace_node(g)
+    assert g.nodes[BRANCH_ID].type == "HINGE"
+    assert SIBLING_ID not in g.nodes
+    assert KEPT_ID in g.nodes
+
+
+def test_hoist_removes_the_other_children_of_the_parent(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Hoisting child 2 removes its sibling 3 together with the parent."""
+    g = _brick_with_two_children()
+
+    def choose(options: list[int]) -> int:
+        return options[0] if len(options) == 1 else KEPT_ID
+
+    monkeypatch.setattr(random, "choice", choose)
+    mutate_hoist(g)
+    assert SIBLING_ID not in g.nodes
+    assert BRANCH_ID not in g.nodes
+    assert KEPT_ID in g.nodes

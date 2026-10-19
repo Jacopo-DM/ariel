@@ -4,6 +4,8 @@
 import mujoco
 import numpy as np
 
+from ariel.body_phenotypes import quaternions as qnp
+
 # Local libraries
 from ariel.body_phenotypes.robogen_lite.config import (
     IDX_OF_CORE,
@@ -11,7 +13,6 @@ from ariel.body_phenotypes.robogen_lite.config import (
     ModuleType,
 )
 from ariel.body_phenotypes.robogen_lite.modules.module import Module
-from ariel.utils import quaternions as qnp
 
 # Type Aliases
 type WeightType = float

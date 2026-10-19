@@ -14,7 +14,7 @@ from ariel.simulation.environments.heightmap_functions import (
     crater_heightmap,
     rugged_heightmap,
 )
-from ariel.utils import NormMethod
+from ariel.simulation.environments.noise_gen import NormMethod
 
 
 @dataclass

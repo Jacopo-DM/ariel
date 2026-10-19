@@ -9,10 +9,11 @@ Todo:
 import mujoco
 import numpy as np
 
+from ariel.body_phenotypes import quaternions as qnp
+
 # Local libraries
 from ariel.body_phenotypes.robogen_lite.config import ModuleFaces, ModuleType
 from ariel.body_phenotypes.robogen_lite.modules.module import Module
-from ariel.utils import quaternions as qnp
 
 # Global constants
 SHRINK = 0.99

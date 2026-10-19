@@ -67,8 +67,8 @@ Full exported list: `AmphitheatreTerrainWorld`, `BaseWorld`, `CompoundWorld`,
 | `Tracker` | `from ariel.simulation.tracker import Tracker` |
 | `VideoRecorder` | `from ariel.rendering import VideoRecorder` *(also `from ariel.rendering import VideoRecorder`)* |
 | `video_renderer`, `single_frame_renderer`, `tracking_video_renderer` | `from ariel.rendering import video_renderer, single_frame_renderer` |
-| `MorphologicalMeasures` | `from ariel.utils.morphological_descriptor import MorphologicalMeasures` |
+| `MorphologicalMeasures` | `from ariel.body_phenotypes.morphological_descriptor import MorphologicalMeasures` |
 | `generate_save_path` | `from ariel.rendering import generate_save_path` |
 | `simple_runner`, `thread_safe_runner` | `from ariel.simulation.runners import simple_runner, thread_safe_runner` |
-| `RevDE` | `from ariel.utils.optimizers.revde import RevDE` |
+| `RevDE` | `from ariel.ec.optimizers.revde import RevDE` |
 | type aliases (`Dimension`, `Position`, `FloatArray`) | `from ariel.parameters.ariel_types import Dimension, Position, FloatArray` |

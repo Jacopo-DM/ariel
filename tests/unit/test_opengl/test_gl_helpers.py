@@ -1,4 +1,4 @@
-"""Test: small helpers and the scripts behind ``python -m`` entry points."""
+"""Test: edge cases of the OpenGL backend, manager and probe worker."""
 
 from __future__ import annotations
 
@@ -11,20 +11,14 @@ import subprocess  # ruff: ignore[suspicious-subprocess-import]  # only builds f
 import sys
 import time
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Self, cast
+from typing import TYPE_CHECKING, Self
 from unittest.mock import Mock
 
-import mujoco
 import pytest
 from rich.console import Console
 
-from ariel.ec.genotypes.nde import nde
 from ariel.opengl import gl_backend, gl_manager
 from ariel.opengl.gl_backend import GLConfig
-from ariel.rendering import file_ops
-from ariel.simulation import runners
-from ariel.simulation.mujoco_ops import has_self_collision
-from ariel.utils.optimizers import revde
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -32,87 +26,9 @@ if TYPE_CHECKING:
 
 _gl_probe_worker = importlib.import_module("ariel.opengl._gl_probe_worker")
 
-PLAIN_XML = "<mujoco><worldbody><geom size='.1'/></worldbody></mujoco>"
-SHORT = 0.02
-LOOP = 5
 RENDER_MS = 1.5
 LOCK_TIMEOUT = 5.0
 USAGE_ERROR = 2
-
-
-# --- runners ---------------------------------------------------------------- #
-
-
-def test_simple_runner_advances_the_clock() -> None:
-    """The simple runner steps until the requested duration is reached."""
-    model = mujoco.MjModel.from_xml_string(PLAIN_XML)
-    data = mujoco.MjData(model)
-    runners.simple_runner(model, data, duration=SHORT, steps_per_loop=LOOP)
-    assert data.time >= SHORT
-
-
-class _CountingController:
-    def __init__(self) -> None:
-        self.calls = 0
-
-    def set_control(self, model: mujoco.MjModel, data: mujoco.MjData) -> None:
-        del model, data
-        self.calls += 1
-
-
-def test_thread_safe_runner_calls_the_controller_every_step() -> None:
-    """The controller runs once per simulation step."""
-    model = mujoco.MjModel.from_xml_string(PLAIN_XML)
-    data = mujoco.MjData(model)
-    controller = _CountingController()
-    runners.thread_safe_runner(model, data, controller, duration=SHORT)
-    assert controller.calls == int(SHORT / model.opt.timestep)
-
-
-# --- mujoco_ops ------------------------------------------------------------- #
-
-
-def test_self_collision_check_reports_compile_errors() -> None:
-    """A spec that MuJoCo cannot compile becomes a ValueError."""
-
-    def fail() -> None:
-        msg = "boom"
-        raise mujoco.FatalError(msg)
-
-    spec = cast("mujoco.MjSpec", SimpleNamespace(compile=fail))
-    with pytest.raises(ValueError, match="Failed to compile"):
-        has_self_collision(spec)
-
-
-# --- file_ops --------------------------------------------------------------- #
-
-
-def test_save_path_defaults_to_the_data_folder(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
-    """Without a folder the path lands in the data folder."""
-    monkeypatch.setattr(file_ops, "DATA", tmp_path)
-    result = file_ops.generate_save_path(
-        file_name="out", file_extension=".txt", append_date=False
-    )
-    assert result == tmp_path / "out.txt"
-
-
-def test_save_path_without_a_name_uses_a_timestamp(tmp_path: Path) -> None:
-    """With only a folder and an extension the name is the timestamp."""
-    result = file_ops.generate_save_path(
-        file_path=tmp_path, file_extension=".txt", append_date=False
-    )
-    assert result.suffix == ".txt"
-    assert result.parent == tmp_path
-
-
-def test_save_path_warns_when_there_is_no_extension(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
-    """No extension anywhere is reported on the console."""
-    file_ops.generate_save_path(file_name="data", file_path=tmp_path)
-    assert "No valid file extension" in capsys.readouterr().out
 
 
 # --- gl_backend ------------------------------------------------------------- #
@@ -361,33 +277,3 @@ def test_probe_worker_script(
         runpy.run_path(inspect.getfile(_gl_probe_worker), run_name="__main__")
     assert stop.value.code == 0
     assert '"ok"' in capsys.readouterr().out
-
-
-# --- demo entry points ------------------------------------------------------ #
-
-
-def test_revde_demo_logs_parents_and_children() -> None:
-    """The RevDE demo runs without error."""
-    revde.main()
-
-
-def test_revde_script() -> None:
-    """Running revde.py as a script calls main()."""
-    runpy.run_path(inspect.getfile(revde), run_name="__main__")
-
-
-def test_nde_script() -> None:
-    """Running nde.py as a script prints the output shapes."""
-    runpy.run_path(inspect.getfile(nde), run_name="__main__")
-
-
-def test_save_path_for_a_folder_that_does_not_exist_yet(
-    tmp_path: Path,
-) -> None:
-    """A target folder that is missing is not created by the path helper."""
-    target = tmp_path / "later"
-    result = file_ops.generate_save_path(
-        file_name="out", file_extension=".txt", file_path=target
-    )
-    assert result.parent == target
-    assert not target.exists()

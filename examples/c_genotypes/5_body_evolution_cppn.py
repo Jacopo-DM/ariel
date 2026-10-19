@@ -32,7 +32,7 @@ from ariel.body_phenotypes.robogen_lite.config import (
     NUM_OF_TYPES_OF_MODULES,
 )
 from ariel.ec import EA, EAOperation, EASettings, Individual, Population
-from ariel.utils.morphological_descriptor import MorphologicalMeasures
+from ariel.body_phenotypes.morphological_descriptor import MorphologicalMeasures
 from ariel.body_phenotypes.robogen_lite.constructor import construct_mjspec_from_graph
 from ariel.simulation.environments._simple_flat_with_target import (
     SimpleFlatWorldWithTarget,

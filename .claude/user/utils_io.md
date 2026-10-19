@@ -45,7 +45,7 @@ video_renderer(model, data, duration=30, video_recorder=rec)
 
 ## Morphological measures
 
-`from ariel.utils.morphological_descriptor import MorphologicalMeasures` —
+`from ariel.body_phenotypes.morphological_descriptor import MorphologicalMeasures` —
 descriptors of a body (proportions, branching, etc.)
 ([morphological_descriptor.py](../../src/ariel/utils/morphological_descriptor.py)).
 Used in [examples/c_genotypes/1_body_evolution_tree.py](../../examples/c_genotypes/1_body_evolution_tree.py).
@@ -57,7 +57,7 @@ Used in [examples/c_genotypes/1_body_evolution_tree.py](../../examples/c_genotyp
 | `from ariel.rendering import generate_save_path` | build timestamped output paths |
 | `from ariel.simulation.mujoco_ops import euler_to_quat_conversion, has_self_collision` | geometry/collision helpers |
 | `from ariel.simulation.runners import simple_runner, thread_safe_runner` | drive a sim loop |
-| `from ariel.utils.optimizers.revde import RevDE` | reversible differential evolution operator |
+| `from ariel.ec.optimizers.revde import RevDE` | reversible differential evolution operator |
 
 ## Reading the results DB
 

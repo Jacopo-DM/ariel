@@ -39,7 +39,7 @@ Ruff is pinned to 0.17.* and does not fix by default; `ruff check --fix` is opt-
 
 ## Code rules
 
-- Package `ariel` in `src/ariel/`; entry points are the modules and `examples/`. Imports point down: `ec` → `simulation`, `body_phenotypes`, `utils` → `parameters`; `simulation` may import `simulators` (back-end settings generators), which imports `parameters` only; `parameters` imports no other ariel package. Nothing in `src/` imports from `examples`.
+- Package `ariel` in `src/ariel/`; entry points are the modules and `examples/`. Imports point down: `ec` → `simulation`, `body_phenotypes`, `rendering` → `opengl`; `simulation` may import `simulators` (back-end settings generators); `body_phenotypes`, `simulation`, `simulators` and `ec` → `parameters`; `opengl` and `parameters` import no other ariel package. Nothing in `src/` imports from `examples`.
 - Reach another module only through its package `__init__.py` exports.
 - No compatibility shims. No abstraction before two real call sites. Clear names over clever one-liners. No options nobody asked for.
 - House style (strict ruff `select = ["ALL"]`, 80 columns, NumPy docstrings, strict mypy, 100% coverage target) is in `.claude/dev/`; the config files win over those docs.

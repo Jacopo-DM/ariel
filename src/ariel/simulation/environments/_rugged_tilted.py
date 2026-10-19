@@ -11,7 +11,7 @@ from ariel.simulation.environments.heightmap_functions import (
     rugged_heightmap,
     smooth_edges_heightmap,
 )
-from ariel.utils import NormMethod
+from ariel.simulation.environments.noise_gen import NormMethod
 
 
 @dataclass

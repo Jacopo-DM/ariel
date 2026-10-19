@@ -62,7 +62,7 @@ from ariel.ec.genotypes.tree.validation import validate_genome_dict
 from ariel.simulation.environments._simple_flat_with_target import (
     SimpleFlatWorldWithTarget,
 )
-from ariel.utils.morphological_descriptor import MorphologicalMeasures
+from ariel.body_phenotypes.morphological_descriptor import MorphologicalMeasures
 
 # Initialize rich console
 install()

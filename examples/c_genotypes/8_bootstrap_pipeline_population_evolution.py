@@ -59,7 +59,7 @@ from ariel.ec.genotypes.tree.validation import validate_genome_dict
 from ariel.simulation.controllers.controller import Controller, Tracker
 from ariel.simulation.controllers.utils.data_get import get_state_from_data
 from ariel.simulation.environments import SimpleFlatWorld
-from ariel.utils.morphological_descriptor import MorphologicalMeasures
+from ariel.body_phenotypes.morphological_descriptor import MorphologicalMeasures
 from ariel.simulation.runners import thread_safe_runner
 
 install()

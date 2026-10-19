@@ -7,7 +7,7 @@ import inspect
 import networkx as nx
 import pytest
 
-from ariel.utils.morphological_descriptor import MorphologicalMeasures
+from ariel.body_phenotypes.morphological_descriptor import MorphologicalMeasures
 
 CROSS_ARM = 2
 THREE_MODULES = 3

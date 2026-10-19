@@ -10,7 +10,7 @@ from numpy.typing import NDArray
 
 # Local libraries
 from ariel.simulation.environments import BaseWorld
-from ariel.utils import PerlinNoise
+from ariel.simulation.environments.noise_gen import PerlinNoise
 
 USE_DEGREES = False
 TERRAIN_COLOR = [0.460, 0.362, 0.216, 1.0]
