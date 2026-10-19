@@ -1,7 +1,7 @@
 """
 Probe one MuJoCo OpenGL backend in a throw-away process.
 
-Run as ``python -m ariel.utils._gl_probe_worker <backend>``. A broken backend
+Run as ``python -m ariel.opengl._gl_probe_worker <backend>``. A broken backend
 can crash the whole process (for example a failing ``glfwCreateWindow``), so
 the manager starts one worker per backend. The worker imports ``mujoco`` only
 and prints a single JSON line: ``{"ok": true, "render_ms": 3.2}`` or

@@ -7,7 +7,7 @@ Todo:
 """
 # ruff: file-ignore[module-import-not-at-top-of-file] (the OpenGL backend must be chosen before importing mujoco)
 
-from ariel.utils.gl_backend import ensure_gl_backend
+from ariel.opengl import ensure_gl_backend
 
 # MuJoCo reads MUJOCO_GL when it is imported, so decide the backend first.
 ensure_gl_backend()

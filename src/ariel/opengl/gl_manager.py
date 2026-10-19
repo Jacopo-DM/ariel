@@ -1,7 +1,7 @@
 """
 Find out which MuJoCo OpenGL backends work and save the answer.
 
-Run ``python -m ariel.utils.gl_manager`` to (re)create
+Run ``python -m ariel.opengl.gl_manager`` to (re)create
 ``mujoco_user_config.json`` in the current folder. Each backend is probed in
 its own subprocess, so a backend that crashes is recorded as failed and the
 manager carries on.
@@ -26,7 +26,7 @@ from rich.progress import (
     TextColumn,
 )
 
-from ariel.utils.gl_backend import (
+from ariel.opengl.gl_backend import (
     BACKEND_ORDER,
     CONFIG_NAME,
     CONFIG_VERSION,
@@ -57,7 +57,7 @@ def default_command(backend: str) -> list[str]:
     list[str]
         The worker command line.
     """
-    return [sys.executable, "-m", "ariel.utils._gl_probe_worker", backend]
+    return [sys.executable, "-m", "ariel.opengl._gl_probe_worker", backend]
 
 
 def _parse_worker_output(stdout: str) -> BackendResult:

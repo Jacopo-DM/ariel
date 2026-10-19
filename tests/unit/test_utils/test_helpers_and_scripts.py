@@ -19,13 +19,12 @@ import pytest
 from rich.console import Console
 
 from ariel.ec.genotypes.nde import nde
+from ariel.opengl import gl_backend, gl_manager
+from ariel.opengl.gl_backend import GLConfig
 from ariel.utils import (
     file_ops,
-    gl_backend,
-    gl_manager,
     runners,
 )
-from ariel.utils.gl_backend import GLConfig
 from ariel.utils.mujoco_ops import has_self_collision
 from ariel.utils.optimizers import revde
 
@@ -33,7 +32,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable
     from pathlib import Path
 
-_gl_probe_worker = importlib.import_module("ariel.utils._gl_probe_worker")
+_gl_probe_worker = importlib.import_module("ariel.opengl._gl_probe_worker")
 
 PLAIN_XML = "<mujoco><worldbody><geom size='.1'/></worldbody></mujoco>"
 SHORT = 0.02

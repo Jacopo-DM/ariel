@@ -12,8 +12,8 @@ from pathlib import Path
 import pytest
 from rich.console import Console
 
-from ariel.utils import gl_backend
-from ariel.utils.gl_backend import CONFIG_NAME, BackendName, GLConfig
+from ariel.opengl import gl_backend
+from ariel.opengl.gl_backend import CONFIG_NAME, BackendName, GLConfig
 
 
 def _write(folder: Path, content: object) -> None:
@@ -293,8 +293,8 @@ _PROCESS_SCRIPT = """
 import io, json, sys, time
 from pathlib import Path
 from rich.console import Console
-from ariel.utils import gl_backend
-from ariel.utils.gl_backend import GLConfig
+from ariel.opengl import gl_backend
+from ariel.opengl.gl_backend import GLConfig
 
 folder = Path(sys.argv[1])
 def fake(path):

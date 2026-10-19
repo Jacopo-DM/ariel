@@ -83,7 +83,7 @@ uv run examples/re_book/1_brain_evolution.py
 ARIEL renders with MuJoCo, which needs an OpenGL backend (`glfw`, `egl` or `osmesa`). The first time you import `ariel.utils.renderers` in a folder, ARIEL tests which backends work on your machine (a few seconds, one-off) and saves the answer in `mujoco_user_config.json` in the current folder. Later `import ariel` calls read that file and set `MUJOCO_GL` before MuJoCo is imported, so a missing display or library does not crash your run.
 
 - A `MUJOCO_GL` you set yourself always wins.
-- To test again (new driver, new machine): `uv run python -m ariel.utils.gl_manager`.
+- To test again (new driver, new machine): `uv run python -m ariel.opengl.gl_manager`.
 - If your script imports `mujoco` before `ariel`, the choice applies from the next run.
 - The interactive viewer (`mujoco.viewer`) always uses GLFW and needs a display; `viewer_available` in the file tells you whether one works.
 - Linux is tested. On macOS and Windows only `glfw` is tested for, and this has not been tried there.

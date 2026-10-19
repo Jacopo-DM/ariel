@@ -18,7 +18,7 @@ from rich.logging import RichHandler
 from rich.traceback import install
 
 # Local libraries
-from ariel.utils.gl_backend import configure_from_file
+from ariel.opengl import configure_from_file
 
 # --- OPENGL BACKEND --- #
 # MuJoCo reads MUJOCO_GL when it is imported, so this must run before that.

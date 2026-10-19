@@ -9,8 +9,8 @@ from pathlib import Path
 import pytest
 from rich.console import Console
 
-from ariel.utils import gl_manager
-from ariel.utils.gl_backend import (
+from ariel.opengl import gl_manager
+from ariel.opengl.gl_backend import (
     CONFIG_NAME,
     BackendResult,
     platform_backends,
