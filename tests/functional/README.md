@@ -60,7 +60,7 @@ row, a row names a notebook that does not exist, or a notebook has no row.
 | `ec/genotypes` | `nde`, `tree_genome` |
 | `ec/optimizers` | none yet |
 | `opengl` | `opengl_and_video` |
-| `parameters` | none yet |
+| `parameters` | `parameters` |
 | `rendering` | `ariel_modules`, `sim_environments`, `opengl_and_video`, `prebuilt_robots` |
 | `simulation` | `speed_tests` |
 | `simulation/controllers` | `cpg` |
