@@ -12,7 +12,7 @@ from ariel.parameters import (
     ND_FLOAT_PRECISION,
     FloatArray,
 )
-from ariel.utils.noise_gen import NormMethod, PerlinNoise
+from ariel.utils import NormMethod, PerlinNoise
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
