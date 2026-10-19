@@ -59,9 +59,9 @@ row, a row names a notebook that does not exist, or a notebook has no row.
 | `ec/generators` | `ec_engine` |
 | `ec/genotypes` | `nde`, `tree_genome` |
 | `ec/optimizers` | none yet |
-| `opengl` | none yet |
+| `opengl` | `opengl_and_video` |
 | `parameters` | none yet |
-| `rendering` | `ariel_modules`, `sim_environments` |
+| `rendering` | `ariel_modules`, `sim_environments`, `opengl_and_video`, `prebuilt_robots` |
 | `simulation` | `speed_tests` |
 | `simulation/controllers` | `cpg` |
 | `simulation/environments` | `sim_environments`, `utils` |
