@@ -11,7 +11,9 @@ Notes
     * Engine defaults are read from the installed engine, never typed in, so
       a MuJoCo upgrade shows up as a changed default.
     * Left out: ``compiler.eulerseq`` (a character vector, not a number or
-      text) and ``stat`` (computed by the compiler, not set).
+      text), ``compiler.authored`` (a bit mask the XML parser sets to record
+      which attributes the file wrote) and ``stat`` (computed by the
+      compiler, not set).
 """
 
 # Standard library
@@ -54,7 +56,7 @@ GEOM_CONTACT_FIELDS = (
     "priority",
 )
 ALIASES = frozenset({"global"})  # visual.global is the same object as global_
-SKIPPED = frozenset({"eulerseq"})
+SKIPPED = frozenset({"eulerseq", "authored"})
 DAMPING_RATIO = 1.0  # critical damping, the MuJoCo default for solref
 OFFSCREEN_HEIGHT = 960  # ARIEL's offscreen render size (old MujocoConfig)
 OFFSCREEN_WIDTH = 1280
@@ -153,8 +155,13 @@ def read_object(
     return found
 
 
-def engine_defaults() -> dict[str, Value]:
-    """Read the defaults of the installed engine.
+def read_spec(spec: mujoco.MjSpec) -> dict[str, Value]:
+    """Read every held setting from a spec.
+
+    Parameters
+    ----------
+    spec : mujoco.MjSpec
+        A fresh spec (the engine defaults) or a loaded one.
 
     Returns
     -------
@@ -162,7 +169,6 @@ def engine_defaults() -> dict[str, Value]:
         Setting path to plain value, in section order. Arrays are tuples of
         floats and engine enums are integers.
     """
-    spec = mujoco.MjSpec()
     return (
         read_object(spec.option, "option")
         | read_object(spec.compiler, "compiler")
@@ -170,6 +176,17 @@ def engine_defaults() -> dict[str, Value]:
         | read_object(spec.visual, "visual")
         | read_object(spec.default.geom, "default.geom", GEOM_CONTACT_FIELDS)
     )
+
+
+def engine_defaults() -> dict[str, Value]:
+    """Read the defaults of the installed engine.
+
+    Returns
+    -------
+    dict[str, Value]
+        Setting path to plain value, see ``read_spec``.
+    """
+    return read_spec(mujoco.MjSpec())
 
 
 def settings(seeds: Seeds) -> list[Setting]:
