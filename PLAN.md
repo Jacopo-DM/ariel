@@ -78,6 +78,16 @@ Tier 3 (listed, not executed): `na_cpg.py` (527) and `simple_cpg.py` (418): one 
 
 Not covered by tests today: the order of the `MUJOCO_GL` imports (checked by hand), `john_set.py` before R3 (its test only calls the functions).
 
+### Last task: gl-autodetect check on the Lenovo (Linux)
+
+Added 2026-10-19 at the user's request; it comes after all the other goals (restructure, physics-bugs, cppn-working, pyright-zero and the `hardware` lint). The user runs these steps on the Lenovo (Linux), in order, from the repo root:
+1. `git pull --ff-only` (the Lenovo needs the commits of `main`; push to `fork` first if they are not there yet, which waits for the user's say-so).
+2. `uv sync --all-groups`
+3. `uv run --no-sync python -m ariel.utils.gl_manager` (probes the three OpenGL backends and writes `mujoco_user_config.json` in the current folder).
+4. `cat mujoco_user_config.json`
+5. `uv run --no-sync python -c "import ariel, os; print(os.environ.get('MUJOCO_GL'))"` (prints the backend that `ariel` chose).
+Done when the user has pasted the output of steps 3 to 5; record it in Known problems and delete the gl-autodetect line there (the result: which backend works, or that all fail). macOS and Windows stay untested and stay listed.
+
 ### Goal physics-wiki: tasks (approved; all done)
 
 W1-W4 are done (see DESIGN.md Results); the wiki structure test now pins the layout.
@@ -116,7 +126,7 @@ Risk across Tier 2: medium (fetched content is summarised by a model; I check th
 The docs build (`uv run sphinx-build -b html docs docs/_build`, CI: `.github/workflows/sphinx.yml`; `nox -s docs` for live reload) was not run locally. The Sphinx workflow passed on the fork on 2026-10-17.
 
 Other problems:
-- gl-autodetect was only run on a machine where all three OpenGL backends fail (no display, no libEGL, no OSMesa). A run on a machine where a backend works, and any run on macOS or Windows, is still missing; `python -m ariel.utils.gl_manager` on such a machine would show it. The 7 examples that create a `mujoco.Renderer` after importing `mujoco` themselves keep MuJoCo's default backend.
+- gl-autodetect (a check on the Lenovo is the last task in Tasks) was only run on a machine where all three OpenGL backends fail (no display, no libEGL, no OSMesa). A run on a machine where a backend works, and any run on macOS or Windows, is still missing; `python -m ariel.utils.gl_manager` on such a machine would show it. The 7 examples that create a `mujoco.Renderer` after importing `mujoco` themselves keep MuJoCo's default backend.
 - `feature-dashboard` (rebuilt 2026-10-18 as `main` plus the five dashboard files and `visualisation/__init__.py` from the old branch, one commit, on `fork`) has none of the dependencies the dashboards need: `panel`, `plotly`, `nicegui`, `kaleido`, `pyvista` (and `pandas`, `json5`, which no `pyproject.toml` ever declared) are missing from its `pyproject.toml`, and the files were never linted or type-checked under the current policy, so `ruff` and `mypy` fail on them there. Adding the dependencies needs approval by name.
 - `uv run pydoclint src` reports 166 findings (mostly DOC111/DOC301: type hints in docstrings, `__init__` docstrings). Its pre-commit hook was left out on purpose (user's choice, T17); `[tool.pydoclint]` in `pyproject.toml` is kept.
 - `.typings/` still holds the mujoco stubs generated for 3.8.0 (git-ignored, used by pyright only); they were not regenerated after the 3.16.0 upgrade (how they were generated is not recorded).
