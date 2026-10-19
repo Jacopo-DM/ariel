@@ -196,6 +196,20 @@ def test_hi_prob_set_types_creates_type_dict() -> None:
     assert len(decoder.type_dict) == NUM_MODULES
 
 
+def test_hi_prob_none_module_loses_all_its_connections() -> None:
+    """A module whose best type is NONE can be neither parent nor child."""
+    none_module = 1
+    decoder = HighProbabilityDecoder(num_modules=NUM_MODULES)
+    decoder.conn_p_space = _conn_space()
+    decoder.rot_p_space = _rot_space()
+    decoder.type_p_space = _type_space()
+    decoder.type_p_space[none_module, ModuleType.NONE.value] = 2.0
+    decoder.set_module_types_and_rotations()
+    assert decoder.type_dict[none_module] == ModuleType.NONE
+    assert not decoder.conn_p_space[none_module].any()
+    assert not decoder.conn_p_space[:, none_module].any()
+
+
 def test_hi_prob_set_types_creates_rot_dict() -> None:
     """set_module_types_and_rotations builds rot_dict for all modules."""
     decoder = HighProbabilityDecoder(num_modules=NUM_MODULES)
