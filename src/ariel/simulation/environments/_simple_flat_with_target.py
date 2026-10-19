@@ -6,9 +6,14 @@ from dataclasses import dataclass  # ruff: ignore[banned-api]  # behaviour first
 # Third-party libraries
 import mujoco
 
-# Local libraries
 from ariel.parameters import Dimension
 from ariel.simulation.environments._base_world import BaseWorld
+
+# Local libraries
+from ariel.simulation.environments.floor_colors import (
+    FLOOR_DARK,
+    FLOOR_LIGHT,
+)
 
 
 @dataclass
@@ -51,8 +56,8 @@ class SimpleFlatWorldWithTarget(BaseWorld):
             name=self._floor_name,
             type=mujoco.mjtTexture.mjTEXTURE_2D,
             builtin=mujoco.mjtBuiltin.mjBUILTIN_CHECKER,
-            rgb1=[0.1, 0.2, 0.3],
-            rgb2=[0.2, 0.3, 0.4],
+            rgb1=list(FLOOR_DARK),
+            rgb2=list(FLOOR_LIGHT),
             width=600,  # pixels
             height=600,  # pixels
         )

@@ -17,7 +17,6 @@ from ariel.simulation.environments import (
     CompoundWorld,
     OlympicArena,
     SimpleFlatWorld,
-    SimpleTiltedWorld,
     compile_terrains,
     heightmap_functions,
     olympic_arena,
@@ -200,12 +199,6 @@ def test_flat_world_with_target_compiles() -> None:
     model = world.spec.compile()
     assert model.nbody > 1
     del world, model
-
-
-def test_tilted_world_without_checker_floor_is_a_known_bug() -> None:
-    """Known bug (PLAN.md): _terrain_color is never set on the tilted world."""
-    with pytest.raises(AttributeError, match="_terrain_color"):
-        SimpleTiltedWorld(checker_floor=False, load_precompiled=False)
 
 
 def test_compound_world_takes_every_override() -> None:

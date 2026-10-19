@@ -8,12 +8,18 @@ import mujoco
 import numpy as np
 from numpy.typing import NDArray
 
-# Local libraries
 from ariel.simulation.environments import BaseWorld
+
+# Local libraries
+from ariel.simulation.environments.floor_colors import (
+    FLOOR_DARK,
+    FLOOR_LIGHT,
+    FLOOR_RGBA,
+)
 from ariel.simulation.environments.noise_gen import PerlinNoise
 
 USE_DEGREES = False
-TERRAIN_COLOR = [0.460, 0.362, 0.216, 1.0]
+TERRAIN_COLOR = list(FLOOR_RGBA)
 
 # Global functions
 # Warning Control
@@ -193,8 +199,8 @@ class OlympicArena(BaseWorld):
             name=grid_name,
             type=mujoco.mjtTexture.mjTEXTURE_2D,
             builtin=mujoco.mjtBuiltin.mjBUILTIN_CHECKER,
-            rgb1=[0.1, 0.2, 0.3],
-            rgb2=[0.2, 0.3, 0.4],
+            rgb1=list(FLOOR_DARK),
+            rgb2=list(FLOOR_LIGHT),
             width=600,
             height=600,
         )

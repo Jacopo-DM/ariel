@@ -17,13 +17,19 @@ Todo
 # Third-party libraries
 import mujoco
 
-# Local libraries
 from ariel.parameters import (
     Dimension,
     FloatArray,
     Rotation,
 )
 from ariel.simulation.environments._base_world import BaseWorld
+
+# Local libraries
+from ariel.simulation.environments.floor_colors import (
+    FLOOR_DARK,
+    FLOOR_LIGHT,
+    FLOOR_RGBA,
+)
 from ariel.simulation.environments.heightmap_functions import flat_heightmap
 from ariel.simulation.mujoco_ops import euler_to_quat_conversion
 
@@ -42,7 +48,7 @@ class CompoundWorld(BaseWorld):
     dims: tuple[int, int] = (100, 100)
     floor_heightmap: FloatArray | None = None
 
-    _terrain_color = (0.460, 0.362, 0.216, 1.0)  # RGBA
+    _terrain_color = FLOOR_RGBA  # RGBA
 
     def __init__(  # ruff: ignore[complex-structure, too-many-arguments]
         self,
@@ -180,8 +186,8 @@ class CompoundWorld(BaseWorld):
             name=self._floor_name,
             type=mujoco.mjtTexture.mjTEXTURE_2D,
             builtin=mujoco.mjtBuiltin.mjBUILTIN_CHECKER,
-            rgb1=[0.1, 0.2, 0.3],
-            rgb2=[0.2, 0.3, 0.4],
+            rgb1=list(FLOOR_DARK),
+            rgb2=list(FLOOR_LIGHT),
             width=600,  # pixels
             height=600,  # pixels
         )
