@@ -23,7 +23,7 @@ Real examples to imitate:
 - Fitness tasks — [src/ariel/simulation/tasks/targeted_locomotion.py](../../src/ariel/simulation/tasks/targeted_locomotion.py),
   [gait_learning.py](../../src/ariel/simulation/tasks/gait_learning.py)
   (`distance_to_target`, `x_speed`, …): pure scoring functions.
-- Tree operators — [src/ariel/ec/genotypes/tree/operators.py](../../src/ariel/ec/genotypes/tree/operators.py)
+- Tree operators — [src/ariel/ec/genotypes/tree/](../../src/ariel/ec/genotypes/tree/) (`structure.py`, `crossover.py`, `mutations.py`)
   (`add_node`, `subtree_swap`, `mutate_hoist`): take a `TreeGenome` as the first
   arg, mutate in place or return a new genome. **No operator class.**
 - MuJoCo helpers — [src/ariel/simulation/mujoco_ops.py](../../src/ariel/simulation/mujoco_ops.py)

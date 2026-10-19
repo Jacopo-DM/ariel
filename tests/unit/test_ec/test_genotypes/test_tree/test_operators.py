@@ -6,9 +6,9 @@ from collections.abc import Callable
 
 import pytest
 
-from ariel.ec.genotypes.tree import operators
-from ariel.ec.genotypes.tree.operators import (
+from ariel.ec.genotypes.tree import (
     add_node,
+    crossover,
     crossover_subtree,
     get_top_ancestor,
     get_tree_depth,
@@ -16,6 +16,8 @@ from ariel.ec.genotypes.tree.operators import (
     mutate_replace_node,
     mutate_shrink,
     mutate_subtree_replacement,
+    mutations,
+    prune_invalid_edges,
     random_tree,
     remove_subtree,
     subtree_swap,
@@ -411,7 +413,7 @@ def test_crossover_falls_back_to_parent_copies_when_invalid(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """If validation rejects the children the parents are copied."""
-    monkeypatch.setattr(operators, "validate_genome_dict", _reject_everything)
+    monkeypatch.setattr(crossover, "validate_genome_dict", _reject_everything)
     a, b = _core_hinge_brick(), _core_hinge_brick()
     c1, c2 = crossover_subtree(a, b)
     assert c1.to_dict() == a.to_dict()
@@ -432,7 +434,7 @@ def test_failed_validation_restores_the_genome(
     mutation: Callable[[TreeGenome], None],
 ) -> None:
     """A mutation that cannot be validated leaves the genome as it was."""
-    monkeypatch.setattr(operators, "validate_genome_dict", _reject_everything)
+    monkeypatch.setattr(mutations, "validate_genome_dict", _reject_everything)
     for seed in range(20):
         random.seed(seed)
         g = _core_hinge_brick()
@@ -486,7 +488,7 @@ def test_pruning_drops_bad_edges_and_their_subtrees() -> None:
         ),  # core FRONT is taken
         TreeEdge(parent=0, child=99, face="LEFT"),  # child does not exist
     ])
-    operators._prune_invalid_edges(g)  # ruff: ignore[private-member-access]  # tests the private helper directly
+    prune_invalid_edges(g)
     assert {(e.parent, e.child) for e in g.edges} == {(0, 1), (1, 2)}
     assert BAD_FACE_ID not in g.nodes
     assert TAKEN_FACE_ID not in g.nodes
@@ -500,7 +502,7 @@ def test_crossover_returns_swapped_children_when_validation_passes(
     Known bug (PLAN.md): the swapped subtrees are not reattached, so real
     validation always fails and crossover returns copies of the parents.
     """
-    monkeypatch.setattr(operators, "validate_genome_dict", lambda _genome: None)
+    monkeypatch.setattr(crossover, "validate_genome_dict", lambda _genome: None)
     a = TreeGenome(
         nodes={
             0: TreeNode(type="CORE", rotation="DEG_0"),

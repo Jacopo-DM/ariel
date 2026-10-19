@@ -32,8 +32,8 @@ from ariel.body_phenotypes.robogen_lite.config import ALLOWED_ROTATIONS, IDX_OF_
 from ariel.body_phenotypes.robogen_lite.constructor import construct_mjspec_from_graph
 from ariel.ec import EA, EAOperation, EASettings, Individual, Population
 from ariel.ec import config as engine_config
-from ariel.ec.genotypes.tree.operators import (
-    _prune_invalid_edges, crossover_subtree, mutate_hoist,
+from ariel.ec.genotypes.tree import (
+    prune_invalid_edges, crossover_subtree, mutate_hoist,
     mutate_replace_node, mutate_shrink, mutate_subtree_replacement,
     random_tree, validate_tree_depth,
 )
@@ -160,7 +160,7 @@ def mutate_morphology(genome: TreeGenome) -> TreeGenome:
             if rots:
                 new.nodes[nid]["rotation"] = random.choice(rots)
 
-    _prune_invalid_edges(new)
+    prune_invalid_edges(new)
     with contextlib.suppress(ValueError):
         validate_genome_dict(new.to_dict())
     return new

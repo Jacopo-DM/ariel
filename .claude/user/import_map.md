@@ -29,7 +29,7 @@ ever fails, the source moved — check the package `__init__.py`.
 | `gecko` | `from ariel.body_phenotypes.robogen_lite.prebuilt_robots.gecko import gecko` |
 | `random_spider20` | `from ariel.body_phenotypes.robogen_lite.prebuilt_robots.random_20 import random_spider20` |
 | `TreeGenome` | `from ariel.ec.genotypes.tree.tree_genome import TreeGenome` |
-| tree operators (`random_tree`, `add_node`, …) | `from ariel.ec.genotypes.tree.operators import random_tree, add_node` |
+| tree operators (`random_tree`, `add_node`, `mutate_hoist`, …) | `from ariel.ec.genotypes.tree import random_tree, add_node` |
 | `NeuralDevelopmentalEncoding` | `from ariel.ec.genotypes.nde.nde import NeuralDevelopmentalEncoding` |
 
 ## Environments (worlds)

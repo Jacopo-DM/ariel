@@ -31,8 +31,8 @@ from ariel.body_phenotypes.robogen_lite.constructor import (
     construct_mjspec_from_graph,
 )
 from ariel.ec import EA, EAOperation, EASettings, Individual, Population
-from ariel.ec.genotypes.tree.operators import (
-    _prune_invalid_edges,
+from ariel.ec.genotypes.tree import (
+    prune_invalid_edges,
     crossover_subtree,
     mutate_hoist,
     mutate_replace_node,
@@ -234,7 +234,7 @@ class Evolution:
                     new.nodes[nid].rotation = random.choice(rots)
 
         # prune any invalid edges before returning
-        _prune_invalid_edges(new)
+        prune_invalid_edges(new)
         with contextlib.suppress(ValueError):
             validate_genome_dict(new.to_dict())
         return new
