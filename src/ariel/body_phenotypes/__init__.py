@@ -16,7 +16,9 @@ from ariel.body_phenotypes.robogen_lite import (
     ModuleRotationsIdx,
     ModuleType,
     MorphologyDecoderBestFirst,
+    Overlap,
     construct_mjspec_from_graph,
+    find_overlaps,
 )
 
 __all__ = [
@@ -34,5 +36,7 @@ __all__ = [
     "ModuleType",
     "MorphologicalMeasures",
     "MorphologyDecoderBestFirst",
+    "Overlap",
     "construct_mjspec_from_graph",
+    "find_overlaps",
 ]

@@ -4,11 +4,12 @@ Run from the repo root: ``uv run --no-sync python tools/measure_overlap.py``.
 Read-only. It builds 60 bodies from each of three sources with seed 42 (a
 random tree of 10 modules, a random tree of 20, and the probability decoder
 with 20), builds each with ``construct_mjspec_from_graph``, compiles it, and
-asks MuJoCo for contacts at the rest pose. A body counts as overlapping when
+measures every pair of geoms at the rest pose. A body counts as overlapping when
 two modules that are not parent and child touch deeper than the tolerance:
 1% of the thinnest side of the smaller of the two modules, so the rule does not
 depend on the size of the robot. MuJoCo does the counting on purpose: the
-repair finds overlaps with Trimesh, and this is the independent check.
+repair finds overlaps with Trimesh and python-fcl, and this is the
+independent check.
 
 Notes
 -----
@@ -109,6 +110,11 @@ def module_sizes(
 def has_overlap(graph: Graph, core: CoreModule) -> bool:
     """Tell whether two non-adjacent modules penetrate beyond the tolerance.
 
+    Every pair of geoms that belong to different modules is measured with
+    ``mj_geomDistance``, which gives a negative distance for a penetration.
+    The contacts MuJoCo reports are not used: it skips contacts between
+    bodies that are rigidly welded together, which is every brick on the core.
+
     Parameters
     ----------
     graph : nx.DiGraph[int]
@@ -119,22 +125,27 @@ def has_overlap(graph: Graph, core: CoreModule) -> bool:
     Returns
     -------
     bool
-        True when a contact is deeper than the tolerance of its pair.
+        True when a distance is more negative than the tolerance of its pair.
     """
     model = core.spec.compile()
     data = mujoco.MjData(model)
     mujoco.mj_forward(model, data)
     sizes = module_sizes(model)
-    for contact in data.contact[: data.ncon]:
-        first = owner_of(model, int(contact.geom1))
-        second = owner_of(model, int(contact.geom2))
-        if first == second or graph.has_edge(first, second):
-            continue
-        if graph.has_edge(second, first):
-            continue
-        smaller = min((first, second), key=lambda node: sizes[node][0])
-        if -float(contact.dist) > TOLERANCE * sizes[smaller][1]:
-            return True
+    owners = [owner_of(model, geom) for geom in range(model.ngeom)]
+    fromto = np.zeros(6)
+    for first_geom in range(model.ngeom):
+        for second_geom in range(first_geom + 1, model.ngeom):
+            first, second = owners[first_geom], owners[second_geom]
+            if first == second or graph.has_edge(first, second):
+                continue
+            if graph.has_edge(second, first):
+                continue
+            smaller = min((first, second), key=lambda node: sizes[node][0])
+            distance = mujoco.mj_geomDistance(
+                model, data, first_geom, second_geom, 1.0, fromto
+            )
+            if -distance > TOLERANCE * sizes[smaller][1]:
+                return True
     return False
 
 
