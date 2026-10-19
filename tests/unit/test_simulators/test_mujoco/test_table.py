@@ -9,7 +9,7 @@ from ariel.simulators.mujoco.seeds import Seeds
 from ariel.simulators.mujoco.table import Row, derivation_table
 
 SEED_ROWS = 10
-FORMULA_ROWS = 4
+FORMULA_ROWS = 6
 LONG_SCALE_M = 0.5
 
 

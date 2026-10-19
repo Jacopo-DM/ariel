@@ -146,6 +146,8 @@ Stack and architecture as found in the repo. Reasons are not recorded unless sta
 
 See "Things that bite" in CLAUDE.md for repo-wide ones. Design-specific ones:
 
+- Band edges need a tolerance. With the default seeds the timestep is advection-limited, so `courant = h * v_max / L` equals `alpha` (0.05) up to rounding (0.05000000000000001), which is the upper edge of its band; `simulators/mujoco/bands.py` compares edges with a relative tolerance of 1e-9. Likewise a default that ties two limits of the timestep flips the binding term on rounding (`joint_frequency` 200 rad/s tied with the advection limit and was changed to 100).
+
 - `HighProbabilityDecoder` and `Blueprint` use attributes they never define; `OlympicArena` cannot be instantiated (abstract `_expand_spec`, a misspelling of `_extend_spec`); `SimpleTiltedWorld` reads `_terrain_color`, which is never set. These are the `# known bug` ignores listed in PLAN.md.
 - `mujoco.viewer` (used by about 20 examples) always uses GLFW and ignores `MUJOCO_GL`; only `mujoco.Renderer` honours it. A GLFW `Renderer` created in a worker thread crashes (`examples/re_book/1_brain_evolution_multithreaded.py` documents an access violation in `glfwCreateWindow`), which is why every backend is probed in its own subprocess.
 - The 3 `# noqa: E712` comments in `ec/archive.py` and 1 in `ec/ea.py` are needed: SQLAlchemy columns must be compared with `== False`.

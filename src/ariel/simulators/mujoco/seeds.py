@@ -249,6 +249,18 @@ class Seeds(FrozenModel):
         }
         return min(limits, key=limits.__getitem__)
 
+    @computed_field  # type: ignore[prop-decorator]  # pydantic documents this stacking
+    @property
+    def timestep_over_contact(self) -> float:
+        """Ratio ``h / tc``; the documented limit is 0.5 (``refsafe``)."""
+        return self.timestep / self.contact_time_constant
+
+    @computed_field  # type: ignore[prop-decorator]  # pydantic documents this stacking
+    @property
+    def courant(self) -> float:
+        """Fraction of ``L`` that a part at ``v_max`` moves in one step."""
+        return self.timestep / self._length_over_speed
+
     @property
     def _length_over_speed(self) -> float:
         """``L / v_max`` in seconds."""

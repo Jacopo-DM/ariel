@@ -23,6 +23,10 @@ TIMESTEP_SOURCE = (
 )
 
 
+RATIO_SOURCE = "formula h / tc; the limit 0.5 is documented (refsafe)"
+COURANT_SOURCE = "formula h * v_max / L; judgement (research page)"
+
+
 class Row(FrozenModel):
     """One line of the derivation table."""
 
@@ -75,5 +79,13 @@ def derivation_table(seeds: Seeds) -> list[Row]:
     rows.extend(
         Row(name=name, value=value, unit="s", kind="formula", source=source)
         for name, value, source in formulas
+    )
+    ratios = (
+        ("timestep_over_contact", seeds.timestep_over_contact, RATIO_SOURCE),
+        ("courant", seeds.courant, COURANT_SOURCE),
+    )
+    rows.extend(
+        Row(name=name, value=value, unit="", kind="formula", source=source)
+        for name, value, source in ratios
     )
     return rows
