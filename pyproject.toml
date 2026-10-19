@@ -9,6 +9,7 @@ authors = [{ name = "jmdm", email = "jmdm.880@gmail.com" }]
 classifiers = ["Development Status :: 2 - Pre-Alpha"]
 
 dependencies = [
+  "astropy>=8.0.2",
   "attrs>=25.4.0",
   "deap>=1.4.3",
   "dm-control>=1.0.38",

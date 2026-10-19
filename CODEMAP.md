@@ -20,6 +20,7 @@ Generated from `src/ariel/` on 2026-10-17. Ignore list: see CLAUDE.md.
 | `ariel.ec.genotypes.nde` | neural developmental encoding (PyTorch) | `nde` |
 | `ariel.body_phenotypes.robogen_lite` | modular robot bodies | `modules` (`Core`, `Brick`, `Hinge`, `Module`), `cppn_neat` (`Genome`, `IdManager`), `decoders` (`HighProbabilityDecoder.probability_matrices_to_graph`, `VectorDecoder.vectors_to_graph`, `CPPN` best-first decoder, `Blueprint` base), `prebuilt_robots` (gecko, spider, john_set, random_20, spider_with_blocks), `constructor`, `config` |
 | `ariel.body_phenotypes.lynx_mjspec` | Lynx arm body and `unified_pipeline` (common, evolve, replay, plot_from_logs); a package since GS8 | `lynx_arm` (`LynxArm`, `ArmConfig`), `table` |
+| `ariel.simulators.mujoco` | generator of MuJoCo settings from physical seeds (goal mujoco-units; skeleton only, tasks MU3 to MU9 fill it) | none yet |
 | `ariel.simulation.environments` | MuJoCo worlds | `BaseWorld` and terrain worlds (`SimpleFlatWorld`, rugged, tilted, crater, amphitheatre, `OlympicArena`) |
 | `ariel.simulation.controllers` | controllers | `Controller`, `ControlCallback` (protocol), `SimpleCPG`, `NaCPG` (one class, after the paper) |
 | `ariel.simulation.tasks` | fitness functions | `targeted_locomotion`, `gait_learning`, `turning_in_place` |
@@ -30,4 +31,4 @@ Generated from `src/ariel/` on 2026-10-17. Ignore list: see CLAUDE.md.
 
 ## Import direction
 
-From `from ariel.X import` lines, checked on 2026-10-17: `ec` → `body_phenotypes`, `simulation`, `utils`; `simulation` → `parameters`, `utils`; `body_phenotypes` → `parameters`, `utils` (`quaternions`); `utils` → `parameters`; `parameters` → none. Every package may also import the `ariel` root (`log`, `console`, `DATA`), and `ariel/__init__.py` imports `ariel.utils.gl_backend`. `examples` import from all. `visualisation` imports nothing from ariel (only an empty `analysis/__init__.py` is left). No architecture test enforces this.
+From `from ariel.X import` lines, checked on 2026-10-17: `ec` → `body_phenotypes`, `simulation`, `utils`; `simulation` → `parameters`, `utils` (and `simulators`, planned: MU8); `simulators` → `parameters` (planned, no imports yet); `body_phenotypes` → `parameters`, `utils` (`quaternions`); `utils` → `parameters`; `parameters` → none. Every package may also import the `ariel` root (`log`, `console`, `DATA`), and `ariel/__init__.py` imports `ariel.utils.gl_backend`. `examples` import from all. `visualisation` imports nothing from ariel (only an empty `analysis/__init__.py` is left). No architecture test enforces this.
