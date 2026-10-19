@@ -194,22 +194,22 @@ def test_rotated_modules_are_not_planar() -> None:
     assert not MorphologicalMeasures(graph).is_2d
 
 
-def test_an_edge_with_an_unknown_face_leaves_a_module_unplaced() -> None:
-    """Known limit: a module only reachable over such an edge has no place."""
+def test_an_edge_with_an_unknown_face_is_rejected() -> None:
+    """The error names the edge and the bad face."""
     graph = _graph({0: "CORE", 1: "BRICK"}, [(0, 1, "SIDEWAYS")])
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError, match=r"Edge 0 -> 1.*'SIDEWAYS'"):
         MorphologicalMeasures(graph)
 
 
-def test_a_second_parent_edge_without_a_face_is_skipped() -> None:
-    """A faceless edge to an already placed module changes nothing."""
+def test_an_edge_without_a_face_is_rejected() -> None:
+    """A faceless edge is an error even when the module is placed already."""
     graph = _graph(
         {0: "CORE", 1: "BRICK", 2: "BRICK"},
         [(0, 1, "FRONT"), (0, 2, "RIGHT")],
     )
     graph.add_edge(1, 2)
-    measures = MorphologicalMeasures(graph)
-    assert measures.num_modules == THREE_MODULES
+    with pytest.raises(ValueError, match=r"Edge 1 -> 2.*None"):
+        MorphologicalMeasures(graph)
 
 
 def test_a_module_with_two_parents_is_placed_once() -> None:
@@ -235,3 +235,14 @@ def test_edges_between_non_bricks_do_not_count_for_clusters() -> None:
     assert MorphologicalMeasures(graph).brick_cluster_ratio == (
         pytest.approx(0.0)
     )
+
+
+def test_a_module_with_two_valid_parents_is_placed_once() -> None:
+    """The first edge that reaches a module decides where it sits."""
+    graph = _graph(
+        {0: "CORE", 1: "BRICK", 2: "BRICK"},
+        [(0, 1, "FRONT"), (0, 2, "RIGHT")],
+    )
+    graph.add_edge(1, 2, face="TOP")
+    measures = MorphologicalMeasures(graph)
+    assert measures.num_modules == THREE_MODULES

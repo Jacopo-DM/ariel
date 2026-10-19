@@ -12,6 +12,8 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
 
+_FACES = ("FRONT", "BACK", "RIGHT", "LEFT", "TOP", "BOTTOM")
+
 _ALLOWED_FACES = {
     "CORE": ["FRONT", "BACK", "RIGHT", "LEFT", "TOP", "BOTTOM"],
     "BRICK": ["FRONT", "RIGHT", "LEFT", "TOP", "BOTTOM"],
@@ -99,6 +101,14 @@ class MorphologicalGrid:
         if robot_graph.number_of_nodes() == 0:
             msg = "Cannot analyze empty robot graph"
             raise ValueError(msg)
+        for parent, child, data in robot_graph.edges(data=True):
+            face = data.get("face")
+            if face not in _FACES:
+                msg = (
+                    f"Edge {parent} -> {child} has no valid face ({face!r}); "
+                    f"valid faces are {', '.join(_FACES)}"
+                )
+                raise ValueError(msg)
 
         self.graph = robot_graph
         self.grid, self.core_grid_position = self._graph_to_grid(robot_graph)
@@ -155,12 +165,10 @@ class MorphologicalGrid:
         return _ALLOWED_FACES.get(self._get_node_type(node), [])
 
     def _get_node_connections(self, node: int) -> list[str]:
-        faces = []
-        for successor in self.graph.successors(node):
-            data = self.graph.get_edge_data(node, successor)
-            if data and "face" in data:
-                faces.append(data["face"])
-        return faces
+        return [
+            self.graph.edges[node, successor]["face"]
+            for successor in self.graph.successors(node)
+        ]
 
     def _count_neighbors(self, node: int) -> int:
         return self.graph.in_degree(node) + self.graph.out_degree(node)
@@ -200,11 +208,11 @@ class MorphologicalGrid:
             "BOTTOM": np.array([0, 0, -1]),
         }
         for child in self.graph.successors(node):
-            data = self.graph.get_edge_data(node, child)
-            if data and "face" in data and data["face"] in face_directions:
-                child_pos = pos + face_directions[data["face"]]
-                if child not in positions:
-                    self._calculate_graph_positions(child, positions, child_pos)
+            face = self.graph.edges[node, child]["face"]
+            if child not in positions:
+                self._calculate_graph_positions(
+                    child, positions, pos + face_directions[face]
+                )
 
     def _calculate_core_is_filled(self) -> bool:
         return len(self._get_node_connections(self.core_node)) == len(
