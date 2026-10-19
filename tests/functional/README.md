@@ -65,7 +65,7 @@ row, a row names a notebook that does not exist, or a notebook has no row.
 | `simulation` | `speed_tests` |
 | `simulation/controllers` | `cpg` |
 | `simulation/environments` | `sim_environments`, `utils` |
-| `simulation/tasks` | none yet |
+| `simulation/tasks` | `tasks` |
 | `simulators` | `mujoco_settings` |
 | `simulators/mujoco` | `mujoco_settings` |
 | `visualisation` | none yet |
