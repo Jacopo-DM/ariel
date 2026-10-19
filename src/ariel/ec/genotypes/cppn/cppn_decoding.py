@@ -7,7 +7,7 @@ import numpy as np
 from mujoco import viewer
 from rich.console import Console
 
-from ariel.body_phenotypes.robogen_lite import (
+from ariel.body_phenotypes import (
     NUM_OF_ROTATIONS,
     NUM_OF_TYPES_OF_MODULES,
     CoreModule,
@@ -17,12 +17,12 @@ from ariel.body_phenotypes.robogen_lite import (
     construct_mjspec_from_graph,
 )
 from ariel.rendering import single_frame_renderer
-from ariel.simulation.controllers import (
+from ariel.simulation import (
     Controller,
     NaCPG,
+    SimpleFlatWorld,
     create_fully_connected_adjacency,
 )
-from ariel.simulation.environments import SimpleFlatWorld
 
 SCRIPT_NAME = Path(__file__).stem
 CWD = Path.cwd()

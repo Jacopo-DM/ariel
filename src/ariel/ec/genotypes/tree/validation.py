@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, Field
 
-from ariel.body_phenotypes.robogen_lite import (
+from ariel.body_phenotypes import (
     ALLOWED_FACES,
     IDX_OF_CORE,
     ModuleFaces,
