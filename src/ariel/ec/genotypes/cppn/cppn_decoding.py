@@ -7,21 +7,17 @@ import numpy as np
 from mujoco import viewer
 from rich.console import Console
 
-from ariel.body_phenotypes.robogen_lite.config import (
+from ariel.body_phenotypes.robogen_lite import (
     NUM_OF_ROTATIONS,
     NUM_OF_TYPES_OF_MODULES,
-)
-from ariel.body_phenotypes.robogen_lite.constructor import (
+    CoreModule,
+    Genome,
+    IdManager,
+    MorphologyDecoderBestFirst,
     construct_mjspec_from_graph,
 )
-from ariel.body_phenotypes.robogen_lite.cppn_neat.genome import Genome
-from ariel.body_phenotypes.robogen_lite.cppn_neat.id_manager import IdManager
-from ariel.body_phenotypes.robogen_lite.decoders.cppn_best_first import (
-    MorphologyDecoderBestFirst,
-)
-from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
-from ariel.simulation.controllers.controller import Controller
-from ariel.simulation.controllers.na_cpg import (
+from ariel.simulation.controllers import (
+    Controller,
     NaCPG,
     create_fully_connected_adjacency,
 )

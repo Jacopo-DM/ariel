@@ -2,9 +2,10 @@
 
 Run from the repo root: ``uv run --no-sync python tools/measure_structure.py``.
 Read-only. It reports file sizes, modules that import many others and
-imports that reach into a submodule of another package instead of its
-``__init__``. Thresholds are 400 lines and 5 imports. Duplication is
-measured apart, with ``npx jscpd@5.4.1 --min-lines 8 src tests``.
+imports of another package's module file (``ariel.ec.ea``) instead of a
+package ``__init__`` (``ariel.ec``, or a subpackage such as
+``ariel.simulation.environments``). Thresholds are 400 lines and 5 imports.
+Duplication is measured apart, with ``npx jscpd@5.4.1 --min-lines 8 src tests``.
 
 Notes
 -----
@@ -22,7 +23,6 @@ ROOT = Path(__file__).resolve().parents[1]
 PACKAGE = "ariel"
 MAX_LINES = 400
 MAX_IMPORTS = 5
-DEEP_PARTS = 2  # ariel.pkg.module has 3 parts: deeper than the entry point
 
 
 class Structure(BaseModel):
@@ -154,7 +154,8 @@ def measure(folder: Path, src: Path, root: Path) -> Structure:
         own = subpackage(module_name(f, src))
         for target in imports[f]:
             parts = target.split(".")
-            if len(parts) > DEEP_PARTS and parts[1] != own:
+            is_module = src.joinpath(*parts).with_suffix(".py").is_file()
+            if is_module and parts[1] != own:
                 deep[f"{own or PACKAGE} -> {parts[1]}"] += 1
     return Structure(
         files=len(files),

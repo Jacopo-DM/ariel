@@ -11,7 +11,7 @@ import random
 
 import networkx as nx
 
-from ariel.body_phenotypes.robogen_lite.config import (
+from ariel.body_phenotypes.robogen_lite import (
     ALLOWED_FACES,
     ALLOWED_ROTATIONS,
     IDX_OF_CORE,

@@ -10,7 +10,7 @@ from types import ModuleType
 # Third-party libraries
 import pytest
 
-FILES = 7
+FILES = 13
 LONG = 401
 WIDE = 6
 DEEP = 7
@@ -42,11 +42,13 @@ def _tree(root: Path) -> Path:
     (pkg / "a" / "__init__.py").write_text("")
     (pkg / "b" / "__init__.py").write_text("")
     (pkg / "b" / "leaf.py").write_text("x = 1\n")
+    for i in range(6):
+        (pkg / "b" / f"m{i}.py").write_text("")
     (pkg / "a" / "long.py").write_text("y = 1\n" * 401)
     names = "\n".join(f"import ariel.b.m{i}" for i in range(6))
     (pkg / "a" / "wide.py").write_text(names + "\n")
     (pkg / "a" / "deep.py").write_text(
-        "from ariel.b.leaf import x\nimport ariel\n",
+        "from ariel.b.leaf import x\nfrom ariel.b import m0\nimport ariel\n",
     )
     return src
 
@@ -106,7 +108,7 @@ def test_render_lists_every_fact(tmp_path: Path) -> None:
     text = script.render(
         "src/ariel", script.measure(src / "ariel", src, tmp_path)
     )
-    assert "src/ariel: 7 files" in text
+    assert "src/ariel: 13 files" in text
     assert "files over 400 lines: 1" in text
     assert "modules importing more than 5 others: 1" in text
     assert "imports that skip a package entry point: 7" in text
