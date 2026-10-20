@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib
 import inspect
+import random
 import runpy
 from pathlib import Path
 
@@ -11,6 +12,8 @@ import mujoco
 import numpy as np
 import pytest
 
+from ariel.body_phenotypes import construct_mjspec_from_graph
+from ariel.ec.genotypes.tree import random_tree
 from ariel.simulation import environments
 from ariel.simulation.environments import (
     BaseWorld,
@@ -270,3 +273,40 @@ def test_smooth_edges_resizes_non_square_maps() -> None:
     """A non-square request is resized to the requested shape."""
     mask = heightmap_functions.smooth_edges_heightmap(NON_SQUARE, EDGE)
     assert mask.shape == NON_SQUARE
+
+
+def test_the_geometry_compile_matches_the_full_compile() -> None:
+    """Tiny textures change nothing the spawn correction reads.
+
+    The old path compiled the whole world; the new one compiles with 1 by 1
+    textures (speed-up S1). Positions, rotations, sizes and contacts must be
+    identical in every world, and the real texture sizes must come back.
+    """
+    random.seed(7)
+    for _, cls in inspect.getmembers(environments, inspect.isclass):
+        world = cls(load_precompiled=False)
+        robot = construct_mjspec_from_graph(random_tree(12).to_networkx())
+        world.spawn(robot.spec, correct_collision_with_floor=False)
+        sizes = [(t.width, t.height) for t in world.spec.textures]
+        full = world.spec.compile()
+        lite = world._compile_for_geometry()
+        full_data, lite_data = mujoco.MjData(full), mujoco.MjData(lite)
+        mujoco.mj_forward(full, full_data)
+        mujoco.mj_forward(lite, lite_data)
+        assert np.array_equal(full_data.geom_xpos, lite_data.geom_xpos)
+        assert np.array_equal(full_data.geom_xmat, lite_data.geom_xmat)
+        assert np.array_equal(full.geom_size, lite.geom_size)
+        assert full_data.ncon == lite_data.ncon
+        assert np.array_equal(full_data.contact.dist, lite_data.contact.dist)
+        assert sizes == [(t.width, t.height) for t in world.spec.textures]
+        assert world.spec.compile().tex_data.size == full.tex_data.size
+
+
+def test_the_texture_sizes_come_back_when_the_compile_fails() -> None:
+    """A failed compile still restores the textures."""
+    world = SimpleFlatWorld(load_precompiled=False)
+    sizes = [(t.width, t.height) for t in world.spec.textures]
+    world.spec.worldbody.add_geom(type=mujoco.mjtGeom.mjGEOM_MESH)
+    with pytest.raises(ValueError, match="mesh"):
+        world._compile_for_geometry()  # ruff: ignore[private-member-access]  # tests the private helper directly
+    assert sizes == [(t.width, t.height) for t in world.spec.textures]

@@ -139,6 +139,31 @@ class BaseWorld:
         )
         return spec
 
+    def _compile_for_geometry(self) -> mj.MjModel:
+        """Compile the spec with 1 by 1 textures, for reading geometry only.
+
+        MuJoCo generates the texture images again on every compile (5.8 MB
+        for the flat world, 14 of its 15 ms). Positions, rotations, sizes and
+        contacts do not depend on them, so the spawn correction compiles with
+        tiny textures and puts the real sizes back (DESIGN.md Decisions,
+        speed-up S1). The spec is not copied: copying a spec that has bodies
+        attached from other specs and then deleting parts of it corrupts
+        memory in the MuJoCo bindings.
+
+        Returns
+        -------
+        mj.MjModel
+            The compiled model, with the same bodies and geoms as the world.
+        """
+        sizes = [(t, t.width, t.height) for t in self.spec.textures]
+        for texture, _, _ in sizes:
+            texture.width = texture.height = 1
+        try:
+            return cast("mj.MjModel", self.spec.compile())
+        finally:
+            for texture, width, height in sizes:
+                texture.width, texture.height = width, height
+
     def _find_lowest_position(
         self,
         spawn_name: str,
@@ -156,7 +181,7 @@ class BaseWorld:
                 The lowest Z position of the robot in the world.
         """
         # Generate model and data from a temporary copy of the spec
-        model: mj.MjModel = cast("mj.MjModel", self.spec.compile())
+        model = self._compile_for_geometry()
         data = mj.MjData(model)
 
         # Step the simulation to ensure everything is stable
@@ -217,7 +242,7 @@ class BaseWorld:
 
     def _find_contacts(self) -> set[tuple[str, str, float]]:
         # Generate model and data
-        model = self.spec.compile()
+        model = self._compile_for_geometry()
         data = mj.MjData(model)
 
         # Step the simulation to ensure everything is stable
