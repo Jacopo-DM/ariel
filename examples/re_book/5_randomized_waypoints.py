@@ -57,7 +57,7 @@ from ariel.rendering import VideoRecorder
 install()
 console = Console()
 
-# TPA fires check_consistency on noisy stochastic simulators — harmless.
+# TPA fires check_consistency on noisy stochastic simulators, harmless.
 # See wiki/CMA-ES_Mirrored_Sampling.md.
 warnings.filterwarnings(
     "ignore",
@@ -290,7 +290,7 @@ def _build_context() -> dict[str, Any]:
     spider = body_spider45()
     world.spawn(spider.spec, position=[0.0, 0.0, 0.1])
 
-    # Green mocap marker — initial position is arbitrary; run_episode moves it.
+    # Green mocap marker, initial position is arbitrary; run_episode moves it.
     marker = world.spec.worldbody.add_body(
         name="green_target", mocap=True, pos=[0.0, 0.0, 0.1]
     )
@@ -417,7 +417,7 @@ def _embed_weights_add_input(
     We reshape the fc1.weight block, append a column of zeros for the new
     input at the END (progress is the last element of the state vector),
     and concatenate the rest unchanged.  The new input starts with zero
-    weight — CMA-ES learns how to use it during the run.
+    weight, CMA-ES learns how to use it during the run.
     """
     fc1_w_size = hidden_size * old_input_size
     fc1_w = weights[:fc1_w_size].reshape(hidden_size, old_input_size)
@@ -450,7 +450,7 @@ def evolve() -> tuple[np.ndarray, Optional[np.ndarray], Optional[list[np.ndarray
         num_params_no_progress = num_params - hidden_size
 
         if loaded.shape == (num_params,):
-            # Exact match — architectures are identical.
+            # Exact match, architectures are identical.
             initial_guess = loaded
             console.log(f"[yellow]Warm start: {num_params} params from {warm_path}[/yellow]")
 
@@ -511,7 +511,7 @@ def evolve() -> tuple[np.ndarray, Optional[np.ndarray], Optional[list[np.ndarray
         initargs=(BASE_SEED,),
     ) as executor:
         for gen in range(BUDGET):
-            # Fresh waypoints this generation — same layout for every candidate
+            # Fresh waypoints this generation, same layout for every candidate
             # so within-generation selection is fair.  Different per generation
             # so no fixed motor program can generalise across the run.
             gen_rng       = np.random.default_rng(BASE_SEED + gen)
@@ -572,7 +572,7 @@ def replay_in_viewer(
       2. ``best_seen_waypoints.npy`` in the same directory as the weights file.
       3. Freshly sampled waypoints using BASE_SEED (fallback).
     """
-    import mujoco.viewer  # local import — only needed for this path
+    import mujoco.viewer  # local import, only needed for this path
 
     weights = np.load(weights_path)
     console.log(f"[cyan]Loaded weights from {weights_path}  ({len(weights)} params)[/cyan]")
@@ -690,7 +690,7 @@ def main() -> None:
     recommendation_weights, best_seen_weights, best_seen_waypoints, input_dim = evolve()
     elapsed = time.time() - start
 
-    # Save the CMA recommendation (distribution mean) — best for warm-starting
+    # Save the CMA recommendation (distribution mean), best for warm-starting
     # future runs since it's a smooth summary of the converged search region.
     weights_path = DATA / "best_weights.npy"
     np.save(weights_path, recommendation_weights)

@@ -51,7 +51,7 @@ from ariel.rendering import VideoRecorder
 install()
 console = Console()
 
-# TPA fires check_consistency on noisy stochastic simulators — harmless.
+# TPA fires check_consistency on noisy stochastic simulators, harmless.
 # See wiki/CMA-ES_Mirrored_Sampling.md.
 warnings.filterwarnings(
     "ignore",
@@ -212,7 +212,7 @@ def run_episode(
                 data.mocap_pos[target_mocap_id] = current_target
                 min_dist_to_current = float("inf")  # reset for the new target
             else:
-                # All waypoints reached — record the moment for speed tiebreak.
+                # All waypoints reached, record the moment for speed tiebreak.
                 completion_time = data.time
 
     final_dist = 0.0 if current_wp_idx >= len(waypoints) else min_dist_to_current
@@ -262,7 +262,7 @@ def _build_context() -> dict[str, Any]:
     spider = body_spider45()
     world.spawn(spider.spec, position=[0.0, 0.0, 0.1])
 
-    # Single green mocap marker — repositioned to each waypoint in sequence.
+    # Single green mocap marker, repositioned to each waypoint in sequence.
     marker = world.spec.worldbody.add_body(
         name="green_target", mocap=True, pos=WAYPOINTS[0].tolist()
     )

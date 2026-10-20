@@ -1,6 +1,6 @@
 # Contributing to ARIEL
 
-Thank you for your interest in contributing to **ARIEL** — an open-source evolutionary robotics framework.
+Thank you for your interest in contributing to **ARIEL**, an open-source evolutionary robotics framework.
 ARIEL is licensed under [GPL-3.0](https://opensource.org/licenses/GPL-3.0) and welcomes contributions of all kinds: bug reports, feature requests, documentation improvements, and pull requests.
 
 ---
@@ -47,10 +47,10 @@ Report bugs via the [Issue Tracker](https://github.com/ci-group/ariel/issues).
 
 A good bug report answers all of the following:
 
-- **OS & Python version** — e.g. Ubuntu 22.04, Python 3.12.3
-- **What you did** — minimal code snippet to reproduce the problem
-- **What you expected** — the behaviour you anticipated
-- **What happened instead** — exact error message or observed behaviour
+- **OS & Python version**, e.g. Ubuntu 22.04, Python 3.12.3
+- **What you did**, minimal code snippet to reproduce the problem
+- **What you expected**, the behaviour you anticipated
+- **What happened instead**, exact error message or observed behaviour
 
 The fastest path to a fix is a minimal reproducible example or a failing test case.
 
@@ -227,7 +227,7 @@ $ uv run pytest tests/functional/
 ### Writing tests
 
 - Place **unit tests** in `tests/unit/` and **functional tests** in `tests/functional/`.
-- Use [pytest](https://docs.pytest.org/) conventions — no custom test classes unless necessary.
+- Use [pytest](https://docs.pytest.org/) conventions, no custom test classes unless necessary.
 - Prefer small, focused tests with descriptive names.
 - `assert` statements are allowed in tests (the `S101` rule is disabled in test files).
 
@@ -305,4 +305,4 @@ test(body_phenotypes): add coverage for CPPN-NEAT edge cases
 ```
 
 Keep the summary line under 72 characters.
-Use the body to explain *why* the change was made, not *what* — the diff already shows the what.
+Use the body to explain *why* the change was made, not *what*, the diff already shows the what.

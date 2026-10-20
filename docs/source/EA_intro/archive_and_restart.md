@@ -7,7 +7,7 @@ Two closely related features make it easy to reuse data across EA runs: the **`A
 ## The Archive Class
 
 `Archive` opens a SQLite database written by any previous `EA` run and exposes query methods for retrieving individuals from it.
-It is read-only — it never modifies the source database.
+It is read-only, it never modifies the source database.
 
 ```python
 from pathlib import Path
@@ -44,7 +44,7 @@ early = archive.random_individual(death_range=(0, 30))
 ### Retrieving populations
 
 ```python
-# Hall of fame — the 10 best individuals of all time
+# Hall of fame, the 10 best individuals of all time
 hof = archive.hall_of_fame(n=10, fitness_mode="min")
 
 # Random sample of 20 individuals
@@ -109,7 +109,7 @@ ea = EA(
 ea.run()
 ```
 
-This is useful for branching experiments — run once, then fork from an intermediate checkpoint with different operators or parameters.
+This is useful for branching experiments, run once, then fork from an intermediate checkpoint with different operators or parameters.
 
 ---
 

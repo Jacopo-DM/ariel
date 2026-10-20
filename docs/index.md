@@ -1,6 +1,6 @@
 :layout: landing
 
-# ARIEL — A Robot Evolution Framework
+# ARIEL: A Robot Evolution Framework
 
 ![Ariel Logo](resources/ariel_logo.svg)
 
@@ -46,7 +46,7 @@ ARIEL brings together the full evolutionary robotics pipeline in a single, cohes
 | [Parallelisation](source/parallel_robot_eval/index)| Scale robot evaluations across CPU cores (MuJoCo Worker) or machines (Ray).                 |
 | [Database & Analysis](source/Db_examples)         | Automatic SQLite experiment logging with pandas, polars, and sqlite3 query examples.          |
 | **Visualisation**                                 | GUI (in progress) and analysis utilities for plotting fitness progression and robot behaviour.|
-| [MuJoCo Integration](source/Mujoco_docs)          | Full access to MuJoCo data variables — forces, sensors, spatial transforms, and more.         |
+| [MuJoCo Integration](source/Mujoco_docs)          | Full access to MuJoCo data variables, forces, sensors, spatial transforms, and more.         |
 
 ---
 

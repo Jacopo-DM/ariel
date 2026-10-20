@@ -19,7 +19,7 @@ from rich.traceback import install
 install()
 console = Console()
 
-# TPA fires check_consistency warnings on noisy stochastic simulators — harmless.
+# TPA fires check_consistency warnings on noisy stochastic simulators, harmless.
 # See wiki/CMA-ES_Mirrored_Sampling.md for details.
 warnings.filterwarnings(
     "ignore",
