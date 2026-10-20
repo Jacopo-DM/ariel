@@ -224,12 +224,12 @@ def test_set_target_position_body_site() -> None:
     """A site on a body is set relative to the parent body of that body."""
     xml = """
     <mujoco><worldbody>
-      <body name="holder" pos="1 0 0"><joint type="slide" axis="1 0 0"/>
+        <body name="holder" pos="1 0 0"><joint type="slide" axis="1 0 0"/>
         <geom size=".1"/>
         <body name="inner"><joint type="hinge" axis="0 0 1"/>
-          <geom size=".1"/><site name="s"/>
+            <geom size=".1"/><site name="s"/>
         </body>
-      </body>
+        </body>
     </worldbody></mujoco>"""
     model = mujoco.MjModel.from_xml_string(xml)
     data = mujoco.MjData(model)

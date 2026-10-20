@@ -11,7 +11,7 @@ class IdManager:
     Supports two modes:
     1. Persistent Mode (default): Loads and saves its state from a JSON file.
     2. In-Memory Mode: Initializes with specified starting IDs, useful for
-      tests.
+        tests.
     """
 
     def __init__(

@@ -7,9 +7,9 @@ the change, which ``model_copy(update=...)`` does not.
 Notes
 -----
     * Quantities are stored in one canonical unit, so every later formula
-      reads plain SI numbers.
+        reads plain SI numbers.
     * The tuning seeds ``alpha``, ``kappa`` and ``gamma`` have no primary
-      source; see ``.claude/wiki/mujoco/mujoco_parameter_research.md``.
+        source; see ``.claude/wiki/mujoco/mujoco_parameter_research.md``.
 """
 
 # Standard library

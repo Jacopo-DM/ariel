@@ -23,17 +23,17 @@ FPS = 30
 DURATION = 0.1
 MODEL_XML = """
 <mujoco>
-  <worldbody>
+    <worldbody>
     <camera name="ortho-cam" pos="0 -2 1" fovy="45"/>
     <body name="robot-core" pos="0 0 1"><freejoint/>
-      <geom size=".1"/></body>
-  </worldbody>
+        <geom size=".1"/></body>
+    </worldbody>
 </mujoco>"""
 NO_CAMERA_XML = """
 <mujoco>
-  <worldbody>
+    <worldbody>
     <body name="{name}" pos="0 0 1"><freejoint/><geom size=".1"/></body>
-  </worldbody>
+    </worldbody>
 </mujoco>"""
 FOVY = 60.0
 TWO_FRAMES = 2

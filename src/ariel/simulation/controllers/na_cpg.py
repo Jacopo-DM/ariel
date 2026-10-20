@@ -7,26 +7,26 @@ for robot motion control", Biomimetic Intelligence and Robotics 2 (2022)
 and obeys::
 
     d(x_i, y_i)/dt = K_i (x_i, y_i - b_i)
-                     + h * sum_j R(phi_i - phi_j) (x_j, y_j - b_j)
+                        + h * sum_j R(phi_i - phi_j) (x_j, y_j - b_j)
 
     K_i = [[alpha (1 - r_i^2), -w_i / zeta_i],
-           [w_i / zeta_i,       alpha (1 - r_i^2)]]
+            [w_i / zeta_i,       alpha (1 - r_i^2)]]
     r_i^2 = x_i^2 + (y_i - b_i)^2
     zeta_i = 1 - ha_i * sign(dx_i/dt_old)
     theta_i = A_i * y_i
 
 * Normalized: the limit cycle has radius 1 whatever ``A_i`` is, so the
-  amplitude and the learning rate ``alpha`` are decoupled. The amplitude only
-  scales the output ``theta_i``.
+    amplitude and the learning rate ``alpha`` are decoupled. The amplitude only
+    scales the output ``theta_i``.
 * Asymmetric: ``zeta_i`` slows the rotation in one half of the cycle and
-  speeds it up in the other (``ha_i`` in (-1, 1), 0 is symmetric), without
-  changing the shape of the cycle.
+    speeds it up in the other (``ha_i`` in (-1, 1), 0 is symmetric), without
+    changing the shape of the cycle.
 * Constrained: the new derivative may differ from the previous one by at
-  most ``CF(w_i)`` (equations 4 and 12). The paper fits ``CF`` to the largest
-  second derivative seen at each angular frequency and does not publish the
-  fit. By default ``CF(w) = CONSTRAINT_MARGIN * w^2 * dt``, the largest
-  change of the derivative per step on the unit circle, with a margin for the
-  asymmetry. A cubic fitted elsewhere can be given as ``coefficients``.
+    most ``CF(w_i)`` (equations 4 and 12). The paper fits ``CF`` to the largest
+    second derivative seen at each angular frequency and does not publish the
+    fit. By default ``CF(w) = CONSTRAINT_MARGIN * w^2 * dt``, the largest
+    change of the derivative per step on the unit circle, with a margin for the
+    asymmetry. A cubic fitted elsewhere can be given as ``coefficients``.
 
 References
 ----------

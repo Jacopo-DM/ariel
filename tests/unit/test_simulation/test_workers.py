@@ -22,17 +22,17 @@ if TYPE_CHECKING:
 
 ROBOT_XML = """
 <mujoco>
-  <worldbody>
+    <worldbody>
     <body name="core" pos="0 0 0.1">
-      <joint type="free"/>
-      <geom type="box" size="0.1 0.1 0.05" mass="1"/>
-      <body name="leg" pos="0.1 0 0">
+        <joint type="free"/>
+        <geom type="box" size="0.1 0.1 0.05" mass="1"/>
+        <body name="leg" pos="0.1 0 0">
         <joint name="hinge" type="hinge" axis="0 1 0"/>
         <geom type="capsule" fromto="0 0 0 0.2 0 0" size="0.02" mass="0.1"/>
-      </body>
+        </body>
     </body>
-  </worldbody>
-  <actuator><motor joint="hinge" gear="10"/></actuator>
+    </worldbody>
+    <actuator><motor joint="hinge" gear="10"/></actuator>
 </mujoco>
 """
 SPAWN = (0.0, 0.0, 0.1)

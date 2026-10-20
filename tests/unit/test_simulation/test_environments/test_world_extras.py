@@ -37,13 +37,13 @@ SimpleFlatWorldWithTarget = importlib.import_module(
 # ball sits on a slide joint so it moves and can touch the floor.
 SPHERE_XML = """
 <mujoco><worldbody>
-  <geom name="anchor" type="sphere" size=".05" mass="1"/>
-  <body><joint type="slide" axis="0 0 1"/>
+    <geom name="anchor" type="sphere" size=".05" mass="1"/>
+    <body><joint type="slide" axis="0 0 1"/>
     <geom name="ball" type="sphere" size=".5"/></body>
 </worldbody></mujoco>"""
 NO_GEOM_XML = """
 <mujoco><worldbody>
-  <body><joint type="slide" axis="0 0 1"/>
+    <body><joint type="slide" axis="0 0 1"/>
     <inertial pos="0 0 0" mass="1" diaginertia=".1 .1 .1"/>
     <site name="mark" size=".1"/></body>
 </worldbody></mujoco>"""

@@ -47,7 +47,7 @@ class MuJoCoWorkerBase(ABC):
         Returns
         -------
         float
-             The fitness value returned by evaluate().
+                The fitness value returned by evaluate().
         """
         os.environ["OMP_NUM_THREADS"] = "1"
         os.environ["MKL_NUM_THREADS"] = "1"

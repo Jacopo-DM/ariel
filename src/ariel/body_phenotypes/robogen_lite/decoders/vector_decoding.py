@@ -106,14 +106,14 @@ class VectorDecoder(Blueprint):
         in order) is decoded as follows:
 
         * ``type_vector[k - 1]`` picks its type among every type but the core
-          (BRICK, HINGE, NONE). A NONE module is left out of the graph.
+            (BRICK, HINGE, NONE). A NONE module is left out of the graph.
         * ``connection_vector[k - 1]`` picks one free ``(parent, face)`` slot:
-          a face that the type of an already placed module allows and that no
-          other module uses. There is always one, since the core has four
-          faces and every placed module offers at least as many as it uses.
-          The result is always a tree rooted at the core.
+            a face that the type of an already placed module allows and that no
+            other module uses. There is always one, since the core has four
+            faces and every placed module offers at least as many as it uses.
+            The result is always a tree rooted at the core.
         * ``rotation_vector[k - 1]`` picks its rotation among the rotations
-          its type allows.
+            its type allows.
 
         Parameters
         ----------

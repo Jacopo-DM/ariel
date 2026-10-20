@@ -10,14 +10,14 @@ face on purpose and are never compared.
 Notes
 -----
     * A module is a graph node. Its geoms are named
-      ``<parent>-<node>-<face>-<kind>``; the core's geom is ``core``.
+        ``<parent>-<node>-<face>-<kind>``; the core's geom is ``core``.
     * The size of a module is the total volume of its geoms; its thinnest
-      side is twice the smallest half-size among them.
+        side is twice the smallest half-size among them.
     * Poses are at joint angle zero, as compiled.
     * The later module of an overlapping pair is the deeper one in the tree;
-      at equal depth, the one whose path from the core takes the later face
-      (``ModuleFaces`` order) at the first edge where the two paths differ.
-      The repair removes it with everything attached beyond it.
+        at equal depth, the one whose path from the core takes the later face
+        (``ModuleFaces`` order) at the first edge where the two paths differ.
+        The repair removes it with everything attached beyond it.
 """
 
 # Standard library

@@ -9,11 +9,11 @@ example ``option.timestep`` or ``default.geom.solref``.
 Notes
 -----
     * Engine defaults are read from the installed engine, never typed in, so
-      a MuJoCo upgrade shows up as a changed default.
+        a MuJoCo upgrade shows up as a changed default.
     * Left out: ``compiler.eulerseq`` (a character vector, not a number or
-      text), ``compiler.authored`` (a bit mask the XML parser sets to record
-      which attributes the file wrote) and ``stat`` (computed by the
-      compiler, not set).
+        text), ``compiler.authored`` (a bit mask the XML parser sets to record
+        which attributes the file wrote) and ``stat`` (computed by the
+        compiler, not set).
 """
 
 # Standard library

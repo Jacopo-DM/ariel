@@ -15,9 +15,9 @@ independent check.
 Notes
 -----
     * A module is a graph node. Its geoms are named
-      ``<parent>-<node>-<face>-<kind>``; the core's geom is ``core``.
+        ``<parent>-<node>-<face>-<kind>``; the core's geom is ``core``.
     * The size of a module is the volume of its geoms, its thinnest side is
-      twice the smallest half-size among them.
+        twice the smallest half-size among them.
 """
 
 import random

@@ -3,11 +3,11 @@
 Notes
 -----
     * ``MjSpec.to_xml`` writes only the values that differ from the engine
-      defaults, so the file is the list of differences and every other value
-      stays the installed engine's default. It also never writes
-      ``compiler.balanceinertia``, so ``generate_xml`` adds that attribute
-      itself; ``build_spec`` keeps it as it is. The full table, defaults
-      included, is in ``derivation_table`` and ``settings``.
+        defaults, so the file is the list of differences and every other value
+        stays the installed engine's default. It also never writes
+        ``compiler.balanceinertia``, so ``generate_xml`` adds that attribute
+        itself; ``build_spec`` keeps it as it is. The full table, defaults
+        included, is in ``derivation_table`` and ``settings``.
 """
 
 # Standard library

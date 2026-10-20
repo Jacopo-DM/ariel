@@ -435,7 +435,7 @@ class Genome:
 
         1. Tries a topological sort (Feed-Forward) for speed and precision.
         2. If a cycle is detected, falls back to iterative relaxation
-          (Recurrent).
+            (Recurrent).
 
         Returns
         -------

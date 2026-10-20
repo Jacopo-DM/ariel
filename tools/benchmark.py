@@ -9,18 +9,18 @@ of the wall-clock time, the median CPU time and the median peak memory.
 Workloads (all seeded, so the work done is the same on every run):
 
 * ``evolution``: a tree-genome evolution of ``EVO_POP`` robots for
-  ``EVO_STEPS`` generations; every new robot is built and simulated for
-  ``EVO_SIM_STEPS`` steps with a sine control.
+    ``EVO_STEPS`` generations; every new robot is built and simulated for
+    ``EVO_SIM_STEPS`` steps with a sine control.
 * ``simulation``: one prebuilt robot in a flat world for ``SIM_STEPS`` steps.
 * ``bodies``: ``BODIES`` random 20-module graphs built into bodies, plain and
-  with ``repair_overlaps=True``.
+    with ``repair_overlaps=True``.
 * ``tests``: the whole test suite, ``uv run --no-sync pytest -q`` (it includes
-  the coverage run that the gate uses).
+    the coverage run that the gate uses).
 
 Notes
 -----
     * Peak memory is the largest resident set of the process (of its child
-      processes for ``tests``), in MiB, from ``resource.getrusage``.
+        processes for ``tests``), in MiB, from ``resource.getrusage``.
     * A gain smaller than the spread of a workload does not count.
 """
 

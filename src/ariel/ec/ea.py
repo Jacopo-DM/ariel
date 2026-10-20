@@ -202,9 +202,10 @@ class EA:
         For each individual in ``self.population``:
 
         - Sets ``time_of_birth`` to ``current_generation`` if the individual
-          has not yet been assigned a birth time (i.e. ``time_of_birth == -1``).
+            has not yet been assigned a birth time (i.e.
+            ``time_of_birth == -1``).
         - Updates ``time_of_death`` to ``current_generation``, reflecting the
-          last generation in which the individual was present.
+            last generation in which the individual was present.
         """
         with Session(self.engine) as session:
             for ind in self.population:
