@@ -21,7 +21,7 @@ From the repo root. Python 3.12 (`.python-version` 3.12.9), uv 0.13.1.
 
 | Purpose | Command | Checked |
 |---|---|---|
-| Install everything | `uv sync --all-groups` | ~5 min first time, ~8.4 GB `.venv` |
+| Install everything | `uv sync --all-groups` | ~5 min first time, ~7.8 GB `.venv` (2026-10-20, after the dependency clean-up) |
 | Lockfile matches pyproject | `uv lock --check` | passes, ~2 s, read-only |
 | Unit tests | `uv run --no-sync pytest tests/unit -q -p no:cacheprovider` | 1233 passed of 1236 run (3 warnings), ~28 s wall on 2026-10-19 (231 of them wiki structure cases; two tests start a process pool, ~15 s); plain `uv run --no-sync pytest -q` also runs the coverage from the template `pytest.ini` (`--cov=src --cov=tests --cov-branch --cov-fail-under=100`, 100% on 2026-10-19) |
 | Lint | `uv run --no-sync ruff check src tests` | passes (src, tests; `ruff.toml` excludes `examples/`, `docs/` and `.claude/wiki`, `mypy.ini` excludes `examples/` and `docs/`), <1 s, read-only (`fix = false`); `ruff.toml` is the user's template (ruff 0.17, `preview = true`, banned-api for `Any`, `dataclass`, `NamedTuple`, `TypedDict`) with py312, those two exclusions, `fix = false` and `assert` allowed in `tests/**/*.ipynb` (added 2026-10-19 with the user's approval, for the functional notebooks) |
@@ -37,7 +37,7 @@ From the repo root. Python 3.12 (`.python-version` 3.12.9), uv 0.13.1.
 | Duplicated code | `npx --yes jscpd@5.4.1 --min-lines 8 --reporters console --output <scratch dir> src` | read-only, 25 ms; needs Node 22 (installed in `/usr/bin`); downloads a 46 MB Rust binary into `~/.npm` the first time; 4.64% of `src` lines on 2026-10-19; not part of any gate |
 | Probe OpenGL backends | `uv run --no-sync python -m ariel.opengl.gl_manager` | writes `mujoco_user_config.json` in the current folder, ~2 s here (2026-10-20: egl and osmesa work, glfw fails, osmesa selected; before, all three failed); rerun after a driver change |
 | Pre-commit (all hooks) | `uv run --no-sync pre-commit run --all-files` | passes; also runs the notebook hooks (`notebooks-commit` on the committed notebooks, `notebooks-push` at push only; install the push hook with `uv run --no-sync pre-commit install --hook-type pre-commit --hook-type pre-push`); first run clones `pre-commit/pre-commit-hooks` into `~/.cache/pre-commit`; the whitespace/EOF hooks edit files, ruff hooks cover `src` and `tests` only |
-| Types (pyright) | `uv run --no-sync pyright src tests` | fails today (179 errors on 2026-10-19), ~15 s, read-only; first run downloads Node into `~/.cache/pyright-python` (229 MB) |
+| Types (pyright) | `uv run --no-sync pyright src tests` | fails today (182 errors on 2026-10-20), ~15 s, read-only; first run downloads Node into `~/.cache/pyright-python` (229 MB) |
 
 Ruff is pinned to 0.17.* and does not fix by default; `ruff check --fix` is opt-in. Pytest with `--cov=ariel` adds ~4 s and writes `.coverage`. Failing results are listed in PLAN.md.
 
