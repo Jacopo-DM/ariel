@@ -80,21 +80,15 @@ class CoreModule(Module):
 
         # ========= Attachment Points =========
         self.sites = {}
-        shift = -1  # mujoco uses xyzw instead of wxyz
         self.sites[ModuleFaces.FRONT] = core.add_site(
             name=f"{core_name}-front",
             pos=[0, CORE_DIMENSIONS[1] * 2, -CORE_DIMENSIONS[1] / 2],
             quat=np.round(
-                np.roll(
-                    qnp.as_float_array(
-                        qnp.from_euler_angles([
-                            np.deg2rad(0),
-                            np.deg2rad(180),
-                            np.deg2rad(180),
-                        ]),
-                    ),
-                    shift=shift,
-                ),
+                qnp.from_euler_angles([
+                    np.deg2rad(0),
+                    np.deg2rad(180),
+                    np.deg2rad(180),
+                ]),
                 decimals=3,
             ),
         )
@@ -102,16 +96,11 @@ class CoreModule(Module):
             name=f"{core_name}-back",
             pos=[0, 0, -CORE_DIMENSIONS[1] / 2],
             quat=np.round(
-                np.roll(
-                    qnp.as_float_array(
-                        qnp.from_euler_angles([
-                            np.deg2rad(0),
-                            np.deg2rad(0),
-                            np.deg2rad(0),
-                        ]),
-                    ),
-                    shift=shift,
-                ),
+                qnp.from_euler_angles([
+                    np.deg2rad(0),
+                    np.deg2rad(0),
+                    np.deg2rad(0),
+                ]),
                 decimals=3,
             ),
         )
@@ -123,16 +112,11 @@ class CoreModule(Module):
                 -CORE_DIMENSIONS[1] / 2,
             ],
             quat=np.round(
-                np.roll(
-                    qnp.as_float_array(
-                        qnp.from_euler_angles([
-                            np.deg2rad(90),
-                            -np.deg2rad(90),
-                            -np.deg2rad(90),
-                        ]),
-                    ),
-                    shift=shift,
-                ),
+                qnp.from_euler_angles([
+                    np.deg2rad(90),
+                    -np.deg2rad(90),
+                    -np.deg2rad(90),
+                ]),
                 decimals=3,
             ),
         )
@@ -144,16 +128,11 @@ class CoreModule(Module):
                 -CORE_DIMENSIONS[1] / 2,
             ],
             quat=np.round(
-                np.roll(
-                    qnp.as_float_array(
-                        qnp.from_euler_angles([
-                            np.deg2rad(90),
-                            np.deg2rad(90),
-                            -np.deg2rad(90),
-                        ]),
-                    ),
-                    shift=shift,
-                ),
+                qnp.from_euler_angles([
+                    np.deg2rad(90),
+                    np.deg2rad(90),
+                    -np.deg2rad(90),
+                ]),
                 decimals=3,
             ),
         )
@@ -161,16 +140,11 @@ class CoreModule(Module):
             name=f"{core_name}-top",
             pos=[0, CORE_DIMENSIONS[1], CORE_DIMENSIONS[2]],
             quat=np.round(
-                np.roll(
-                    qnp.as_float_array(
-                        qnp.from_euler_angles([
-                            np.deg2rad(0),
-                            np.deg2rad(180),
-                            np.deg2rad(90),
-                        ]),
-                    ),
-                    shift=shift,
-                ),
+                qnp.from_euler_angles([
+                    np.deg2rad(0),
+                    np.deg2rad(180),
+                    np.deg2rad(90),
+                ]),
                 decimals=3,
             ),
         )
@@ -178,16 +152,11 @@ class CoreModule(Module):
             name=f"{core_name}-bottom",
             pos=[0, CORE_DIMENSIONS[1], -CORE_DIMENSIONS[2]],
             quat=np.round(
-                np.roll(
-                    qnp.as_float_array(
-                        qnp.from_euler_angles([
-                            np.deg2rad(0),
-                            np.deg2rad(0),
-                            -np.deg2rad(90),
-                        ]),
-                    ),
-                    shift=shift,
-                ),
+                qnp.from_euler_angles([
+                    np.deg2rad(0),
+                    np.deg2rad(0),
+                    -np.deg2rad(90),
+                ]),
                 decimals=3,
             ),
         )

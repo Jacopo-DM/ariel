@@ -168,7 +168,6 @@ class HingeModule(Module):
             -np.deg2rad(180 - angle),
             np.deg2rad(0),
         ])
-        quat = np.roll(qnp.as_float_array(quat), shift=-1)
 
         # Set the quaternion for the hinge body
         self.body.quat = np.round(quat, decimals=3)

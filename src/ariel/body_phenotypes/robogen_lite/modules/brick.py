@@ -56,21 +56,15 @@ class BrickModule(Module):
 
         # ========= Attachment Points =========
         self.sites = {}
-        shift = -1  # mujoco uses xyzw instead of wxyz
         self.sites[ModuleFaces.FRONT] = brick.add_site(
             name=f"{brick_name}-front",
             pos=[0, ariel_modules_config.BRICK_DIMENSIONS[1] * 2, 0],
             quat=np.round(
-                np.roll(
-                    qnp.as_float_array(
-                        qnp.from_euler_angles([
-                            np.deg2rad(0),
-                            np.deg2rad(180),
-                            np.deg2rad(180),
-                        ]),
-                    ),
-                    shift=shift,
-                ),
+                qnp.from_euler_angles([
+                    np.deg2rad(0),
+                    np.deg2rad(180),
+                    np.deg2rad(180),
+                ]),
                 decimals=3,
             ),
         )
@@ -82,16 +76,11 @@ class BrickModule(Module):
                 0,
             ],
             quat=np.round(
-                np.roll(
-                    qnp.as_float_array(
-                        qnp.from_euler_angles([
-                            np.deg2rad(90),
-                            -np.deg2rad(90),
-                            -np.deg2rad(90),
-                        ]),
-                    ),
-                    shift=shift,
-                ),
+                qnp.from_euler_angles([
+                    np.deg2rad(90),
+                    -np.deg2rad(90),
+                    -np.deg2rad(90),
+                ]),
                 decimals=3,
             ),
         )
@@ -103,16 +92,11 @@ class BrickModule(Module):
                 0,
             ],
             quat=np.round(
-                np.roll(
-                    qnp.as_float_array(
-                        qnp.from_euler_angles([
-                            np.deg2rad(90),
-                            np.deg2rad(90),
-                            -np.deg2rad(90),
-                        ]),
-                    ),
-                    shift=shift,
-                ),
+                qnp.from_euler_angles([
+                    np.deg2rad(90),
+                    np.deg2rad(90),
+                    -np.deg2rad(90),
+                ]),
                 decimals=3,
             ),
         )
@@ -124,16 +108,11 @@ class BrickModule(Module):
                 ariel_modules_config.BRICK_DIMENSIONS[2],
             ],
             quat=np.round(
-                np.roll(
-                    qnp.as_float_array(
-                        qnp.from_euler_angles([
-                            np.deg2rad(0),
-                            np.deg2rad(180),
-                            np.deg2rad(90),
-                        ]),
-                    ),
-                    shift=shift,
-                ),
+                qnp.from_euler_angles([
+                    np.deg2rad(0),
+                    np.deg2rad(180),
+                    np.deg2rad(90),
+                ]),
                 decimals=3,
             ),
         )
@@ -145,16 +124,11 @@ class BrickModule(Module):
                 -ariel_modules_config.BRICK_DIMENSIONS[2],
             ],
             quat=np.round(
-                np.roll(
-                    qnp.as_float_array(
-                        qnp.from_euler_angles([
-                            np.deg2rad(0),
-                            np.deg2rad(0),
-                            -np.deg2rad(90),
-                        ]),
-                    ),
-                    shift=shift,
-                ),
+                qnp.from_euler_angles([
+                    np.deg2rad(0),
+                    np.deg2rad(0),
+                    -np.deg2rad(90),
+                ]),
                 decimals=3,
             ),
         )
@@ -182,7 +156,6 @@ class BrickModule(Module):
             -np.deg2rad(180 - angle),
             np.deg2rad(0),
         ])
-        quat = np.roll(qnp.as_float_array(quat), shift=-1)
 
         # Set the quaternion for the brick body
         self.body.quat = np.round(quat, decimals=3)
