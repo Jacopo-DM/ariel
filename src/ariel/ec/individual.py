@@ -14,8 +14,8 @@ class Individual(SQLModel, table=True):
     """
     A single candidate solution in an evolutionary algorithm.
 
-    Persisted as a SQLite row via SQLModel. All mutable state — fitness,
-    genotype, and tags — is accessed through properties that enforce
+    Persisted as a SQLite row via SQLModel. All mutable state, fitness,
+    genotype, and tags, is accessed through properties that enforce
     consistency invariants (e.g. clearing ``requires_eval`` on fitness
     assignment).
 

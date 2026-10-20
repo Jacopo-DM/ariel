@@ -1,4 +1,4 @@
-"""Test: Archive — read-only query interface for a persisted EA database."""
+"""Test: Archive, read-only query interface for a persisted EA database."""
 
 import math
 from pathlib import Path

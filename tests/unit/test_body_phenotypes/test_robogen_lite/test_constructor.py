@@ -13,7 +13,7 @@ from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
 
 
 def _make_core_only_graph() -> nx.DiGraph[int]:
-    """Single-node graph — just a core module.
+    """Single-node graph, just a core module.
 
     Returns
     -------
@@ -56,7 +56,7 @@ def _make_core_with_brick_graph() -> nx.DiGraph[int]:
 
 
 def _make_core_with_none_graph() -> nx.DiGraph[int]:
-    """Core with a NONE-type slot on FRONT — should be skipped.
+    """Core with a NONE-type slot on FRONT, should be skipped.
 
     Returns
     -------

@@ -45,7 +45,7 @@ def setup_database(
     db_file_path.parent.mkdir(parents=True, exist_ok=True)
 
     if db_file_path.exists():
-        msg = f"Database at {db_file_path!r} — handling: {db_handling!r}"
+        msg = f"Database at {db_file_path!r} - handling: {db_handling!r}"
         match db_handling:
             case "delete":
                 console.log(f"⚠️  {msg} → deleting", style="yellow")

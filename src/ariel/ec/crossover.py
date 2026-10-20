@@ -250,7 +250,7 @@ class Crossover:
 
         return _pack(c1, shape), _pack(c2, shape)
 
-    # -- Order crossover (OX) — for permutation representations ---------------
+    # -- Order crossover (OX), for permutation representations ---------------
 
     @staticmethod
     def order_crossover(

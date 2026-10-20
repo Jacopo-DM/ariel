@@ -57,7 +57,7 @@ def _rot_space(num_modules: int = NUM_MODULES) -> NDArray[np.float32]:
 
 
 # ---------------------------------------------------------------------------
-# HighProbabilityDecoder — initialization
+# HighProbabilityDecoder: initialization
 # ---------------------------------------------------------------------------
 
 
@@ -68,7 +68,7 @@ def test_hi_prob_decoder_initialization() -> None:
 
 
 # ---------------------------------------------------------------------------
-# HighProbabilityDecoder — probability_matrices_to_graph
+# HighProbabilityDecoder: probability_matrices_to_graph
 # ---------------------------------------------------------------------------
 
 
@@ -155,7 +155,7 @@ def test_hi_prob_decoder_single_module() -> None:
 
 
 # ---------------------------------------------------------------------------
-# HighProbabilityDecoder — apply_connection_constraints
+# HighProbabilityDecoder: apply_connection_constraints
 # ---------------------------------------------------------------------------
 
 
@@ -182,7 +182,7 @@ def test_hi_prob_apply_constraints_core_never_child() -> None:
 
 
 # ---------------------------------------------------------------------------
-# HighProbabilityDecoder — set_module_types_and_rotations
+# HighProbabilityDecoder: set_module_types_and_rotations
 # ---------------------------------------------------------------------------
 
 
@@ -223,7 +223,7 @@ def test_hi_prob_set_types_creates_rot_dict() -> None:
 
 
 # ---------------------------------------------------------------------------
-# HighProbabilityDecoder — decode_probability_to_graph
+# HighProbabilityDecoder: decode_probability_to_graph
 # ---------------------------------------------------------------------------
 
 
@@ -261,7 +261,7 @@ def test_hi_prob_decode_builds_edges_list() -> None:
 
 
 # ---------------------------------------------------------------------------
-# VectorDecoder — initialization
+# VectorDecoder: initialization
 # ---------------------------------------------------------------------------
 
 
@@ -272,7 +272,7 @@ def test_vector_decoder_initialization() -> None:
 
 
 # ---------------------------------------------------------------------------
-# VectorDecoder — assign_symbols_from_range
+# VectorDecoder: assign_symbols_from_range
 # ---------------------------------------------------------------------------
 
 
@@ -412,7 +412,7 @@ def test_hi_prob_decode_none_parent_raises() -> None:
 
 
 # ---------------------------------------------------------------------------
-# VectorDecoder — vectors_to_graph
+# VectorDecoder: vectors_to_graph
 # ---------------------------------------------------------------------------
 
 BRICK_VALUE = 0.2  # first of three types: BRICK, HINGE, NONE

@@ -50,7 +50,7 @@ def _fill_parameters(net: _Network, params: NDArray[np.float64]) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Experiment-specific EvalConfig (optional — plain EvalConfig also works)
+# Experiment-specific EvalConfig (optional, plain EvalConfig also works)
 # ---------------------------------------------------------------------------
 
 

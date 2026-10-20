@@ -16,7 +16,7 @@ def _safe_attr(individual: Individual, attribute: str) -> float:
 
     Attempts to read ``attribute`` from ``individual`` and cast it to
     ``float``. Returns ``float("-inf")`` instead of raising when the
-    attribute is missing, ``None``, or non-numeric — allowing callers to
+    attribute is missing, ``None``, or non-numeric, allowing callers to
     use this as a sort key without crashing on unevaluated individuals.
 
     Parameters
@@ -44,7 +44,7 @@ class Population:  # ruff: ignore[too-many-public-methods]  # public signature o
     Ordered, mutable container of ``Individual`` objects.
 
     Supports a chainable query API modelled after NumPy / pandas idioms.
-    All filter and sort methods return new ``Population`` instances —
+    All filter and sort methods return new ``Population`` instances -
     the original is never mutated.
 
     Parameters
@@ -262,7 +262,7 @@ class Population:  # ruff: ignore[too-many-public-methods]  # public signature o
             Name of the ``Individual`` attribute to sort by. Pass
             ``"fitness_"`` (default) to use the raw stored value, or
             ``"fitness"`` to use the property (which raises for
-            unevaluated individuals — caught internally and treated as
+            unevaluated individuals, caught internally and treated as
             ``-inf``).
         n : int, optional
             Number of top individuals to return. Default is ``1``.

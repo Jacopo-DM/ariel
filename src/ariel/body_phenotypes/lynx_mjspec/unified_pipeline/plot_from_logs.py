@@ -93,7 +93,7 @@ def plot_training_logs(log_files: str | list[str]) -> None:
     )
 
     # Chart Formatting
-    plt.title(f"Training Metrics — {n_runs} runs aggregated", fontsize=14)
+    plt.title(f"Training Metrics - {n_runs} runs aggregated", fontsize=14)
     plt.xlabel("Generation", fontsize=12)
     plt.ylabel("Metric Value", fontsize=12)
 

@@ -2,7 +2,7 @@
 
 Users subclass MuJoCoWorkerBase and implement evaluate() with their
 experiment-specific fitness logic. The instance is passed directly to
-multiprocessing.Pool.imap — it is picklable because it is a named class.
+multiprocessing.Pool.imap, it is picklable because it is a named class.
 """
 
 import os

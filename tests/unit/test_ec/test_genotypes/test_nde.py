@@ -1,4 +1,4 @@
-"""Test: NeuralDevelopmentalEncoding — init, forward shapes, and value range."""
+"""Test: NeuralDevelopmentalEncoding, init, forward shapes, and value range."""
 
 from itertools import starmap
 
@@ -100,7 +100,7 @@ def test_nde_rotation_shape() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Forward — output structure
+# Forward: output structure
 # ---------------------------------------------------------------------------
 
 
@@ -143,7 +143,7 @@ def test_nde_forward_rotation_shape() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Forward — value properties (sigmoid output → [0, 1])
+# Forward: value properties (sigmoid output → [0, 1])
 # ---------------------------------------------------------------------------
 
 
@@ -186,7 +186,7 @@ def test_nde_forward_no_nan() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Forward — determinism
+# Forward: determinism
 # ---------------------------------------------------------------------------
 
 
@@ -210,7 +210,7 @@ def test_nde_forward_different_inputs_differ() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Forward — different module counts
+# Forward: different module counts
 # ---------------------------------------------------------------------------
 
 

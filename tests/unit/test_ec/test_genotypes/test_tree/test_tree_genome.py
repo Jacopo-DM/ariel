@@ -1,4 +1,4 @@
-"""Test: TreeGenome model — construction, conversion, serialization."""
+"""Test: TreeGenome model, construction, conversion, serialization."""
 
 import json
 import tempfile

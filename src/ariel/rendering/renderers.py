@@ -247,7 +247,7 @@ def tracking_video_renderer(
     )
     if core_body_id == -1:
         msg = (
-            f"Body '{geom_to_track}' not found — scanning for any 'core' body."
+            f"Body '{geom_to_track}' not found - scanning for any 'core' body."
         )
         log.warning(msg)
         core_body_id = next(
@@ -263,7 +263,7 @@ def tracking_video_renderer(
     if core_body_id is not None:
         log.info(f"Tracking body ID: {core_body_id}")
     else:
-        log.warning("No 'core' body found — using default free camera.")
+        log.warning("No 'core' body found - using default free camera.")
 
     # Calculate steps per frame to avoid single iterations
     options = mujoco.MjOption()

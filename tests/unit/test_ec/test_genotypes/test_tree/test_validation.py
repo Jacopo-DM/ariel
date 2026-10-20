@@ -168,7 +168,7 @@ def test_validate_invalid_face_raises() -> None:
 
 def test_validate_disallowed_face_for_type_raises() -> None:
     """Edge using a face not allowed for the parent type raises ValueError."""
-    # HINGE only allows FRONT — using BACK on a hinge parent should fail
+    # HINGE only allows FRONT: using BACK on a hinge parent should fail
     genome = {
         "nodes": {
             "0": {"type": "CORE", "rotation": "DEG_0"},

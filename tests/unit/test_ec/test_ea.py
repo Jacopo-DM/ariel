@@ -81,7 +81,7 @@ def test_ea_db_handling_delete_overwrites(tmp_path: Path) -> None:
     # Explicitly dispose the engine so Windows releases the file lock
     ea1.engine.dispose()
     del ea1
-    # Second run on same path — should succeed
+    # Second run on same path: should succeed
     EA(
         population=make_pop(),
         operations=[noop],
