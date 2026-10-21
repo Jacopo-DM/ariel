@@ -65,11 +65,13 @@ def _parse_worker_output(stdout: str) -> BackendResult:
     try:
         payload = json.loads(lines[-1])
         ok = bool(payload["ok"])
+        # A success without a numeric time is as unreadable as garbage
+        render_ms = float(payload["render_ms"]) if ok else None
     except (IndexError, ValueError, KeyError, TypeError):
         return BackendResult(ok=False, error="worker output unreadable")
     if not ok:
         return BackendResult(ok=False, error=str(payload.get("error")))
-    return BackendResult(ok=True, render_ms=float(payload["render_ms"]))
+    return BackendResult(ok=True, render_ms=render_ms)
 
 
 def probe_backend(

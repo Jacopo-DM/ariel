@@ -7,6 +7,8 @@ from collections.abc import Callable
 from pathlib import Path
 
 import pytest
+from hypothesis import example, given
+from hypothesis import strategies as st
 from rich.console import Console
 
 from ariel.opengl import gl_manager
@@ -112,6 +114,44 @@ def test_probe_backend_missing_executable() -> None:
     result = gl_manager.probe_backend("egl", build, timeout=5)
     assert result.ok is False
     assert result.error is not None
+
+
+WORKER_VALUES = (
+    st.none()
+    | st.booleans()
+    | st.integers()
+    | st.floats()
+    | st.text()
+    | st.lists(st.integers(), max_size=2)
+)
+WORKER_LINES = st.one_of(
+    st.text(),
+    st.dictionaries(
+        st.sampled_from(["ok", "render_ms", "error"]), WORKER_VALUES
+    ).map(json.dumps),
+    st.lists(WORKER_VALUES, max_size=2).map(json.dumps),
+)
+
+
+@given(st.lists(WORKER_LINES, max_size=3).map("\n".join))
+@example('noise\n{"ok": true, "render_ms": 12.5}')
+@example('{"ok": true, "": null}')
+@example('{"ok": true, "render_ms": null}')
+@example('{"ok": true, "render_ms": "fast"}')
+def test_parse_worker_output_boundary(stdout: str) -> None:
+    """Any worker output gives a BackendResult, never an exception."""
+    result = gl_manager._parse_worker_output(stdout)  # ruff: ignore[private-member-access]  # the parser of the probe's stdout
+    assert isinstance(result, BackendResult)
+
+
+@pytest.mark.parametrize(
+    "stdout",
+    ['{"ok": true}', '{"ok": true, "render_ms": "fast"}'],
+)
+def test_success_without_a_time_is_unreadable(stdout: str) -> None:
+    """A reported success with no numeric render time counts as unreadable."""
+    result = gl_manager._parse_worker_output(stdout)  # ruff: ignore[private-member-access]  # the parser of the probe's stdout
+    assert result == BackendResult(ok=False, error="worker output unreadable")
 
 
 def test_select_backend_prefers_fastest() -> None:
