@@ -91,7 +91,7 @@ class BaseWorld:
         spec.modelname = self.name.replace("-", " ").title()
 
         # Copy during attach
-        spec.copy_during_attach = True
+        spec.copy_during_attach = True  # ty: ignore[invalid-assignment]  # stub types this write-only property as None
 
         # --- Assets ---
         # Skybox Texture
@@ -271,7 +271,7 @@ class BaseWorld:
 
     def _check_and_correct_spawn(
         self,
-        spawn_site: mj.MjsBody,
+        spawn_site: mj.MjsSite,
         spawn_body: mj.MjsBody,
         spawn_name: str,
         base_point: float = 0.01,
@@ -283,7 +283,7 @@ class BaseWorld:
 
         Parameters
         ----------
-        spawn_site : mj.MjsBody
+        spawn_site : mj.MjsSite
             The site where the robot is spawned.
         spawn_body : mj.MjsBody
             The body of the spawned robot.
@@ -405,8 +405,8 @@ class BaseWorld:
 
         # Create a spawn site at the specified position
         spawn_site = self.spec.worldbody.add_site(
-            pos=np.array(position),
-            quat=np.array(rotation_as_quat),
+            pos=list(position),
+            quat=rotation_as_quat.tolist(),
         )
 
         # Attach the robot body to the spawn site

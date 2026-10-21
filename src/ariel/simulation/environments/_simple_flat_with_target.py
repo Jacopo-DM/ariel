@@ -39,11 +39,8 @@ class SimpleFlatWorldWithTarget(BaseWorld):
         # Floor geom parameters
         self._floor_name = self.mujoco_config.floor_name
         width, height, depth = self.floor_size
-        self._floor_kwargs = {
-            "name": self._floor_name,
-            "size": [width / 2, height / 2, depth / 2],  # mj starts from center
-            "type": mujoco.mjtGeom.mjGEOM_PLANE,
-        }
+        # mj starts from center
+        self._floor_half_size = [width / 2, height / 2, depth / 2]
 
         # Create checker texture if enabled
         self._create_checker_texture()
@@ -69,15 +66,17 @@ class SimpleFlatWorldWithTarget(BaseWorld):
             reflectance=0,
         )
 
-        # Update floor geom parameters
-        self._floor_kwargs["material"] = self._floor_name
-
     def _expand_spec(self) -> None:
         floor = self.spec.worldbody.add_body(
             name=self._floor_name,
             pos=[0, 0, 0],
         )
-        floor.add_geom(**self._floor_kwargs)
+        floor.add_geom(
+            name=self._floor_name,
+            type=mujoco.mjtGeom.mjGEOM_PLANE,
+            size=self._floor_half_size,
+            material=self._floor_name,
+        )
 
         # Add a target marker cube (for visual feedback)
         target_body = self.spec.worldbody.add_body(

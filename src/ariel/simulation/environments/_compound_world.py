@@ -116,10 +116,6 @@ class CompoundWorld(BaseWorld):
 
         # Floor geom parameters
         self._floor_name = self.mujoco_config.floor_name
-        self._floor_kwargs = {
-            "name": self._floor_name,
-            "size": self.floor_size,
-        }
 
         # Use flat heightmap if none is provided
         if self.floor_heightmap is None:
@@ -137,8 +133,6 @@ class CompoundWorld(BaseWorld):
         # Create checker texture if enabled
         if self.checker_floor is True:
             self._create_checker_texture()
-        else:
-            self._floor_kwargs["rgba"] = self._terrain_color
 
         #  Expand the MuJoCo specification
         self._expand_spec()
@@ -163,10 +157,6 @@ class CompoundWorld(BaseWorld):
             userdata=heightmap.flatten().tolist(),
         )
 
-        # Update floor geom parameters
-        self._floor_kwargs["hfieldname"] = self._floor_name
-        self._floor_kwargs["type"] = mujoco.mjtGeom.mjGEOM_HFIELD
-
     def _set_floor_tilt(
         self,
         tilt: Rotation,  # degrees (x, y, z)
@@ -177,9 +167,6 @@ class CompoundWorld(BaseWorld):
             tilt,
             rotation_sequence,
         )
-
-        # Update floor geom parameters
-        self._floor_kwargs["quat"] = self.rotation_as_quat  # type: ignore[assignment]  # known bug
 
     def _create_checker_texture(self) -> None:
         self.spec.add_texture(
@@ -199,8 +186,14 @@ class CompoundWorld(BaseWorld):
             reflectance=0,
         )
 
-        # Update floor geom parameters
-        self._floor_kwargs["material"] = self._floor_name
-
     def _expand_spec(self) -> None:
-        self.spec.worldbody.add_geom(**self._floor_kwargs)
+        checker = self.checker_floor is True
+        self.spec.worldbody.add_geom(
+            name=self._floor_name,
+            type=mujoco.mjtGeom.mjGEOM_HFIELD,
+            size=list(self.floor_size),
+            hfieldname=self._floor_name,
+            quat=self.rotation_as_quat.tolist(),
+            material=self._floor_name if checker else None,
+            rgba=None if checker else list(self._terrain_color),
+        )
