@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import cast
 
 import mujoco
+import mujoco.viewer
 import numpy as np
 import pytest
 

@@ -10,27 +10,31 @@ import pytest
 from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots import john_set
 
-BUILDERS: list[Callable[[], CoreModule]] = [
-    john_set.baby_a,
-    john_set.baby_b,
-    john_set.gecko_small,
-    john_set.linkin_modified,
-    john_set.snake,
-    john_set.turtle,
-    john_set.iguana,
-    john_set.spider_8,
-    john_set.spider_12,
-    john_set.spider_16,
-    john_set.centipede_3,
-    john_set.centipede_4,
-    john_set.centipede_5,
-]
+# Looked up by name, so each key is the name of its function
+BUILDERS: dict[str, Callable[[], CoreModule]] = {
+    name: getattr(john_set, name)
+    for name in (
+        "baby_a",
+        "baby_b",
+        "gecko_small",
+        "linkin_modified",
+        "snake",
+        "turtle",
+        "iguana",
+        "spider_8",
+        "spider_12",
+        "spider_16",
+        "centipede_3",
+        "centipede_4",
+        "centipede_5",
+    )
+}
 
 
-@pytest.mark.parametrize("builder", BUILDERS, ids=lambda f: f.__name__)
-def test_body_builds_and_compiles(builder: Callable[[], CoreModule]) -> None:
+@pytest.mark.parametrize("name", list(BUILDERS))
+def test_body_builds_and_compiles(name: str) -> None:
     """Every body in the set is a CoreModule that compiles and steps."""
-    core = builder()
+    core = BUILDERS[name]()
     assert isinstance(core, CoreModule)
     model = cast("mujoco.MjModel", core.spec.compile())
     data = mujoco.MjData(model)
@@ -61,13 +65,13 @@ XML_HASHES = {
 
 def test_every_body_has_a_recorded_hash() -> None:
     """The hash table covers exactly the bodies the module offers."""
-    assert sorted(XML_HASHES) == sorted(b.__name__ for b in BUILDERS)
+    assert sorted(XML_HASHES) == sorted(BUILDERS)
 
 
-@pytest.mark.parametrize("builder", BUILDERS, ids=lambda f: f.__name__)
-def test_body_xml_is_unchanged(builder: Callable[[], CoreModule]) -> None:
+@pytest.mark.parametrize("name", list(BUILDERS))
+def test_body_xml_is_unchanged(name: str) -> None:
     """The compiled-spec XML of each body matches the recorded hash."""
-    core = builder()
+    core = BUILDERS[name]()
     digest = hashlib.sha256(core.spec.to_xml().encode()).hexdigest()[:16]
-    assert digest == XML_HASHES[builder.__name__]
+    assert digest == XML_HASHES[name]
     del core

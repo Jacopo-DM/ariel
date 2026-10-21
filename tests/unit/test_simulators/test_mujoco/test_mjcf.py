@@ -33,8 +33,12 @@ def same(left: Value, right: Value) -> bool:
             a == pytest.approx(b, rel=1e-5)
             for a, b in zip(left, right, strict=True)
         )
-    if isinstance(left, float) or isinstance(right, float):
-        return float(left) == pytest.approx(float(right), rel=1e-5)  # type: ignore[arg-type]  # not a tuple here
+    if (
+        isinstance(left, int | float)
+        and isinstance(right, int | float)
+        and (isinstance(left, float) or isinstance(right, float))
+    ):
+        return float(left) == pytest.approx(float(right), rel=1e-5)
     return left == right
 
 

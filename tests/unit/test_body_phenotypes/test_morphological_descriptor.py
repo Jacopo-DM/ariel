@@ -18,7 +18,7 @@ FOUR_MODULES = 4
 CORE_FACES = ("FRONT", "BACK", "RIGHT", "LEFT", "TOP", "BOTTOM")
 PROPERTIES = [
     name
-    for name, member in inspect.getmembers(
+    for name, _ in inspect.getmembers(
         MorphologicalMeasures, lambda obj: isinstance(obj, property)
     )
 ]

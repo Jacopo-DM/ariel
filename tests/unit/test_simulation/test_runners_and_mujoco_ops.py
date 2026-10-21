@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import importlib.metadata
+import importlib
 from types import SimpleNamespace
 from typing import cast
 
@@ -56,7 +56,7 @@ def test_self_collision_check_reports_compile_errors() -> None:
 
     def fail() -> None:
         msg = "boom"
-        raise mujoco.FatalError(msg)
+        raise mujoco.FatalError(msg)  # pyright: ignore[reportCallIssue]  # the generated stub loses FatalError in a circular import
 
     spec = cast("mujoco.MjSpec", SimpleNamespace(compile=fail))
     with pytest.raises(ValueError, match="Failed to compile"):

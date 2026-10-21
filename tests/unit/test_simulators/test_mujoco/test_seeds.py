@@ -8,6 +8,7 @@ from pydantic import ValidationError
 
 # Local libraries
 from ariel.simulators.mujoco.seeds import Seeds
+from tests.unit.misuse import assign, untyped
 
 DEFAULT_LENGTH_M = 0.05
 DEFAULT_SPEED_M_S = 1.0
@@ -50,7 +51,7 @@ def test_a_wrong_dimension_raises() -> None:
 
 def test_a_number_without_a_unit_raises() -> None:
     with pytest.raises(ValidationError, match="astropy quantity"):
-        Seeds(length_scale=DEFAULT_LENGTH_M)  # type: ignore[arg-type]  # the test passes the wrong type on purpose
+        untyped(Seeds)(length_scale=DEFAULT_LENGTH_M)
 
 
 @pytest.mark.parametrize(
@@ -77,7 +78,7 @@ def test_plain_seeds_must_be_positive(name: str, bad: float) -> None:
 def test_seeds_are_frozen() -> None:
     seeds = Seeds()
     with pytest.raises(ValidationError, match="frozen"):
-        seeds.alpha = 0.1  # type: ignore[misc]  # the test assigns to a frozen field on purpose
+        assign(seeds, "alpha", 0.1)
 
 
 def test_replace_returns_a_new_object_and_keeps_the_old_one() -> None:

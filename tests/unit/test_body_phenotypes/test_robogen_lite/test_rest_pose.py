@@ -64,12 +64,12 @@ def test_every_module_of_a_random_body_owns_geoms() -> None:
 def test_poses_are_in_the_core_frame() -> None:
     plain = rest_boxes(john_set.spider_8())
     turned_core = john_set.spider_8()
-    turned_core.spec.body("core").quat = (
+    turned_core.spec.body("core").quat = np.array([
         math.cos(math.pi / 8),
         0,
         0,
         math.sin(math.pi / 8),
-    )
+    ])
     turned = rest_boxes(turned_core)
     assert plain.owners == turned.owners
     np.testing.assert_allclose(turned.poses, plain.poses, atol=1e-9)

@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from ariel.simulation.mujoco_worker import EvalConfig, MuJoCoWorkerBase
+from tests.unit.misuse import assign
 
 if TYPE_CHECKING:
     from types import ModuleType
@@ -73,9 +74,13 @@ def test_eval_config_is_frozen_and_strict() -> None:
     """EvalConfig rejects unknown fields and cannot be changed."""
     config = EvalConfig(spawn_position=SPAWN, target_position=TARGET)
     with pytest.raises(ValueError, match="frozen"):
-        config.seed = 1  # type: ignore[misc]  # frozen on purpose
+        assign(config, "seed", 1)
     with pytest.raises(ValueError, match="extra"):
-        EvalConfig(spawn_position=SPAWN, target_position=TARGET, speed=1)  # type: ignore[call-arg]  # deliberately wrong
+        EvalConfig.model_validate({
+            "spawn_position": SPAWN,
+            "target_position": TARGET,
+            "speed": 1,
+        })
 
 
 @pytest.fixture

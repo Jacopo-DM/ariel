@@ -108,46 +108,59 @@ def test_ea_commit_sets_time_of_birth(tmp_path: Path) -> None:
     """_commit assigns time_of_birth=-1 individuals the current generation."""
     ea = make_ea(tmp_path)
     # Fetch fresh from DB so SQLAlchemy session context is active
-    pop = ea._fetch()  # ruff: ignore[private-member-access]
-    for ind in pop:
+    ea.fetch_population()
+    for ind in ea.population:
         assert ind.time_of_birth == 0
 
 
 def test_ea_fetch_returns_population(tmp_path: Path) -> None:
-    """_fetch returns a Population instance."""
+    """fetch_population stores a Population."""
     ea = make_ea(tmp_path)
-    pop = ea._fetch()  # ruff: ignore[private-member-access]
-    assert isinstance(pop, Population)
+    ea.fetch_population()
+    assert isinstance(ea.population, Population)
 
 
 def test_ea_fetch_only_alive(tmp_path: Path) -> None:
-    """_fetch(only_alive=True) returns only alive individuals."""
+    """fetch_population(only_alive=True) keeps only alive individuals."""
     ea = make_ea(tmp_path)
-    pop = ea._fetch(only_alive=True)  # ruff: ignore[private-member-access]
-    assert all(ind.alive for ind in pop)
+    ea.fetch_population(only_alive=True)
+    assert all(ind.alive for ind in ea.population)
 
 
-def test_ea_fetch_sort_desc(tmp_path: Path) -> None:
-    """_fetch(sort='desc') returns individuals sorted by fitness descending."""
-    ea = make_ea(tmp_path)
-    pop = ea._fetch(sort="desc")  # ruff: ignore[private-member-access]
-    fitnesses = [ind.fitness_ for ind in pop if ind.fitness_ is not None]
-    assert fitnesses == sorted(fitnesses, reverse=True)
+def _solution_fitnesses(ea: EA) -> tuple[float, float, float]:
+    best = ea.get_solution(mode="best").fitness_
+    median = ea.get_solution(mode="median").fitness_
+    worst = ea.get_solution(mode="worst").fitness_
+    assert best is not None
+    assert median is not None
+    assert worst is not None
+    return best, median, worst
 
 
-def test_ea_fetch_sort_asc(tmp_path: Path) -> None:
-    """_fetch(sort='asc') returns individuals sorted by fitness ascending."""
-    ea = make_ea(tmp_path)
-    pop = ea._fetch(sort="asc")  # ruff: ignore[private-member-access]
-    fitnesses = [ind.fitness_ for ind in pop if ind.fitness_ is not None]
-    assert fitnesses == sorted(fitnesses)
+def test_ea_solutions_descend_when_maximising(tmp_path: Path) -> None:
+    """Maximising: best, median and worst come in falling fitness."""
+    best, median, worst = _solution_fitnesses(make_ea(tmp_path))
+    assert best >= median >= worst
+
+
+def test_ea_solutions_ascend_when_minimising(tmp_path: Path) -> None:
+    """Minimising: best, median and worst come in rising fitness."""
+    ea = EA(
+        population=make_pop(),
+        operations=[noop],
+        db_file_path=tmp_path / "test.db",
+        quiet=True,
+        is_maximisation=False,
+    )
+    best, median, worst = _solution_fitnesses(ea)
+    assert best <= median <= worst
 
 
 def test_ea_fetch_requires_eval_false(tmp_path: Path) -> None:
-    """_fetch(requires_eval=False) returns only evaluated individuals."""
+    """fetch_population(requires_eval=False) keeps evaluated individuals."""
     ea = make_ea(tmp_path)
-    pop = ea._fetch(requires_eval=False)  # ruff: ignore[private-member-access]
-    assert all(not ind.requires_eval for ind in pop)
+    ea.fetch_population(requires_eval=False)
+    assert all(not ind.requires_eval for ind in ea.population)
 
 
 def test_ea_fetch_population_updates_self(tmp_path: Path) -> None:

@@ -7,6 +7,7 @@ import pytest
 
 from ariel.ec import EAOperation, EASettings
 from ariel.ec.population import Population
+from tests.unit.misuse import untyped
 from tests.unit.test_ec.ea_helpers import (
     CUSTOM_NUM_STEPS,
     DEFAULT_NUM_STEPS,
@@ -64,7 +65,7 @@ def test_eaoperation_no_params_raises() -> None:
 
     assert len(bad()) == 0
     with pytest.raises(TypeError, match="first argument"):
-        EAOperation(bad)  # type: ignore[arg-type]  # deliberately wrong signature
+        untyped(EAOperation)(bad)
 
 
 def test_eaoperation_wrong_first_param_type_raises() -> None:
@@ -75,7 +76,7 @@ def test_eaoperation_wrong_first_param_type_raises() -> None:
 
     assert len(bad(1)) == 1
     with pytest.raises(TypeError, match="Population"):
-        EAOperation(bad)  # type: ignore[arg-type]  # deliberately wrong signature
+        untyped(EAOperation)(bad)
 
 
 def test_eaoperation_wrong_return_type_raises() -> None:
@@ -86,7 +87,7 @@ def test_eaoperation_wrong_return_type_raises() -> None:
 
     assert bad(make_pop()) == [4]
     with pytest.raises(TypeError, match="Population"):
-        EAOperation(bad)  # type: ignore[arg-type]  # deliberately wrong signature
+        untyped(EAOperation)(bad)
 
 
 def test_eaoperation_call_with_population_executes() -> None:

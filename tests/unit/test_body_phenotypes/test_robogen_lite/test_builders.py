@@ -30,6 +30,7 @@ from ariel.body_phenotypes.robogen_lite.modules.brick import BrickModule
 from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
 from ariel.body_phenotypes.robogen_lite.modules.hinge import HingeModule
 from ariel.body_phenotypes.robogen_lite.modules.module import Module
+from tests.unit.misuse import untyped
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -118,7 +119,7 @@ def test_module_rotate_default_raises() -> None:
         module_type = ModuleType.BRICK
 
         def rotate(self, angle: float) -> None:
-            super().rotate(angle)
+            untyped(super().rotate)(angle)  # the abstract method, on purpose
 
     with pytest.raises(NotImplementedError, match="does not implement"):
         _Complete().rotate(0.0)

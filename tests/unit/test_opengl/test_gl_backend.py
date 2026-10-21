@@ -232,7 +232,8 @@ def test_ensure_does_nothing_when_environment_is_set(tmp_path: Path) -> None:
 def test_ensure_when_mujoco_already_imported(tmp_path: Path) -> None:
     """The probe still runs and is saved, but applies from the next run."""
     run = _FakeRun()
-    console = _quiet_console()
+    buffer = io.StringIO()
+    console = Console(file=buffer, width=120)
     environ: dict[str, str] = {}
     applied = gl_backend.ensure_gl_backend(
         tmp_path / CONFIG_NAME,
@@ -244,7 +245,7 @@ def test_ensure_when_mujoco_already_imported(tmp_path: Path) -> None:
     assert applied is None
     assert run.calls == 1
     assert environ == {}
-    assert "next time" in console.file.getvalue()  # type: ignore[attr-defined]
+    assert "next time" in buffer.getvalue()
 
 
 def test_ensure_reprobes_a_corrupt_file(tmp_path: Path) -> None:

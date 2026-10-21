@@ -28,6 +28,7 @@ _gl_probe_worker = importlib.import_module("ariel.opengl._gl_probe_worker")
 
 RENDER_MS = 1.5
 LOCK_TIMEOUT = 5.0
+STAT_THAT_MISSES = 2  # the lock vanishes on the second stat()
 USAGE_ERROR = 2
 
 
@@ -61,20 +62,34 @@ def test_mujoco_version_without_the_package(
 def test_wait_for_lock_stops_when_the_lock_disappears(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """A lock released between exists() and stat() ends the wait."""
-    lock = tmp_path / "x.lock"
+    """A lock released between exists() and stat() ends the wait.
+
+    Another process holds the lock; it releases it just as this one reads
+    the lock's age, and this one then takes the lock and probes.
+    """
+    path = tmp_path / gl_backend.CONFIG_NAME
+    lock = path.with_name(path.name + gl_backend.LOCK_SUFFIX)
     lock.write_text("1", encoding="utf-8")
     original = type(lock).stat
     calls: list[int] = []
 
     def vanishing(self: Path, **kwargs: bool) -> os.stat_result:
-        calls.append(1)
-        if len(calls) > 1:
-            raise FileNotFoundError
+        if self == lock:
+            calls.append(1)
+            if len(calls) == STAT_THAT_MISSES:  # exists() saw it
+                lock.unlink()
+                raise FileNotFoundError
         return original(self, **kwargs)
 
     monkeypatch.setattr(type(lock), "stat", vanishing)
-    gl_backend._wait_for_lock(lock, LOCK_TIMEOUT)  # ruff: ignore[private-member-access]  # tests the private helper directly
+    applied = gl_backend.ensure_gl_backend(
+        path,
+        run=lambda _target: GLConfig(selected="egl"),
+        environ={},
+        modules={},
+        lock_timeout=LOCK_TIMEOUT,
+    )
+    assert applied == "egl"
     assert len(calls) > 1
 
 

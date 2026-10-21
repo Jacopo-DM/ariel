@@ -9,6 +9,7 @@ import networkx as nx
 import pytest
 
 from ariel.body_phenotypes import (
+    CoreModule,
     construct_mjspec_from_graph,
     find_overlaps,
     repair_overlaps,
@@ -120,7 +121,7 @@ def test_the_smaller_id_goes_first_among_equally_deep_modules(
 
     monkeypatch.setattr(overlap, "find_overlaps", fake)
     caplog.set_level(logging.DEBUG, logger="rich")
-    repaired = repair_overlaps(graph, lambda _graph: None)  # type: ignore[arg-type,return-value]  # the fake finder ignores the body
+    repaired = repair_overlaps(graph, lambda _graph: CoreModule(index=0))
     assert [r.getMessage() for r in caplog.records if r.name == "rich"] == [
         "pruned 1 modules (ids 1) for overlap with 0",
         "pruned 1 modules (ids 2) for overlap with 0",
@@ -142,7 +143,7 @@ def test_a_removed_module_takes_its_subtree_with_it(
 
     monkeypatch.setattr(overlap, "find_overlaps", fake)
     caplog.set_level(logging.DEBUG, logger="rich")
-    repaired = repair_overlaps(graph, lambda _graph: None)  # type: ignore[arg-type,return-value]  # the fake finder ignores the body
+    repaired = repair_overlaps(graph, lambda _graph: CoreModule(index=0))
     assert [r.getMessage() for r in caplog.records if r.name == "rich"] == [
         "pruned 2 modules (ids 2, 3) for overlap with 0"
     ]

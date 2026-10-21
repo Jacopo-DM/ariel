@@ -25,6 +25,8 @@ from ariel.simulation.environments import (
     olympic_arena,
 )
 from ariel.simulators.mujoco import Seeds
+from tests.unit.misuse import untyped
+from tests.unit.test_simulation.plain_world import PlainWorld
 
 TOOL = Path(__file__).resolve().parents[4] / "tools" / "compile_terrains.py"
 
@@ -174,7 +176,7 @@ def test_world_no_longer_takes_a_mujoco_config() -> None:
     """The config argument was dropped silently; passing it now fails."""
     config = SimpleFlatWorld(load_precompiled=False).mujoco_config
     with pytest.raises(TypeError, match="mujoco_config"):
-        BaseWorld(mujoco_config=config, load_precompiled=False)  # type: ignore[abstract,call-arg]  # the removed argument is the point of the test
+        untyped(PlainWorld)(mujoco_config=config, load_precompiled=False)
 
 
 def test_worlds_start_from_the_generated_settings() -> None:
@@ -278,34 +280,39 @@ def test_smooth_edges_resizes_non_square_maps() -> None:
     assert mask.shape == NON_SQUARE
 
 
-def test_the_geometry_compile_matches_the_full_compile() -> None:
+def test_the_geometry_compile_matches_the_full_compile(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """Tiny textures change nothing the spawn correction reads.
 
     The old path compiled the whole world; the new one compiles with 1 by 1
-    textures (speed-up S1). Positions, rotations, sizes and contacts must be
-    identical in every world, and the real texture sizes must come back.
+    textures (speed-up S1). A robot spawned in every world must land exactly
+    where the full compile puts it, the collision check must report the same
+    contacts, and the real texture sizes must come back.
     """
-    random.seed(7)
+    unseeded = np.random.default_rng
+
+    def seeded(seed: int | None = None) -> np.random.Generator:
+        return unseeded(0 if seed is None else seed)
+
+    # The terrain noise is not seeded; seeding it builds one terrain twice
+    monkeypatch.setattr(np.random, "default_rng", seeded)
     for _, cls in inspect.getmembers(environments, inspect.isclass):
-        world = cls(load_precompiled=False)
-        robot = construct_mjspec_from_graph(random_tree(12).to_networkx())
-        world.spawn(robot.spec, correct_collision_with_floor=False)
-        sizes = [(t.width, t.height) for t in world.spec.textures]
-        full = cast("mujoco.MjModel", world.spec.compile())
-        lite = world._compile_for_geometry()
-        full_data, lite_data = mujoco.MjData(full), mujoco.MjData(lite)
-        mujoco.mj_forward(full, full_data)
-        mujoco.mj_forward(lite, lite_data)
-        assert np.array_equal(full_data.geom_xpos, lite_data.geom_xpos)
-        assert np.array_equal(full_data.geom_xmat, lite_data.geom_xmat)
-        assert np.array_equal(full.geom_size, lite.geom_size)
-        assert full_data.ncon == lite_data.ncon
-        assert np.array_equal(full_data.contact.dist, lite_data.contact.dist)
-        assert sizes == [(t.width, t.height) for t in world.spec.textures]
-        assert (
-            cast("mujoco.MjModel", world.spec.compile()).tex_data.size
-            == full.tex_data.size
+        world_cls = cast("type[BaseWorld]", cls)
+        lite = world_cls(load_precompiled=False)
+        full = world_cls(load_precompiled=False)
+        monkeypatch.setattr(
+            full,
+            "_compile_for_geometry",
+            lambda world=full: world.spec.compile(),
         )
+        sizes = [(t.width, t.height) for t in lite.spec.textures]
+        for world in (lite, full):
+            random.seed(7)
+            robot = construct_mjspec_from_graph(random_tree(12).to_networkx())
+            world.spawn(robot.spec, validate_no_collisions=True)
+        assert sizes == [(t.width, t.height) for t in lite.spec.textures]
+        assert lite.spec.to_xml() == full.spec.to_xml(), cls.__name__
 
 
 def test_the_texture_sizes_come_back_when_the_compile_fails() -> None:
@@ -313,6 +320,7 @@ def test_the_texture_sizes_come_back_when_the_compile_fails() -> None:
     world = SimpleFlatWorld(load_precompiled=False)
     sizes = [(t.width, t.height) for t in world.spec.textures]
     world.spec.worldbody.add_geom(type=mujoco.mjtGeom.mjGEOM_MESH)
+    robot = construct_mjspec_from_graph(random_tree(4).to_networkx())
     with pytest.raises(ValueError, match="mesh"):
-        world._compile_for_geometry()  # ruff: ignore[private-member-access]  # tests the private helper directly
+        world.spawn(robot.spec)
     assert sizes == [(t.width, t.height) for t in world.spec.textures]

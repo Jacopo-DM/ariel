@@ -406,10 +406,8 @@ def test_fitness_percentile_in_band(archive: Archive) -> None:
     pop = archive.fitness_percentile_population(0.0, 50.0)
     assert len(pop) > 0
     fitnesses = [_fitness(ind) for ind in pop]
-    all_fitnesses = [
-        _fitness(ind)
-        for ind in archive._fetch_all(archive._base_query())  # ruff: ignore[private-member-access]
-    ]
+    everyone = archive.hall_of_fame(n=archive.size, fitness_mode="max")
+    all_fitnesses = [_fitness(ind) for ind in everyone]
     lo = float(np.percentile(all_fitnesses, 0.0))
     hi = float(np.percentile(all_fitnesses, 50.0))
     for f in fitnesses:

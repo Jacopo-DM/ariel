@@ -28,6 +28,7 @@ from ariel.body_phenotypes.robogen_lite.overlap import (
     pair_tolerance,
 )
 from ariel.ec.genotypes.tree import random_tree
+from tests.unit.misuse import assign
 
 CUBE = 0.05  # half size of a brick
 THIN = 0.01  # half size of a thin plate
@@ -177,7 +178,7 @@ def test_overlaps_come_out_in_node_order() -> None:
 def test_overlap_is_a_frozen_record() -> None:
     overlap = Overlap(first=1, second=2, depth=0.1, tolerance=0.01)
     with pytest.raises(ValueError, match="frozen"):
-        overlap.depth = 0.2  # type: ignore[misc]  # frozen on purpose
+        assign(overlap, "depth", 0.2)
 
 
 def test_a_clean_body_has_no_overlap() -> None:

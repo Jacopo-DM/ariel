@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import importlib.metadata
+import importlib
 from typing import TYPE_CHECKING
 
 from ariel.rendering import file_ops
