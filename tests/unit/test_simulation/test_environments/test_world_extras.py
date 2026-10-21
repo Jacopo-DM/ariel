@@ -43,7 +43,7 @@ SPHERE_XML = """
 <mujoco><worldbody>
     <geom name="anchor" type="sphere" size=".05" mass="1"/>
     <body><joint type="slide" axis="0 0 1"/>
-    <geom name="ball" type="sphere" size=".5"/></body>
+    <geom name="ball" type="sphere" size=".1"/></body>
 </worldbody></mujoco>"""
 NO_GEOM_XML = """
 <mujoco><worldbody>

@@ -12,7 +12,6 @@ Notes
 """
 
 # Third-party libraries
-from typing import cast
 
 import mujoco
 import numpy as np
@@ -23,6 +22,7 @@ from pydantic import ConfigDict
 from ariel.body_phenotypes.robogen_lite.config import IDX_OF_CORE
 from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
 from ariel.parameters import FrozenModel
+from ariel.simulators import compile_model
 
 type Floats = NDArray[np.float64]
 
@@ -89,7 +89,7 @@ def rest_boxes(core: CoreModule) -> RestBoxes:
         ),
         key=lambda pair: -len(pair[0]),
     )
-    model = cast("mujoco.MjModel", core.spec.compile())
+    model = compile_model(core.spec)
     data = mujoco.MjData(model)
     mujoco.mj_forward(model, data)
     if any(kind != mujoco.mjtGeom.mjGEOM_BOX for kind in model.geom_type):

@@ -261,7 +261,7 @@ def build_model(
     world = TableWorld()
     world.spawn(arm.spec)
 
-    model = cast("mujoco.MjModel", world.spec.compile())
+    model = world.compile()
     data = mujoco.MjData(model)
 
     tcp_sid = resolve_site_id(model, "tcp")

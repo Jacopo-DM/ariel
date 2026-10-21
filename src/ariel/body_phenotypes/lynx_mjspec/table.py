@@ -4,6 +4,8 @@ from dataclasses import dataclass  # ruff: ignore[banned-api]  # behaviour first
 
 import mujoco
 
+from ariel.simulators import compile_model
+
 
 @dataclass
 class TableWorld:
@@ -124,6 +126,16 @@ class TableWorld:
             rgba=[1, 0, 0, 1],
             pos=[0, 0, self.table_height + self.table_thickness / 2 + 0.01],
         )
+
+    def compile(self) -> mujoco.MjModel:
+        """Compile the world through ARIEL's checks (``compile_model``).
+
+        Returns
+        -------
+        mujoco.MjModel
+            The compiled model; implausible values only warn.
+        """
+        return compile_model(self.spec)
 
     def spawn(self, other_spec: mujoco.MjSpec) -> None:
         """Spawn robot body flush on the table surface."""

@@ -1,13 +1,13 @@
 """MuJoCo helpers: quaternion conversion, self-collision check and spec copy."""
 
 # Third-party libraries
-from typing import cast
 
 import mujoco
 import numpy as np
 
 # Local libraries
 from ariel.parameters import FloatArray, Rotation
+from ariel.simulators import compile_model
 
 # Global constants
 # Global functions
@@ -72,7 +72,7 @@ def has_self_collision(
         If the robot specification cannot be compiled by MuJoCo.
     """
     try:
-        model = cast("mujoco.MjModel", robot_spec.compile())
+        model = compile_model(robot_spec)
         data = mujoco.MjData(model)
         mujoco.mj_forward(model, data)
         return any(

@@ -12,6 +12,7 @@ import mujoco as mj
 import torch
 
 from ariel.parameters import FrozenModel
+from ariel.simulators import compile_model
 
 
 class EvalConfig(FrozenModel):
@@ -54,7 +55,7 @@ class MuJoCoWorkerBase[C: EvalConfig](ABC):
         os.environ["OPENBLAS_NUM_THREADS"] = "1"
         torch.set_num_threads(1)
         xml_string, config = args
-        model = mj.MjModel.from_xml_string(xml_string)
+        model = compile_model(mj.MjSpec.from_string(xml_string))
         data = mj.MjData(model)
         return self.evaluate(model, data, config)
 

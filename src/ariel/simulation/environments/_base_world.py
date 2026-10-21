@@ -24,7 +24,7 @@ import numpy as np
 from ariel import log
 from ariel.parameters import MujocoConfig, Position, Rotation
 from ariel.simulation.mujoco_ops import euler_to_quat_conversion
-from ariel.simulators import Seeds, build_spec
+from ariel.simulators import Seeds, build_spec, compile_model
 
 
 class BaseWorld:
@@ -139,6 +139,16 @@ class BaseWorld:
         )
         return spec
 
+    def compile(self) -> mj.MjModel:
+        """Compile the world through ARIEL's checks (``compile_model``).
+
+        Returns
+        -------
+        mj.MjModel
+            The compiled model; implausible values only warn.
+        """
+        return compile_model(self.spec)
+
     def _compile_for_geometry(self) -> mj.MjModel:
         """Compile the spec with 1 by 1 textures, for reading geometry only.
 
@@ -159,7 +169,7 @@ class BaseWorld:
         for texture, _, _ in sizes:
             texture.width = texture.height = 1
         try:
-            return cast("mj.MjModel", self.spec.compile())
+            return compile_model(self.spec)
         finally:
             for texture, width, height in sizes:
                 texture.width, texture.height = width, height
