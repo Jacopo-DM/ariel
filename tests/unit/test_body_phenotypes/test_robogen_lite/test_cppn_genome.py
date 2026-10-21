@@ -3,6 +3,7 @@
 import json
 import math
 import random
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -534,3 +535,54 @@ def test_id_manager_save_failure_is_reported(
     ids = IdManager(save_path=tmp_path / "missing" / "ids.json")
     ids.save()
     assert "Error saving ID state" in capsys.readouterr().out
+
+
+ID_STATE_VALUES = (
+    st.none()
+    | st.booleans()
+    | st.integers()
+    | st.floats()
+    | st.text(max_size=3)
+    | st.lists(st.integers(), max_size=2)
+)
+ID_STATE_FILES = st.one_of(
+    st.binary(),
+    st.fixed_dictionaries(
+        {},
+        optional={
+            "next_node_id": ID_STATE_VALUES,
+            "next_innov_id": ID_STATE_VALUES,
+        },
+    ).map(lambda state: json.dumps(state).encode()),
+    st.lists(st.integers(), max_size=2).map(lambda v: json.dumps(v).encode()),
+)
+
+
+@given(ID_STATE_FILES)
+@example(b'{"next_node_id": 7, "next_innov_id": 9}')
+@example(b"\x80")
+@example(b"[]")
+@example(b'{"next_node_id": null}')
+@example(b'{"next_node_id": [1]}')
+@example(b'{"next_node_id": 1.5}')
+def test_id_manager_load_boundary(raw: bytes) -> None:
+    """Any state file leaves integer counters, never an exception."""
+    with tempfile.TemporaryDirectory() as folder:
+        path = Path(folder) / "ids.json"
+        path.write_bytes(raw)
+        ids = IdManager(save_path=path)
+    assert isinstance(ids.get_next_node_id(), int)
+    assert isinstance(ids.get_next_innov_id(), int)
+
+
+@given(st.integers(), st.integers())
+def test_id_manager_round_trip(node_id: int, innov_id: int) -> None:
+    """A manager loaded from a saved state continues from the same ids."""
+    with tempfile.TemporaryDirectory() as folder:
+        path = Path(folder) / "ids.json"
+        IdManager(
+            save_path=path, node_start=node_id, innov_start=innov_id
+        ).save()
+        loaded = IdManager(save_path=path)
+    assert loaded.get_next_node_id() == node_id + 1
+    assert loaded.get_next_innov_id() == innov_id + 1

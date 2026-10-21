@@ -3,6 +3,17 @@
 import json
 from pathlib import Path
 
+from pydantic import BaseModel, ConfigDict, StrictInt, ValidationError
+
+
+class _IdState(BaseModel):
+    """The saved counters; other keys in the file are ignored."""
+
+    model_config = ConfigDict(frozen=True, extra="ignore")
+
+    next_node_id: StrictInt = 0
+    next_innov_id: StrictInt = 0
+
 
 class IdManager:
     """
@@ -101,11 +112,11 @@ class IdManager:
             return
 
         try:
-            with self.save_path.open("r") as f:
-                state = json.load(f)
-                self._node_id = state.get("next_node_id", 0)
-                self._innov_id = state.get("next_innov_id", 0)
-        except (OSError, json.JSONDecodeError) as e:
+            state = _IdState.model_validate_json(self.save_path.read_bytes())
+        except (OSError, ValidationError) as e:
             print(f"Error loading ID state: {e}. Starting with fresh IDs.")  # ruff: ignore[print]
             self._node_id = 0
             self._innov_id = 0
+            return
+        self._node_id = state.next_node_id
+        self._innov_id = state.next_innov_id
