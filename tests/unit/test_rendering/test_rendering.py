@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Self
+from typing import TYPE_CHECKING, ClassVar, Self
 
 import cv2
 import mujoco
@@ -45,10 +45,12 @@ pytestmark = pytest.mark.usefixtures("fake_opengl")
 class _FakeRenderer:
     """Draws black frames instead of using OpenGL."""
 
+    # Every camera passed to update_scene, across instances (reset per test)
+    cameras: ClassVar[list[object]] = []
+
     def __init__(self, model: mujoco.MjModel, width: int, height: int) -> None:
         del model
         self.shape = (height, width, 3)
-        self.cameras: list[object] = []
 
     def __enter__(self) -> Self:
         return self
@@ -63,7 +65,7 @@ class _FakeRenderer:
         camera: object = None,
     ) -> None:
         del data, scene_option
-        self.cameras.append(camera)
+        self.cameras.append(camera)  # the shared class list
 
     def render(self) -> NDArray[np.uint8]:
         return np.zeros(self.shape, dtype=np.uint8)
@@ -73,6 +75,7 @@ class _FakeRenderer:
 def fake_opengl(monkeypatch: pytest.MonkeyPatch) -> None:
     # Replace the OpenGL renderer; no backend works on every machine.
     monkeypatch.setattr(mujoco, "Renderer", _FakeRenderer)
+    monkeypatch.setattr(_FakeRenderer, "cameras", [])
 
 
 def _scene(xml: str = MODEL_XML) -> tuple[mujoco.MjModel, mujoco.MjData]:
@@ -151,12 +154,17 @@ def test_recorder_reports_when_no_codec_opens(
 
 
 def test_single_frame_without_a_camera() -> None:
-    """The default camera is used if the model has no ortho-cam."""
+    """MuJoCo's free camera (-1) is used if the model has no ortho-cam.
+
+    ``mujoco.Renderer.update_scene`` takes -1 for the free camera and
+    raises ``TypeError`` for ``None`` (MuJoCo 3.16).
+    """
     model, data = _scene(NO_CAMERA_XML.format(name="b"))
     image = renderers.single_frame_renderer(
         model, data, width=WIDTH, height=HEIGHT
     )
     assert image.size == (WIDTH, HEIGHT)
+    assert _FakeRenderer.cameras == [-1]
 
 
 def test_single_frame_with_a_camera_override() -> None:
