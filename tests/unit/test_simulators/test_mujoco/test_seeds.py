@@ -10,14 +10,14 @@ from pydantic import ValidationError
 from ariel.simulators.mujoco.seeds import Seeds
 from tests.unit.misuse import assign, untyped
 
-DEFAULT_LENGTH_M = 0.05
+DEFAULT_LENGTH_M = 0.075  # the measured brick's edge
 DEFAULT_SPEED_M_S = 1.0
 DEFAULT_JOINT_RAD_S = 100.0
 DEFAULT_ALPHA = 0.05
 DEFAULT_KAPPA = 0.28
 DEFAULT_GAMMA = 0.5
 GRAVITY_M_S2 = 9.80665
-FIVE_CENTIMETRES = 5.0
+BRICK_CENTIMETRES = 7.5
 LONGER_LENGTH_M = 0.1
 
 
@@ -33,7 +33,7 @@ def test_defaults_are_the_documented_seeds() -> None:
 
 
 def test_quantities_are_stored_in_the_canonical_unit() -> None:
-    seeds = Seeds(length_scale=FIVE_CENTIMETRES * u.cm)
+    seeds = Seeds(length_scale=BRICK_CENTIMETRES * u.cm)
     assert seeds.length_scale.unit == u.m
     assert seeds.length_scale.value == pytest.approx(DEFAULT_LENGTH_M)
 
@@ -99,15 +99,17 @@ def test_replace_rejects_an_unknown_seed() -> None:
         Seeds().replace(mass=1.0 * u.kg)
 
 
-ADVECTION_S = 0.0025
-CONTACT_S = 0.014
+# With the measured brick (0.075 m) since physical-checks PC4; 0.0025 and
+# 0.014 with the old 0.05 m
+ADVECTION_S = 0.00375
+CONTACT_S = 0.021
 JOINT_S = 0.005
-LONG_SCALE_M = 0.5
+LONG_SCALE_M = 0.75  # ten bricks
 FAST_M_S = 10.0
-FAST_ADVECTION_S = 0.00025
+FAST_ADVECTION_S = 0.000375
 STIFF_RAD_S = 1000.0
 STIFF_JOINT_S = 0.5 / STIFF_RAD_S
-SLOW_JOINT_RAD_S = 50.0
+SLOW_JOINT_RAD_S = 40.0
 LARGE_ALPHA = 10.0
 
 
@@ -151,3 +153,14 @@ def test_derived_values_are_part_of_the_dump() -> None:
     dumped = Seeds().model_dump()
     assert dumped["timestep_limit"] == "advection"
     assert dumped["timestep"] == pytest.approx(ADVECTION_S)
+
+
+def test_the_length_scale_follows_the_brick(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A bigger brick makes a bigger world scale (and a longer timestep)."""
+    default = Seeds()
+    monkeypatch.setenv("BRICK__SIZE", '["10 cm", "10 cm", "10 cm"]')
+    bigger = Seeds()
+    assert bigger.length_scale.value == pytest.approx(0.1)
+    assert bigger.timestep > default.timestep

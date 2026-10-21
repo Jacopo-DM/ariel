@@ -41,7 +41,7 @@ def test_out_writes_a_loadable_mjcf_file(
     model = cast(
         "mujoco.MjModel", mujoco.MjSpec.from_file(str(target)).compile()
     )
-    assert model.opt.timestep == pytest.approx(0.0025)
+    assert model.opt.timestep == pytest.approx(0.00375)  # the 7.5 cm brick
 
 
 def test_running_the_package_as_a_script(

@@ -33,7 +33,7 @@ def test_row_names_are_unique_and_every_row_has_a_source() -> None:
 
 def test_seed_rows_hold_the_canonical_values() -> None:
     rows = by_name(derivation_table(Seeds()))
-    assert rows["length_scale"].value == pytest.approx(0.05)
+    assert rows["length_scale"].value == pytest.approx(0.075)
     assert rows["length_scale"].unit == "m"
     assert not rows["friction"].unit
 

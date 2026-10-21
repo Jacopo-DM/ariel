@@ -8,7 +8,7 @@ Generated for MuJoCo 3.16.0 from the default seeds. Every world starts from thes
 
 | Name | Value | Unit | Kind | Source |
 |---|---|---|---|---|
-| `length_scale` | 0.05 | m | seed | seed, set by the user |
+| `length_scale` | 0.075 | m | seed | seed, set by the user |
 | `top_speed` | 1 | m / s | seed | seed, set by the user |
 | `joint_frequency` | 100 | rad / s | seed | seed, set by the user |
 | `gravity` | 9.80665 | m / s2 | seed | seed, set by the user |
@@ -18,10 +18,10 @@ Generated for MuJoCo 3.16.0 from the default seeds. Every world starts from thes
 | `alpha` | 0.05 |  | seed | seed, set by the user |
 | `kappa` | 0.28 |  | seed | seed, set by the user |
 | `gamma` | 0.5 |  | seed | seed, set by the user |
-| `contact_time_constant` | 0.014 | s | formula | formula tc = kappa * L / v_max; judgement, kappa 0.28 gives the 14 ms calibrated for robot-to-robot contact |
-| `advection_limit` | 0.0025 | s | formula | formula alpha * L / v_max; judgement (research page) |
+| `contact_time_constant` | 0.021 | s | formula | formula tc = kappa * L / v_max; judgement, kappa 0.28 gives the 14 ms calibrated for robot-to-robot contact |
+| `advection_limit` | 0.00375 | s | formula | formula alpha * L / v_max; judgement (research page) |
 | `joint_limit` | 0.005 | s | formula | formula gamma / omega_max; judgement (research page) |
-| `timestep` | 0.0025 | s | formula | formula min(advection, tc / 2, joint), bound by the advection limit; tc >= 2 h is documented (refsafe) |
+| `timestep` | 0.00375 | s | formula | formula min(advection, tc / 2, joint), bound by the advection limit; tc >= 2 h is documented (refsafe) |
 | `timestep_over_contact` | 0.178571 |  | formula | formula h / tc; the limit 0.5 is documented (refsafe) |
 | `courant` | 0.05 |  | formula | formula h * v_max / L; judgement (research page) |
 
@@ -34,7 +34,7 @@ Generated for MuJoCo 3.16.0 from the default seeds. Every world starts from thes
 | `option.density` | 0 | 1.204 | seed | air density seed (medium for fluid forces) | consensus of the research reports, wiki mjcf_option |
 | `option.gravity` | 0 0 -9.81 | 0 0 -9.80665 | seed | gravity seed, pointing down the z axis | standard gravity, ISO 80000-3 |
 | `option.integrator` | 0 | 3 | fixed | implicitfast is the documented general recommendation and what ARIEL already used (old MujocoConfig) | https://mujoco.readthedocs.io/en/stable/XMLreference.html#option-integrator; wiki mujoco_modeling_guidance |
-| `option.timestep` | 0.002 | 0.0025 | formula | derived from the seeds, see timestep in the table | judgement (wiki mujoco_parameter_research) |
+| `option.timestep` | 0.002 | 0.00375 | formula | derived from the seeds, see timestep in the table | judgement (wiki mujoco_parameter_research) |
 | `option.viscosity` | 0 | 1.81e-05 | seed | air viscosity seed (medium for fluid forces) | consensus of the research reports, wiki mjcf_option |
 | `compiler.balanceinertia` | False | True | fixed | accept slightly inconsistent inertias of generated bodies; what ARIEL already used (old MujocoConfig) | https://mujoco.readthedocs.io/en/stable/XMLreference.html#compiler-balanceinertia |
 | `compiler.degree` | True | False | fixed | ARIEL code uses radians; what ARIEL already used (old MujocoConfig) | https://mujoco.readthedocs.io/en/stable/XMLreference.html#compiler-angle |
@@ -51,7 +51,7 @@ Generated for MuJoCo 3.16.0 from the default seeds. Every world starts from thes
 | `visual.scale.contactheight` | 0.1 | 0.2 | fixed | ARIEL's own look of the viewer; what ARIEL already used (old BaseWorld._init_spec) | https://mujoco.readthedocs.io/en/stable/XMLreference.html#visual-scale |
 | `visual.scale.contactwidth` | 0.3 | 0.5 | fixed | ARIEL's own look of the viewer; what ARIEL already used (old BaseWorld._init_spec) | https://mujoco.readthedocs.io/en/stable/XMLreference.html#visual-scale |
 | `visual.scale.forcewidth` | 0.1 | 0.3 | fixed | ARIEL's own look of the viewer; what ARIEL already used (old BaseWorld._init_spec) | https://mujoco.readthedocs.io/en/stable/XMLreference.html#visual-scale |
-| `default.geom.solref` | 0.02 1 | 0.014 1 | formula | contact time constant tc and critical damping ratio 1 | wiki mujoco_solver_parameters; tc is judgement |
+| `default.geom.solref` | 0.02 1 | 0.021 1 | formula | contact time constant tc and critical damping ratio 1 | wiki mujoco_solver_parameters; tc is judgement |
 
 ## Plausible bands
 
@@ -59,7 +59,7 @@ Generated for MuJoCo 3.16.0 from the default seeds. Every world starts from thes
 
 | Quantity | Value | Band | Unit | Inside | Basis |
 |---|---|---|---|---|---|
-| `timestep` | 0.0025 | 0.0005 to 0.005 | s | yes | judgement (reports agree, DeepMind Control uses 2 to 5 ms) |
+| `timestep` | 0.00375 | 0.0005 to 0.005 | s | yes | judgement (reports agree, DeepMind Control uses 2 to 5 ms) |
 | `timestep_over_contact` | 0.178571 | 0.01 to 0.5 |  | yes | upper limit documented (refsafe), lower limit judgement |
 | `courant` | 0.05 | 0 to 0.05 |  | yes | judgement (ChatGPT report) |
 | `gravity` | 9.80665 | 9 to 10 | m / s2 | yes | judgement, Earth |

@@ -22,12 +22,16 @@ import numpy as np
 from pydantic import Field, PlainValidator, computed_field
 
 # Local libraries
-from ariel.parameters import STANDARD_GRAVITY, FrozenModel, quantity_of
+from ariel.parameters import (
+    STANDARD_GRAVITY,
+    ArielModulesConfig,
+    FrozenModel,
+    quantity_of,
+)
 
 # Global constants
 AIR_DENSITY_20C = 1.204  # kg / m^3, consensus of the research reports
 AIR_VISCOSITY_20C = 1.81e-5  # Pa s, consensus of the research reports
-DEFAULT_LENGTH_SCALE = 0.05  # m, one brick
 DEFAULT_TOP_SPEED = 1.0  # m / s
 DEFAULT_JOINT_FREQUENCY = 100.0  # rad / s, about 16 Hz for a stiff servo
 DEFAULT_FRICTION = 1.0  # MuJoCo's own default
@@ -88,12 +92,23 @@ def _default(number: float, unit: u.UnitBase) -> Callable[[], u.Quantity]:
     return lambda: u.Quantity(number, unit)
 
 
+def _brick_edge() -> u.Quantity:
+    """Return the edge of the measured brick, the world's length scale.
+
+    Returns
+    -------
+    astropy.units.Quantity
+        The brick's first side (all three are equal).
+    """
+    return ArielModulesConfig().brick.size[0]
+
+
 class Seeds(FrozenModel):
     """The physical scales of a simulated world."""
 
     length_scale: Length = Field(
-        default_factory=_default(DEFAULT_LENGTH_SCALE, u.m),
-        description="size of one brick",
+        default_factory=_brick_edge,
+        description="edge of the measured brick (ArielModulesConfig)",
     )
     top_speed: Speed = Field(
         default_factory=_default(DEFAULT_TOP_SPEED, u.m / u.s),
