@@ -16,6 +16,7 @@ from ariel.opengl.gl_backend import (
     CONFIG_NAME,
     BackendResult,
     platform_backends,
+    read_config,
 )
 
 _OK = (
@@ -57,6 +58,25 @@ def _per_backend(
 
     def build(backend: str) -> list[str]:
         return [sys.executable, "-c", scripts[backend], backend]
+
+    return build
+
+
+# Prints its first argument as is, so a test controls the worker's stdout
+_ECHO = "import sys; sys.stdout.write(sys.argv[1])"
+
+
+def _echo(stdout: str) -> Callable[[str], list[str]]:
+    """Return a worker command factory whose worker prints `stdout`.
+
+    Returns
+    -------
+    Callable[[str], list[str]]
+        The command factory.
+    """
+
+    def build(_backend: str) -> list[str]:
+        return [sys.executable, "-I", "-S", "-c", _ECHO, stdout]
 
     return build
 
@@ -124,8 +144,10 @@ WORKER_VALUES = (
     | st.text()
     | st.lists(st.integers(), max_size=2)
 )
+# Text a process can receive as an argument: no NUL, no lone surrogates
+ARGUMENT_TEXT = st.text(st.characters(codec="utf-8", exclude_characters="\x00"))
 WORKER_LINES = st.one_of(
-    st.text(),
+    ARGUMENT_TEXT,
     st.dictionaries(
         st.sampled_from(["ok", "render_ms", "error"]), WORKER_VALUES
     ).map(json.dumps),
@@ -140,7 +162,7 @@ WORKER_LINES = st.one_of(
 @example('{"ok": true, "render_ms": "fast"}')
 def test_parse_worker_output_boundary(stdout: str) -> None:
     """Any worker output gives a BackendResult, never an exception."""
-    result = gl_manager._parse_worker_output(stdout)  # ruff: ignore[private-member-access]  # the parser of the probe's stdout
+    result = gl_manager.probe_backend("egl", _echo(stdout), timeout=20)
     assert isinstance(result, BackendResult)
 
 
@@ -150,7 +172,7 @@ def test_parse_worker_output_boundary(stdout: str) -> None:
 )
 def test_success_without_a_time_is_unreadable(stdout: str) -> None:
     """A reported success with no numeric render time counts as unreadable."""
-    result = gl_manager._parse_worker_output(stdout)  # ruff: ignore[private-member-access]  # the parser of the probe's stdout
+    result = gl_manager.probe_backend("egl", _echo(stdout), timeout=20)
     assert result == BackendResult(ok=False, error="worker output unreadable")
 
 
@@ -196,6 +218,7 @@ def test_run_writes_valid_config(tmp_path: Path) -> None:
     )
     on_disk = json.loads(path.read_text(encoding="utf-8"))
     assert on_disk == config.model_dump(mode="json")
+    assert read_config(path) == config
     assert on_disk["version"] == 1
     assert on_disk["platform"] == "linux"
     assert set(on_disk) >= {"python", "mujoco", "backends", "selected"}

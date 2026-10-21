@@ -105,7 +105,7 @@ NAMES = st.sampled_from([
     "BOTTOM",
 ]) | st.text(max_size=5)
 IDS = st.integers(min_value=-1, max_value=6)
-JSON_VALUES = st.recursive(
+JSON_VALUES: st.SearchStrategy[object] = st.recursive(
     st.none()
     | st.booleans()
     | st.integers()
@@ -125,10 +125,12 @@ RAW_EDGES = st.fixed_dictionaries(
     {"parent": IDS, "child": IDS, "face": NAMES},
     optional={"note": st.text(max_size=5)},
 )
+# fixed_dictionaries takes its key and value types from this mapping
+NO_REQUIRED_KEYS: dict[str, st.SearchStrategy[object]] = {}
 # Dicts shaped like a stored genome, near misses of it, and any JSON object
 GENOME_DICTS: st.SearchStrategy[dict[str, object]] = st.one_of(
     st.fixed_dictionaries(
-        {},
+        NO_REQUIRED_KEYS,
         optional={
             "nodes": st.dictionaries(IDS.map(str), RAW_NODES, max_size=5)
             | st.lists(RAW_NODES, max_size=5)

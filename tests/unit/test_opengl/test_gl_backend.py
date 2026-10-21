@@ -16,7 +16,7 @@ from hypothesis import example, given
 from hypothesis import strategies as st
 from rich.console import Console
 
-from ariel.opengl import gl_backend, gl_manager
+from ariel.opengl import gl_backend
 from ariel.opengl.gl_backend import (
     CONFIG_NAME,
     BackendName,
@@ -84,10 +84,14 @@ def test_read_config_boundary(raw: bytes) -> None:
 
 @given(GL_CONFIGS)
 def test_config_round_trip(config: GLConfig) -> None:
-    """Reading back the file the probe writes gives the same config."""
+    """A config dumped to JSON reads back as the same config.
+
+    The manager writes this dump; ``test_run_writes_valid_config`` reads
+    back a file it wrote.
+    """
     with tempfile.TemporaryDirectory() as folder:
         path = Path(folder) / CONFIG_NAME
-        gl_manager._write_atomically(path, config)  # ruff: ignore[private-member-access]  # the writer the probe uses
+        path.write_text(config.model_dump_json(indent=2), encoding="utf-8")
         assert gl_backend.read_config(path) == config
 
 
