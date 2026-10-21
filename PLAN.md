@@ -177,7 +177,7 @@ Tier 3 (not done, with the reason): see the spec; plus a CI job for the notebook
 
 ### Last task: gl-autodetect check on the Lenovo (Linux)
 
-Added 2026-10-19 at the user's request; it comes after all the other goals (restructure, physics-bugs, cppn-working, pyright-zero and the `hardware` lint). The user runs these steps on the Lenovo (Linux), in order, from the repo root:
+Added 2026-10-19 at the user's request; it comes after all the other goals (restructure, physics-bugs, cppn-working, pyright-zero and the `hardware` lint). Changed 2026-10-21 (user's choice): this Linux machine renders now, so the render steps (the `prebuilt_robots.ipynb` pictures with `--save`, `examples/a_mujoco/3_cameras_in_simulation.py` offscreen, the notebook import order) run here, right after goal types-zero; the Lenovo is no longer needed for them. The steps as first written, for the Lenovo: the user runs these steps on the Lenovo (Linux), in order, from the repo root:
 1. `git pull --ff-only` (the Lenovo needs the commits of `main`; push to `fork` first if they are not there yet, which waits for the user's say-so).
 2. `uv sync --all-groups`
 3. `uv run --no-sync python -m ariel.opengl.gl_manager` (the module was `ariel.utils.gl_manager` until R2d-1; probes the three OpenGL backends and writes `mujoco_user_config.json` in the current folder).
