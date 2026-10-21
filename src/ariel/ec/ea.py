@@ -365,9 +365,7 @@ class EA:
         self.current_generation += 1
         self.fetch_population()
         for op in self.operations:
-            # An operation run on a Population returns one; EAOperation
-            # checks that at run time
-            self.population = cast("Population", op(self.population))
+            self.population = op(self.population)
         self._commit()
 
     def run(self) -> None:

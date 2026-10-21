@@ -423,7 +423,9 @@ def main(argv: list[str]) -> int:
     if argv[:1] == [RUN_FLAG]:
         sys.stdout.write(run_once(argv[1]).model_dump_json() + "\n")
         return 0
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    # The module docstring is always there (this script is not run with -OO)
+    summary = (__doc__ or "").splitlines()[0]
+    parser = argparse.ArgumentParser(description=summary)
     parser.add_argument("workloads", nargs="*")
     parser.add_argument("--runs", type=int, default=10)
     args = parser.parse_args(argv)

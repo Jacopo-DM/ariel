@@ -1,7 +1,7 @@
 """Operation protocol and the EAOperation step wrapper."""
 
 import inspect
-from typing import ParamSpec, Protocol, cast
+from typing import ParamSpec, Protocol, cast, overload
 
 from ariel.ec.population import Population
 
@@ -20,9 +20,9 @@ class Operation(Protocol):
     name: str
 
     def __call__(  # pragma: no cover  # typing stub only
-        self, *args: object, **kwargs: object
-    ) -> "Population | Operation":
-        """Run on a population, or bind configuration arguments."""
+        self, population: Population, /
+    ) -> Population:
+        """Run on a population and return the next one."""
         ...
 
 
@@ -148,6 +148,16 @@ class EAOperation[**P]:
         self.args = args
         self.kwargs = kwargs
         self.name = func.__name__
+
+    @overload
+    def __call__(  # type: ignore[overload-overlap]  # pragma: no cover  # a Population first runs the operation, as __call__ checks first
+        self, population: Population, /
+    ) -> Population: ...
+
+    @overload
+    def __call__(  # pragma: no cover  # typing stub only
+        self, *args: P.args, **kwargs: P.kwargs
+    ) -> "EAOperation[P]": ...
 
     def __call__(
         self, *args: object, **kwargs: object
