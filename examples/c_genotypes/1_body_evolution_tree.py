@@ -170,7 +170,7 @@ def calculate_morphological_fitness(genome: TreeGenome) -> float:
         if robot_graph.number_of_nodes() == 0:
             return float("inf")
 
-        measures = MorphologicalMeasures(robot_graph)
+        measures = MorphologicalMeasures(construct_mjspec_from_graph(robot_graph))
 
         # Weighted combination of morphological properties
         # Higher values are better, so we negate for minimization
@@ -232,7 +232,7 @@ class MorphologyEvolution:
             robot_graph = genome.to_networkx()
             if robot_graph.number_of_nodes() == 0:
                 return 0
-            measures = MorphologicalMeasures(robot_graph)
+            measures = MorphologicalMeasures(construct_mjspec_from_graph(robot_graph))
             return measures.num_active_hinges
         except Exception:
             return 0
@@ -470,7 +470,7 @@ def main() -> None:
         fitness = calculate_morphological_fitness(genome)
 
         try:
-            measures = MorphologicalMeasures(genome.to_networkx())
+            measures = MorphologicalMeasures(construct_mjspec_from_graph(genome.to_networkx()))
             console.log(f"Best Fitness Score: {fitness:.4f}")
             console.log(f"Modules: {measures.num_modules}")
             console.log(f"Joints: {measures.num_active_hinges}")

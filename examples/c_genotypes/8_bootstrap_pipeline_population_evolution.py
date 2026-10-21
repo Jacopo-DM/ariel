@@ -247,7 +247,7 @@ def morphology_fitness(genome: TreeGenome) -> float:
         graph = genome.to_networkx()
         if graph.number_of_nodes() == 0:
             return float("inf")
-        m = MorphologicalMeasures(graph)
+        m = MorphologicalMeasures(construct_mjspec_from_graph(graph))
         score = (
             m.symmetry * 0.20
             + m.joints * 0.20

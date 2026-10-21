@@ -82,7 +82,7 @@ id_manager = IdManager(node_start=NUM_CPPN_INPUTS + NUM_CPPN_OUTPUTS - 1,
 
 def morpho_score_from_graph(graph) -> float:
     try:
-        measures = MorphologicalMeasures(graph)
+        measures = MorphologicalMeasures(construct_mjspec_from_graph(graph))
         score = (
             measures.symmetry * 0.20
             + measures.joints * 0.20
@@ -244,7 +244,7 @@ if __name__ == "__main__":
     if best:
         cppn = Genome.from_dict(best.genotype["cppn"])
         graph = evo.decode_to_graph(cppn)
-        measures = MorphologicalMeasures(graph)
+        measures = MorphologicalMeasures(construct_mjspec_from_graph(graph))
         score = morpho_score_from_graph(graph)
         console.log(f"Best morphological score: {score:.4f}")
         console.log(f"Modules: {measures.num_modules}, Joints: {measures.num_active_hinges}, Symmetry: {measures.symmetry:.4f}, Diversity: {measures.module_diversity:.4f}")
