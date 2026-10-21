@@ -2,8 +2,11 @@
 Morphology-only evolution for CPPN genomes using the same morphological fitness
 as the tree-based example. Decodes CPPNs into module graphs using the
 best-first decoder and evaluates with MorphologicalMeasures.
+
+No `from __future__ import annotations` here: EAOperation checks that each
+step is annotated with the Population class itself, and that import would
+turn the annotation into the string "Population".
 """
-from __future__ import annotations
 
 import argparse
 import copy
@@ -26,7 +29,6 @@ from ariel.body_phenotypes.robogen_lite.cppn_neat.id_manager import IdManager
 from ariel.body_phenotypes.robogen_lite.decoders.cppn_best_first import (
     MorphologyDecoderBestFirst,
 )
-from ariel.body_phenotypes.robogen_lite.decoders.score_cube import MorphologyDecoderCubePruning
 from ariel.body_phenotypes.robogen_lite.config import (
     NUM_OF_ROTATIONS,
     NUM_OF_TYPES_OF_MODULES,

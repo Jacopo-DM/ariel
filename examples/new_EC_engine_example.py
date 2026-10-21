@@ -8,7 +8,7 @@ from rich.traceback import install
 from ariel.ec import (
     EA,
     Crossover,
-    EAStep,
+    EAOperation,
     Individual,
     IntegerMutator,
     IntegersGenerator,
@@ -108,21 +108,21 @@ def main() -> None:
     initial = Population([make_individual() for _ in range(20)])
     initial = evaluate(initial)
 
-    ops: list[EAStep] = [
-        EAStep("parent_selection", parent_selection),
-        EAStep("crossover", crossover),
-        EAStep("mutate", mutate),
-        EAStep("evaluate", evaluate),
-        EAStep("survivor_select", survivor_selection),
+    ops = [
+        EAOperation(parent_selection),
+        EAOperation(crossover),
+        EAOperation(mutate),
+        EAOperation(evaluate),
+        EAOperation(survivor_selection),
     ]
 
     ea = EA(initial, ops, num_steps=50)
     ea.run()
 
     console.log("─── Results ───")
-    console.log(f"best = {ea.best('best', only_alive=False)}")
-    console.log(f"median = {ea.best('median', only_alive=False)}")
-    console.log(f"worst = {ea.best('worst', only_alive=False)}")
+    console.log(f"best = {ea.get_solution('best', only_alive=False)}")
+    console.log(f"median = {ea.get_solution('median', only_alive=False)}")
+    console.log(f"worst = {ea.get_solution('worst', only_alive=False)}")
 
     # Population API examples
     db_pop = ea._fetch(only_alive=False)
