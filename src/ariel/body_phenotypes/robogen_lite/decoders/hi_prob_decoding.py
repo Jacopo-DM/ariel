@@ -125,9 +125,8 @@ class HighProbabilityDecoder(Blueprint):
                 current_state.shape,
             )
 
-            # Convert to list for easier manipulation
-            max_index = [int(i) for i in max_index]  # type: ignore[assignment]  # known bug
-            from_module, to_module, conn_face = max_index
+            # Convert to plain ints
+            from_module, to_module, conn_face = (int(i) for i in max_index)
 
             # Check if the maximum value is zero (no more connections)
             value_at_max = current_state[from_module, to_module, conn_face]
@@ -143,12 +142,12 @@ class HighProbabilityDecoder(Blueprint):
                 raise ValueError(msg)
 
             # Ensure no NONE modules are instantiated
-            if self.type_dict[to_module] == ModuleType.NONE:  # type: ignore[index]  # known bug
+            if self.type_dict[to_module] == ModuleType.NONE:
                 msg = "Cannot instantiate a NONE module.\n"
                 msg += "This indicates an error in decoding."
                 raise ValueError(msg)
 
-            if self.type_dict[from_module] == ModuleType.NONE:  # type: ignore[index]  # known bug
+            if self.type_dict[from_module] == ModuleType.NONE:
                 msg = "Cannot instantiate a NONE module.\n"
                 msg += "This indicates an error in decoding."
                 raise ValueError(msg)
@@ -159,7 +158,7 @@ class HighProbabilityDecoder(Blueprint):
             )
 
             # Update instantiated modules
-            pre_nodes[to_module] = 1  # type: ignore[index]  # known bug
+            pre_nodes[to_module] = 1
 
             # Disable taken face
             self.conn_p_space[from_module, :, conn_face] = 0.0

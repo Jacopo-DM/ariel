@@ -2,18 +2,18 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
-
-ActivationFunction = Callable[[float], float]
-
 
 class Node:
     """A node gene in a NEAT genome."""
 
     def __init__(
-        self, _id: int, typ: str, activation: ActivationFunction, bias: float
+        self, _id: int, typ: str, activation: str | None, bias: float
     ) -> None:
-        """Create a node with an ID, type, activation function and bias."""
+        """Create a node with an ID, type, activation name and bias.
+
+        The activation is a key of ``ACTIVATION_FUNCTIONS``; input nodes
+        have none.
+        """
         self._id = _id
         self.typ = typ
         self.activation = activation

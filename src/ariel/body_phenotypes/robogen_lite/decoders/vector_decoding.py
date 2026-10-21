@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 # Standard library
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING, TypeVar, cast, overload
 
 # Third-party libraries
 import networkx as nx
@@ -33,6 +33,22 @@ T = TypeVar("T")
 
 class VectorDecoder(Blueprint):
     """Implements the vector-decoding algorithm."""
+
+    @overload
+    def assign_symbols_from_range(  # pragma: no cover  # typing stub only
+        self,
+        vector: npt.NDArray[np.float64] | Sequence[float],
+        symbols: Sequence[Sequence[T]],
+        weight: Sequence[Sequence[float]] | None = None,
+    ) -> list[T]: ...
+
+    @overload
+    def assign_symbols_from_range(  # pragma: no cover  # typing stub only
+        self,
+        vector: npt.NDArray[np.float64] | Sequence[float],
+        symbols: Sequence[T],
+        weight: Sequence[float] | None = None,
+    ) -> list[T]: ...
 
     def assign_symbols_from_range(  # ruff: ignore[no-self-use]  # keeps the interface shared with the sibling classes
         self,
@@ -64,9 +80,10 @@ class VectorDecoder(Blueprint):
         per_element = isinstance(symbols[0], (list, tuple, np.ndarray))
 
         for i, value in enumerate(vector):
-            current_symbols: Sequence[T] = (
-                symbols[i] if per_element else symbols  # type: ignore[assignment]  # known bug
-            )  # pyright: ignore[reportAssignmentType]
+            # per_element tells which of the two shapes symbols has
+            current_symbols = cast(
+                "Sequence[T]", symbols[i] if per_element else symbols
+            )
 
             num_symbols = len(current_symbols)
 

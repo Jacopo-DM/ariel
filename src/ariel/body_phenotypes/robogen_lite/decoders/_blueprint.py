@@ -31,11 +31,19 @@ from networkx.readwrite import json_graph
 from ariel.body_phenotypes.robogen_lite.config import (
     ModuleFaces,
     ModuleInstance,
+    ModuleRotationsIdx,
+    ModuleType,
 )
 
 
 class Blueprint:
     """Implements the high-probability-decoding algorithm."""
+
+    # Set by each decoder before generate_networkx_graph runs
+    nodes: set[int]
+    edges: list[tuple[int, int, int]]
+    type_dict: dict[int, ModuleType]
+    rot_dict: dict[int, ModuleRotationsIdx]
 
     def __init__(self, num_modules: int) -> None:
         """
@@ -56,13 +64,13 @@ class Blueprint:
 
     def generate_networkx_graph(self) -> None:
         """Generate a NetworkX graph from the decoded graph."""
-        for node in self.nodes:  # type: ignore[attr-defined]  # known bug
+        for node in self.nodes:
             self.graph.add_node(
                 node,
-                type=self.type_dict[node].name,  # type: ignore[attr-defined]  # known bug
-                rotation=self.rot_dict[node].name,  # type: ignore[attr-defined]  # known bug
+                type=self.type_dict[node].name,
+                rotation=self.rot_dict[node].name,
             )
-        for edges in self.edges:  # type: ignore[attr-defined]  # known bug
+        for edges in self.edges:
             parent, child, face = edges
             self.graph.add_edge(
                 parent,
@@ -88,7 +96,9 @@ def save_graph_as_json(
     if save_file is None:
         return
 
-    data = json_graph.node_link_data(graph, edges="edges")
+    # The networkx stub's deprecated overload (link=) matches every call,
+    # also this one, which uses edges= as networkx asks
+    data = json_graph.node_link_data(graph, edges="edges")  # ty: ignore[deprecated]  # pyright: ignore[reportDeprecated]
     json_string = json.dumps(data, indent=4)
 
     Path(save_file).write_text(json_string, encoding="utf-8")

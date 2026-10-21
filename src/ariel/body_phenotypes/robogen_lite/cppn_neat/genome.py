@@ -124,7 +124,7 @@ class Genome:
 
         # 1. Create Input Nodes
         for i in range(num_inputs):
-            node = Node(_id=i, typ="input", activation=None, bias=0.0)  # type: ignore[arg-type]  # known bug
+            node = Node(_id=i, typ="input", activation=None, bias=0.0)
             nodes[i] = node
 
         # 2. Create Output Nodes (starting ID after inputs)
@@ -133,7 +133,7 @@ class Genome:
             node = Node(
                 _id=current_node_id,
                 typ="output",
-                activation=DEFAULT_ACTIVATION,  # type: ignore[arg-type]  # known bug
+                activation=DEFAULT_ACTIVATION,
                 bias=cls._get_random_bias(),
             )
             nodes[current_node_id] = node
@@ -227,7 +227,7 @@ class Genome:
         new_node = Node(
             _id=new_node_id,
             typ="hidden",
-            activation=self._get_random_activation(),  # type: ignore[arg-type]  # known bug
+            activation=self._get_random_activation(),
             bias=self._get_random_bias(),
         )
         self.add_node(new_node)
@@ -494,9 +494,9 @@ class Genome:
                     weighted_sum += node_outputs[conn.in_id] * conn.weight
 
                 weighted_sum += node.bias
-                node_outputs[node_id] = ACTIVATION_FUNCTIONS[node.activation](  # type: ignore[index]  # known bug
-                    weighted_sum
-                )
+                # Only input nodes have no activation, and they are skipped
+                activation = ACTIVATION_FUNCTIONS[cast("str", node.activation)]
+                node_outputs[node_id] = activation(weighted_sum)
 
             return [node_outputs[node_id] for node_id in output_node_ids]
 
@@ -535,9 +535,10 @@ class Genome:
                         weighted_sum += current_values[conn.in_id] * conn.weight
 
                     weighted_sum += node.bias
-                    next_values[node_id] = ACTIVATION_FUNCTIONS[
-                        node.activation  # type: ignore[index]  # known bug
-                    ](weighted_sum)
+                    activation = ACTIVATION_FUNCTIONS[
+                        cast("str", node.activation)
+                    ]
+                    next_values[node_id] = activation(weighted_sum)
 
                 current_values = next_values
 
@@ -596,7 +597,7 @@ class Genome:
             int(nid): Node(
                 _id=props.node_id,
                 typ=props.typ,
-                activation=props.activation,  # type: ignore[arg-type]  # known bug
+                activation=props.activation,
                 bias=props.bias,
             )
             for nid, props in record.nodes.items()
