@@ -1,4 +1,3 @@
-# ruff: file-ignore[non-empty-init-module]  # package entry point: runs setup code before the re-exports (see CODEMAP.md)
 """Simulation tasks for evaluating robot performance."""
 
 from ariel.simulation.tasks.gait_learning import (
@@ -9,10 +8,10 @@ from ariel.simulation.tasks.gait_learning import (
 from ariel.simulation.tasks.targeted_locomotion import distance_to_target
 from ariel.simulation.tasks.turning_in_place import turning_in_place
 
-tasks = ["Gate Learning", "Targeted Locomotion", "Turning In Place"]
-
-_task_fitness_function_map_ = {
-    "Gate Learning": [xy_displacement, x_speed, y_speed],
-    "Targeted Locomotion": [distance_to_target],
-    "Turning In Place": [turning_in_place],
-}
+__all__ = [
+    "distance_to_target",
+    "turning_in_place",
+    "x_speed",
+    "xy_displacement",
+    "y_speed",
+]

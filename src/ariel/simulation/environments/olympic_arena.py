@@ -18,7 +18,6 @@ from ariel.simulation.environments.floor_colors import (
 )
 from ariel.simulation.environments.noise_gen import PerlinNoise
 
-USE_DEGREES = False
 TERRAIN_COLOR = list(FLOOR_RGBA)
 
 # Global functions

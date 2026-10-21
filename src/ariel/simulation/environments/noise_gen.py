@@ -33,7 +33,6 @@ class PerlinNoise:
     """
 
     seed: int | None = None
-    norm_methods: NormMethod = "linear"
 
     def __post_init__(self) -> None:
         """Initialize the Perlin noise generator."""
