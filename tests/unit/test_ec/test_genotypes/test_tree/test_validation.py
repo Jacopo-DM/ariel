@@ -1,11 +1,13 @@
 """Test: tree genome validation utilities."""
 
 import pytest
+from hypothesis import example, given
 
 from ariel.ec.genotypes.tree.validation import (
     is_single_connected_tree,
     validate_genome_dict,
 )
+from tests.unit.test_ec.test_genotypes.test_tree.trees import GENOME_DICTS
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -269,3 +271,29 @@ def test_validate_missing_parent_node_raises() -> None:
     genome["edges"] = [{"parent": 7, "child": 0, "face": "FRONT"}]
     with pytest.raises(ValueError, match="missing parent node"):
         validate_genome_dict(genome)
+
+
+# ---------------------------------------------------------------------------
+# Properties
+# ---------------------------------------------------------------------------
+
+
+@given(GENOME_DICTS)
+@example(_core_brick_hinge())
+def test_validate_genome_dict_boundary(genome: dict[str, object]) -> None:
+    """Any dict passes or raises ValueError, never another exception."""
+    try:
+        validate_genome_dict(genome)
+    except ValueError:  # pydantic's ValidationError is a ValueError
+        return
+
+
+@given(GENOME_DICTS)
+@example(_core_brick_hinge())
+def test_is_single_connected_tree_boundary(genome: dict[str, object]) -> None:
+    """Any dict gives a bool or raises ValueError, never another exception."""
+    try:
+        answer = is_single_connected_tree(genome)
+    except ValueError:  # pydantic's ValidationError is a ValueError
+        return
+    assert isinstance(answer, bool)
