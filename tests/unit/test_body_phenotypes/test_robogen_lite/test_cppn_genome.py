@@ -30,8 +30,7 @@ LAST_INNOV_START = 7
 
 
 def _node(node_id: int, typ: str, *, bias: float = 0.0) -> Node:
-    # Node genes store the activation by name; the annotation says callable.
-    return Node(node_id, typ, "sigmoid" if typ != "input" else None, bias)  # type: ignore[arg-type]  # known bug
+    return Node(node_id, typ, "sigmoid" if typ != "input" else None, bias)
 
 
 def _chain_genome() -> Genome:
