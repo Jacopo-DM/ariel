@@ -4,6 +4,11 @@
 [environment]
 python-version = "3.12"
 
+[src]
+# The same folders mypy.ini and ruff.toml leave out (user's choice, 2026-10-18 and
+# 2026-10-21): scripts and notebooks with no tests behind them.
+exclude = ["docs", "examples"]
+
 [analysis]
 # Each checker keeps its own ignore comment: ty reads `# ty: ignore[rule]  # reason`
 # and mypy reads `# type: ignore[code]  # reason`.
