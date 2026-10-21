@@ -113,8 +113,7 @@ ariel/
 ├── tests/                          # Unit and functional tests
 ├── docs/                           # Sphinx documentation sources
 ├── wiki/                           # Project wiki (Obsidian vault)
-├── pyproject.toml                  # Project metadata and dependencies (uv)
-└── noxfile.py                      # Automation sessions (tests, docs, compiled build)
+└── pyproject.toml                  # Project metadata and dependencies (uv)
 ```
 
 Simulation runs write output to a local `__data__/` directory (created on first run).

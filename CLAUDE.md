@@ -63,7 +63,7 @@ Ruff is pinned to 0.17.* and does not fix by default; `ruff check --fix` is opt-
 
 - Run outputs go to `__data__/` under the current working directory (`ariel.DATA`, git-ignored). Tests and dev tools must not write anywhere else or read other users' data.
 - `mujoco_user_config.json` (and a `.lock` file while probing) is written in the current working folder by `ariel.opengl.gl_manager`; it is git-ignored and machine-specific. `MUJOCO_GL`, if set, always wins over it. Tests preset `MUJOCO_GL=glfw` in `tests/conftest.py` so they never probe.
-- No keys or environment variables are used, except `ARIEL_COMPILE_MYPYC=1` to opt in to the mypyc build (`setup.py`).
+- No keys or environment variables are used.
 
 ## Ignore list
 
@@ -83,7 +83,7 @@ Ruff is pinned to 0.17.* and does not fix by default; `ruff check --fix` is opt-
 ## Things that bite
 
 - `ruff check --fix` is opt-in (config has `fix = false`), and the pre-commit ruff hook does not pass it either. The whitespace and end-of-file hooks do edit files.
-- `uv add` and `uv remove` sync `.venv` to the default groups only and uninstall the docs and other group packages; run `uv sync --all-groups` right after. `uv pip ...` is blocked by the user's hook; `docs/requirements.txt` is written with `uv export` (DESIGN.md Decisions, dependency clean-up).
+- `uv add` and `uv remove` sync `.venv` to the default groups only and uninstall the docs and other group packages; run `uv sync --all-groups` right after. `uv pip ...` is blocked by the user's hook.
 - Other sessions share this checkout and can switch its branch (on 2026-10-21 one did, and a commit meant for a feature branch landed on `main`). Run `git branch --show-current` before each commit.
 - `ruff format <folder>` with an explicit path ignores the `exclude` in `ruff.toml` and reformats `examples/` and `docs/`; run it on `src tests tools` only. A bare `import ariel.rendering` or `ariel.opengl.gl_manager` run from the repo root probes the OpenGL backends the first time and writes `mujoco_user_config.json` there (git-ignored); preset `MUJOCO_GL=glfw` for ad-hoc imports, or delete the file after.
 - Read the exit code of `uv run --locked pytest -q`, not the coverage table: the `Miss` column counts statements only, so a gap in branches (`BrPart`) still fails the floor and the TOTAL row looks clean. When the floor fails, pytest-cov's own error message crashes with `ModernTerminalReporter has no attribute write` (INTERNALERROR) instead of saying so; run `uv run --no-sync coverage report --fail-under=100` to see the gap.

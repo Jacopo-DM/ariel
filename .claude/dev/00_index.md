@@ -2,7 +2,7 @@
 
 Read this when you (or an AI you direct) are **writing or modifying code inside
 `src/ariel/`**. The goal: produce code that matches the house style and passes
-`pre-commit` / `nox` on the first try.
+`pre-commit` on the first try.
 
 ## Load order
 
@@ -14,7 +14,7 @@ needed.
 | [coding_standards.md](coding_standards.md) | writing any code — the ruff/format rules |
 | [functional_vs_oo.md](functional_vs_oo.md) | deciding function vs `@dataclass` vs class |
 | [docstrings_and_types.md](docstrings_and_types.md) | adding docstrings or type hints |
-| [testing_and_tooling.md](testing_and_tooling.md) | running tests, coverage, pre-commit, mypyc |
+| [testing_and_tooling.md](testing_and_tooling.md) | running tests, coverage, pre-commit |
 | [repo_map.md](repo_map.md) | deciding *where* new code belongs |
 | [contribution_workflow.md](contribution_workflow.md) | preparing a PR |
 
@@ -35,5 +35,4 @@ disagree, the config wins — update the doc.
 - [ruff.toml](../../ruff.toml) — lint + format
 - [mypy.ini](../../mypy.ini) — type checking
 - [pyproject.toml](../../pyproject.toml) — deps, pytest, coverage
-- [noxfile.py](../../noxfile.py) — task automation
 - [.pre-commit-config.yaml](../../.pre-commit-config.yaml) — commit-time gates

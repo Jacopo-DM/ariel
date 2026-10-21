@@ -551,10 +551,6 @@ mut
 mycanvas
 mypy
 Mypy
-mypyc
-Mypyc
-MYPYC
-mypycify
 myst
 nala
 Nala
@@ -595,9 +591,6 @@ normalsize
 normalvariate
 nosetests
 notsotiny
-nox
-noxfile
-NOXSESSION
 npt
 NPY
 nrow

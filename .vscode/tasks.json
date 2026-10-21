@@ -20,24 +20,6 @@
                 "kind": "build",
                 "isDefault": true,
             },
-        },
-        {
-            "label": "Run nox: docs",
-            "type": "shell",
-            "command": "uv",
-            "args": [
-                "run",
-                "nox",
-                "--session=docs",
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true,
-                "presentation": {
-                    "reveal": "always",
-                    "panel": "new"
-                }
-            },
-        },
+        }
     ],
 }

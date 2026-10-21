@@ -76,7 +76,6 @@ It is recommended to discuss the idea in an issue **before** writing code, so th
 |---|---|---|
 | Python ≥ 3.12.9 | Runtime | <https://www.python.org> |
 | [uv](https://docs.astral.sh/uv/) | Package & environment manager | `pip install uv` |
-| [Nox](https://nox.thea.codes/) | Task runner / test sessions | `pip install nox` |
 | [pre-commit](https://pre-commit.com/) | Git hook manager | `pip install pre-commit` |
 
 ### Installation
@@ -119,8 +118,7 @@ ariel/
 ├── pyproject.toml          # Project metadata and tool config
 ├── ruff.toml               # Ruff linter/formatter config
 ├── mypy.ini                # MyPy type checker config
-├── pyrightconfig.json      # Pyright type checker config
-└── noxfile.py              # Nox session definitions
+└── pyrightconfig.json      # Pyright type checker config
 ```
 
 A general heuristic for package dependencies: if adding a feature would introduce a dependency from one ARIEL sub-package to another, reconsider the design.
@@ -241,10 +239,10 @@ API reference pages are generated automatically via [AutoAPI](https://sphinx-aut
 ### Building docs locally
 
 ```console
-$ nox --session=docs
+$ uv run --no-sync sphinx-autobuild --open-browser docs docs/_build
 ```
 
-This cleans the `docs/_build/` and `docs/_autoapi/` directories, then launches a live-reload server at `http://localhost:8000`.
+This builds the docs into `docs/_build/` and launches a live-reload server at `http://localhost:8000`.
 
 ### Documentation guidelines
 

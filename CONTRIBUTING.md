@@ -40,7 +40,6 @@ Request features on the [Issue Tracker].
 You need Python 3.12+ and the following tools:
 
 - [uv]
-- [Nox]
 
 Install the package with development requirements:
 
@@ -57,7 +56,6 @@ $ uv run ariel
 ```
 
 [uv]: https://docs.astral.sh/uv/
-[nox]: https://nox.thea.codes/
 
 ## How to test the project
 
@@ -73,7 +71,7 @@ Run only the unit tests:
 $ uv run pytest tests/unit
 ```
 
-The only Nox session is `docs` (`nox --session=docs`).
+Serve the docs with live reload: `uv run --no-sync sphinx-autobuild --open-browser docs docs/_build`.
 
 Unit tests are located in the _tests_ directory,
 and are written using the [pytest] testing framework.

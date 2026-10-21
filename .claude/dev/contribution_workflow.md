@@ -26,7 +26,7 @@ for the full text and links. This page is the checklist.
 
 ## PR acceptance criteria (from CONTRIBUTING.md)
 
-- [ ] Nox suite passes with no errors *and* no warnings.
+- [ ] `uv run pytest`, `ruff` and `mypy` pass with no errors *and* no warnings.
 - [ ] Unit tests included; 100% coverage maintained.
 - [ ] Documentation updated for new functionality.
 - [ ] Pre-commit (ruff + pydoclint + prettier) clean.

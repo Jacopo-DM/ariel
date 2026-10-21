@@ -49,10 +49,9 @@ git commit -m "Update: config files from template"
 ```bash
 mkdir -p docs/source docs/_build
 uv add --group=docs shibuya myst-parser sphinx_design sphinx-autodoc2
-uv export --only-group docs --no-hashes --no-emit-project --format requirements-txt -o docs/requirements.txt
 touch docs/conf.py
 # <<< FILL `conf.py` WITH CONTENT >>>
-git add docs/conf.py docs/requirements.txt
+git add docs/conf.py
 git commit -m "Add: configuration files for docs"
 
 touch docs/index.md
@@ -81,21 +80,6 @@ git commit -m "Add: custom fonts and colors"
 mkdir -p docs/_templates/partials/
 touch  docs/_templates/partials/webfonts.html
 ```
-
-### Nox
-
-```bash
-uv add --dev nox
-touch noxfile.py
-# <<< FILL `noxfile.py` WITH CONTENT >>>
-nox --session=docs # test
-git add noxfile.py
-git commit -m "Add: nox configuration file (noxfile.py)"
-```
-
-* fill: `noxfile.py`
-  * https://nox.thea.codes/en/stable/
-
 
 ### VSCode Configurations
 

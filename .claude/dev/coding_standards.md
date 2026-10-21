@@ -46,8 +46,8 @@ pyupgrade, bugbear, security `S…`, complexity `PLR…`, etc.).
 
 ### Per-file carve-outs
 
-- `**/tests/**/*.py`, `*/test_*.py`, `noxfile.py` → `S101` allowed (asserts are
-  fine in tests / nox config).
+- `**/tests/**/*.py`, `*/test_*.py` → `S101` allowed (asserts are fine in
+  tests).
 
 ## Imports — three blocks
 

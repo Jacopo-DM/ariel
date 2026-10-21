@@ -1,8 +1,8 @@
 # Testing & tooling
 
-ARIEL uses **uv** for environments, **nox** for docs builds, **pytest** for
+ARIEL uses **uv** for environments and docs builds, **pytest** for
 tests, and a **pre-commit** config for commit-time gates. Source of truth:
-[noxfile.py](../../noxfile.py), [pyproject.toml](../../pyproject.toml),
+[pyproject.toml](../../pyproject.toml),
 [.pre-commit-config.yaml](../../.pre-commit-config.yaml),
 [CONTRIBUTING.md](../../CONTRIBUTING.md).
 
@@ -23,7 +23,6 @@ Use `uv sync --all-groups` to include the dev and docs groups.
 ```bash
 uv run pytest tests/unit                  # unit tests
 uv run pytest tests/unit --cov=ariel      # with coverage
-nox --list                                # sessions: only `docs` exists today
 ```
 
 - Tests live in [tests/](../../tests/), written with `pytest`
@@ -33,7 +32,7 @@ nox --list                                # sessions: only `docs` exists today
   passes; raise it as tests are added. New code needs new tests.
   Excluded lines: `pragma: no cover`, `if TYPE_CHECKING:`.
 - Asserts are allowed in test files (ruff `S101` carve-out for `tests/`,
-  `test_*.py`, `noxfile.py`).
+  `test_*.py`).
 
 When adding a feature, add the test in the matching `tests/…` path **in the same
 change**, don't defer it. CI runs the tests, ruff and mypy
@@ -51,9 +50,3 @@ YAML, end-of-file and whitespace checks. Code that isn't ruff-clean will be
 rejected at commit time; write it to standard up front (see
 [coding_standards.md](coding_standards.md)). `pydoclint` is installed but not a
 hook yet.
-
-## Optional: mypyc compiled build
-
-ARIEL can be compiled with `mypyc` for speed (opt-in, off by default). Triggered
-by the `ARIEL_COMPILE_MYPYC=1` env var via [setup.py](../../setup.py). No nox
-session builds it. You won't need this for normal development.
