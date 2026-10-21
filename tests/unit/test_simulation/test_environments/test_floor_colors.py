@@ -68,7 +68,7 @@ def test_plain_floors_use_the_light_green(world: BaseWorld) -> None:
 
 def test_the_olympic_flat_sections_use_the_greens() -> None:
     """The grid texture of the arena is the same green checker."""
-    world = OlympicArena(load_precompiled=False)  # type: ignore[abstract]  # known bug: OlympicArena is abstract (PLAN.md)
+    world = OlympicArena(load_precompiled=False)
     texture = world.spec.texture("grid")
     assert tuple(texture.rgb1) == pytest.approx(FLOOR_DARK)
     assert tuple(texture.rgb2) == pytest.approx(FLOOR_LIGHT)

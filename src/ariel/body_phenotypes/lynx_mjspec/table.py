@@ -14,7 +14,7 @@ class TableWorld:
     def __init__(self) -> None:
         """Create the world spec with a floor and a table."""
         self.spec = mujoco.MjSpec()
-        self.spec.copy_during_attach = True
+        self.spec.copy_during_attach = True  # ty: ignore[invalid-assignment]  # stub types this write-only property as None
 
         # Table dimensions
         self.table_width = 1.0

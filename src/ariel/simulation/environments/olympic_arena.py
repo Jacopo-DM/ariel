@@ -52,12 +52,12 @@ def quaternion_from_axis_angle(axis: str, angle_deg: float) -> list[float]:
             msg += f" Got {axis=}. Should be 'x', 'y' or 'z'"
             raise ValueError(msg)
 
-    axis_tup = np.asarray(axis_tup, dtype=float)  # type: ignore[assignment]  # known bug
-    axis_tup /= np.linalg.norm(axis_tup)  # type: ignore[call-overload]  # known bug
+    axis_vec = np.asarray(axis_tup, dtype=float)
+    axis_vec /= np.linalg.norm(axis_vec)
     angle_rad = np.deg2rad(angle_deg)
     half_angle = angle_rad / 2
     w = np.cos(half_angle)
-    xyz = np.sin(half_angle) * axis_tup
+    xyz = np.sin(half_angle) * axis_vec
 
     return [w, *xyz]
 
@@ -147,7 +147,7 @@ class OlympicArena(BaseWorld):
         self.heightmap = self._generate_heightmap()
 
         # Build the world specification
-        self._extend_spec()
+        self._expand_spec()
 
     def _generate_heightmap(self) -> NDArray[np.float64]:
         size = self.rugged_resolution
@@ -166,7 +166,7 @@ class OlympicArena(BaseWorld):
         # Generate a grid of noise
         width, height = size, size
         scale = hill
-        noise = pnoise.as_grid(width, height, scale=scale, normalize=False)  # type: ignore[arg-type]  # known bug
+        noise = pnoise.as_grid(width, height, scale=scale, normalize="none")
 
         # --- Smooth edge mask (0 at borders -> 1 inside) --- #
         # Normalized coordinates in [0,1]
@@ -191,7 +191,7 @@ class OlympicArena(BaseWorld):
         # Apply mask so edges fade to 0 smoothly
         return cast("NDArray[np.float64]", noise * mask)
 
-    def _extend_spec(self) -> None:
+    def _expand_spec(self) -> None:
         # --- Assets --- #
         # Grid texture and material for flat sections
         grid_name = "grid"
@@ -342,7 +342,7 @@ class OlympicArena(BaseWorld):
 
 if __name__ == "__main__":
     # Compile and save the XML for inspection
-    arena = OlympicArena(  # type: ignore[abstract]  # known bug
+    arena = OlympicArena(
         load_precompiled=False,
     )
     arena.store_to_xml()

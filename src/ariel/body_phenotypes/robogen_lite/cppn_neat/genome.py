@@ -362,7 +362,7 @@ class Genome:
             If the node is already in the genome.
         """
         if node not in self.nodes.values():
-            self.nodes[node._id] = node  # ruff: ignore[private-member-access]
+            self.nodes[node.node_id] = node
         else:
             msg = "Node already exists in genome."
             raise ValueError(msg)
@@ -555,7 +555,7 @@ class Genome:
         return {
             "nodes": {
                 str(k): {
-                    "_id": v._id,  # ruff: ignore[private-member-access]
+                    "_id": v.node_id,
                     "typ": v.typ,
                     "activation": v.activation,
                     "bias": v.bias,

@@ -19,6 +19,11 @@ class Node:
         self.activation = activation
         self.bias = bias
 
+    @property
+    def node_id(self) -> int:
+        """The node's ID."""
+        return self._id
+
     def copy(self) -> Node:
         """Return a new Node object with identical values.
 

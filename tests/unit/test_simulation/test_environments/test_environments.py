@@ -56,7 +56,7 @@ def test_crater_terrain_world_initialization() -> None:
 
 def test_olympic_arena_initialization() -> None:
     """Simply instantiate the OlympicArena class."""
-    world = OlympicArena()  # type: ignore[abstract]  # known bug: BaseWorld and OlympicArena are abstract (PLAN.md)
+    world = OlympicArena()
     model = cast("mujoco.MjModel", world.spec.compile())
     data = mujoco.MjData(model)
     del model, data, world

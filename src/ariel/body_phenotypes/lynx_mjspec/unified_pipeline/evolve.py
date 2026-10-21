@@ -300,10 +300,10 @@ def main() -> None:  # ruff: ignore[too-many-locals]  # long routine kept as wri
                 optimizer.tell(cand, float(fit))
 
             valid = [f for f in fitnesses if f < INVALID_FITNESS]
-            try:
-                sigma_str = f" σ={optimizer.optim.es.sigma:.4f}"  # type: ignore[attr-defined]  # ruff: ignore[ambiguous-unicode-character-string]  # known bug
-            except AttributeError:
-                sigma_str = ""
+            # Only CMA-style optimizers carry a step size, deep inside
+            es = getattr(getattr(optimizer, "optim", None), "es", None)
+            sigma: float | None = getattr(es, "sigma", None)
+            sigma_str = "" if sigma is None else f" σ={sigma:.4f}"  # ruff: ignore[ambiguous-unicode-character-string]
             best_idx = int(np.argmin(fitnesses))
             best_tubes = np.round(np.asarray(candidates[best_idx].value[0]), 3)
             print(

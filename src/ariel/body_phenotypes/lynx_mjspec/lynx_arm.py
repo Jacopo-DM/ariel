@@ -65,7 +65,7 @@ class LynxArm:
             [s, c, 0],
             [0, 0, 1],
         ])
-        return cast("NDArray[np.float64]", rotation @ axis)
+        return rotation @ axis
 
     def _build_robot(self) -> None:
         """Construct the kinematic chain hierarchically."""

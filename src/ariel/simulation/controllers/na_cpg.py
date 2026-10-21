@@ -387,7 +387,9 @@ class NaCPG(nn.Module):
         self.angles = torch.zeros(self.n)
         self.angle_history = []
 
-    def forward(self, time: float | None = None) -> torch.Tensor:
+    def forward(  # ty: ignore[invalid-mutable-override]  # torch types forward as a Callable attribute; models override it with a method
+        self, time: float | None = None
+    ) -> torch.Tensor:
         """Advance every oscillator by one step and return the angles.
 
         Parameters

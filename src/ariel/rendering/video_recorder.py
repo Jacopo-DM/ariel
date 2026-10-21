@@ -82,8 +82,8 @@ class VideoRecorder:
         output_file = output_folder / f"{file_name}{self._file_extension}"
 
         fourcc = cv2.VideoWriter_fourcc(*self._video_encoding)
-        video_writer = cv2.VideoWriter(  # type: ignore[call-overload]  # known bug
-            output_file,
+        video_writer = cv2.VideoWriter(
+            str(output_file),
             fourcc,
             self.fps,
             (self.width, self.height),
@@ -93,8 +93,8 @@ class VideoRecorder:
             for codec, ext in self._fallback_encoders:
                 output_file = output_folder / f"{file_name}{ext}"
                 fourcc = cv2.VideoWriter_fourcc(*codec)
-                video_writer = cv2.VideoWriter(  # type: ignore[call-overload]  # known bug
-                    output_file,
+                video_writer = cv2.VideoWriter(
+                    str(output_file),
                     fourcc,
                     self.fps,
                     (self.width, self.height),

@@ -113,9 +113,9 @@ def resolve_site_id(model: mujoco.MjModel, base_name: str) -> int:
     int
         The site id, or -1 if no site matches.
     """
-    sid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, base_name)
+    sid: int = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, base_name)
     if sid != -1:
-        return cast("int", sid)
+        return sid
 
     for i in range(model.nsite):
         name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_SITE, i) or ""
@@ -205,10 +205,10 @@ def build_observation(
     """
     q, qd = get_joint_state(model, data, joint_ids)
     rel_target = data.site_xpos[tgt_sid] - data.site_xpos[tcp_sid]
-    return cast(
-        "NDArray[np.float64]",
-        np.concatenate([q, qd, rel_target]).astype(np.float64),
+    obs: NDArray[np.float64] = np.concatenate([q, qd, rel_target]).astype(
+        np.float64
     )
+    return obs
 
 
 def apply_position_delta_control(

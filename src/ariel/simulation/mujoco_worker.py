@@ -25,7 +25,7 @@ class EvalConfig(FrozenModel):
     seed: int | None = None
 
 
-class MuJoCoWorkerBase(ABC):
+class MuJoCoWorkerBase[C: EvalConfig](ABC):
     """Callable base class for MuJoCo robot evaluation in worker processes.
 
     Subclass and implement evaluate(). Pass an instance to
@@ -38,7 +38,7 @@ class MuJoCoWorkerBase(ABC):
     where eval_args is a list of (xml_string, EvalConfig) tuples.
     """
 
-    def __call__(self, args: tuple[str, EvalConfig]) -> float:
+    def __call__(self, args: tuple[str, C]) -> float:
         """Entry point called by the worker process.
 
         Loads the MuJoCo model from XML and delegates to evaluate().
@@ -63,7 +63,7 @@ class MuJoCoWorkerBase(ABC):
         self,
         model: mj.MjModel,
         data: mj.MjData,
-        config: EvalConfig,
+        config: C,
     ) -> float:
         """Evaluate a robot and return a scalar fitness value.
 

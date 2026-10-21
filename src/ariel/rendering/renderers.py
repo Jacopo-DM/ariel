@@ -254,8 +254,7 @@ def tracking_video_renderer(
             (
                 i
                 for i in range(model.nbody)
-                if (mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, i) or "")
-                and "core"
+                if "core"
                 in (mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, i) or "")
             ),
             None,
@@ -274,7 +273,7 @@ def tracking_video_renderer(
     # Build the tracking camera once (reused every frame)
     if core_body_id is not None:
         tracking_cam = mujoco.MjvCamera()
-        tracking_cam.type = mujoco.mjtCamera.mjCAMERA_TRACKING
+        tracking_cam.type = int(mujoco.mjtCamera.mjCAMERA_TRACKING)
         tracking_cam.trackbodyid = core_body_id
         tracking_cam.distance = tracking_distance
         tracking_cam.azimuth = tracking_azimuth

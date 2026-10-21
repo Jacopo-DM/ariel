@@ -42,7 +42,7 @@ SEED = 3
 FITNESS_FLOOR = 0.0
 
 
-class _CountingWorker(MuJoCoWorkerBase):
+class _CountingWorker(MuJoCoWorkerBase[EvalConfig]):
     """Reports the number of actuators and the seed of its config."""
 
     offset = 0.0

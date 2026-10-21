@@ -352,9 +352,10 @@ def _probe_once(
                 run as manager_run,
             )
 
-            def run(target: Path) -> GLConfig:
+            def default_run(target: Path) -> GLConfig:
                 return manager_run(target, console=console)
 
+            run = default_run
         config = run(path)
         if "mujoco" in modules:
             if console is None:

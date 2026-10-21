@@ -29,7 +29,8 @@ class Operation(Protocol):
 class _PipelineFunction[**Q](Protocol):
     """A named function that takes a Population first and returns one."""
 
-    __name__: str
+    @property
+    def __name__(self) -> str: ...  # pragma: no cover  # ruff: ignore[bad-dunder-method-name]  # mirrors the __name__ of functions and methods
 
     def __call__(  # pragma: no cover  # typing stub only
         self, population: Population, /, *args: Q.args, **kwargs: Q.kwargs

@@ -81,7 +81,10 @@ def _quantity_of(
         if not isinstance(value, u.Quantity):
             msg = f"needs an astropy quantity in {unit}, got {value!r}"
             raise ValueError(msg)  # ruff: ignore[type-check-without-type-error]  # pydantic only reports ValueError
-        if not value.unit.is_equivalent(unit, equivalencies=_ANGLES):
+        # A Quantity always has a unit; the stub allows None
+        if value.unit is None or not value.unit.is_equivalent(
+            unit, equivalencies=_ANGLES
+        ):
             msg = f"needs the dimension of {unit}, got {value.unit}"
             raise ValueError(msg)
         if not value.isscalar:

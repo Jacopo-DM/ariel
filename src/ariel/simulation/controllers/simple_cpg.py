@@ -34,7 +34,7 @@ DATA.mkdir(exist_ok=True)
 # --- TERMINAL OUTPUT SETUP ---
 install(show_locals=False)
 console = Console()
-torch.set_printoptions(precision=4)  # type: ignore[no-untyped-call]  # known bug
+torch.set_printoptions(precision=4)  # type: ignore[no-untyped-call]  # torch leaves this function unannotated
 
 
 def create_fully_connected_adjacency(num_nodes: int) -> dict[int, list[int]]:
@@ -270,7 +270,9 @@ class SimpleCPG(nn.Module):
         self.angles.data = self.initial_state["angles"].clone()
         self.angle_history = []
 
-    def forward(self, time: float | None = None) -> torch.Tensor:
+    def forward(  # ty: ignore[invalid-mutable-override]  # torch types forward as a Callable attribute; models override it with a method
+        self, time: float | None = None
+    ) -> torch.Tensor:
         """Perform a forward pass to update CPG states and compute angles.
 
         Parameters

@@ -71,7 +71,7 @@ class LocomotionConfig(EvalConfig):
 # ---------------------------------------------------------------------------
 
 
-class TargetedLocomotionWorker(MuJoCoWorkerBase):
+class TargetedLocomotionWorker(MuJoCoWorkerBase[LocomotionConfig]):
     """Evaluates a robot on a targeted-locomotion task.
 
     Fitness = distance to target after CMA-ES controller optimisation
@@ -82,7 +82,7 @@ class TargetedLocomotionWorker(MuJoCoWorkerBase):
         self,
         model: mj.MjModel,
         data: mj.MjData,
-        config: LocomotionConfig,  # type: ignore[override]  # known bug
+        config: LocomotionConfig,
     ) -> float:
         """Optimise a controller with CMA-ES and return the best fitness.
 
@@ -147,9 +147,9 @@ class TargetedLocomotionWorker(MuJoCoWorkerBase):
 # ---------------------------------------------------------------------------
 
 
-def evaluate_population(
-    eval_args: list[tuple[str, EvalConfig]],
-    worker: MuJoCoWorkerBase,
+def evaluate_population[C: EvalConfig](
+    eval_args: list[tuple[str, C]],
+    worker: MuJoCoWorkerBase[C],
     num_workers: int = 8,
 ) -> list[float]:
     """Run eval_args through a process pool and return fitness values.
@@ -195,5 +195,5 @@ if __name__ == "__main__":
     eval_args = [(dummy_xml, config), (dummy_xml, config)]
     worker = TargetedLocomotionWorker()
 
-    results = evaluate_population(eval_args, worker, num_workers=2)  # type: ignore[arg-type]  # known bug
+    results = evaluate_population(eval_args, worker, num_workers=2)
     print("Fitness values:", results)

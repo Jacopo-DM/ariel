@@ -133,6 +133,7 @@ def test_recorder_falls_back_to_another_codec(
     monkeypatch.setattr(_FakeWriter, "openable", (".avi",))
     monkeypatch.setattr(cv2, "VideoWriter", _FakeWriter)
     recorder = _recorder(tmp_path)
+    assert isinstance(recorder.video_writer, _FakeWriter)
     assert recorder.video_writer.path.endswith(".avi")
 
 

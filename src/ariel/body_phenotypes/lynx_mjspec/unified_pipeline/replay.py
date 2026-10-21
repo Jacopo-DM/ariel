@@ -6,7 +6,7 @@ import argparse
 import json
 import time
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, SupportsFloat, cast
 
 import mujoco
 import mujoco.viewer
@@ -192,8 +192,12 @@ def main() -> None:  # ruff: ignore[too-many-locals]  # long routine kept as wri
     default_target = np.array(
         metadata.get("target", DEFAULT_TARGET.tolist()), dtype=np.float64
     )
+    # The run saved a number here (evolve.py writes the metadata)
     touch_threshold = float(
-        metadata.get("touch_threshold", DEFAULT_TOUCH_THRESHOLD)  # type: ignore[arg-type]  # known bug
+        cast(
+            "SupportsFloat",
+            metadata.get("touch_threshold", DEFAULT_TOUCH_THRESHOLD),
+        )
     )
     target = np.array(
         [args.target_x, args.target_y, args.target_z], dtype=np.float64

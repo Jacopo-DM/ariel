@@ -257,8 +257,8 @@ def test_olympic_arena_loads_its_precompiled_xml(
     precompiled_dir: Path,
 ) -> None:
     """A stored arena is loaded without rebuilding."""
-    OlympicArena(load_precompiled=False).store_to_xml()  # type: ignore[abstract]  # known bug
-    assert OlympicArena(load_precompiled=True).is_precompiled  # type: ignore[abstract]  # known bug
+    OlympicArena(load_precompiled=False).store_to_xml()
+    assert OlympicArena(load_precompiled=True).is_precompiled
     assert list(precompiled_dir.glob("*.xml"))
 
 

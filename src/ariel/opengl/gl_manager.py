@@ -136,7 +136,7 @@ def select_backend(
         The backend name, or None if none works. Ties follow the order
         glfw, egl, osmesa.
     """
-    working = [
+    working: list[tuple[float, int, BackendName]] = [
         (r.render_ms if r.render_ms is not None else float("inf"), i, name)
         for i, name in enumerate(BACKEND_ORDER)
         if (r := results.get(name)) is not None and r.ok

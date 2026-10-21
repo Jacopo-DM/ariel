@@ -40,7 +40,7 @@ WORLDS: dict[str, Callable[[], BaseWorld]] = {
     "rugged-tilted": lambda: RuggedTiltedWorld(load_precompiled=False),
     "crater": lambda: CraterTerrainWorld(load_precompiled=False),
     "amphitheatre": lambda: AmphitheatreTerrainWorld(load_precompiled=False),
-    "olympic-arena": lambda: OlympicArena(load_precompiled=False),  # type: ignore[abstract]  # known bug: OlympicArena is abstract (PLAN.md)
+    "olympic-arena": lambda: OlympicArena(load_precompiled=False),
 }
 
 
