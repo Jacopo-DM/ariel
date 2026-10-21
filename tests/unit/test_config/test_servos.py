@@ -69,4 +69,4 @@ def test_a_mass_times_length_is_not_a_torque() -> None:
 
 def test_modules_config_holds_the_servo() -> None:
     """The hinge's actuator is the DSS-M15."""
-    assert isinstance(ArielModulesConfig().ACTUATOR, DSSM15)
+    assert isinstance(ArielModulesConfig().servo, DSSM15)

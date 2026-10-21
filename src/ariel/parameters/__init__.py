@@ -16,6 +16,7 @@ from ariel.parameters.ariel_types import (
     Rotation,
 )
 from ariel.parameters.base_model import FrozenModel, MutableModel
+from ariel.parameters.module_specs import BrickSpec, CoreSpec, HingeSpec
 from ariel.parameters.mujoco_params import MujocoConfig
 from ariel.parameters.quantities import (
     ANGLES,
@@ -35,9 +36,12 @@ __all__ = [
     "STANDARD_GRAVITY",
     "ArielConfig",
     "ArielModulesConfig",
+    "BrickSpec",
+    "CoreSpec",
     "Dimension",
     "FloatArray",
     "FrozenModel",
+    "HingeSpec",
     "IntArray",
     "MujocoConfig",
     "MutableModel",

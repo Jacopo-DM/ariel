@@ -14,10 +14,14 @@ from ariel.body_phenotypes import quaternions as qnp
 # Local libraries
 from ariel.body_phenotypes.robogen_lite.config import ModuleFaces, ModuleType
 from ariel.body_phenotypes.robogen_lite.modules.module import Module
-from ariel.parameters import ArielModulesConfig
 
-# Global functions
-ariel_modules_config = ArielModulesConfig()
+# --- Robogen Configuration --- #
+# Module weight (kg)
+BRICK_MASS = 0.055
+
+# Module half-sizes (length, width, height) in meters
+BRICK_DIMENSIONS = (0.05, 0.05, 0.05)
+# ------------------------------ #
 
 
 class BrickModule(Module):
@@ -49,9 +53,9 @@ class BrickModule(Module):
         brick.add_geom(
             name=brick_name,
             type=mujoco.mjtGeom.mjGEOM_BOX,
-            mass=ariel_modules_config.BRICK_MASS,
-            size=ariel_modules_config.BRICK_DIMENSIONS,
-            pos=[0, ariel_modules_config.BRICK_DIMENSIONS[0], 0],
+            mass=BRICK_MASS,
+            size=BRICK_DIMENSIONS,
+            pos=[0, BRICK_DIMENSIONS[0], 0],
             rgba=(28 / 255, 119 / 255, 195 / 255, 1),
         )
 
@@ -59,7 +63,7 @@ class BrickModule(Module):
         self.sites = {}
         self.sites[ModuleFaces.FRONT] = brick.add_site(
             name=f"{brick_name}-front",
-            pos=[0, ariel_modules_config.BRICK_DIMENSIONS[1] * 2, 0],
+            pos=[0, BRICK_DIMENSIONS[1] * 2, 0],
             quat=np.round(
                 qnp.from_euler_angles([
                     np.deg2rad(0),
@@ -72,8 +76,8 @@ class BrickModule(Module):
         self.sites[ModuleFaces.LEFT] = brick.add_site(
             name=f"{brick_name}-left",
             pos=[
-                -ariel_modules_config.BRICK_DIMENSIONS[0],
-                ariel_modules_config.BRICK_DIMENSIONS[1],
+                -BRICK_DIMENSIONS[0],
+                BRICK_DIMENSIONS[1],
                 0,
             ],
             quat=np.round(
@@ -88,8 +92,8 @@ class BrickModule(Module):
         self.sites[ModuleFaces.RIGHT] = brick.add_site(
             name=f"{brick_name}-right",
             pos=[
-                ariel_modules_config.BRICK_DIMENSIONS[0],
-                ariel_modules_config.BRICK_DIMENSIONS[1],
+                BRICK_DIMENSIONS[0],
+                BRICK_DIMENSIONS[1],
                 0,
             ],
             quat=np.round(
@@ -105,8 +109,8 @@ class BrickModule(Module):
             name=f"{brick_name}-top",
             pos=[
                 0,
-                ariel_modules_config.BRICK_DIMENSIONS[1],
-                ariel_modules_config.BRICK_DIMENSIONS[2],
+                BRICK_DIMENSIONS[1],
+                BRICK_DIMENSIONS[2],
             ],
             quat=np.round(
                 qnp.from_euler_angles([
@@ -121,8 +125,8 @@ class BrickModule(Module):
             name=f"{brick_name}-bottom",
             pos=[
                 0,
-                ariel_modules_config.BRICK_DIMENSIONS[1],
-                -ariel_modules_config.BRICK_DIMENSIONS[2],
+                BRICK_DIMENSIONS[1],
+                -BRICK_DIMENSIONS[2],
             ],
             quat=np.round(
                 qnp.from_euler_angles([

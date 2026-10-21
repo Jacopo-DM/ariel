@@ -2,27 +2,24 @@
 
 # Third-party libraries
 from pydantic import Field
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Local libraries
+from ariel.parameters.module_specs import BrickSpec, CoreSpec, HingeSpec
 from ariel.parameters.servos import DSSM15
-
-# Type Aliases
-type WeightType = float
-type DimensionType = tuple[float, float, float]
 
 
 class ArielModulesConfig(BaseSettings):
-    # --- Brick Config --- #
-    # Module weights (kg)
-    """Masses, dimensions and limits of the RoboGen-lite modules."""
+    """Measured sizes and masses of the modules, and the hinge's servo.
 
-    BRICK_MASS: WeightType = 0.055  # 55 grams
+    An environment variable overrides one value, written with its unit and
+    named by the path to it: ``BRICK__MASS="0.1 kg"``. A bare number is
+    refused.
+    """
 
-    # Module dimensions (length, width, height) in meters
-    BRICK_DIMENSIONS: DimensionType = (0.05, 0.05, 0.05)
-    # ------------------------------ #
+    model_config = SettingsConfigDict(env_nested_delimiter="__")
 
-    # --- Hinge Config --- #
-    ACTUATOR: DSSM15 = Field(default_factory=DSSM15)
-    # ------------------------------ #
+    brick: BrickSpec = Field(default_factory=BrickSpec)
+    core: CoreSpec = Field(default_factory=CoreSpec)
+    hinge: HingeSpec = Field(default_factory=HingeSpec)
+    servo: DSSM15 = Field(default_factory=DSSM15)
