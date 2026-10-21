@@ -54,7 +54,7 @@ Each row is a real call site. If your case matches one, write the class.
 | **Persistent / DB-backed state + invariants** | `Individual(SQLModel)` — [src/ariel/ec/individual.py](../../src/ariel/ec/individual.py) | ORM row; `fitness` property guards access before evaluation |
 | **Fluent / chainable API** | `Population.where(...).alive` — [src/ariel/ec/population.py](../../src/ariel/ec/population.py) | each call returns a new `Population`; reads like a query |
 | **Algorithm bundling state + steps** | `RevDE` — [src/ariel/ec/optimizers/revde.py](../../src/ariel/ec/optimizers/revde.py); `EA` — [src/ariel/ec/ea.py](../../src/ariel/ec/ea.py) | holds matrices / population between `step()` calls |
-| **`nn.Module` / framework contract** | `SimpleCPG`, `NaCPG` — [src/ariel/simulation/controllers/](../../src/ariel/simulation/controllers/) | PyTorch requires subclassing `nn.Module` |
+| **`nn.Module` / framework contract** | the CPGs (`CPG` and its seven subclasses) — [src/ariel/simulation/controllers/cpg/](../../src/ariel/simulation/controllers/cpg/) | PyTorch requires subclassing `nn.Module` |
 | **Plugin point needing subclassing** | `Module(ABC)` — [src/ariel/body_phenotypes/robogen_lite/modules/module.py](../../src/ariel/body_phenotypes/robogen_lite/modules/module.py) | `Core`/`Brick`/`Hinge` override `rotate` |
 | **Validated config** | Pydantic `BaseModel` / `EASettings(BaseSettings)` — [ea.py](../../src/ariel/ec/ea.py) | field validation + `.env` overrides |
 | **Framework extension** | `BaseWorld` subclasses — [environments/_base_world.py](../../src/ariel/simulation/environments/_base_world.py) | builds on MuJoCo's `MjSpec` builder |

@@ -17,7 +17,7 @@ from rich.traceback import install
 
 # Local libraries
 from ariel.simulation.controllers.controller import Controller
-from ariel.simulation.controllers.na_cpg import NaCPG, create_fully_connected_adjacency
+from ariel.simulation.controllers import NaCPG, create_fully_connected_adjacency
 from ariel.simulation.environments import SimpleFlatWorld as World
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots.gecko import gecko
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider import spider

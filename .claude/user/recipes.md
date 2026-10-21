@@ -30,13 +30,13 @@ Source: [examples/re_book/2_body_brain_evolution.py](../../examples/re_book/2_bo
 
 ```python
 from ariel.simulation.controllers.controller import Controller
-from ariel.simulation.controllers.simple_cpg import (
-    SimpleCPG,
+from ariel.simulation.controllers import (
+    HopfCPG,
     create_fully_connected_adjacency,
 )
 from ariel.simulation.tracker import Tracker
 
-cpg = SimpleCPG(create_fully_connected_adjacency(model.nu))
+cpg = HopfCPG(create_fully_connected_adjacency(model.nu))
 tracker = Tracker(mujoco.mjtObj.mjOBJ_BODY, "core", ["xpos"])
 ctrl = Controller(
     controller_callback_function=lambda m, d, *a, **k: cpg.forward(d.time),

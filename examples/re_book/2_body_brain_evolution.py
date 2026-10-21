@@ -40,8 +40,8 @@ from ariel.body_phenotypes.robogen_lite.decoders.cppn_best_first import (
 )
 from ariel.ec import EA, EAOperation, EASettings, Individual, Population
 from ariel.simulation.controllers.controller import Controller
-from ariel.simulation.controllers.simple_cpg import (
-    SimpleCPG,
+from ariel.simulation.controllers import (
+    HopfCPG,
     create_fully_connected_adjacency,
 )
 from ariel.simulation.environments._simple_flat_with_target import (
@@ -78,7 +78,7 @@ DURATION: int = args.dur
 POP_SIZE: int = args.pop
 BUDGET: int = args.budget
 NUM_MODULES: int = 10
-CTRL_GENOME_SIZE: int = NUM_MODULES * 5
+CTRL_GENOME_SIZE: int = NUM_MODULES * 4  # HopfCPG: phase, w, amplitudes, offset
 
 SPAWN_POSITION = (-0.8, 0.0, 0.1)
 TARGET_POSITION = np.array([2.0, 0.0, 0.5])
@@ -152,14 +152,14 @@ class Evolution:
             return None
 
     def map_genotype_to_brain(
-        self, cpg: SimpleCPG, full_genome: list[float],
+        self, cpg: HopfCPG, full_genome: list[float],
     ) -> None:
         """Decodes Float Vector into CPG Parameters."""
         n = cpg.phase.shape[0]
         params = np.array(full_genome)
 
         # Resize logic if body changed size
-        required_size = n * 5
+        required_size = n * 4
         if required_size > len(params):
             params = np.resize(params, required_size)
         else:
@@ -168,8 +168,7 @@ class Evolution:
         p_phase = params[0 * n : 1 * n]
         p_w = params[1 * n : 2 * n]
         p_amp = params[2 * n : 3 * n]
-        p_ha = params[3 * n : 4 * n]
-        p_b = params[4 * n : 5 * n]
+        p_offset = params[3 * n : 4 * n]
 
         with torch.no_grad():
             cpg.phase.data.copy_(torch.from_numpy(p_phase * np.pi).float())
@@ -181,8 +180,7 @@ class Evolution:
             cpg.amplitudes.data.copy_(
                 torch.from_numpy(0.5 + (3.5 * (p_amp + 1.0) / 2.0)).float(),
             )
-            cpg.ha.data.copy_(torch.from_numpy(p_ha * 2.0).float())
-            cpg.b.data.copy_(torch.from_numpy(p_b * 0.5).float())
+            cpg.offset.data.copy_(torch.from_numpy(p_offset * 0.5).float())
 
     def get_joint_count(self, genome: Genome) -> int:
         """Checks if the genome produces a body with actuators."""
@@ -495,7 +493,7 @@ class Evolution:
 
         # 3. Setup Brain
         adj_dict = create_fully_connected_adjacency(model.nu)
-        cpg = SimpleCPG(adj_dict)
+        cpg = HopfCPG(adj_dict)
         self.map_genotype_to_brain(cpg, ind.genotype["ctrl"])
 
         if mode != "simple":

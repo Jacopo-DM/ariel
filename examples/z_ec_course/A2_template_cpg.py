@@ -15,7 +15,7 @@ from ariel import console
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots.gecko import gecko
 from ariel.simulation.controllers import NaCPG
 from ariel.simulation.controllers.controller import Controller, Tracker
-from ariel.simulation.controllers.na_cpg import create_fully_connected_adjacency
+from ariel.simulation.controllers import create_fully_connected_adjacency
 from ariel.simulation.environments import SimpleFlatWorld
 from ariel.simulation.runners import simple_runner
 

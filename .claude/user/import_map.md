@@ -47,8 +47,7 @@ Full exported list: `AmphitheatreTerrainWorld`, `BaseWorld`, `CompoundWorld`,
 | Symbol | Import |
 |---|---|
 | `Controller` | `from ariel.simulation.controllers.controller import Controller` |
-| `SimpleCPG`, `create_fully_connected_adjacency` | `from ariel.simulation.controllers.simple_cpg import SimpleCPG, create_fully_connected_adjacency` |
-| `NaCPG` | `from ariel.simulation.controllers import NaCPG` |
+| `HopfCPG`, `AdaptiveHopfCPG`, `PhaseCPG`, `SwingStanceCPG`, `NaCPG`, `TegotaeCPG`, `LearnableTegotaeCPG`, `CPG`, `create_fully_connected_adjacency` | `from ariel.simulation import HopfCPG, create_fully_connected_adjacency` (also from `ariel.simulation.controllers`) |
 | `get_state_from_data` | `from ariel.simulation.controllers.utils.data_get import get_state_from_data` |
 
 ## Tasks / fitness

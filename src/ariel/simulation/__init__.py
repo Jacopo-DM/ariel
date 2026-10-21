@@ -2,8 +2,15 @@
 
 # Local libraries
 from ariel.simulation.controllers import (
+    CPG,
+    AdaptiveHopfCPG,
     Controller,
+    HopfCPG,
+    LearnableTegotaeCPG,
     NaCPG,
+    PhaseCPG,
+    SwingStanceCPG,
+    TegotaeCPG,
     create_fully_connected_adjacency,
 )
 from ariel.simulation.environments import (
@@ -27,21 +34,28 @@ from ariel.simulation.mujoco_worker import EvalConfig, MuJoCoWorkerBase
 from ariel.simulation.tracker import Tracker
 
 __all__ = [
+    "CPG",
+    "AdaptiveHopfCPG",
     "AmphitheatreTerrainWorld",
     "BaseWorld",
     "CompoundWorld",
     "Controller",
     "CraterTerrainWorld",
     "EvalConfig",
+    "HopfCPG",
+    "LearnableTegotaeCPG",
     "MuJoCoWorkerBase",
     "NaCPG",
     "NormMethod",
     "OlympicArena",
     "PerlinNoise",
+    "PhaseCPG",
     "RuggedTerrainWorld",
     "RuggedTiltedWorld",
     "SimpleFlatWorld",
     "SimpleTiltedWorld",
+    "SwingStanceCPG",
+    "TegotaeCPG",
     "Tracker",
     "create_fully_connected_adjacency",
     "euler_to_quat_conversion",

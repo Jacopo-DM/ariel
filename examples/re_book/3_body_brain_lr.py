@@ -17,7 +17,6 @@ from typing import Any, Literal
 import mujoco as mj
 import nevergrad as ng
 import numpy as np
-import torch
 from mujoco import viewer
 from rich.console import Console
 from rich.progress import (
@@ -45,8 +44,7 @@ from ariel.body_phenotypes.robogen_lite.decoders.cppn_best_first import (
 from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
 from ariel.ec import EA, EAOperation, EASettings, Individual, Population
 from ariel.simulation.controllers.controller import Controller, Tracker
-from ariel.simulation.controllers.na_cpg import create_fully_connected_adjacency
-from ariel.simulation.controllers.simple_cpg import SimpleCPG
+from ariel.simulation.controllers import HopfCPG, create_fully_connected_adjacency
 from ariel.simulation.environments import SimpleFlatWorld
 from ariel.rendering import single_frame_renderer, video_renderer
 from ariel.simulation.runners import simple_runner
@@ -374,11 +372,7 @@ def learning_robot(
             (-2 * np.pi) - 1,
             (2 * np.pi) + 1,
         ),
-        ha=ng.p.Array(shape=(num_of_inputs,)).set_bounds(
-            -3,
-            3,
-        ),
-        b=ng.p.Array(shape=(num_of_inputs,)).set_bounds(
+        offset=ng.p.Array(shape=(num_of_inputs,)).set_bounds(
             -2,
             2,
         ),
@@ -559,18 +553,15 @@ def evaluate_robot(
     num_of_joints = model.nu
     del model, data
 
-    # SimpleCPG setup
+    # HopfCPG setup
     adj_dict = create_fully_connected_adjacency(num_of_joints)
-    cpg = SimpleCPG(adj_dict)
+    cpg = HopfCPG(adj_dict)
 
     if brain is not None:
         # JSON object to numpy arrays
         brain_np = deserialise_brain_to_numpy(brain)
 
-        # Map flat parameters to SimpleCPG tensors
-        with torch.no_grad():
-            for key, val in brain_np.items():
-                getattr(cpg, key).data.copy_(torch.from_numpy(val).float())
+        cpg.set_param_with_dict(brain_np)
 
     # Simulate the robot
     ctrl = Controller(

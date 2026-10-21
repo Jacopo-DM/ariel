@@ -7,31 +7,44 @@ common routes: a **CPG** (central pattern generator, good for locomotion) or a
 
 ## CPG controllers
 
-`SimpleCPG` and `NaCPG` are `nn.Module`s built from an adjacency dict.
+Seven CPGs live in `ariel.simulation.controllers.cpg`
+([folder](../../src/ariel/simulation/controllers/cpg/)). All are `nn.Module`s
+built from an adjacency dict, one oscillator per actuator, and all share the
+interface of the base class `CPG`.
 
 ```python
-from ariel.simulation.controllers.simple_cpg import (
-    SimpleCPG,
-    create_fully_connected_adjacency,
-)
+from ariel.simulation import HopfCPG, create_fully_connected_adjacency
 
 adj = create_fully_connected_adjacency(model.nu)  # nu = #actuators
-cpg = SimpleCPG(adj)  # SimpleCPG(adjacency_dict, mu=1.0, dt=0.01, ...)
-action = cpg.forward(data.time)  # -> per-joint targets
+cpg = HopfCPG(adj, seed=0)
+action = cpg.forward(data.time)  # -> one target angle per joint
 ```
 
-- `SimpleCPG(adjacency_dict, mu=1.0, dt=0.01, hard_bounds=(-pi/2, pi/2), *,
-  angle_tracking=False, seed=None)` —
-  [simple_cpg.py](../../src/ariel/simulation/controllers/simple_cpg.py).
-- `NaCPG` (neural-adaptive variant), exported as the package default
-  (`from ariel.simulation.controllers import NaCPG`) —
-  [na_cpg.py](../../src/ariel/simulation/controllers/na_cpg.py). Variants:
-  `na_cpg_norm.py`, `na_cpg_beta.py`.
-- `create_fully_connected_adjacency(num_nodes) -> dict[int, list[int]]` exists in
-  each CPG module; import it from the one you use.
+| Class | Model | Parameter groups |
+|---|---|---|
+| `HopfCPG` | Hopf oscillators with Kuramoto phase coupling (Righetti and Ijspeert 2006) | `phase`, `w`, `amplitudes`, `offset` |
+| `AdaptiveHopfCPG` | the same, frequency learns from `set_input(values)` | `phase`, `w`, `amplitudes`, `offset` |
+| `PhaseCPG` | phase oscillators with critically damped amplitudes (Ijspeert 2007, CPG-RL) | `phase`, `w`, `amplitudes`, `offset` |
+| `SwingStanceCPG` | Hopf with one frequency per half cycle (Righetti and Ijspeert 2008) | `phase`, `w_swing`, `w_stance`, `amplitudes`, `offset` |
+| `NaCPG` | normalized asymmetric CPG (Tong et al. 2022) | `phase`, `w`, `amplitudes`, `ha`, `b` |
+| `TegotaeCPG` | phase oscillators steered by the load each limb feels, `set_input(loads)` (Owaki et al.; Herneth et al. 2023) | `phase`, `w`, `amplitudes`, `offset`, `sigma` |
+| `LearnableTegotaeCPG` | the same, with the feedback as three small networks shared by all joints (Herneth et al. 2023) | `phase`, `w`, `amplitudes`, `offset`, plus `action`, `reaction`, `gain` weights (51 with `hidden=4`) |
 
-CPG parameters (`phase`, `w`, `amplitudes`, `ha`, `b`) are tensors you can set
-from a genome vector — see `map_genotype_to_brain` in
+- `forward(time)` follows the simulation clock: it integrates over the time
+  since the previous timed call, in sub-steps of at most `dt` (0.01 s). The
+  first timed call, or a time earlier than the last, resets the state.
+  `forward()` with no time takes one step of `dt`.
+- Parameters: `set_flat_params(vector)` (groups in the order of the table, `n`
+  values each, except the network weights, sized by `group_sizes`), `set_params_by_group(name, values)`, `set_param_with_dict`,
+  `get_flat_params()`, and `parameter_bounds()` for the range each parameter
+  is sampled from. Set them before the run, or call `reset_state()` after.
+- `angle_limits` (default plus or minus pi/2) clip the output; `clamping_error`
+  is the mean overshoot. `angle_tracking=True` keeps `angle_history`.
+
+`tests/functional/cpg_properties.ipynb` shows what each model can and cannot
+do (for example, `SwingStanceCPG` only holds in-phase and anti-phase pairs);
+`tests/functional/cpg_locomotion.ipynb` compares them on the gecko. For mapping
+a genome vector onto the groups, see `map_genotype_to_brain` in
 [examples/re_book/2_body_brain_evolution.py](../../examples/re_book/2_body_brain_evolution.py).
 
 ## The `Controller` glue + binding

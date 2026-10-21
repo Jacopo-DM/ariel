@@ -24,8 +24,8 @@ from ariel.body_phenotypes.robogen_lite.constructor import construct_mjspec_from
 from ariel.ec import Individual
 from ariel.ec.genotypes.tree.tree_genome import TreeGenome
 from ariel.simulation.controllers.controller import Controller
-from ariel.simulation.controllers.simple_cpg import (
-    SimpleCPG,
+from ariel.simulation.controllers import (
+    HopfCPG,
     create_fully_connected_adjacency,
 )
 from ariel.simulation.environments._simple_flat_with_target import (
@@ -53,11 +53,11 @@ def map_genotype_to_body(genome_data: dict[str, Any] | TreeGenome) -> mujoco.MjS
         return None
 
 
-def map_genotype_to_brain(cpg: SimpleCPG, full_genome: list[float]) -> None:
+def map_genotype_to_brain(cpg: HopfCPG, full_genome: list[float]) -> None:
     n = cpg.phase.shape[0]
     params = np.array(full_genome)
 
-    required_size = n * 5
+    required_size = n * 4
     if required_size > len(params):
         params = np.resize(params, required_size)
     else:
@@ -66,15 +66,13 @@ def map_genotype_to_brain(cpg: SimpleCPG, full_genome: list[float]) -> None:
     p_phase = params[0 * n : 1 * n]
     p_w = params[1 * n : 2 * n]
     p_amp = params[2 * n : 3 * n]
-    p_ha = params[3 * n : 4 * n]
-    p_b = params[4 * n : 5 * n]
+    p_offset = params[3 * n : 4 * n]
 
     with torch.no_grad():
         cpg.phase.data.copy_(torch.from_numpy(p_phase * np.pi).float())
         cpg.w.data.copy_(torch.from_numpy(0.2 + (3.8 * (p_w + 1.0) / 2.0)).float())
         cpg.amplitudes.data.copy_(torch.from_numpy(0.5 + (3.5 * (p_amp + 1.0) / 2.0)).float())
-        cpg.ha.data.copy_(torch.from_numpy(p_ha * 2.0).float())
-        cpg.b.data.copy_(torch.from_numpy(p_b * 0.5).float())
+        cpg.offset.data.copy_(torch.from_numpy(p_offset * 0.5).float())
 
 
 def load_best_individual_from_db(db_path: Path) -> Individual | None:
@@ -116,7 +114,7 @@ def run_simulation(mode: ViewerTypes, ind: Individual, duration: float, out_dir:
     data = mujoco.MjData(model)
 
     adj_dict = create_fully_connected_adjacency(model.nu)
-    cpg = SimpleCPG(adj_dict)
+    cpg = HopfCPG(adj_dict)
     map_genotype_to_brain(cpg, cast(list[float], genotype["ctrl"]))
 
     tracker = Tracker(mujoco.mjtObj.mjOBJ_BODY, "core", ["xpos"])

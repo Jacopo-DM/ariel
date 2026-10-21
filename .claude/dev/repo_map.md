@@ -15,7 +15,7 @@ same packages (public imports + snippets), see [../user/00_index.md](../user/00_
 | [body_phenotypes/robogen_lite/](../../src/ariel/body_phenotypes/robogen_lite/) | Modular robot bodies: `modules/` (`Core`/`Brick`/`Hinge`, `Module(ABC)`), `cppn_neat/` (`Genome`, `IdManager`), `decoders/`, `prebuilt_robots/`, `constructor.py` | new module types, decoders, or prebuilt bodies |
 | [body_phenotypes/lynx_mjspec/](../../src/ariel/body_phenotypes/lynx_mjspec/) | Lynx arm pipeline | Lynx-specific body work |
 | [simulation/environments/](../../src/ariel/simulation/environments/) | `BaseWorld` + terrains (`SimpleFlatWorld`, `RuggedTerrainWorld`, `OlympicArena`, …) | a new world/terrain (subclass `BaseWorld`) |
-| [simulation/controllers/](../../src/ariel/simulation/controllers/) | `Controller`, `Tracker` glue + CPGs (`SimpleCPG`, `NaCPG`, `nn.Module`) | new controllers |
+| [simulation/controllers/](../../src/ariel/simulation/controllers/) | `Controller`, `Tracker` glue + CPGs in `cpg/` (`CPG` base, `HopfCPG`, `AdaptiveHopfCPG`, `PhaseCPG`, `SwingStanceCPG`, `NaCPG`, `TegotaeCPG`, `LearnableTegotaeCPG`; `nn.Module`s) | new controllers |
 | [simulation/tasks/](../../src/ariel/simulation/tasks/) | Fitness functions (`targeted_locomotion`, `gait_learning`, `turning_in_place`) | new fitness/evaluation metrics (free functions) |
 | [parameters/](../../src/ariel/parameters/) | Type aliases (`ariel_types.py`), MuJoCo & module params (Pydantic) | shared types or config constants |
 | [opengl/](../../src/ariel/opengl/) | OpenGL backend probe and `MUJOCO_GL` setup | runs before MuJoCo loads |
