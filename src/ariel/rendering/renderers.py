@@ -147,11 +147,10 @@ def video_renderer(
         "ortho-cam",
     )
 
-    # If camera not found, use default camera
+    # If camera not found, keep -1: MuJoCo's free (default) camera
     if camera == -1:
         msg = "Camera 'ortho-cam' not found. Using default camera."
         log.debug(msg)
-        camera = None
     else:
         model.cam_fovy[camera] = (
             cam_fovy if cam_fovy is not None else model.cam_fovy[camera]

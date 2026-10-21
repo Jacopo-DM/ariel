@@ -214,11 +214,17 @@ def test_video_renderer_writes_frames(tmp_path: Path) -> None:
 def test_video_renderer_with_defaults(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Without a recorder one is created in the working folder."""
+    """Without a recorder one is created in the working folder.
+
+    The model has no ortho-cam, so every frame uses MuJoCo's free camera
+    (-1); ``update_scene`` raises ``TypeError`` for ``None`` (MuJoCo 3.16).
+    """
     monkeypatch.chdir(tmp_path)
     model, data = _scene(NO_CAMERA_XML.format(name="b"))
     renderers.video_renderer(model, data, duration=DURATION)
     assert list(tmp_path.glob("video_*.mp4"))
+    assert _FakeRenderer.cameras
+    assert set(_FakeRenderer.cameras) == {-1}
 
 
 @pytest.mark.parametrize("body", ["robot-core", "my-core-body", "plain"])
