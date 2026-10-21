@@ -98,7 +98,7 @@ class CoreModule(Module):
                     np.deg2rad(180),
                 ]),
                 decimals=3,
-            ),
+            ).tolist(),
         )
         self.sites[ModuleFaces.BACK] = core.add_site(
             name=f"{core_name}-back",
@@ -110,7 +110,7 @@ class CoreModule(Module):
                     np.deg2rad(0),
                 ]),
                 decimals=3,
-            ),
+            ).tolist(),
         )
         self.sites[ModuleFaces.LEFT] = core.add_site(
             name=f"{core_name}-left",
@@ -126,7 +126,7 @@ class CoreModule(Module):
                     -np.deg2rad(90),
                 ]),
                 decimals=3,
-            ),
+            ).tolist(),
         )
         self.sites[ModuleFaces.RIGHT] = core.add_site(
             name=f"{core_name}-right",
@@ -142,7 +142,7 @@ class CoreModule(Module):
                     -np.deg2rad(90),
                 ]),
                 decimals=3,
-            ),
+            ).tolist(),
         )
         self.sites[ModuleFaces.TOP] = core.add_site(
             name=f"{core_name}-top",
@@ -154,7 +154,7 @@ class CoreModule(Module):
                     np.deg2rad(90),
                 ]),
                 decimals=3,
-            ),
+            ).tolist(),
         )
         self.sites[ModuleFaces.BOTTOM] = core.add_site(
             name=f"{core_name}-bottom",
@@ -166,7 +166,7 @@ class CoreModule(Module):
                     -np.deg2rad(90),
                 ]),
                 decimals=3,
-            ),
+            ).tolist(),
         )
 
         # Save model specifications

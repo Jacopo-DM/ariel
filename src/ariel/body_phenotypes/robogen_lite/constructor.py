@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 # Standard library
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 # Third-party libraries
 # Local libraries
@@ -77,33 +77,34 @@ def _construct(graph: DiGraph[int]) -> CoreModule:
     ValueError
         If the graph contains unknown module types.
     """
-    modules: dict[int, Module] = {}
+    modules: dict[int, Module | None] = {}
     for node in graph.nodes:
         # Extract module type and rotation from the graph node
         module_type = graph.nodes[node]["type"]
         module_rotation = graph.nodes[node]["rotation"]
 
         # Create the module based on its type
+        module: Module | None
         match module_type:
             case ModuleType.CORE.name:
                 module = CoreModule(index=IDX_OF_CORE)
             case ModuleType.HINGE.name:
-                module = HingeModule(index=node)  # type: ignore[assignment]  # known bug
+                module = HingeModule(index=node)
             case ModuleType.BRICK.name:
-                module = BrickModule(index=node)  # type: ignore[assignment]  # known bug
+                module = BrickModule(index=node)
             case ModuleType.NONE.name:
-                module = None  # type: ignore[assignment]  # known bug
+                module = None
             case _:
                 msg = f"Unknown module type: {module_type}"
                 raise ValueError(msg)
 
         # Check that the module is not None
-        if module:  # type: ignore[truthy-bool]  # known bug
+        if module is not None:
             rotation_angle = ModuleRotationsTheta[module_rotation].value
             module.rotate(rotation_angle)
             modules[node] = module
         else:
-            modules[node] = None  # type: ignore[assignment]  # known bug
+            modules[node] = None
 
     # Attach bodies to modules based on the graph edges
     for edge in graph.edges:
@@ -113,10 +114,15 @@ def _construct(graph: DiGraph[int]) -> CoreModule:
         face = graph.edges[edge]["face"]
 
         # Check if both modules exist (not 'None')
-        if modules[to_module]:  # type: ignore[truthy-bool]  # known bug
-            modules[from_module].sites[ModuleFaces[face]].attach_body(  # type: ignore[attr-defined]  # known bug
-                body=modules[to_module].body,  # type: ignore[attr-defined]  # known bug
-                prefix=f"{modules[from_module].index}-{modules[to_module].index}-{ModuleFaces[face].value}-",  # type: ignore[attr-defined]  # known bug
+        if modules[to_module] is not None:
+            # A graph from a decoder has parts below the core and no edge
+            # from an empty node; the casts leave any other graph failing
+            # with AttributeError, as before.
+            parent = cast("Module", modules[from_module])
+            child = cast("BrickModule | HingeModule", modules[to_module])
+            parent.sites[ModuleFaces[face]].attach_body(
+                body=child.body,
+                prefix=f"{parent.index}-{child.index}-{ModuleFaces[face].value}-",
             )
 
     core_module = modules[IDX_OF_CORE]

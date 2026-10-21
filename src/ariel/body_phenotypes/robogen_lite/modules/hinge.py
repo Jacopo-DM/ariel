@@ -38,6 +38,7 @@ class HingeModule(Module):
 
     index: int | None = None
     module_type: ModuleType = ModuleType.HINGE
+    body: mujoco.MjsBody
 
     def __init__(self, index: int) -> None:  # ruff: ignore[too-many-locals]  # long routine kept as written; splitting it is a refactor outside this goal
         """Initialize the hinge module.
@@ -134,9 +135,9 @@ class HingeModule(Module):
             dyntype=dyntype,
             gaintype=gaintype,
             biastype=biastype,
-            dynprm=dynprm,
-            gainprm=gainprm,
-            biasprm=biasprm,
+            dynprm=dynprm.tolist(),
+            gainprm=gainprm.tolist(),
+            biasprm=biasprm.tolist(),
             trntype=trntype,
             target=servo_name,
             ctrlrange=(

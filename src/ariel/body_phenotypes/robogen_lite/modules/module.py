@@ -9,11 +9,22 @@ Todo:
 import typing
 from abc import ABC, abstractmethod
 
+# Third-party libraries
+import mujoco
+
+# Local libraries
+from ariel.body_phenotypes.robogen_lite.config import ModuleFaces
+
 
 class Module(ABC):
     """Base class for all modules."""
 
     required_attributes: typing.ClassVar[list[str]] = ["index", "module_type"]
+
+    # Set by every subclass in __init__
+    index: int | None
+    sites: dict[ModuleFaces, mujoco.MjsSite]
+    spec: mujoco.MjSpec
 
     def __init_subclass__(cls) -> None:
         """

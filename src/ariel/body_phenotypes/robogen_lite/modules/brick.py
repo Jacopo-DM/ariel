@@ -25,6 +25,7 @@ class BrickModule(Module):
 
     index: int | None = None
     module_type: ModuleType = ModuleType.BRICK
+    body: mujoco.MjsBody
 
     def __init__(self, index: int) -> None:
         """Initialize the brick module.
@@ -66,7 +67,7 @@ class BrickModule(Module):
                     np.deg2rad(180),
                 ]),
                 decimals=3,
-            ),
+            ).tolist(),
         )
         self.sites[ModuleFaces.LEFT] = brick.add_site(
             name=f"{brick_name}-left",
@@ -82,7 +83,7 @@ class BrickModule(Module):
                     -np.deg2rad(90),
                 ]),
                 decimals=3,
-            ),
+            ).tolist(),
         )
         self.sites[ModuleFaces.RIGHT] = brick.add_site(
             name=f"{brick_name}-right",
@@ -98,7 +99,7 @@ class BrickModule(Module):
                     -np.deg2rad(90),
                 ]),
                 decimals=3,
-            ),
+            ).tolist(),
         )
         self.sites[ModuleFaces.TOP] = brick.add_site(
             name=f"{brick_name}-top",
@@ -114,7 +115,7 @@ class BrickModule(Module):
                     np.deg2rad(90),
                 ]),
                 decimals=3,
-            ),
+            ).tolist(),
         )
         self.sites[ModuleFaces.BOTTOM] = brick.add_site(
             name=f"{brick_name}-bottom",
@@ -130,7 +131,7 @@ class BrickModule(Module):
                     -np.deg2rad(90),
                 ]),
                 decimals=3,
-            ),
+            ).tolist(),
         )
 
         # Save model specifications
