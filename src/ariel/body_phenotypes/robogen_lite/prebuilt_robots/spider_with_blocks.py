@@ -7,6 +7,9 @@ from ariel.body_phenotypes.robogen_lite.config import ModuleFaces
 from ariel.body_phenotypes.robogen_lite.modules.brick import BrickModule
 from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
 from ariel.body_phenotypes.robogen_lite.modules.hinge import HingeModule
+from ariel.body_phenotypes.robogen_lite.prebuilt_robots.parts import (
+    attach as attach_part,
+)
 
 current_module = sys.modules[__name__]
 
@@ -41,8 +44,10 @@ def attach(
     module: SUBMODULES,
     name: str,
     rotation: float = 0,
+    *,
+    root: CoreModule,
 ) -> SUBMODULES:
-    """Attach `module` to `parent` on `face` and return it.
+    """Attach `module` to `parent` on `face`, record it, and return it.
 
     Returns
     -------
@@ -50,7 +55,7 @@ def attach(
         The attached module.
     """
     name = f"{parent.name}-{name}"  # type: ignore[union-attr]  # known bug
-    parent.sites[face].attach_body(body=module.body, prefix=name + "-")
+    attach_part(root, parent, face, module, name + "-", rotation)
 
     module.name = name  # type: ignore[union-attr]  # known bug
 
@@ -71,10 +76,12 @@ def body_spider() -> CoreModule:
     core = make_core()
 
     for i, f in enumerate(faces, start=1):
-        h0 = attach(core, f, HingeModule(index=i), f"{f.name[0]}H")
-        b0 = attach(h0, F, BrickModule(index=4 + i), "B")
-        h1 = attach(b0, F, HingeModule(index=8 + i), "H", rotation=90)
-        attach(h1, F, BrickModule(index=12 + i), "B")
+        h0 = attach(core, f, HingeModule(index=i), f"{f.name[0]}H", root=core)
+        b0 = attach(h0, F, BrickModule(index=4 + i), "B", root=core)
+        h1 = attach(
+            b0, F, HingeModule(index=8 + i), "H", rotation=90, root=core
+        )
+        attach(h1, F, BrickModule(index=12 + i), "B", root=core)
 
     return core
 

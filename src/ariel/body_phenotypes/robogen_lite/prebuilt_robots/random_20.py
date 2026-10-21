@@ -12,6 +12,7 @@ from ariel.body_phenotypes.robogen_lite.config import ModuleFaces
 from ariel.body_phenotypes.robogen_lite.modules.brick import BrickModule
 from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
 from ariel.body_phenotypes.robogen_lite.modules.hinge import HingeModule
+from ariel.body_phenotypes.robogen_lite.prebuilt_robots.parts import attach
 
 HINGE_PROBABILITY = 0.6
 
@@ -63,16 +64,15 @@ def random_spider20(seed: int = 1337) -> CoreModule:
         parent, attach_face = open_sites.pop(site_idx)
 
         # Slight hinge bias usually increases articulation in random bodies.
+        rotation = 0
         if rng.random() < HINGE_PROBABILITY:
             child = HingeModule(index=idx)
-            child.rotate(rng.choice(hinge_rotations))
+            rotation = rng.choice(hinge_rotations)
+            child.rotate(rotation)
         else:
             child = BrickModule(index=idx)  # type: ignore[assignment]  # known bug
 
-        parent.sites[attach_face].attach_body(
-            body=child.body,
-            prefix=f"m{idx}",
-        )
+        attach(core, parent, attach_face, child, f"m{idx}", rotation)
 
         # Only enqueue attachment faces that this module actually exposes.
         open_sites.extend((child, child_face) for child_face in child.sites)

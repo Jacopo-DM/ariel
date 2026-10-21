@@ -4,6 +4,7 @@ from ariel.body_phenotypes.robogen_lite.config import ModuleFaces
 from ariel.body_phenotypes.robogen_lite.modules.brick import BrickModule
 from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
 from ariel.body_phenotypes.robogen_lite.modules.hinge import HingeModule
+from ariel.body_phenotypes.robogen_lite.prebuilt_robots.parts import attach
 
 
 def spider() -> CoreModule:
@@ -87,59 +88,23 @@ def spider() -> CoreModule:
     # --- ATTACH BODIES ---
 
     """Front-leg"""
-    core.sites[ModuleFaces.FRONT].attach_body(
-        body=l1_1.body,
-        prefix="l1_1",
-    )
-    l1_1.sites[ModuleFaces.FRONT].attach_body(
-        body=l1_2.body,
-        prefix="l1_2",
-    )
-    l1_2.sites[ModuleFaces.FRONT].attach_body(
-        body=l1_3.body,
-        prefix="l1_3",
-    )
+    attach(core, core, ModuleFaces.FRONT, l1_1, "l1_1")
+    attach(core, l1_1, ModuleFaces.FRONT, l1_2, "l1_2", 90)
+    attach(core, l1_2, ModuleFaces.FRONT, l1_3, "l1_3")
 
     """Left-leg"""
-    core.sites[ModuleFaces.LEFT].attach_body(
-        body=l2_1.body,
-        prefix="l2_1",
-    )
-    l2_1.sites[ModuleFaces.FRONT].attach_body(
-        body=l2_2.body,
-        prefix="l2_2",
-    )
-    l2_2.sites[ModuleFaces.FRONT].attach_body(
-        body=l2_3.body,
-        prefix="l2_3",
-    )
+    attach(core, core, ModuleFaces.LEFT, l2_1, "l2_1")
+    attach(core, l2_1, ModuleFaces.FRONT, l2_2, "l2_2", 90)
+    attach(core, l2_2, ModuleFaces.FRONT, l2_3, "l2_3")
 
     """Right-leg"""
-    core.sites[ModuleFaces.RIGHT].attach_body(
-        body=l3_1.body,
-        prefix="l3_1",
-    )
-    l3_1.sites[ModuleFaces.FRONT].attach_body(
-        body=l3_2.body,
-        prefix="l3_2",
-    )
-    l3_2.sites[ModuleFaces.FRONT].attach_body(
-        body=l3_3.body,
-        prefix="l3_3",
-    )
+    attach(core, core, ModuleFaces.RIGHT, l3_1, "l3_1")
+    attach(core, l3_1, ModuleFaces.FRONT, l3_2, "l3_2", 90)
+    attach(core, l3_2, ModuleFaces.FRONT, l3_3, "l3_3")
 
     """Back-leg"""
-    core.sites[ModuleFaces.BACK].attach_body(
-        body=l4_1.body,
-        prefix="l4_1",
-    )
-    l4_1.sites[ModuleFaces.FRONT].attach_body(
-        body=l4_2.body,
-        prefix="l4_2",
-    )
-    l4_2.sites[ModuleFaces.FRONT].attach_body(
-        body=l4_3.body,
-        prefix="l4_3",
-    )
+    attach(core, core, ModuleFaces.BACK, l4_1, "l4_1")
+    attach(core, l4_1, ModuleFaces.FRONT, l4_2, "l4_2", 90)
+    attach(core, l4_2, ModuleFaces.FRONT, l4_3, "l4_3")
 
     return core

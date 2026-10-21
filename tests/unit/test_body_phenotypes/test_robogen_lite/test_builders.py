@@ -178,7 +178,7 @@ def test_attach_names_the_module_and_rotates_it() -> None:
     core = spider_with_blocks.make_core()
     hinge = HingeModule(index=1)
     attached = spider_with_blocks.attach(
-        core, ModuleFaces.FRONT, hinge, "H", rotation=90
+        core, ModuleFaces.FRONT, hinge, "H", rotation=90, root=core
     )
     assert attached is hinge
     assert attached.name == "C-H"  # type: ignore[union-attr]  # known bug

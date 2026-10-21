@@ -1,6 +1,8 @@
 """Core module: the root of a RoboGen-lite robot body."""
 
 # Third-party libraries
+from typing import TYPE_CHECKING
+
 import mujoco
 import numpy as np
 
@@ -13,6 +15,9 @@ from ariel.body_phenotypes.robogen_lite.config import (
     ModuleType,
 )
 from ariel.body_phenotypes.robogen_lite.modules.module import Module
+
+if TYPE_CHECKING:
+    import networkx as nx
 
 # Type Aliases
 type WeightType = float
@@ -54,6 +59,9 @@ class CoreModule(Module):
 
         # Set the index
         self.index = IDX_OF_CORE
+
+        # The graph the body is built from, set by whoever builds it
+        self.graph: nx.DiGraph[int] | None = None
 
         # Create the parent spec.
         spec = mujoco.MjSpec()

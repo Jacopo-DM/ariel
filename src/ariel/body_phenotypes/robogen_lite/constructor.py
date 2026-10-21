@@ -121,7 +121,31 @@ def _construct(graph: DiGraph[int]) -> CoreModule:
 
     core_module = modules[IDX_OF_CORE]
     if isinstance(core_module, CoreModule):
+        core_module.graph = _with_prefixes(graph)
         return core_module
 
     msg = "The core module is not of type CoreModule."
     raise ValueError(msg)
+
+
+def _with_prefixes(graph: DiGraph[int]) -> DiGraph[int]:
+    """Copy a graph and give every node the prefix of its geom names.
+
+    Parameters
+    ----------
+    graph : Graph
+        The graph a body was built from.
+
+    Returns
+    -------
+    Graph
+        A copy whose nodes carry ``prefix``: ``<parent>-<node>-<face>-`` as
+        ``_construct`` names them, empty for the core.
+    """
+    copy = graph.copy()
+    for node in copy.nodes:
+        copy.nodes[node]["prefix"] = ""
+    for parent, child in copy.edges:
+        face = ModuleFaces[copy.edges[parent, child]["face"]]
+        copy.nodes[child]["prefix"] = f"{parent}-{child}-{face.value}-"
+    return copy

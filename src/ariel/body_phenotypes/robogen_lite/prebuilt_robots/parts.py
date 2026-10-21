@@ -5,10 +5,19 @@ the face of that module, and for a hinge the rotation in degrees. A part is
 named after its kind and its place among the parts of that kind
 (``hinge_0``, ``brick_0``, ``hinge_1``, ...); a table names the parent by that
 name, and the core is ``core``.
+
+Every builder in this package also writes the body down as a graph on
+``CoreModule.graph`` (``start_graph`` and ``attach``): nodes with ``type``,
+``rotation`` (degrees) and ``prefix`` (the start of the names of the module's
+geoms; the core's is empty), edges with ``face``. The measures in
+``ariel.body_phenotypes`` read it.
 """
 
 # Standard library
-from typing import Literal
+from typing import Literal, cast
+
+# Third-party libraries
+import networkx as nx
 
 # Local libraries
 from ariel.body_phenotypes.robogen_lite.config import ModuleFaces
@@ -18,6 +27,7 @@ from ariel.body_phenotypes.robogen_lite.modules.hinge import HingeModule
 from ariel.parameters import FrozenModel
 
 type Piece = HingeModule | BrickModule
+type Graph = nx.DiGraph[int]
 
 
 class Part(FrozenModel):
@@ -83,6 +93,60 @@ def brick(index: int, parent: str, face: ModuleFaces) -> Part:
     return Part(kind="brick", index=index, parent=parent, face=face)
 
 
+def start_graph(core: CoreModule) -> Graph:
+    """Give a new body a graph that holds only its core.
+
+    Parameters
+    ----------
+    core : CoreModule
+        The core of the body being built.
+
+    Returns
+    -------
+    nx.DiGraph[int]
+        The graph, also stored on ``core.graph``.
+    """
+    graph: Graph = nx.DiGraph()
+    graph.add_node(cast("int", core.index), type="CORE", rotation=0, prefix="")
+    core.graph = graph
+    return graph
+
+
+def attach(
+    core: CoreModule,
+    parent: CoreModule | Piece,
+    face: ModuleFaces,
+    child: Piece,
+    prefix: str,
+    rotation: float = 0,
+) -> None:
+    """Attach ``child`` to ``parent`` and write it in ``core.graph``.
+
+    Parameters
+    ----------
+    core : CoreModule
+        The core of the body; its graph is started on the first call.
+    parent : CoreModule | HingeModule | BrickModule
+        The module it hangs on.
+    face : ModuleFaces
+        The face of ``parent`` that holds it.
+    child : HingeModule | BrickModule
+        The module attached.
+    prefix : str
+        The prefix of the names of its bodies and geoms.
+    rotation : float
+        The rotation of ``child`` in degrees, as recorded (the caller turns
+        the module itself).
+    """
+    parent.sites[face].attach_body(body=child.body, prefix=prefix)
+    graph = core.graph if core.graph is not None else start_graph(core)
+    node = cast("int", child.index)
+    graph.add_node(
+        node, type=child.module_type.name, rotation=rotation, prefix=prefix
+    )
+    graph.add_edge(cast("int", parent.index), node, face=face.name)
+
+
 def build(parts: tuple[Part, ...]) -> CoreModule:
     """Build a body from its table of parts.
 
@@ -97,6 +161,7 @@ def build(parts: tuple[Part, ...]) -> CoreModule:
         The core module of the finished robot body.
     """
     core = CoreModule(index=0)
+    start_graph(core)
     named: dict[str, CoreModule | Piece] = {"core": core}
     counts = {"hinge": 0, "brick": 0}
     for part in parts:
@@ -109,9 +174,13 @@ def build(parts: tuple[Part, ...]) -> CoreModule:
             module = BrickModule(index=part.index)
         if part.rotation is not None:
             module.rotate(part.rotation)
-        named[part.parent].sites[part.face].attach_body(
-            body=module.body,
-            prefix=name,
+        attach(
+            core,
+            named[part.parent],
+            part.face,
+            module,
+            name,
+            part.rotation or 0,
         )
         named[name] = module
     return core

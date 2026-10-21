@@ -24,6 +24,7 @@ import pytest
 # Local libraries
 from ariel.body_phenotypes import MorphologicalMeasures
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots import john_tables
+from ariel.body_phenotypes.robogen_lite.prebuilt_robots.parts import build
 from ariel.ec.genotypes.tree import random_tree
 
 if TYPE_CHECKING:
@@ -154,3 +155,10 @@ def test_the_counts_match_the_golden_values(name: str) -> None:
 
 def test_the_golden_file_covers_every_body() -> None:
     assert set(GOLDEN_VALUES) == set(bodies())
+
+
+@pytest.mark.parametrize("table", TABLES)
+def test_a_built_table_robot_keeps_the_golden_graph(table: str) -> None:
+    graph = build(getattr(john_tables, table)).graph
+    assert graph is not None
+    assert counts(graph) == GOLDEN_VALUES[table]
