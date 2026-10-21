@@ -8,6 +8,7 @@ import pytest
 from ariel.ec import EAOperation, EASettings
 from ariel.ec.population import Population
 from tests.unit.misuse import untyped
+from tests.unit.test_ec import future_steps
 from tests.unit.test_ec.ea_helpers import (
     CUSTOM_NUM_STEPS,
     DEFAULT_NUM_STEPS,
@@ -77,6 +78,20 @@ def test_eaoperation_wrong_first_param_type_raises() -> None:
     assert len(bad(1)) == 1
     with pytest.raises(TypeError, match="Population"):
         untyped(EAOperation)(bad)
+
+
+def test_eaoperation_accepts_postponed_annotations() -> None:
+    """A step from a module with the __future__ import is accepted."""
+    step = EAOperation(future_steps.keep_all)
+    population = make_pop()
+    assert len(step(population)) == len(population)
+
+
+def test_eaoperation_unresolvable_annotation_raises() -> None:
+    """A text annotation that names a type-checking-only import is refused."""
+    assert len(future_steps.from_sequence([])) == 0
+    with pytest.raises(TypeError, match="got 'Sequence\\[int\\]'"):
+        untyped(EAOperation)(future_steps.from_sequence)
 
 
 def test_eaoperation_wrong_return_type_raises() -> None:

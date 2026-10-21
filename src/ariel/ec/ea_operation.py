@@ -103,7 +103,12 @@ class EAOperation[**P]:
         TypeError
             If an operation does not take and return a Population.
         """
-        sig = inspect.signature(func)
+        # A module with ``from __future__ import annotations`` stores them
+        # as text; resolve it, and keep the text if a name cannot be found
+        try:
+            sig = inspect.signature(func, eval_str=True)
+        except NameError:
+            sig = inspect.signature(func)
         params = list(sig.parameters.values())
 
         if not args and not kwargs:
