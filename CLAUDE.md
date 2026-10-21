@@ -70,7 +70,7 @@ Ruff is pinned to 0.17.* and does not fix by default; `ruff check --fix` is opt-
 |---|---|---|
 | `__data__/` | generated | runs and examples |
 | `.venv/` | generated | `uv venv` / `uv sync` |
-| `.typings/` | generated stubs, git-ignored, per machine | MuJoCo stubs for pyright (`stubPath`), made by the "MuJoCo stubs" command; untracked 2026-10-18 because the global gate type-checks every tracked file and they fail mypy; a pull of that commit deleted the old copy (mujoco 3.8.0 and torch, 17 MB) from other clones |
+| `.typings/` | generated stubs, git-ignored, per machine | MuJoCo stubs for pyright (`stubPath`) and ty (`extra-paths`), made by the "MuJoCo stubs" command; untracked 2026-10-18 because the global gate type-checks every tracked file and they fail mypy; a pull of that commit deleted the old copy (mujoco 3.8.0 and torch, 17 MB) from other clones |
 | `docs/_build/`, `docs/autoapi/`, `docs/apidocs/` | generated | sphinx |
 | `uv.lock` | generated | `uv lock` |
 | `3_spider_vision_new.npy` | binary, stray | tracked at the repo root; origin not recorded |

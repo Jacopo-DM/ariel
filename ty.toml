@@ -3,6 +3,9 @@
 # pre-commit and CI do not run it (ty is still before 1.0).
 [environment]
 python-version = "3.12"
+# The MuJoCo stubs that pyright reads too (CLAUDE.md, MuJoCo stubs); git-ignored,
+# so a machine without them sees MuJoCo as before.
+extra-paths = [".typings"]
 
 [src]
 # The same folders mypy.ini and ruff.toml leave out (user's choice, 2026-10-18 and
