@@ -37,6 +37,7 @@ from trimesh.collision import CollisionManager
 from ariel import log
 from ariel.body_phenotypes.robogen_lite.config import IDX_OF_CORE, ModuleFaces
 from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
+from ariel.body_phenotypes.robogen_lite.rest_pose import rest_boxes
 from ariel.parameters import FrozenModel
 
 # Global constants
@@ -220,25 +221,12 @@ def find_overlaps(graph: Graph, core: CoreModule) -> list[Overlap]:
     Returns
     -------
     list[Overlap]
-        Pairs deeper than the tolerance, ordered by node ids.
-
-    Raises
-    ------
-    ValueError
-        If a geom of the body is not a box.
+        Pairs deeper than the tolerance, ordered by node ids; ``rest_boxes``
+        raises ``ValueError`` for a body without a graph or a geom that is
+        not a box.
     """
-    model = core.spec.compile()
-    data = mujoco.MjData(model)
-    mujoco.mj_forward(model, data)
-    box = mujoco.mjtGeom.mjGEOM_BOX
-    if any(kind != box for kind in model.geom_type):
-        msg = "Overlap detection only handles box geoms."
-        raise ValueError(msg)
-    owners = [owner_of(model, geom) for geom in range(model.ngeom)]
-    poses = np.tile(np.eye(4), (model.ngeom, 1, 1))
-    poses[:, :3, :3] = data.geom_xmat.reshape(-1, 3, 3)
-    poses[:, :3, 3] = data.geom_xpos
-    return box_overlaps(graph, owners, np.array(model.geom_size), poses)
+    boxes = rest_boxes(core)
+    return box_overlaps(graph, boxes.owners, boxes.halves, boxes.poses)
 
 
 def depth_of(graph: Graph, node: int) -> int:
