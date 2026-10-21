@@ -15,40 +15,7 @@ import mujoco
 
 # Local libraries
 from ariel.body_phenotypes.robogen_lite.config import ModuleFaces
-from ariel.parameters import to_unit
-
-
-# The one place where a module's quantities become MuJoCo's numbers
-def metres(length: u.Quantity) -> float:
-    """Return a length as a plain number of metres, MuJoCo's unit.
-
-    Parameters
-    ----------
-    length : astropy.units.Quantity
-        A length in any unit.
-
-    Returns
-    -------
-    float
-        The length in metres.
-    """
-    return float(to_unit(length, u.m).value)
-
-
-def kilograms(mass: u.Quantity) -> float:
-    """Return a mass as a plain number of kilograms, MuJoCo's unit.
-
-    Parameters
-    ----------
-    mass : astropy.units.Quantity
-        A mass in any unit.
-
-    Returns
-    -------
-    float
-        The mass in kilograms.
-    """
-    return float(to_unit(mass, u.kg).value)
+from ariel.parameters import metres
 
 
 def half_extents(

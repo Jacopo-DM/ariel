@@ -17,9 +17,8 @@ from ariel.body_phenotypes.robogen_lite.config import (
 from ariel.body_phenotypes.robogen_lite.modules.module import (
     Module,
     half_extents,
-    kilograms,
 )
-from ariel.parameters import ArielModulesConfig
+from ariel.parameters import ArielModulesConfig, kilograms
 
 if TYPE_CHECKING:
     import networkx as nx

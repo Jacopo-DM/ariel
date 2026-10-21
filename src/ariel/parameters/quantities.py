@@ -124,3 +124,51 @@ def quantity_of(
         return converted
 
     return PlainValidator(check)
+
+
+def metres(length: u.Quantity) -> float:
+    """Return a length as a plain number of metres, MuJoCo's unit.
+
+    Parameters
+    ----------
+    length : astropy.units.Quantity
+        A length in any unit.
+
+    Returns
+    -------
+    float
+        The length in metres.
+    """
+    return float(to_unit(length, u.m).value)
+
+
+def kilograms(mass: u.Quantity) -> float:
+    """Return a mass as a plain number of kilograms, MuJoCo's unit.
+
+    Parameters
+    ----------
+    mass : astropy.units.Quantity
+        A mass in any unit.
+
+    Returns
+    -------
+    float
+        The mass in kilograms.
+    """
+    return float(to_unit(mass, u.kg).value)
+
+
+def radians(angle: u.Quantity) -> float:
+    """Return an angle as a plain number of radians, MuJoCo's unit.
+
+    Parameters
+    ----------
+    angle : astropy.units.Quantity
+        An angle in any unit.
+
+    Returns
+    -------
+    float
+        The angle in radians.
+    """
+    return float(to_unit(angle, u.rad).value)

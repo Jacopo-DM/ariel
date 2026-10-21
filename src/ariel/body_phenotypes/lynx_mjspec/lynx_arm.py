@@ -1,24 +1,60 @@
 """Lynxmotion arm body built as a MuJoCo MjSpec."""
 
+from typing import Annotated
+
+import astropy.units as u
 import mujoco
 import numpy as np
 from numpy.typing import NDArray
-from pydantic import Field
+from pydantic import ConfigDict, Field
 
-from ariel.parameters import FrozenModel
+from ariel.parameters import (
+    FrozenModel,
+    kilograms,
+    metres,
+    quantity_of,
+    radians,
+)
+
+type Length = Annotated[u.Quantity, quantity_of(u.m)]
+type Angle = Annotated[u.Quantity, quantity_of(u.rad, allow_negative=True)]
+
+# The arm's parts (not measured on a real arm; the numbers ARIEL used)
+BASE_RADIUS = 8 * u.cm
+BASE_HEIGHT = 10 * u.cm
+BASE_MASS = 2 * u.kg
+JOINT_RADIUS = 4 * u.cm
+JOINT_HALF_LENGTH = 3 * u.cm
+JOINT_MASS = 200 * u.g
+TUBE_RADIUS = 3 * u.cm
+TUBE_MASS = 100 * u.g
+GRIPPER_RADIUS = 1 * u.cm
+GRIPPER_HALF_LENGTH = 4 * u.cm
+GRIPPER_MASS = 50 * u.g
+TCP_HEIGHT = 8 * u.cm
 
 
 class ArmConfig(FrozenModel):
     """Joint count, tube lengths and angles that define one arm."""
 
+    # The defaults go through the same unit check and SI conversion
+    model_config = ConfigDict(
+        frozen=True, extra="forbid", validate_default=True
+    )
+
     num_joints: int = 6
     genotype_tube: list[int] = Field(default_factory=lambda: [1, 1, 1, 1, 1])
     genotype_joints: int = 6
-    tube_lengths: list[float] = Field(
-        default_factory=lambda: [0.1, 0.1, 0.1, 0.1, 0.1]
-    )
-    rotation_angles: list[float] = Field(
-        default_factory=lambda: [0.0, -1.57, 0.0, 0.0, 0.0, 0.0]
+    tube_lengths: list[Length] = Field(default_factory=lambda: [10 * u.cm] * 5)
+    rotation_angles: list[Angle] = Field(
+        default_factory=lambda: [
+            0 * u.rad,
+            -1.57 * u.rad,
+            0 * u.rad,
+            0 * u.rad,
+            0 * u.rad,
+            0 * u.rad,
+        ]
     )
     task: str = "reach"
 
@@ -39,9 +75,9 @@ class LynxArm:
         # Default configuration
         self.config = config or ArmConfig()
 
-        self.base_height = 0.1
-        self.joint_radius = 0.04
-        self.tube_radius = 0.03
+        self.base_height = metres(BASE_HEIGHT)
+        self.joint_radius = metres(JOINT_RADIUS)
+        self.tube_radius = metres(TUBE_RADIUS)
 
         self._build_robot()
 
@@ -72,10 +108,10 @@ class LynxArm:
 
         base_link.add_geom(
             type=mujoco.mjtGeom.mjGEOM_CYLINDER,
-            size=[0.08, self.base_height / 2, 0],
+            size=[metres(BASE_RADIUS), self.base_height / 2, 0],
             pos=[0, 0, self.base_height / 2],
             rgba=[0.2, 0.2, 0.2, 1],
-            mass=2.0,
+            mass=kilograms(BASE_MASS),
             group=1,
         )
 
@@ -99,7 +135,7 @@ class LynxArm:
 
             # Apply yaw rotation to axis instead of body
             yaw = (
-                self.config.rotation_angles[i]
+                radians(self.config.rotation_angles[i])
                 if i < len(self.config.rotation_angles)
                 else 0.0
             )
@@ -133,11 +169,11 @@ class LynxArm:
             # Joint visual (motor housing)
             link_body.add_geom(
                 type=mujoco.mjtGeom.mjGEOM_CYLINDER,
-                size=[self.joint_radius, 0.03, 0],
+                size=[self.joint_radius, metres(JOINT_HALF_LENGTH), 0],
                 axisangle=[1, 0, 0, 1.5708],
                 rgba=[0.1, 0.1, 0.1, 1],
                 group=1,
-                mass=0.2,
+                mass=kilograms(JOINT_MASS),
             )
 
             # Tube (if enabled)
@@ -146,7 +182,7 @@ class LynxArm:
                 i < len(self.config.genotype_tube)
                 and self.config.genotype_tube[i] == 1
             ):
-                tube_length = self.config.tube_lengths[i]
+                tube_length = metres(self.config.tube_lengths[i])
 
                 link_body.add_geom(
                     type=mujoco.mjtGeom.mjGEOM_CYLINDER,
@@ -154,7 +190,7 @@ class LynxArm:
                     pos=[0, 0, tube_length / 2],
                     rgba=[0.7, 0.2, 0.2, 1],
                     group=1,
-                    mass=0.1,
+                    mass=kilograms(TUBE_MASS),
                 )
 
             # Update chain
@@ -169,16 +205,16 @@ class LynxArm:
 
         ee_body.add_geom(
             type=mujoco.mjtGeom.mjGEOM_CYLINDER,
-            size=[0.01, 0.04, 0],
-            pos=[0, 0, 0.04],
+            size=[metres(GRIPPER_RADIUS), metres(GRIPPER_HALF_LENGTH), 0],
+            pos=[0, 0, metres(GRIPPER_HALF_LENGTH)],
             rgba=[0.8, 0.8, 0.8, 1],
             group=1,
-            mass=0.05,
+            mass=kilograms(GRIPPER_MASS),
         )
 
         ee_body.add_site(
             name="tcp",
-            pos=[0, 0, 0.08],
+            pos=[0, 0, metres(TCP_HEIGHT)],
             rgba=[1, 0, 0, 1],
             size=[0.01, 0.01, 0.01],
         )

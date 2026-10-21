@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import cast
 
+import astropy.units as u
 import mujoco
 import numpy as np
 import pytest
@@ -66,7 +67,7 @@ def test_tube_geoms_only_for_enabled_tubes() -> None:
     with_tubes = _compiled_arm(
         ArmConfig(
             genotype_tube=[1] * NUM_TUBES,
-            tube_lengths=[TUBE_LENGTH] * NUM_TUBES,
+            tube_lengths=[TUBE_LENGTH * u.m] * NUM_TUBES,
         )
     )
     without = _compiled_arm(ArmConfig(genotype_tube=[0] * NUM_TUBES))

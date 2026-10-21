@@ -16,9 +16,8 @@ from ariel.body_phenotypes.robogen_lite.config import ModuleFaces, ModuleType
 from ariel.body_phenotypes.robogen_lite.modules.module import (
     Module,
     half_extents,
-    kilograms,
 )
-from ariel.parameters import ArielModulesConfig
+from ariel.parameters import ArielModulesConfig, kilograms
 
 # The measured brick (ariel.parameters.module_specs) in MuJoCo's numbers:
 # mass in kg, half of each side in metres

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
+import astropy.units as u
 import mujoco
 import numpy as np
 
@@ -252,8 +253,14 @@ def build_model(
         num_joints=NUM_JOINTS,
         genotype_tube=[1] * NUM_TUBES,
         genotype_joints=NUM_JOINTS,
-        tube_lengths=np.clip(tube_lengths, TUBE_MIN, TUBE_MAX).tolist(),
-        rotation_angles=[0.0, -1.57, 0.0, 0.0, 0.0, 0.0],
+        # The genome holds tube lengths in metres
+        tube_lengths=[
+            float(length) * u.m
+            for length in np.clip(tube_lengths, TUBE_MIN, TUBE_MAX)
+        ],
+        rotation_angles=[
+            angle * u.rad for angle in (0.0, -1.57, 0.0, 0.0, 0.0, 0.0)
+        ],
         task="reach",
     )
 

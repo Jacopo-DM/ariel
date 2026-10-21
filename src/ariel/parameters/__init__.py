@@ -22,7 +22,10 @@ from ariel.parameters.quantities import (
     ANGLES,
     KILOGRAM_FORCE,
     STANDARD_GRAVITY,
+    kilograms,
+    metres,
     quantity_of,
+    radians,
     to_unit,
 )
 from ariel.parameters.servos import DSSM15, ServoRating
@@ -48,7 +51,10 @@ __all__ = [
     "Position",
     "Rotation",
     "ServoRating",
+    "kilograms",
+    "metres",
     "quantity_of",
+    "radians",
     "to_unit",
 ]
 

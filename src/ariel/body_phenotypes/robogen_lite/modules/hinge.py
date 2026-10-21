@@ -16,12 +16,8 @@ from ariel.body_phenotypes import quaternions as qnp
 
 # Local libraries
 from ariel.body_phenotypes.robogen_lite.config import ModuleFaces, ModuleType
-from ariel.body_phenotypes.robogen_lite.modules.module import (
-    Module,
-    kilograms,
-    metres,
-)
-from ariel.parameters import ArielModulesConfig
+from ariel.body_phenotypes.robogen_lite.modules.module import Module
+from ariel.parameters import ArielModulesConfig, kilograms, metres
 
 # Global constants
 SHRINK = 0.99
