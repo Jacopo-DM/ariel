@@ -6,8 +6,13 @@ import random
 from pathlib import Path
 
 import pytest
+from hypothesis import example, given
+from hypothesis import strategies as st
 
-from ariel.body_phenotypes.robogen_lite.cppn_neat.activations import sigmoid
+from ariel.body_phenotypes.robogen_lite.cppn_neat.activations import (
+    ACTIVATION_FUNCTIONS,
+    sigmoid,
+)
 from ariel.body_phenotypes.robogen_lite.cppn_neat.connection import Connection
 from ariel.body_phenotypes.robogen_lite.cppn_neat.genome import Genome
 from ariel.body_phenotypes.robogen_lite.cppn_neat.id_manager import IdManager
@@ -394,6 +399,84 @@ def test_to_dict_from_dict_roundtrip() -> None:
     rebuilt = Genome.from_dict(data)
     assert rebuilt.to_dict() == genome.to_dict()
     assert rebuilt.activate([0.1, 0.2]) == genome.activate([0.1, 0.2])
+
+
+FLOATS = st.floats(allow_nan=False)
+NODE_TYPES = st.sampled_from(["input", "hidden", "output"])
+ACTIVATION_NAMES = st.none() | st.sampled_from(sorted(ACTIVATION_FUNCTIONS))
+NODES = st.builds(
+    Node,
+    _id=st.integers(),
+    typ=NODE_TYPES,
+    activation=ACTIVATION_NAMES,
+    bias=FLOATS,
+)
+CONNECTIONS = st.builds(
+    Connection,
+    in_id=st.integers(),
+    out_id=st.integers(),
+    weight=FLOATS,
+    enabled=st.booleans(),
+    innov_id=st.integers(),
+)
+GENOMES = st.builds(
+    lambda nodes, connections: Genome(
+        nodes=nodes,
+        connections={c.innov_id: c for c in connections},
+        fitness=0.0,
+    ),
+    st.dictionaries(st.integers(), NODES, max_size=4),
+    st.lists(CONNECTIONS, max_size=4),
+)
+NODE_RECORDS = st.fixed_dictionaries({
+    "_id": st.integers() | st.text(max_size=3),
+    "typ": NODE_TYPES | st.integers(),
+    "activation": ACTIVATION_NAMES | st.integers(),
+    "bias": FLOATS | st.text(max_size=3),
+})
+CONNECTION_RECORDS = st.fixed_dictionaries({
+    "in_id": st.integers(),
+    "out_id": st.integers(),
+    "weight": FLOATS,
+    "enabled": st.booleans() | st.text(max_size=3),
+    "innov_id": st.integers() | st.none(),
+})
+GENOME_DICTS: st.SearchStrategy[dict[str, object]] = st.fixed_dictionaries(
+    {},
+    optional={
+        "nodes": st.dictionaries(
+            st.integers().map(str) | st.text(max_size=3),
+            NODE_RECORDS,
+            max_size=3,
+        )
+        | st.lists(st.integers(), max_size=2),
+        "connections": st.lists(CONNECTION_RECORDS, max_size=3)
+        | st.text(max_size=3),
+    },
+)
+
+
+@given(GENOME_DICTS)
+@example({
+    "nodes": {"0": {"_id": 0, "typ": "input", "activation": None, "bias": 0.0}},
+    "connections": [
+        {"in_id": 0, "out_id": 0, "weight": 1.0, "enabled": True, "innov_id": 0}
+    ],
+})
+def test_from_dict_boundary(data: dict[str, object]) -> None:
+    """Any dict gives a Genome or raises ValueError, nothing else."""
+    try:
+        genome = Genome.from_dict(data)
+    except ValueError:  # pydantic's ValidationError is a ValueError
+        return
+    assert isinstance(genome, Genome)
+
+
+@given(GENOMES)
+def test_json_round_trip(genome: Genome) -> None:
+    """A genome's dict, through JSON and back, gives the same dict."""
+    data = json.loads(json.dumps(genome.to_dict()))
+    assert Genome.from_dict(data).to_dict() == genome.to_dict()
 
 
 def test_from_dict_rejects_bad_data() -> None:
