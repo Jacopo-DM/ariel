@@ -9,8 +9,7 @@ import sys
 from collections.abc import Callable
 from pathlib import Path
 
-import mujoco
-
+# ariel first: it picks the OpenGL backend, which MuJoCo reads when it loads
 from ariel import DATA
 from ariel.rendering import single_frame_renderer
 from ariel.simulation import (
@@ -24,6 +23,9 @@ from ariel.simulation import (
     SimpleFlatWorld,
     SimpleTiltedWorld,
 )
+
+# isort: split
+import mujoco
 
 WORLDS: dict[str, Callable[[], BaseWorld]] = {
     "simple-flat": lambda: SimpleFlatWorld(load_precompiled=False),
