@@ -1,18 +1,4 @@
-"""Settings of the MuJoCo worlds that are not physics.
-
-Notes
------
-    *
-
-References
-----------
-    [1]
-
-Todo
-----
-    [ ]
-
-"""
+"""Settings of the MuJoCo worlds that are not physics."""
 
 # Standard library
 from pathlib import Path

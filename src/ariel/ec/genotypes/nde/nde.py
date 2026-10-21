@@ -1,18 +1,4 @@
-"""Neural developmental encoding.
-
-Notes
------
-    *
-
-References
-----------
-    [1]
-
-Todo
-----
-    [ ]
-
-"""
+"""Neural developmental encoding."""
 
 # Standard library
 from collections.abc import Sequence

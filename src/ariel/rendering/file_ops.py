@@ -1,18 +1,4 @@
-"""Common file operations.
-
-Notes
------
-    *
-
-References
-----------
-    [1]
-
-Todo
-----
-    [ ]
-
-"""
+"""Common file operations."""
 
 # Standard library
 import datetime as dt

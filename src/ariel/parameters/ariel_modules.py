@@ -1,18 +1,4 @@
-"""Configuration of the RoboGen-lite modules and the SER0019 servo.
-
-Notes
------
-    *
-
-References
-----------
-    [1]
-
-Todo
-----
-    [ ]
-
-"""
+"""Configuration of the RoboGen-lite modules and the SER0019 servo."""
 
 # Standard library
 from pathlib import Path

@@ -1,18 +1,4 @@
-"""MuJoCo helpers: quaternion conversion, self-collision check and spec copy.
-
-Notes
------
-    *
-
-References
-----------
-    [1]
-
-Todo
-----
-    [ ]
-
-"""
+"""MuJoCo helpers: quaternion conversion, self-collision check and spec copy."""
 
 # Third-party libraries
 from typing import cast
