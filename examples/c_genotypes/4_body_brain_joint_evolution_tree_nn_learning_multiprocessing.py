@@ -55,6 +55,7 @@ from ariel.simulation.controllers.controller import Controller, Tracker
 from ariel.simulation.controllers.utils.data_get import get_state_from_data
 from ariel.simulation.environments import SimpleFlatWorld
 from ariel.rendering import VideoRecorder
+from ariel.simulators import compile_model
 
 install()
 console = Console()
@@ -200,7 +201,7 @@ def _spawn_with_fallback(
             position=position,
             correct_collision_with_floor=correct_collision_with_floor,
         )
-        model = world.spec.compile()
+        model = world.compile()
         data = mujoco.MjData(model)
         return world, model, data
 
@@ -374,7 +375,7 @@ class MinimalJointEvolution:
                 position=position,
                 correct_collision_with_floor=correct_collision_with_floor,
             )
-            model = world.spec.compile()
+            model = world.compile()
             data = mujoco.MjData(model)
             return world, model, data
 
@@ -388,7 +389,7 @@ class MinimalJointEvolution:
         if spec is None:
             return 0
         try:
-            return spec.compile().nu
+            return compile_model(spec).nu
         except Exception:
             return 0
 

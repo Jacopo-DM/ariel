@@ -25,7 +25,6 @@ import re
 import sys
 import time
 from collections.abc import Callable
-from typing import cast
 
 import mujoco
 import networkx as nx
@@ -43,6 +42,7 @@ from ariel.body_phenotypes import (
 )
 from ariel.body_phenotypes.robogen_lite.decoders import HighProbabilityDecoder
 from ariel.ec.genotypes.tree import random_tree
+from ariel.simulators import compile_model
 
 SEED = 42
 BODIES = 60
@@ -134,7 +134,7 @@ def has_overlap(graph: Graph, core: CoreModule) -> bool:
     bool
         True when a distance is more negative than the tolerance of its pair.
     """
-    model = cast("mujoco.MjModel", core.spec.compile())
+    model = compile_model(core.spec)
     data = mujoco.MjData(model)
     mujoco.mj_forward(model, data)
     sizes = module_sizes(model)

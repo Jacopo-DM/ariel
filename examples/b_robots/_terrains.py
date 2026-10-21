@@ -130,7 +130,7 @@ def run(
     world.spawn(robot.spec, position=[0, 0, 0.25])
 
     # Compile the model
-    model = world.spec.compile()
+    model = world.compile()
     data = mujoco.MjData(model)
 
     # Save the model to XML

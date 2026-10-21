@@ -74,7 +74,7 @@ def experiment(
 
     # Generate the model and data
     # These are standard parts of the simulation USE THEM AS IS, DO NOT CHANGE
-    model = world.spec.compile()
+    model = world.compile()
     data = mj.MjData(model)
 
     # Reset state and time of simulation

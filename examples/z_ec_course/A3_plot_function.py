@@ -181,7 +181,7 @@ def show_xpos_history(
     plt.title("Robot Path in XY Plane")
 
     # Render the background image
-    model = world.spec.compile()
+    model = world.compile()
     data = mj.MjData(model)
     save_path = str(DATA / "background.png")
     single_frame_renderer(

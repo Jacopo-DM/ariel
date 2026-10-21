@@ -1,7 +1,5 @@
 """Test: Tracker class initialization, setup, update, and reset."""
 
-from typing import cast
-
 import mujoco
 
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider import spider
@@ -22,7 +20,7 @@ def _build_spider_in_world() -> tuple[
     world = SimpleFlatWorld()
     core = spider()
     world.spawn(core.spec, position=(0, 0, 0.3), rotation=(0, 0, 0))
-    model = cast("mujoco.MjModel", world.spec.compile())
+    model = world.compile()
     data = mujoco.MjData(model)
     mujoco.mj_forward(model, data)
     return world.spec, model, data
@@ -97,7 +95,7 @@ def test_tracker_reset_clears_history() -> None:
 def test_tracker_floor_geom() -> None:
     """Tracker can track a floor geom by partial name match."""
     world = SimpleFlatWorld()
-    model = cast("mujoco.MjModel", world.spec.compile())
+    model = world.compile()
     data = mujoco.MjData(model)
     mujoco.mj_forward(model, data)
 

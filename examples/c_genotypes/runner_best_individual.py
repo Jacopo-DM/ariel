@@ -167,7 +167,7 @@ def main() -> None:
         spec = construct_mjspec_from_graph(graph).spec
         world = SimpleFlatWorld()
         world.spawn(spec, position=SPAWN_POSITION, correct_collision_with_floor=True)
-        model = world.spec.compile()
+        model = world.compile()
         data = mujoco.MjData(model)
         console.log(f"[green]Built MuJoCo model with {model.nu} actuators[/green]")
     except Exception as exc:

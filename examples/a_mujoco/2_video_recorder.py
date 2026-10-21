@@ -44,7 +44,7 @@ def main() -> None:
     world.spawn(body)
 
     # Generate the model and data
-    model = world.spec.compile()
+    model = world.compile()
     data = mujoco.MjData(model)
 
     # Non-default VideoRecorder options

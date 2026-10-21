@@ -1,7 +1,5 @@
 """Test: MuJoCo utility functions."""
 
-from typing import cast
-
 import mujoco
 import numpy as np
 import pytest
@@ -11,6 +9,7 @@ from ariel.simulation.mujoco_ops import (
     has_self_collision,
     mjspec_deep_copy,
 )
+from ariel.simulators import compile_model
 
 QUATERNION_LENGTH = 4
 
@@ -99,6 +98,6 @@ def test_mjspec_deep_copy_is_independent() -> None:
     spec = _simple_spec()
     copy = mjspec_deep_copy(spec)
     # both should compile without error
-    model_orig = cast("mujoco.MjModel", spec.compile())
-    model_copy = cast("mujoco.MjModel", copy.compile())
+    model_orig = compile_model(spec)
+    model_copy = compile_model(copy)
     assert model_orig.ngeom == model_copy.ngeom

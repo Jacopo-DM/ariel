@@ -28,7 +28,7 @@ from tests.unit.test_simulation.plain_world import PlainWorld
 def test_amphitheatre_terrain_world_initialization() -> None:
     """Simply instantiate the AmphitheatreTerrainWorld class."""
     world = AmphitheatreTerrainWorld()
-    model = cast("mujoco.MjModel", world.spec.compile())
+    model = world.compile()
     data = mujoco.MjData(model)
     del model, data, world
 
@@ -36,7 +36,7 @@ def test_amphitheatre_terrain_world_initialization() -> None:
 def test_base_world_initialization() -> None:
     """Simply instantiate the BaseWorld class."""
     world = PlainWorld()
-    model = cast("mujoco.MjModel", world.spec.compile())
+    model = world.compile()
     data = mujoco.MjData(model)
     del model, data, world
 
@@ -44,7 +44,7 @@ def test_base_world_initialization() -> None:
 def test_compound_world_initialization() -> None:
     """Simply instantiate the CompoundWorld class."""
     world = CompoundWorld()
-    model = cast("mujoco.MjModel", world.spec.compile())
+    model = world.compile()
     data = mujoco.MjData(model)
     del model, data, world
 
@@ -52,7 +52,7 @@ def test_compound_world_initialization() -> None:
 def test_crater_terrain_world_initialization() -> None:
     """Simply instantiate the CraterTerrainWorld class."""
     world = CraterTerrainWorld()
-    model = cast("mujoco.MjModel", world.spec.compile())
+    model = world.compile()
     data = mujoco.MjData(model)
     del model, data, world
 
@@ -60,7 +60,7 @@ def test_crater_terrain_world_initialization() -> None:
 def test_olympic_arena_initialization() -> None:
     """Simply instantiate the OlympicArena class."""
     world = OlympicArena()
-    model = cast("mujoco.MjModel", world.spec.compile())
+    model = world.compile()
     data = mujoco.MjData(model)
     del model, data, world
 
@@ -68,7 +68,7 @@ def test_olympic_arena_initialization() -> None:
 def test_rugged_terrain_world_initialization() -> None:
     """Simply instantiate the RuggedTerrainWorld class."""
     world = RuggedTerrainWorld()
-    model = cast("mujoco.MjModel", world.spec.compile())
+    model = world.compile()
     data = mujoco.MjData(model)
     del model, data, world
 
@@ -76,7 +76,7 @@ def test_rugged_terrain_world_initialization() -> None:
 def test_rugged_tilted_world_initialization() -> None:
     """Simply instantiate the RuggedTiltedWorld class."""
     world = RuggedTiltedWorld()
-    model = cast("mujoco.MjModel", world.spec.compile())
+    model = world.compile()
     data = mujoco.MjData(model)
     del model, data, world
 
@@ -84,7 +84,7 @@ def test_rugged_tilted_world_initialization() -> None:
 def test_simple_flat_world_initialization() -> None:
     """Simply instantiate the SimpleFlatWorld class."""
     world = SimpleFlatWorld()
-    model = cast("mujoco.MjModel", world.spec.compile())
+    model = world.compile()
     data = mujoco.MjData(model)
     del model, data, world
 
@@ -92,7 +92,7 @@ def test_simple_flat_world_initialization() -> None:
 def test_simple_tilted_world_initialization() -> None:
     """Simply instantiate the SimpleTiltedWorld class."""
     world = SimpleTiltedWorld()
-    model = cast("mujoco.MjModel", world.spec.compile())
+    model = world.compile()
     data = mujoco.MjData(model)
     del model, data, world
 
@@ -105,7 +105,7 @@ def test_instantiation_of_all_environments() -> None:
         xml = r"""
         <mujoco>
         <worldbody>
-            <geom name="red_box" type="box" size=".2 .2 .2" rgba="1 0 0 1"/>
+            <geom name="red_box" type="box" size=".1 .1 .1" rgba="1 0 0 1"/>
             <geom name="green_sphere" pos=".2 .2 .2" size=".1" rgba="0 1 0 1"/>
         </worldbody>
         </mujoco>
@@ -129,7 +129,7 @@ def test_instantiation_of_all_environments() -> None:
         )
 
         # Compile the model and create data
-        model = cast("mujoco.MjModel", world.spec.compile())
+        model = world.compile()
         data = mujoco.MjData(model)
 
         # Step the simulation to ensure no errors

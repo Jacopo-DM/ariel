@@ -1,6 +1,5 @@
 """Test: Controller class initialization and set_control logic."""
 
-from typing import cast
 from unittest.mock import Mock
 
 import mujoco
@@ -10,6 +9,7 @@ import pytest
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider import spider
 from ariel.simulation.controllers.controller import Controller
 from ariel.simulation.tracker import Tracker
+from ariel.simulators import compile_model
 
 DEFAULT_CTRL_STEP = 50
 DEFAULT_SAVE_STEP = 500
@@ -36,7 +36,7 @@ def _zero_callback(
 
 def _build_spider_model() -> tuple[mujoco.MjModel, mujoco.MjData]:
     core = spider()
-    model = cast("mujoco.MjModel", core.spec.compile())
+    model = compile_model(core.spec)
     data = mujoco.MjData(model)
     return model, data
 

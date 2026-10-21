@@ -5,7 +5,7 @@ from __future__ import annotations
 # Standard library
 import importlib.util
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 # Third-party libraries
 import networkx as nx
@@ -13,11 +13,11 @@ import pytest
 
 # Local libraries
 from ariel.body_phenotypes import construct_mjspec_from_graph
+from ariel.simulators import compile_model
 
 if TYPE_CHECKING:
     from types import ModuleType
 
-    import mujoco
 
 SCRIPT = Path(__file__).resolve().parents[3] / "tools" / "measure_overlap.py"
 SMALL = 5
@@ -73,9 +73,7 @@ def test_a_body_with_modules_inside_each_other_is_counted() -> None:
 def test_module_sizes_read_the_hinge_and_the_brick() -> None:
     script = _load()
     graph = _graph(CLEAN_NODES, CLEAN_EDGES)
-    model = cast(
-        "mujoco.MjModel", construct_mjspec_from_graph(graph).spec.compile()
-    )
+    model = compile_model(construct_mjspec_from_graph(graph).spec)
     sizes = script.module_sizes(model)
     brick_volume, brick_side = sizes[1]
     hinge_volume, hinge_side = sizes[2]
@@ -88,11 +86,8 @@ def test_module_sizes_read_the_hinge_and_the_brick() -> None:
 
 def test_the_geoms_of_a_hinge_belong_to_the_hinge() -> None:
     script = _load()
-    model = cast(
-        "mujoco.MjModel",
-        construct_mjspec_from_graph(
-            _graph(CLEAN_NODES, CLEAN_EDGES)
-        ).spec.compile(),
+    model = compile_model(
+        construct_mjspec_from_graph(_graph(CLEAN_NODES, CLEAN_EDGES)).spec
     )
     owners = [script.owner_of(model, geom) for geom in range(model.ngeom)]
     assert owners == [0, 1, 2, 2, 3]  # core, brick, stator, rotor, brick

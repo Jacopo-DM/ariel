@@ -7,6 +7,7 @@ import pytest
 
 # Local libraries
 from ariel.simulation.controllers.utils.data_get import get_state_from_data
+from ariel.simulators import compile_model
 
 ROBOT_XML = """
 <mujoco>
@@ -34,7 +35,7 @@ def test_state_is_quaternion_without_w_then_joints(
     expected_imaginary: tuple[float, float, float],
 ) -> None:
     """The position is left out and a negative w flips the quaternion."""
-    model = mujoco.MjModel.from_xml_string(ROBOT_XML)
+    model = compile_model(mujoco.MjSpec.from_string(ROBOT_XML))
     data = mujoco.MjData(model)
     data.qpos[0:3] = (5.0, 6.0, 7.0)
     data.qpos[3:7] = quat

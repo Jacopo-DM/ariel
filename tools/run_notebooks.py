@@ -36,7 +36,8 @@ TIMEOUT_SECONDS = 600
 # the notebooks do; plain ``import ariel`` only reads a saved choice.
 OPENGL_PROBE = (
     "import ariel.rendering, mujoco; "
-    "model = mujoco.MjModel.from_xml_string('<mujoco/>'); "
+    "from ariel.simulators import compile_model; "
+    "model = compile_model(mujoco.MjSpec.from_string('<mujoco/>')); "
     "mujoco.Renderer(model, 8, 8).close()"
 )
 

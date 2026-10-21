@@ -11,6 +11,7 @@ import pytest
 
 from ariel.simulation import runners
 from ariel.simulation.mujoco_ops import has_self_collision
+from ariel.simulators import compile_model
 
 _gl_probe_worker = importlib.import_module("ariel.opengl._gl_probe_worker")
 
@@ -24,7 +25,7 @@ LOOP = 5
 
 def test_simple_runner_advances_the_clock() -> None:
     """The simple runner steps until the requested duration is reached."""
-    model = mujoco.MjModel.from_xml_string(PLAIN_XML)
+    model = compile_model(mujoco.MjSpec.from_string(PLAIN_XML))
     data = mujoco.MjData(model)
     runners.simple_runner(model, data, duration=SHORT, steps_per_loop=LOOP)
     assert data.time >= SHORT
@@ -41,7 +42,7 @@ class _CountingController:
 
 def test_thread_safe_runner_calls_the_controller_every_step() -> None:
     """The controller runs once per simulation step."""
-    model = mujoco.MjModel.from_xml_string(PLAIN_XML)
+    model = compile_model(mujoco.MjSpec.from_string(PLAIN_XML))
     data = mujoco.MjData(model)
     controller = _CountingController()
     runners.thread_safe_runner(model, data, controller, duration=SHORT)

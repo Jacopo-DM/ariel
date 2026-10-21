@@ -113,7 +113,7 @@ def visualize_genome(cppn_genome: Genome) -> None:
         spec = construct_mjspec_from_graph(graph).spec
         world = SimpleFlatWorldWithTarget()
         world.spawn(spec, position=SPAWN_POSITION)
-        model = world.spec.compile()
+        model = world.compile()
         data = mujoco.MjData(model)
         viewer.launch(model=model, data=data)
     except Exception as e:

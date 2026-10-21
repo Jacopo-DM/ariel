@@ -8,7 +8,6 @@ Run from the repo root on a machine with a working OpenGL backend:
 import sys
 from collections.abc import Callable
 from pathlib import Path
-from typing import cast
 
 # ariel first: it picks the OpenGL backend, which MuJoCo reads when it loads
 from ariel import DATA
@@ -60,7 +59,7 @@ def render_all(folder: Path) -> list[Path]:
     folder.mkdir(parents=True, exist_ok=True)
     written: list[Path] = []
     for name, make in WORLDS.items():
-        model = cast("mujoco.MjModel", make().spec.compile())
+        model = make().compile()
         data = mujoco.MjData(model)
         path = folder / f"{name}.png"
         single_frame_renderer(model, data, save=True, save_path=path)

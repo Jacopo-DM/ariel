@@ -61,6 +61,7 @@ from ariel.simulation.controllers.utils.data_get import get_state_from_data
 from ariel.simulation.environments import SimpleFlatWorld
 from ariel.body_phenotypes.morphological_descriptor import MorphologicalMeasures
 from ariel.simulation.runners import thread_safe_runner
+from ariel.simulators import compile_model
 
 install()
 console = Console()
@@ -284,7 +285,7 @@ class MorphologySearch:
             if graph.number_of_nodes() == 0:
                 return 0
             spec = construct_mjspec_from_graph(graph).spec
-            model = spec.compile()
+            model = compile_model(spec)
             return model.nu
         except Exception:
             return 0
@@ -447,7 +448,7 @@ class BrainEvaluator:
                 position=SPAWN_POSITION,
                 correct_collision_with_floor=correct_collision_with_floor,
             )
-            model = world.spec.compile()
+            model = world.compile()
             data = mujoco.MjData(model)
             return world, model, data
 
@@ -618,7 +619,7 @@ class BootstrappedJointEvolution:
             if graph.number_of_nodes() == 0:
                 return 0
             spec = construct_mjspec_from_graph(graph).spec
-            model = spec.compile()
+            model = compile_model(spec)
             return model.nu
         except Exception:
             return 0

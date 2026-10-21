@@ -199,7 +199,7 @@ def visualize_genome(genome: TreeGenome) -> None:
         spec = construct_mjspec_from_graph(robot_graph).spec
         world = SimpleFlatWorldWithTarget()
         world.spawn(spec, position=SPAWN_POSITION)
-        model = world.spec.compile()
+        model = world.compile()
 
         data = mujoco.MjData(model)
         viewer.launch(model=model, data=data)

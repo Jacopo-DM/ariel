@@ -6,7 +6,6 @@ import json
 import random
 import tempfile
 from pathlib import Path
-from typing import cast
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -34,6 +33,7 @@ from ariel.body_phenotypes.robogen_lite.modules.brick import BrickModule
 from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
 from ariel.body_phenotypes.robogen_lite.modules.hinge import HingeModule
 from ariel.body_phenotypes.robogen_lite.modules.module import Module
+from ariel.simulators import compile_model
 from tests.unit.misuse import untyped
 
 mpl.use("Agg")
@@ -234,7 +234,7 @@ def test_constructor_builds_core_with_children() -> None:
     """The small graph builds a core that compiles."""
     core = constructor.construct_mjspec_from_graph(_small_graph())
     assert isinstance(core, CoreModule)
-    model = cast("mujoco.MjModel", core.spec.compile())
+    model = compile_model(core.spec)
     data = mujoco.MjData(model)
     mujoco.mj_step(model, data)
     del core, model, data

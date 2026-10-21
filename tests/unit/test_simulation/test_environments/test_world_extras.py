@@ -87,7 +87,7 @@ def test_world_roundtrips_through_its_xml(
     assert (precompiled_dir / f"{built.name}.xml").exists()
     loaded = cls(load_precompiled=True)
     assert loaded.is_precompiled
-    model = cast("mujoco.MjModel", loaded.spec.compile())
+    model = loaded.compile()
     assert model.nbody >= 1
     del built, loaded, model
 
@@ -119,7 +119,7 @@ def test_spawn_with_defaults_adds_a_free_robot() -> None:
     world = SimpleFlatWorld(load_precompiled=False)
     robot = mujoco.MjSpec.from_string(SPHERE_XML)
     world.spawn(robot)
-    model = cast("mujoco.MjModel", world.spec.compile())
+    model = world.compile()
     assert model.njnt == TWO_JOINTS
     del world, robot, model
 
@@ -198,7 +198,7 @@ def test_flat_world_with_target_loads_its_precompiled_xml(
 def test_flat_world_with_target_compiles() -> None:
     """The flat world with a target adds the target body."""
     world = SimpleFlatWorldWithTarget(load_precompiled=False)
-    model = cast("mujoco.MjModel", world.spec.compile())
+    model = world.compile()
     assert model.nbody > 1
     del world, model
 
@@ -218,7 +218,7 @@ def test_compound_world_takes_every_override() -> None:
     )
     assert world.name == "my-compound"
     assert world.dims == HEIGHT_DIMS
-    model = cast("mujoco.MjModel", world.spec.compile())
+    model = world.compile()
     assert model.ngeom >= 1
     del world, model
 
@@ -298,7 +298,7 @@ def test_the_geometry_compile_matches_the_full_compile(
         monkeypatch.setattr(
             full,
             "_compile_for_geometry",
-            lambda world=full: world.spec.compile(),
+            lambda world=full: world.compile(),
         )
         sizes = [(t.width, t.height) for t in lite.spec.textures]
         for world in (lite, full):

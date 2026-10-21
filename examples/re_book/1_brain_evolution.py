@@ -505,7 +505,7 @@ def main():
     )
     world.spawn(spider_core.spec, position=[0, 0, 0.1])
 
-    model = world.spec.compile()
+    model = world.compile()
     data = mujoco.MjData(model)
 
     best_weights, final_input_dim = evolve(world, model, data)

@@ -11,6 +11,7 @@ import pytest
 from PIL import Image
 
 from ariel.rendering import VideoRecorder, renderers
+from ariel.simulators import compile_model
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -79,7 +80,7 @@ def fake_opengl(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def _scene(xml: str = MODEL_XML) -> tuple[mujoco.MjModel, mujoco.MjData]:
-    model = mujoco.MjModel.from_xml_string(xml)
+    model = compile_model(mujoco.MjSpec.from_string(xml))
     return model, mujoco.MjData(model)
 
 

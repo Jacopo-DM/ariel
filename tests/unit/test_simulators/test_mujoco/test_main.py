@@ -4,11 +4,12 @@
 import runpy
 import sys
 from pathlib import Path
-from typing import cast
 
 # Third-party libraries
 import mujoco
 import pytest
+
+from ariel.simulators import compile_model
 
 # Local libraries
 from ariel.simulators.mujoco.__main__ import main
@@ -38,9 +39,7 @@ def test_out_writes_a_loadable_mjcf_file(
     target = tmp_path / "world.xml"
     assert main(["--out", str(target)]) == 0
     assert str(target) in capsys.readouterr().out
-    model = cast(
-        "mujoco.MjModel", mujoco.MjSpec.from_file(str(target)).compile()
-    )
+    model = compile_model(mujoco.MjSpec.from_file(str(target)))
     assert model.opt.timestep == pytest.approx(0.00375)  # the 7.5 cm brick
 
 

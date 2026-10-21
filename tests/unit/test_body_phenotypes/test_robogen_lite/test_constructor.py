@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import cast
-
 import mujoco
 import networkx as nx
 import pytest
@@ -12,6 +10,7 @@ from ariel.body_phenotypes.robogen_lite.constructor import (
     construct_mjspec_from_graph,
 )
 from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
+from ariel.simulators import compile_model
 
 
 def _make_core_only_graph() -> nx.DiGraph[int]:
@@ -82,7 +81,7 @@ def test_core_only_graph_returns_core_module() -> None:
 def test_core_only_graph_compiles() -> None:
     """The spec produced from a core-only graph can be compiled by MuJoCo."""
     core = construct_mjspec_from_graph(_make_core_only_graph())
-    model = cast("mujoco.MjModel", core.spec.compile())
+    model = compile_model(core.spec)
     data = mujoco.MjData(model)
     del core, model, data
 
@@ -90,7 +89,7 @@ def test_core_only_graph_compiles() -> None:
 def test_core_with_hinge_compiles() -> None:
     """Core + hinge graph produces a compilable MuJoCo spec."""
     core = construct_mjspec_from_graph(_make_core_with_hinge_graph())
-    model = cast("mujoco.MjModel", core.spec.compile())
+    model = compile_model(core.spec)
     data = mujoco.MjData(model)
     del core, model, data
 
@@ -98,7 +97,7 @@ def test_core_with_hinge_compiles() -> None:
 def test_core_with_brick_compiles() -> None:
     """Core + brick graph produces a compilable MuJoCo spec."""
     core = construct_mjspec_from_graph(_make_core_with_brick_graph())
-    model = cast("mujoco.MjModel", core.spec.compile())
+    model = compile_model(core.spec)
     data = mujoco.MjData(model)
     del core, model, data
 
@@ -106,7 +105,7 @@ def test_core_with_brick_compiles() -> None:
 def test_core_with_none_module_compiles() -> None:
     """NONE-type nodes are silently skipped; resulting spec still compiles."""
     core = construct_mjspec_from_graph(_make_core_with_none_graph())
-    model = cast("mujoco.MjModel", core.spec.compile())
+    model = compile_model(core.spec)
     data = mujoco.MjData(model)
     del core, model, data
 

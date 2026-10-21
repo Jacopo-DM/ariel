@@ -6,7 +6,7 @@ from __future__ import annotations
 import itertools
 import random
 from functools import cache
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 # Third-party libraries
 import mujoco
@@ -21,6 +21,7 @@ from ariel.body_phenotypes import (
     construct_mjspec_from_graph,
 )
 from ariel.ec.genotypes.tree import random_tree
+from ariel.simulators import compile_model
 from tests.unit.test_body_phenotypes.test_robogen_lite.prebuilt_bodies import (
     PREBUILT,
 )
@@ -64,7 +65,7 @@ def _extent(robot: CoreModule) -> NDArray[np.float64]:
     NDArray[np.float64]
         Extent along x, y and z.
     """
-    model = cast("mujoco.MjModel", robot.spec.compile())
+    model = compile_model(robot.spec)
     data = mujoco.MjData(model)
     mujoco.mj_forward(model, data)
     core = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "core")

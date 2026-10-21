@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import cast
-
 import astropy.units as u
 import mujoco
 import numpy as np
@@ -18,6 +16,7 @@ from ariel.body_phenotypes.lynx_mjspec.unified_pipeline.common import (
     FastNumpyNetwork,
     PolicySpec,
 )
+from ariel.simulators import compile_model
 
 TUBE_LENGTH = 0.4
 HIDDEN = 3
@@ -31,7 +30,7 @@ def _compiled_arm(config: ArmConfig | None = None) -> mujoco.MjModel:
     arm = LynxArm(config=config)
     world = TableWorld()
     world.spawn(arm.spec)
-    return cast("mujoco.MjModel", world.spec.compile())
+    return world.compile()
 
 
 # --- ArmConfig and LynxArm -------------------------------------------------- #
@@ -88,7 +87,7 @@ def test_arm_without_rotation_angles_still_builds() -> None:
 def test_table_world_has_a_target_site() -> None:
     """The table world compiles and carries the target site."""
     world = TableWorld()
-    model = cast("mujoco.MjModel", world.spec.compile())
+    model = world.compile()
     assert mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, "target") >= 0
     del model
 
@@ -216,7 +215,7 @@ def test_set_target_position_body_site() -> None:
         </body>
         </body>
     </worldbody></mujoco>"""
-    model = mujoco.MjModel.from_xml_string(xml)
+    model = compile_model(mujoco.MjSpec.from_string(xml))
     data = mujoco.MjData(model)
     mujoco.mj_forward(model, data)
     site = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, "s")

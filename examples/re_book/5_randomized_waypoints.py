@@ -307,7 +307,7 @@ def _build_context() -> dict[str, Any]:
         xyaxes=[1, 0, 0, 0, 1, 0],
     )
 
-    model = world.spec.compile()
+    model = world.compile()
     data  = mujoco.MjData(model)
 
     cam_name: Optional[str] = None

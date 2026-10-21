@@ -2,13 +2,13 @@
 
 import hashlib
 from collections.abc import Callable
-from typing import cast
 
 import mujoco
 import pytest
 
 from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots import john_set
+from ariel.simulators import compile_model
 
 # Looked up by name, so each key is the name of its function
 BUILDERS: dict[str, Callable[[], CoreModule]] = {
@@ -36,7 +36,7 @@ def test_body_builds_and_compiles(name: str) -> None:
     """Every body in the set is a CoreModule that compiles and steps."""
     core = BUILDERS[name]()
     assert isinstance(core, CoreModule)
-    model = cast("mujoco.MjModel", core.spec.compile())
+    model = compile_model(core.spec)
     data = mujoco.MjData(model)
     mujoco.mj_step(model, data)
     assert model.nbody > 1

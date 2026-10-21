@@ -88,7 +88,7 @@ def show_xpos_history(history: list[float]) -> None:
     # Initialize world to get the background
     mj.set_mjcb_control(None)
     world = OlympicArena()
-    model = world.spec.compile()
+    model = world.compile()
     data = mj.MjData(model)
     save_path = str(DATA / "background.png")
     single_frame_renderer(
@@ -191,7 +191,7 @@ def quick_spawn(
         temp_robot,
         position=SPAWN_POS,
     )
-    model = world.spec.compile()
+    model = world.compile()
     data = mj.MjData(model)
     mj.mj_resetData(model, data)
     return (cast("mj.MjModel", model), data, world)

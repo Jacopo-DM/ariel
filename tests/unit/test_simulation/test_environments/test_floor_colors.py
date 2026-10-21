@@ -2,7 +2,6 @@
 
 # Standard library
 import importlib
-from typing import cast
 
 # Third-party libraries
 import mujoco
@@ -77,6 +76,6 @@ def test_the_olympic_flat_sections_use_the_greens() -> None:
 def test_a_tilted_world_without_a_checker_floor_compiles() -> None:
     """Before the floors shared a colour this crashed with AttributeError."""
     world = SimpleTiltedWorld(checker_floor=False, load_precompiled=False)
-    model = cast("mujoco.MjModel", world.spec.compile())
+    model = world.compile()
     assert mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, "floor") >= 0
     del world, model

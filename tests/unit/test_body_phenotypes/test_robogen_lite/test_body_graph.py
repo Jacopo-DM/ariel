@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import cast
-
 # Third-party libraries
 import mujoco
 import networkx as nx
@@ -15,6 +13,7 @@ from ariel.body_phenotypes.robogen_lite.constructor import (
 )
 from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots import gecko
+from ariel.simulators import compile_model
 from tests.unit.test_body_phenotypes.test_robogen_lite.prebuilt_bodies import (
     PREBUILT,
 )
@@ -26,7 +25,7 @@ def _graph(robot: CoreModule) -> nx.DiGraph[int]:
 
 
 def _geom_names(robot: CoreModule) -> list[str]:
-    model = cast("mujoco.MjModel", robot.spec.compile())
+    model = compile_model(robot.spec)
     return [
         mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_GEOM, geom) or ""
         for geom in range(model.ngeom)

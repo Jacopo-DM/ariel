@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import random
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import mujoco
 import networkx as nx
@@ -28,6 +28,7 @@ from ariel.body_phenotypes.robogen_lite.overlap import (
     pair_tolerance,
 )
 from ariel.ec.genotypes.tree import random_tree
+from ariel.simulators import compile_model
 from tests.unit.misuse import assign
 
 CUBE = 0.05  # half size of a brick
@@ -197,9 +198,7 @@ def test_a_body_with_modules_inside_each_other_is_reported() -> None:
 
 def test_owner_of_reads_the_node_from_the_geom_name() -> None:
     graph = _body_graph(CLEAN)
-    model = cast(
-        "mujoco.MjModel", construct_mjspec_from_graph(graph).spec.compile()
-    )
+    model = compile_model(construct_mjspec_from_graph(graph).spec)
     owners = [owner_of(model, geom) for geom in range(model.ngeom)]
     assert owners == [0, 1, 2, 2, 3]  # core, brick, stator, rotor, brick
 
@@ -207,7 +206,7 @@ def test_owner_of_reads_the_node_from_the_geom_name() -> None:
 def test_a_geom_without_a_name_belongs_to_the_core() -> None:
     spec = mujoco.MjSpec()
     spec.worldbody.add_geom(type=mujoco.mjtGeom.mjGEOM_BOX, size=[1, 1, 1])
-    assert owner_of(cast("mujoco.MjModel", spec.compile()), 0) == 0
+    assert owner_of(compile_model(spec), 0) == 0
 
 
 def test_a_geom_that_is_not_a_box_is_rejected() -> None:
@@ -231,8 +230,6 @@ def test_every_module_of_a_random_body_owns_its_own_geoms() -> None:
     random.seed(42)
     for _ in range(20):
         graph = random_tree(20).to_networkx()
-        model = cast(
-            "mujoco.MjModel", construct_mjspec_from_graph(graph).spec.compile()
-        )
+        model = compile_model(construct_mjspec_from_graph(graph).spec)
         owners = {owner_of(model, geom) for geom in range(model.ngeom)}
         assert owners == set(graph.nodes)

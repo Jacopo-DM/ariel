@@ -38,7 +38,7 @@ def main() -> None:
     )
 
     # Generate the model and data
-    model = world.spec.compile()
+    model = world.compile()
     data = mujoco.MjData(model)
 
     # Render a single frame and save it locally.

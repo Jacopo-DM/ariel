@@ -46,7 +46,7 @@ def main() -> None:
     world.spawn(test_object, correct_collision_with_floor=True)
 
     # Compile the model and create data
-    model = world.spec.compile()
+    model = world.compile()
     data = mujoco.MjData(model)
 
     # Render a single frame

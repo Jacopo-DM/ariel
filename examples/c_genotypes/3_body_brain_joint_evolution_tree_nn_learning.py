@@ -56,6 +56,7 @@ from ariel.simulation.controllers.controller import Controller, Tracker
 from ariel.simulation.controllers.utils.data_get import get_state_from_data
 from ariel.simulation.environments import SimpleFlatWorld
 from ariel.simulation.runners import thread_safe_runner
+from ariel.simulators import compile_model
 
 # Pretty logs
 install()
@@ -257,7 +258,7 @@ class JointTreeNNLearningEvolution:
                 position=position,
                 correct_collision_with_floor=correct_collision_with_floor,
             )
-            model = world.spec.compile()
+            model = world.compile()
             data = mujoco.MjData(model)
             return world, model, data
 
@@ -275,7 +276,7 @@ class JointTreeNNLearningEvolution:
         if spec is None:
             return 0
         try:
-            model = spec.compile()
+            model = compile_model(spec)
             return model.nu
         except Exception:
             return 0

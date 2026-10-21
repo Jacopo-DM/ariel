@@ -44,7 +44,7 @@ def show_module(module: str) -> Image | None:
     )
 
     # Generate the model and data
-    model = world.spec.compile()
+    model = world.compile()
     data = mj.MjData(model)
 
     # Render a single frame
