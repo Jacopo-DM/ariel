@@ -2,8 +2,9 @@
 
 ``golden_counts.json`` holds every measure that reads only the graph, for 60
 random trees of up to 20 modules (``random.seed(42)``, as
-``tools/measure_overlap.py``) and the 13 robots of ``john_set``, recorded with
-the grid-based ``MorphologicalMeasures`` of commit ``ef74198``. The shape
+``tools/measure_overlap.py``) and the 13 robots of ``john_set`` (from their
+tables), recorded with the grid-based ``MorphologicalMeasures`` of commit
+``ef74198``. The shape
 measures (bounding box, coverage, proportion, symmetry, ``is_2d``) are left
 out on purpose: their meaning changes with the goal geometry-measures.
 """
@@ -18,17 +19,19 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 # Third-party libraries
-import networkx as nx
 import pytest
 
 # Local libraries
-from ariel.body_phenotypes import MorphologicalMeasures
+from ariel.body_phenotypes import (
+    MorphologicalMeasures,
+    construct_mjspec_from_graph,
+)
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots import john_tables
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots.parts import build
 from ariel.ec.genotypes.tree import random_tree
 
 if TYPE_CHECKING:
-    from ariel.body_phenotypes.robogen_lite.prebuilt_robots.parts import Part
+    from ariel.body_phenotypes import CoreModule
 
 GOLDEN = Path(__file__).with_name("golden_counts.json")
 SEED = 42
@@ -80,60 +83,36 @@ COUNTS = (
     "D",
 )
 
-type Graph = nx.DiGraph[int]
 type Values = dict[str, float | int | bool]
 
 
-def table_graph(parts: tuple[Part, ...]) -> Graph:
-    """Turn a table of parts into the graph it describes.
-
-    Parameters
-    ----------
-    parts : tuple[Part, ...]
-        A table from ``john_tables``.
-
-    Returns
-    -------
-    nx.DiGraph[int]
-        Nodes with ``type`` and ``rotation``, edges with ``face``.
-    """
-    graph: Graph = nx.DiGraph()
-    graph.add_node(0, type="CORE", rotation="DEG_0")
-    ids = {"core": 0}
-    seen = {"hinge": 0, "brick": 0}
-    for part in parts:
-        name = f"{part.kind}_{seen[part.kind]}"
-        seen[part.kind] += 1
-        ids[name] = part.index
-        graph.add_node(part.index, type=part.kind.upper(), rotation="DEG_0")
-        graph.add_edge(ids[part.parent], part.index, face=part.face.name)
-    return graph
-
-
 @cache
-def bodies() -> dict[str, Graph]:
-    """Name every body the golden values cover.
+def bodies() -> dict[str, CoreModule]:
+    """Build every body the golden values cover.
 
     Returns
     -------
-    dict[str, nx.DiGraph[int]]
-        Body name to its graph.
+    dict[str, CoreModule]
+        Body name to the built robot.
     """
     random.seed(SEED)
     named = {
-        f"tree {i}": random_tree(MODULES).to_networkx() for i in range(BODIES)
+        f"tree {i}": construct_mjspec_from_graph(
+            random_tree(MODULES).to_networkx()
+        )
+        for i in range(BODIES)
     }
     for table in TABLES:
-        named[table] = table_graph(getattr(john_tables, table))
+        named[table] = build(getattr(john_tables, table))
     return named
 
 
-def counts(graph: Graph) -> Values:
+def counts(robot: CoreModule) -> Values:
     """Read every count measure of one body.
 
     Parameters
     ----------
-    graph : nx.DiGraph[int]
+    robot : CoreModule
         The body.
 
     Returns
@@ -141,7 +120,7 @@ def counts(graph: Graph) -> Values:
     dict[str, float | int | bool]
         Measure name to value.
     """
-    measures = MorphologicalMeasures(graph)
+    measures = MorphologicalMeasures(robot)
     return {name: getattr(measures, name) for name in COUNTS}
 
 
@@ -155,10 +134,3 @@ def test_the_counts_match_the_golden_values(name: str) -> None:
 
 def test_the_golden_file_covers_every_body() -> None:
     assert set(GOLDEN_VALUES) == set(bodies())
-
-
-@pytest.mark.parametrize("table", TABLES)
-def test_a_built_table_robot_keeps_the_golden_graph(table: str) -> None:
-    graph = build(getattr(john_tables, table)).graph
-    assert graph is not None
-    assert counts(graph) == GOLDEN_VALUES[table]

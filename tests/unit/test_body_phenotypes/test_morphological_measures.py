@@ -8,7 +8,11 @@ import networkx as nx
 import pytest
 
 # Local libraries
-from ariel.body_phenotypes.morphological_descriptor import MorphologicalMeasures
+from ariel.body_phenotypes import (
+    CoreModule,
+    MorphologicalMeasures,
+    construct_mjspec_from_graph,
+)
 
 SPIDER_HINGES = 4
 SPIDER_MODULES = 5
@@ -67,28 +71,40 @@ def _make_branching_graph() -> nx.DiGraph[int]:
     return g
 
 
+def _measure(graph: nx.DiGraph[int]) -> MorphologicalMeasures:
+    return MorphologicalMeasures(construct_mjspec_from_graph(graph))
+
+
 def test_morphological_empty_graph_raises() -> None:
     """MorphologicalMeasures raises ValueError for an empty graph."""
+    robot = construct_mjspec_from_graph(_make_single_core_graph())
+    robot.graph = nx.DiGraph()
     with pytest.raises(ValueError, match="empty"):
-        MorphologicalMeasures(nx.DiGraph())
+        MorphologicalMeasures(robot)
+
+
+def test_a_robot_without_a_graph_raises() -> None:
+    """A core made by hand, with no builder, cannot be measured."""
+    with pytest.raises(ValueError, match="no graph"):
+        MorphologicalMeasures(CoreModule(index=0))
 
 
 def test_morphological_single_core_num_modules() -> None:
     """A graph with only a core has num_modules == 1."""
-    m = MorphologicalMeasures(_make_single_core_graph())
+    m = _measure(_make_single_core_graph())
     assert m.num_modules == 1
 
 
 def test_morphological_single_core_no_bricks_or_hinges() -> None:
     """A single-core graph has no bricks or active hinges."""
-    m = MorphologicalMeasures(_make_single_core_graph())
+    m = _measure(_make_single_core_graph())
     assert m.num_bricks == 0
     assert m.num_active_hinges == 0
 
 
 def test_morphological_spider_graph_module_counts() -> None:
     """Spider graph has 4 hinges and 0 bricks."""
-    m = MorphologicalMeasures(_make_spider_graph())
+    m = _measure(_make_spider_graph())
     assert m.num_active_hinges == SPIDER_HINGES
     assert m.num_bricks == 0
     assert m.num_modules == SPIDER_MODULES
@@ -96,14 +112,14 @@ def test_morphological_spider_graph_module_counts() -> None:
 
 def test_morphological_branching_graph_brick_count() -> None:
     """Branching graph has 2 bricks and 1 hinge."""
-    m = MorphologicalMeasures(_make_branching_graph())
+    m = _measure(_make_branching_graph())
     assert m.num_bricks == BRANCHING_BRICKS
     assert m.num_active_hinges == 1
 
 
 def test_morphological_symmetry_in_range() -> None:
     """All symmetry scores are in [0, 1]."""
-    m = MorphologicalMeasures(_make_spider_graph())
+    m = _measure(_make_spider_graph())
     assert 0.0 <= m.xy_symmetry <= 1.0
     assert 0.0 <= m.xz_symmetry <= 1.0
     assert 0.0 <= m.yz_symmetry <= 1.0
@@ -111,46 +127,46 @@ def test_morphological_symmetry_in_range() -> None:
 
 
 def test_morphological_bounding_box_positive() -> None:
-    """Bounding box dimensions are all positive integers."""
-    m = MorphologicalMeasures(_make_spider_graph())
-    assert m.bounding_box_depth >= 1
-    assert m.bounding_box_width >= 1
-    assert m.bounding_box_height >= 1
+    """Bounding box dimensions are positive lengths in metres."""
+    m = _measure(_make_spider_graph())
+    assert 0.0 < m.bounding_box_depth < 1.0
+    assert 0.0 < m.bounding_box_width < 1.0
+    assert 0.0 < m.bounding_box_height < 1.0
 
 
 def test_morphological_coverage_in_range() -> None:
     """Coverage (C) is in (0, 1]."""
-    m = MorphologicalMeasures(_make_spider_graph())
+    m = _measure(_make_spider_graph())
     assert 0.0 < m.C <= 1.0
 
 
 def test_morphological_joints_ratio_in_range() -> None:
     """Joint ratio J is in [0, 1]."""
-    m = MorphologicalMeasures(_make_spider_graph())
+    m = _measure(_make_spider_graph())
     assert 0.0 <= m.J <= 1.0
 
 
 def test_morphological_limbs_in_range() -> None:
     """Limbs ratio L is in [0, 1]."""
-    m = MorphologicalMeasures(_make_spider_graph())
+    m = _measure(_make_spider_graph())
     assert 0.0 <= m.L <= 1.0
 
 
 def test_morphological_proportion_in_range() -> None:
     """Proportion P is in (0, 1]."""
-    m = MorphologicalMeasures(_make_spider_graph())
+    m = _measure(_make_spider_graph())
     assert 0.0 < m.P <= 1.0
 
 
 def test_morphological_is_2d_flag() -> None:
-    """A flat robot with only 90-degree rotations is recognised as 2D."""
-    m = MorphologicalMeasures(_make_spider_graph())
-    assert isinstance(m.is_2d, bool)
+    """A spider with its legs in the core's plane is flat."""
+    m = _measure(_make_spider_graph())
+    assert m.is_2d
 
 
 def test_morphological_paper_aliases_consistent() -> None:
     """Paper-letter aliases agree with their named property counterparts."""
-    m = MorphologicalMeasures(_make_branching_graph())
+    m = _measure(_make_branching_graph())
     assert pytest.approx(m.branching) == m.B
     assert pytest.approx(m.limbs) == m.L
     assert pytest.approx(m.length_of_limbs) == m.E

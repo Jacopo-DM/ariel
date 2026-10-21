@@ -1,4 +1,4 @@
-"""Counts and bounding box measures of a robot graph."""
+"""Counts of a robot graph."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from ariel.body_phenotypes.morphological_grid import MorphologicalGrid
 
 
 class MorphologicalCounts(MorphologicalGrid):
-    """Module counts, bounding box and potential maxima of a robot graph."""
+    """Module counts and potential maxima of a robot graph."""
 
     @property
     def num_bricks(self) -> int:

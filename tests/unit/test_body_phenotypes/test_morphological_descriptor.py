@@ -7,13 +7,15 @@ import inspect
 import networkx as nx
 import pytest
 
-from ariel.body_phenotypes.morphological_descriptor import MorphologicalMeasures
+from ariel.body_phenotypes import (
+    MorphologicalMeasures,
+    construct_mjspec_from_graph,
+)
 
 CROSS_ARM = 2
 THREE_MODULES = 3
 FOUR_MODULES = 4
 CROSS_MODULES = 1 + 6 * CROSS_ARM
-SPAN = 2 * CROSS_ARM + 1
 FILLED_BRICK_FACES = 5
 CORE_FACES = ("FRONT", "BACK", "RIGHT", "LEFT", "TOP", "BOTTOM")
 OPPOSITE = {
@@ -43,6 +45,21 @@ def _graph(
     return graph
 
 
+def _core_only() -> nx.DiGraph[int]:
+    return _graph({0: "CORE"}, [])
+
+
+def _measure(graph: nx.DiGraph[int]) -> MorphologicalMeasures:
+    return MorphologicalMeasures(construct_mjspec_from_graph(graph))
+
+
+def _measure_graph(graph: nx.DiGraph[int]) -> MorphologicalMeasures:
+    # A graph no builder accepts, set on a built core to test the checks.
+    robot = construct_mjspec_from_graph(_core_only())
+    robot.graph = graph
+    return MorphologicalMeasures(robot)
+
+
 def _cross(arm_types: dict[str, tuple[str, str]]) -> nx.DiGraph[int]:
     # A core with a two-module arm on each of the six faces.
     types = {0: "CORE"}
@@ -55,10 +72,6 @@ def _cross(arm_types: dict[str, tuple[str, str]]) -> nx.DiGraph[int]:
         edges.extend([(0, next_id, face), (next_id, next_id + 1, face)])
         next_id += 2
     return _graph(types, edges)
-
-
-def _core_only() -> nx.DiGraph[int]:
-    return _graph({0: "CORE"}, [])
 
 
 def _filled() -> nx.DiGraph[int]:
@@ -80,12 +93,12 @@ def _filled() -> nx.DiGraph[int]:
 
 @pytest.mark.parametrize(
     "graph",
-    [_core_only(), _cross({}), _filled()],
-    ids=["core-only", "cross", "filled"],
+    [_core_only(), _filled()],
+    ids=["core-only", "filled"],
 )
 def test_every_property_can_be_read(graph: nx.DiGraph[int]) -> None:
     """All measures evaluate without error on very different robots."""
-    measures = MorphologicalMeasures(graph)
+    measures = _measure(graph)
     for name in PROPERTIES:
         assert getattr(measures, name) is not None
 
@@ -94,12 +107,12 @@ def test_two_roots_are_rejected() -> None:
     """A graph with two roots has no single core."""
     graph = _graph({0: "CORE", 1: "BRICK"}, [])
     with pytest.raises(ValueError, match="exactly one root"):
-        MorphologicalMeasures(graph)
+        _measure_graph(graph)
 
 
 def test_core_only_has_zero_ratios() -> None:
     """Measures with a zero denominator return 0."""
-    measures = MorphologicalMeasures(_core_only())
+    measures = _measure(_core_only())
     assert measures.filled_core_and_bricks_proportion == pytest.approx(0.0)
     assert measures.limbs == pytest.approx(0.0)
     assert measures.joints == pytest.approx(0.0)
@@ -113,16 +126,15 @@ def test_core_only_has_zero_ratios() -> None:
 def test_unknown_module_type_has_no_allowed_faces() -> None:
     """A module of an unknown type exposes no faces and counts as unfilled."""
     graph = _graph({0: "CORE", 1: "NONE"}, [(0, 1, "FRONT")])
-    measures = MorphologicalMeasures(graph)
+    measures = _measure(graph)
     assert measures.num_bricks == 0
     assert measures.num_active_hinges == 0
 
 
 def test_cross_is_equally_symmetric_in_every_plane() -> None:
     """Identical arms on opposite faces score the same in all three planes."""
-    measures = MorphologicalMeasures(_cross({}))
+    measures = _measure_graph(_cross({}))
     assert measures.num_modules == CROSS_MODULES
-    assert measures.bounding_box_depth == SPAN
     assert measures.xy_symmetry > 0.0
     assert measures.xy_symmetry == pytest.approx(measures.xz_symmetry)
     assert measures.xz_symmetry == pytest.approx(measures.yz_symmetry)
@@ -137,8 +149,8 @@ def test_cross_with_different_arms_is_less_symmetric() -> None:
         "LEFT": ("HINGE", "HINGE"),
         "BACK": ("HINGE", "HINGE"),
     })
-    full = MorphologicalMeasures(_cross({}))
-    measures = MorphologicalMeasures(mixed)
+    full = _measure_graph(_cross({}))
+    measures = _measure_graph(mixed)
     assert measures.xy_symmetry < full.xy_symmetry
     assert measures.xz_symmetry < full.xz_symmetry
     assert measures.yz_symmetry < full.yz_symmetry
@@ -146,7 +158,7 @@ def test_cross_with_different_arms_is_less_symmetric() -> None:
 
 def test_filled_robot_reports_filled_modules() -> None:
     """The core and the first brick have every allowed face used."""
-    measures = MorphologicalMeasures(_filled())
+    measures = _measure(_filled())
     assert measures.core_is_filled
     assert 1 in measures.filled_bricks
     assert measures.num_filled_bricks == len(measures.filled_bricks)
@@ -170,35 +182,31 @@ def test_brick_cluster_ratio_counts_brick_to_brick_edges() -> None:
         [(0, 1, "FRONT"), (1, 2, "FRONT")],
     )
     # Two brick-involved edges (core-brick, brick-brick), one is brick-brick.
-    assert MorphologicalMeasures(cluster).brick_cluster_ratio == (
-        pytest.approx(0.5)
-    )
-    assert MorphologicalMeasures(mixed).brick_cluster_ratio == (
-        pytest.approx(0.0)
-    )
-    assert MorphologicalMeasures(mixed).module_diversity == pytest.approx(1.0)
+    assert _measure(cluster).brick_cluster_ratio == (pytest.approx(0.5))
+    assert _measure_graph(mixed).brick_cluster_ratio == (pytest.approx(0.0))
+    assert _measure_graph(mixed).module_diversity == pytest.approx(1.0)
 
 
-def test_size_is_modules_over_volume() -> None:
-    """Size is the number of modules over the bounding-box volume."""
-    measures = MorphologicalMeasures(_cross({}))
-    assert measures.size == pytest.approx(
-        measures.num_modules / measures.bounding_box_volume
-    )
+def test_size_is_the_coverage() -> None:
+    """Size and coverage are one measure: the share of the box filled."""
+    measures = _measure(_graph({0: "CORE", 1: "BRICK"}, [(0, 1, "FRONT")]))
+    assert measures.size == pytest.approx(measures.coverage)
+    assert 0.0 < measures.coverage < 1.0
 
 
-def test_rotated_modules_are_not_planar() -> None:
-    """A 45 degree rotation leaves the 2D family."""
-    graph = _graph({0: "CORE", 1: "HINGE"}, [(0, 1, "FRONT")])
-    graph.nodes[1]["rotation"] = "DEG_45"
-    assert not MorphologicalMeasures(graph).is_2d
+def test_a_module_on_top_of_the_core_is_not_flat() -> None:
+    """A brick on TOP reaches above the core; one on FRONT does not."""
+    on_top = _graph({0: "CORE", 1: "BRICK"}, [(0, 1, "TOP")])
+    in_front = _graph({0: "CORE", 1: "BRICK"}, [(0, 1, "FRONT")])
+    assert not _measure(on_top).is_2d
+    assert _measure(in_front).is_2d
 
 
 def test_an_edge_with_an_unknown_face_is_rejected() -> None:
     """The error names the edge and the bad face."""
     graph = _graph({0: "CORE", 1: "BRICK"}, [(0, 1, "SIDEWAYS")])
     with pytest.raises(ValueError, match=r"Edge 0 -> 1.*'SIDEWAYS'"):
-        MorphologicalMeasures(graph)
+        _measure_graph(graph)
 
 
 def test_an_edge_without_a_face_is_rejected() -> None:
@@ -209,7 +217,7 @@ def test_an_edge_without_a_face_is_rejected() -> None:
     )
     graph.add_edge(1, 2)
     with pytest.raises(ValueError, match=r"Edge 1 -> 2.*None"):
-        MorphologicalMeasures(graph)
+        _measure_graph(graph)
 
 
 def test_a_module_with_two_parents_is_placed_once() -> None:
@@ -223,7 +231,7 @@ def test_a_module_with_two_parents_is_placed_once() -> None:
             (2, 3, "FRONT"),
         ],
     )
-    assert MorphologicalMeasures(graph).num_modules == FOUR_MODULES
+    assert _measure_graph(graph).num_modules == FOUR_MODULES
 
 
 def test_edges_between_non_bricks_do_not_count_for_clusters() -> None:
@@ -232,9 +240,7 @@ def test_edges_between_non_bricks_do_not_count_for_clusters() -> None:
         {0: "CORE", 1: "HINGE", 2: "HINGE"},
         [(0, 1, "FRONT"), (1, 2, "FRONT")],
     )
-    assert MorphologicalMeasures(graph).brick_cluster_ratio == (
-        pytest.approx(0.0)
-    )
+    assert _measure(graph).brick_cluster_ratio == (pytest.approx(0.0))
 
 
 def test_a_module_with_two_valid_parents_is_placed_once() -> None:
@@ -244,7 +250,7 @@ def test_a_module_with_two_valid_parents_is_placed_once() -> None:
         [(0, 1, "FRONT"), (0, 2, "RIGHT")],
     )
     graph.add_edge(1, 2, face="TOP")
-    measures = MorphologicalMeasures(graph)
+    measures = _measure_graph(graph)
     assert measures.num_modules == THREE_MODULES
 
 
@@ -288,7 +294,7 @@ def test_a_mirror_symmetric_cross_scores_one_in_every_plane(
             edges.append((previous, next_id, face))
             previous = next_id
             next_id += 1
-    measures = MorphologicalMeasures(_graph(types, edges))
+    measures = _measure_graph(_graph(types, edges))
     assert measures.xy_symmetry == pytest.approx(1.0)
     assert measures.xz_symmetry == pytest.approx(1.0)
     assert measures.yz_symmetry == pytest.approx(1.0)
@@ -300,7 +306,7 @@ def test_a_symmetric_line_is_symmetric_across_its_length_only(
 ) -> None:
     """A flat line has everything on the other two planes, which count 0.0."""
     arm = ["BRICK"] * arm_length
-    measures = MorphologicalMeasures(_arms(arm, arm))
+    measures = _measure_graph(_arms(arm, arm))
     assert measures.xz_symmetry == pytest.approx(1.0)
     assert measures.xy_symmetry == pytest.approx(0.0)
     assert measures.yz_symmetry == pytest.approx(0.0)
@@ -308,19 +314,17 @@ def test_a_symmetric_line_is_symmetric_across_its_length_only(
 
 def test_a_mismatch_in_the_outer_layer_lowers_the_score() -> None:
     """The outer pair (brick against hinge) is compared and does not match."""
-    measures = MorphologicalMeasures(
-        _arms(["BRICK", "BRICK"], ["BRICK", "HINGE"])
-    )
+    measures = _measure_graph(_arms(["BRICK", "BRICK"], ["BRICK", "HINGE"]))
     assert measures.xz_symmetry == pytest.approx(0.5)
 
 
 def test_an_arm_without_a_mirror_scores_zero() -> None:
     """Modules on one side only have nothing to match."""
-    measures = MorphologicalMeasures(_arms(["BRICK"] * 3, []))
+    measures = _measure_graph(_arms(["BRICK"] * 3, []))
     assert measures.xz_symmetry == pytest.approx(0.0)
 
 
 def test_a_core_off_the_middle_compares_the_layers_both_sides_reach() -> None:
     """Three modules right, one left: only the first layer has a pair."""
-    measures = MorphologicalMeasures(_arms(["BRICK"] * 3, ["BRICK"]))
+    measures = _measure_graph(_arms(["BRICK"] * 3, ["BRICK"]))
     assert measures.xz_symmetry == pytest.approx(2 / 4)

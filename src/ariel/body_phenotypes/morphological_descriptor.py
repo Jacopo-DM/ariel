@@ -7,16 +7,115 @@ https://github.com/ci-group/revolve2/blob/master/standards/revolve2/standards/mo
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+import numpy as np
+
 from ariel.body_phenotypes.morphological_counts import MorphologicalCounts
+from ariel.body_phenotypes.robogen_lite import IDX_OF_CORE, rest_boxes
+
+if TYPE_CHECKING:
+    from ariel.body_phenotypes.robogen_lite import CoreModule
+
+# Axes of the core's frame: FRONT points along +y, RIGHT along x, TOP along +z
+DEPTH_AXIS = 1
+WIDTH_AXIS = 0
+HEIGHT_AXIS = 2
+FLAT_TOLERANCE = 1e-3  # metres a module may reach past the core and stay flat
 
 
 class MorphologicalMeasures(MorphologicalCounts):  # ruff: ignore[too-many-public-methods]  # a collection of measures, so many properties are expected
-    """Modular robot morphological measures computed from a tree (blueprint).
+    """Morphological measures of a built robot.
 
-    The grid and its helpers are in ``MorphologicalGrid``, the counts in
-    ``MorphologicalCounts``; this class adds the proportions and the
-    single-letter aliases (see those classes for the attributes).
+    The counts come from the graph the robot was built from
+    (``CoreModule.graph``, see ``MorphologicalCounts``); the size measures
+    from its geoms at joint angle zero, in metres, along the core's own
+    axes: depth from FRONT to BACK, width from LEFT to RIGHT, height from
+    TOP to BOTTOM. This class adds the proportions and the single-letter
+    aliases.
+
+    Parameters
+    ----------
+    robot : CoreModule
+        A robot from ``construct_mjspec_from_graph`` or a prebuilt builder.
     """
+
+    def __init__(self, robot: CoreModule) -> None:
+        """Measure ``robot``."""
+        super().__init__(robot)
+        boxes = rest_boxes(robot)
+        centres = boxes.poses[:, :3, 3]
+        reach = np.einsum(
+            "nij,nj->ni", np.abs(boxes.poses[:, :3, :3]), boxes.halves
+        )
+        low, high = centres - reach, centres + reach
+        self.extent = high.max(axis=0) - low.min(axis=0)
+        self.module_volume = float(np.prod(boxes.halves, axis=1).sum() * 8)
+        core = np.array(boxes.owners) == IDX_OF_CORE
+        self.reaches_past_core = bool(
+            high[:, HEIGHT_AXIS].max()
+            > high[core, HEIGHT_AXIS].max() + FLAT_TOLERANCE
+            or low[:, HEIGHT_AXIS].min()
+            < low[core, HEIGHT_AXIS].min() - FLAT_TOLERANCE
+        )
+
+    # ------------------------------------------------------------------
+    # Bounding box, in metres
+    # ------------------------------------------------------------------
+
+    @property
+    def bounding_box_depth(self) -> float:
+        """Extent from FRONT to BACK of the core, in metres.
+
+        Returns
+        -------
+        float
+        """
+        return float(self.extent[DEPTH_AXIS])
+
+    @property
+    def bounding_box_width(self) -> float:
+        """Extent from LEFT to RIGHT of the core, in metres.
+
+        Returns
+        -------
+        float
+        """
+        return float(self.extent[WIDTH_AXIS])
+
+    @property
+    def bounding_box_height(self) -> float:
+        """Extent from TOP to BOTTOM of the core, in metres.
+
+        Returns
+        -------
+        float
+        """
+        return float(self.extent[HEIGHT_AXIS])
+
+    @property
+    def bounding_box_volume(self) -> float:
+        """Depth times width times height, in cubic metres.
+
+        Returns
+        -------
+        float
+        """
+        return (
+            self.bounding_box_depth
+            * self.bounding_box_width
+            * self.bounding_box_height
+        )
+
+    @property
+    def is_2d(self) -> bool:
+        """Whether no module reaches above or below the core.
+
+        Returns
+        -------
+        bool
+        """
+        return not self.reaches_past_core
 
     # ------------------------------------------------------------------
     # Named proportions (intermediate, kept for backwards compatibility)
@@ -55,14 +154,15 @@ class MorphologicalMeasures(MorphologicalCounts):  # ruff: ignore[too-many-publi
 
     @property
     def bounding_box_volume_coverage(self) -> float:
-        """Fraction of the bounding-box volume occupied by modules.
+        """Fraction of the bounding-box volume the modules fill.
 
         Returns
         -------
         float
-            Value in (0, 1].
+            The summed volume of the geoms over ``bounding_box_volume``,
+            in (0, 1].
         """
-        return self.num_modules / self.bounding_box_volume
+        return self.module_volume / self.bounding_box_volume
 
     @property
     def branching(self) -> float:
@@ -179,15 +279,14 @@ class MorphologicalMeasures(MorphologicalCounts):  # ruff: ignore[too-many-publi
 
     @property
     def size(self) -> float:
-        """Size = num_modules / bounding_box_volume.
+        """Size, the same as ``coverage``.
 
         Returns
         -------
         float
             Value in (0, 1].
         """
-        # TODO: verify that bounding_box_volume is the right normaliser here  # ruff: ignore[line-contains-todo, missing-todo-author]
-        return self.num_modules / self.bounding_box_volume
+        return self.coverage
 
     @property
     def brick_cluster_ratio(self) -> float:
@@ -233,7 +332,7 @@ class MorphologicalMeasures(MorphologicalCounts):  # ruff: ignore[too-many-publi
 
     @property
     def C(self) -> float:  # ruff: ignore[invalid-function-name]
-        """Coverage C = num_modules / bounding_box_volume."""
+        """Coverage C = module volume / bounding_box_volume."""
         return self.coverage
 
     @property
@@ -263,4 +362,4 @@ class MorphologicalMeasures(MorphologicalCounts):  # ruff: ignore[too-many-publi
             min(depth, width) / max(depth, width), in (0, 1].
         """
         d, w = self.bounding_box_depth, self.bounding_box_width
-        return min(d, w) / max(d, w) if max(d, w) > 0 else 0.0
+        return min(d, w) / max(d, w)

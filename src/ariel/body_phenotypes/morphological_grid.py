@@ -10,6 +10,8 @@ if TYPE_CHECKING:
     import networkx as nx
     from numpy.typing import NDArray
 
+    from ariel.body_phenotypes.robogen_lite import CoreModule
+
 
 _FACES = ("FRONT", "BACK", "RIGHT", "LEFT", "TOP", "BOTTOM")
 
@@ -37,9 +39,9 @@ class MorphologicalGrid:
 
     Parameters
     ----------
-    robot_graph : nx.DiGraph
-        Directed graph of the robot phenotype.  Nodes require ``'type'`` and
-        ``'rotation'`` attributes; edges require a ``'face'`` attribute.
+    robot : CoreModule
+        A built robot that carries its graph (``CoreModule.graph``): nodes
+        with ``'type'``, edges with ``'face'``.
 
     Attributes
     ----------
@@ -51,9 +53,6 @@ class MorphologicalGrid:
         Padded version of grid centred on the core, used for symmetry checks.
     core_grid_position : NDArray[np.float64]
         Integer (x, y, z) index of the core module inside grid.
-    is_2d : bool
-        ``True`` when every module's rotation is a multiple of 90° in the XY
-        plane (i.e. the robot has no vertical extent beyond its flat layout).
     core_node : Any
         The unique root node of graph (in-degree == 0).
     modules : list
@@ -86,17 +85,23 @@ class MorphologicalGrid:
     Raises
     ------
     ValueError
-        If robot_graph is empty or contains more than one root node.
+        If the robot has no graph, or its graph is empty or has more than
+        one root node.
     """
 
-    def __init__(self, robot_graph: nx.DiGraph[int]) -> None:
-        """Create the measures for `robot_graph`; raise if it is empty.
+    def __init__(self, robot: CoreModule) -> None:
+        """Create the measures for `robot`; raise if its graph is unusable.
 
         Raises
         ------
         ValueError
-            If the robot graph is empty.
+            If the robot has no graph or its graph is empty.
         """
+        if robot.graph is None:
+            msg = "The robot has no graph; build it with a builder of ARIEL."
+            raise ValueError(msg)
+        robot_graph = robot.graph
+        self.robot = robot
         if robot_graph.number_of_nodes() == 0:
             msg = "Cannot analyze empty robot graph"
             raise ValueError(msg)
@@ -112,7 +117,6 @@ class MorphologicalGrid:
         self.graph = robot_graph
         self.grid, self.core_grid_position = self._graph_to_grid(robot_graph)
         self.core_node = self._find_core_node()
-        self.is_2d = self._calculate_is_2d()
         self.modules = list(robot_graph.nodes())
         self.bricks = self._get_nodes_by_type("BRICK")
         self.active_hinges = self._get_nodes_by_type("HINGE")
@@ -149,13 +153,6 @@ class MorphologicalGrid:
             for n in self.graph.nodes()
             if self.graph.nodes[n].get("type") == module_type
         ]
-
-    def _calculate_is_2d(self) -> bool:
-        valid = {"DEG_0", "DEG_90", "DEG_180", "DEG_270"}
-        return all(
-            self.graph.nodes[n].get("rotation", "DEG_0") in valid
-            for n in self.graph.nodes()
-        )
 
     def _get_node_type(self, node: int) -> str:
         return cast("str", self.graph.nodes[node].get("type", "UNKNOWN"))
@@ -304,54 +301,6 @@ class MorphologicalGrid:
 
     def _calculate_yz_symmetry(self) -> float:
         return self._mirror_symmetry(0)
-
-    # ------------------------------------------------------------------
-    # Bounding-box geometry
-    # ------------------------------------------------------------------
-
-    @property
-    def bounding_box_depth(self) -> int:
-        """Extent along the forward/backward (X) axis in module-grid units.
-
-        Returns
-        -------
-        int
-        """
-        return cast("int", self.grid.shape[0])
-
-    @property
-    def bounding_box_width(self) -> int:
-        """Extent along the left/right (Y) axis in module-grid units.
-
-        Returns
-        -------
-        int
-        """
-        return cast("int", self.grid.shape[1])
-
-    @property
-    def bounding_box_height(self) -> int:
-        """Extent along the up/down (Z) axis in module-grid units.
-
-        Returns
-        -------
-        int
-        """
-        return cast("int", self.grid.shape[2])
-
-    @property
-    def bounding_box_volume(self) -> int:
-        """Product of all three bounding-box dimensions (m_area in the paper).
-
-        Returns
-        -------
-        int
-        """
-        return (
-            self.bounding_box_depth
-            * self.bounding_box_width
-            * self.bounding_box_height
-        )
 
     # ------------------------------------------------------------------
     # Raw counts

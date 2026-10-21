@@ -26,6 +26,7 @@ from ariel.body_phenotypes.robogen_lite.overlap import (
     find_overlaps,
     repair_overlaps,
 )
+from ariel.body_phenotypes.robogen_lite.rest_pose import RestBoxes, rest_boxes
 
 __all__ = [
     "ALLOWED_FACES",
@@ -42,7 +43,9 @@ __all__ = [
     "ModuleType",
     "MorphologyDecoderBestFirst",
     "Overlap",
+    "RestBoxes",
     "construct_mjspec_from_graph",
     "find_overlaps",
     "repair_overlaps",
+    "rest_boxes",
 ]
