@@ -1,4 +1,6 @@
-"""Small tree genomes and constants shared by the tree genotype tests."""
+"""Small tree genomes, strategies and constants for the tree genome tests."""
+
+from hypothesis import strategies as st
 
 from ariel.ec.genotypes.tree.tree_genome import (
     TreeEdge,
@@ -80,3 +82,73 @@ def brick_with_two_children() -> TreeGenome:
             TreeEdge(parent=1, child=3, face="LEFT"),
         ],
     )
+
+
+# ---------------------------------------------------------------------------
+# Hypothesis strategies
+# ---------------------------------------------------------------------------
+
+# Real enum member names and junk, so generated dicts reach every check
+NAMES = st.sampled_from([
+    "CORE",
+    "BRICK",
+    "HINGE",
+    "NONE",
+    "DEG_0",
+    "DEG_45",
+    "DEG_90",
+    "FRONT",
+    "BACK",
+    "LEFT",
+    "RIGHT",
+    "TOP",
+    "BOTTOM",
+]) | st.text(max_size=5)
+IDS = st.integers(min_value=-1, max_value=6)
+JSON_VALUES = st.recursive(
+    st.none()
+    | st.booleans()
+    | st.integers()
+    | st.floats(allow_nan=False)
+    | st.text(max_size=5),
+    lambda inner: (
+        st.lists(inner, max_size=3)
+        | st.dictionaries(st.text(max_size=5), inner, max_size=3)
+    ),
+    max_leaves=8,
+)
+RAW_NODES = st.fixed_dictionaries(
+    {"type": NAMES, "rotation": NAMES},
+    optional={"id": IDS, "extra": st.text(max_size=5)},
+)
+RAW_EDGES = st.fixed_dictionaries(
+    {"parent": IDS, "child": IDS, "face": NAMES},
+    optional={"note": st.text(max_size=5)},
+)
+# Dicts shaped like a stored genome, near misses of it, and any JSON object
+GENOME_DICTS: st.SearchStrategy[dict[str, object]] = st.one_of(
+    st.fixed_dictionaries(
+        {},
+        optional={
+            "nodes": st.dictionaries(IDS.map(str), RAW_NODES, max_size=5)
+            | st.lists(RAW_NODES, max_size=5)
+            | JSON_VALUES,
+            "edges": st.lists(RAW_EDGES, max_size=5) | JSON_VALUES,
+        },
+    ),
+    st.dictionaries(st.text(max_size=5), JSON_VALUES, max_size=3),
+)
+GENOMES = st.builds(
+    TreeGenome,
+    nodes=st.dictionaries(
+        st.integers(),
+        st.builds(TreeNode, type=st.text(), rotation=st.text()),
+        max_size=5,
+    ),
+    edges=st.lists(
+        st.builds(
+            TreeEdge, parent=st.integers(), child=st.integers(), face=st.text()
+        ),
+        max_size=5,
+    ),
+)

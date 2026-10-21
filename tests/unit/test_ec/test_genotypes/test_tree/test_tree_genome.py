@@ -6,6 +6,8 @@ from pathlib import Path
 
 import networkx as nx
 import pytest
+from hypothesis import example, given
+from hypothesis import strategies as st
 
 from ariel.ec.genotypes.tree.io import (
     genome_to_networkx_dict,
@@ -16,6 +18,10 @@ from ariel.ec.genotypes.tree.tree_genome import (
     TreeEdge,
     TreeGenome,
     TreeNode,
+)
+from tests.unit.test_ec.test_genotypes.test_tree.trees import (
+    GENOME_DICTS,
+    GENOMES,
 )
 
 NODE_COUNT = 2
@@ -206,3 +212,55 @@ def test_save_genome_writes_a_file_that_load_genome_reads_back(
     save_genome(genome, str(path))
     assert path.is_file()
     assert load_genome(str(path)) == genome
+
+
+# ---------------------------------------------------------------------------
+# Properties
+# ---------------------------------------------------------------------------
+
+VALID_JSON = (
+    '{"nodes": {"0": {"type": "CORE", "rotation": "DEG_0"}, '
+    '"1": {"type": "HINGE", "rotation": "DEG_0"}}, '
+    '"edges": [{"parent": 0, "child": 1, "face": "FRONT"}]}'
+)
+
+
+@given(GENOME_DICTS)
+@example(json.loads(VALID_JSON))
+@example({"nodes": [{"type": "CORE", "rotation": "DEG_0"}]})
+def test_from_dict_boundary(data: dict[str, object]) -> None:
+    """Any dict gives a TreeGenome or raises ValueError, nothing else."""
+    try:
+        genome = TreeGenome.from_dict(data)
+    except ValueError:  # pydantic's ValidationError is a ValueError
+        return
+    assert isinstance(genome, TreeGenome)
+
+
+@given(st.binary())
+@example(VALID_JSON.encode())
+def test_load_genome_boundary(raw: bytes) -> None:
+    """Any file content loads as a TreeGenome or raises ValueError."""
+    with tempfile.TemporaryDirectory() as folder:
+        path = Path(folder) / "genome.json"
+        path.write_bytes(raw)
+        try:
+            genome = load_genome(str(path))
+        except ValueError:  # bad JSON, bad UTF-8 or a bad genome
+            return
+    assert isinstance(genome, TreeGenome)
+
+
+@given(GENOMES)
+def test_dict_round_trip(genome: TreeGenome) -> None:
+    """Rebuilding a genome from its dict gives the same genome."""
+    assert TreeGenome.from_dict(genome.to_dict()) == genome
+
+
+@given(GENOMES)
+def test_json_file_round_trip(genome: TreeGenome) -> None:
+    """Loading a saved genome gives the same genome."""
+    with tempfile.TemporaryDirectory() as folder:
+        path = str(Path(folder) / "genome.json")
+        save_genome(genome, path)
+        assert load_genome(path) == genome
