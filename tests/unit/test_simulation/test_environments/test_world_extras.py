@@ -7,6 +7,7 @@ import inspect
 import random
 import runpy
 from pathlib import Path
+from typing import cast
 
 import mujoco
 import numpy as np
@@ -84,7 +85,7 @@ def test_world_roundtrips_through_its_xml(
     assert (precompiled_dir / f"{built.name}.xml").exists()
     loaded = cls(load_precompiled=True)
     assert loaded.is_precompiled
-    model = loaded.spec.compile()
+    model = cast("mujoco.MjModel", loaded.spec.compile())
     assert model.nbody >= 1
     del built, loaded, model
 
@@ -122,7 +123,7 @@ def test_spawn_with_defaults_adds_a_free_robot() -> None:
     world = SimpleFlatWorld(load_precompiled=False)
     robot = mujoco.MjSpec.from_string(SPHERE_XML)
     world.spawn(robot)
-    model = world.spec.compile()
+    model = cast("mujoco.MjModel", world.spec.compile())
     assert model.njnt == TWO_JOINTS
     del world, robot, model
 
@@ -201,7 +202,7 @@ def test_flat_world_with_target_loads_its_precompiled_xml(
 def test_flat_world_with_target_compiles() -> None:
     """The flat world with a target adds the target body."""
     world = SimpleFlatWorldWithTarget(load_precompiled=False)
-    model = world.spec.compile()
+    model = cast("mujoco.MjModel", world.spec.compile())
     assert model.nbody > 1
     del world, model
 
@@ -221,7 +222,7 @@ def test_compound_world_takes_every_override() -> None:
     )
     assert world.name == "my-compound"
     assert world.dims == HEIGHT_DIMS
-    model = world.spec.compile()
+    model = cast("mujoco.MjModel", world.spec.compile())
     assert model.ngeom >= 1
     del world, model
 
@@ -290,7 +291,7 @@ def test_the_geometry_compile_matches_the_full_compile() -> None:
         robot = construct_mjspec_from_graph(random_tree(12).to_networkx())
         world.spawn(robot.spec, correct_collision_with_floor=False)
         sizes = [(t.width, t.height) for t in world.spec.textures]
-        full = world.spec.compile()
+        full = cast("mujoco.MjModel", world.spec.compile())
         lite = world._compile_for_geometry()
         full_data, lite_data = mujoco.MjData(full), mujoco.MjData(lite)
         mujoco.mj_forward(full, full_data)
@@ -301,7 +302,10 @@ def test_the_geometry_compile_matches_the_full_compile() -> None:
         assert full_data.ncon == lite_data.ncon
         assert np.array_equal(full_data.contact.dist, lite_data.contact.dist)
         assert sizes == [(t.width, t.height) for t in world.spec.textures]
-        assert world.spec.compile().tex_data.size == full.tex_data.size
+        assert (
+            cast("mujoco.MjModel", world.spec.compile()).tex_data.size
+            == full.tex_data.size
+        )
 
 
 def test_the_texture_sizes_come_back_when_the_compile_fails() -> None:

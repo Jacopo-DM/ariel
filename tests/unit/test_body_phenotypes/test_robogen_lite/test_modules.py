@@ -1,5 +1,7 @@
 """Test: initialization of robogen_lite module classes."""
 
+from typing import cast
+
 import mujoco
 import pytest
 
@@ -26,7 +28,7 @@ def test_core_module_initialization() -> None:
 def test_core_module_has_spec() -> None:
     """CoreModule exposes a MjSpec that can be compiled."""
     core = CoreModule(index=IDX_OF_CORE)
-    model = core.spec.compile()
+    model = cast("mujoco.MjModel", core.spec.compile())
     data = mujoco.MjData(model)
     del core, model, data
 
@@ -101,6 +103,6 @@ def test_brick_module_initialization() -> None:
 def test_brick_module_has_spec() -> None:
     """BrickModule exposes a MjSpec that can be compiled."""
     brick = BrickModule(index=2)
-    model = brick.spec.compile()
+    model = cast("mujoco.MjModel", brick.spec.compile())
     data = mujoco.MjData(model)
     del brick, model, data

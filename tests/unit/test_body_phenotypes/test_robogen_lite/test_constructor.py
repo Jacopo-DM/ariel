@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 import mujoco
 import networkx as nx
 import pytest
@@ -80,7 +82,7 @@ def test_core_only_graph_returns_core_module() -> None:
 def test_core_only_graph_compiles() -> None:
     """The spec produced from a core-only graph can be compiled by MuJoCo."""
     core = construct_mjspec_from_graph(_make_core_only_graph())
-    model = core.spec.compile()
+    model = cast("mujoco.MjModel", core.spec.compile())
     data = mujoco.MjData(model)
     del core, model, data
 
@@ -88,7 +90,7 @@ def test_core_only_graph_compiles() -> None:
 def test_core_with_hinge_compiles() -> None:
     """Core + hinge graph produces a compilable MuJoCo spec."""
     core = construct_mjspec_from_graph(_make_core_with_hinge_graph())
-    model = core.spec.compile()
+    model = cast("mujoco.MjModel", core.spec.compile())
     data = mujoco.MjData(model)
     del core, model, data
 
@@ -96,7 +98,7 @@ def test_core_with_hinge_compiles() -> None:
 def test_core_with_brick_compiles() -> None:
     """Core + brick graph produces a compilable MuJoCo spec."""
     core = construct_mjspec_from_graph(_make_core_with_brick_graph())
-    model = core.spec.compile()
+    model = cast("mujoco.MjModel", core.spec.compile())
     data = mujoco.MjData(model)
     del core, model, data
 
@@ -104,7 +106,7 @@ def test_core_with_brick_compiles() -> None:
 def test_core_with_none_module_compiles() -> None:
     """NONE-type nodes are silently skipped; resulting spec still compiles."""
     core = construct_mjspec_from_graph(_make_core_with_none_graph())
-    model = core.spec.compile()
+    model = cast("mujoco.MjModel", core.spec.compile())
     data = mujoco.MjData(model)
     del core, model, data
 

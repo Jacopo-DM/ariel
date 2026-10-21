@@ -1,5 +1,6 @@
 """Test: Controller class initialization and set_control logic."""
 
+from typing import cast
 from unittest.mock import Mock
 
 import mujoco
@@ -35,7 +36,7 @@ def _zero_callback(
 
 def _build_spider_model() -> tuple[mujoco.MjModel, mujoco.MjData]:
     core = spider()
-    model = core.spec.compile()
+    model = cast("mujoco.MjModel", core.spec.compile())
     data = mujoco.MjData(model)
     return model, data
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import random
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -139,7 +139,7 @@ def test_constructor_builds_core_with_children() -> None:
     """The small graph builds a core that compiles."""
     core = constructor.construct_mjspec_from_graph(_small_graph())
     assert isinstance(core, CoreModule)
-    model = core.spec.compile()
+    model = cast("mujoco.MjModel", core.spec.compile())
     data = mujoco.MjData(model)
     mujoco.mj_step(model, data)
     del core, model, data

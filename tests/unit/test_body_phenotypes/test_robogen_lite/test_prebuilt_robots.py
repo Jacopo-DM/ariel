@@ -1,5 +1,7 @@
 """Test: prebuilt robot bodies compile to valid MuJoCo models."""
 
+from typing import cast
+
 import mujoco
 
 from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
@@ -17,7 +19,7 @@ def test_spider_returns_core_module() -> None:
 def test_spider_compiles() -> None:
     """Spider body compiles to a valid MuJoCo model."""
     core = spider()
-    model = core.spec.compile()
+    model = cast("mujoco.MjModel", core.spec.compile())
     data = mujoco.MjData(model)
     mujoco.mj_step(model, data)
     del core, model, data
@@ -33,7 +35,7 @@ def test_gecko_returns_core_module() -> None:
 def test_gecko_compiles() -> None:
     """Gecko body compiles to a valid MuJoCo model."""
     core = gecko()
-    model = core.spec.compile()
+    model = cast("mujoco.MjModel", core.spec.compile())
     data = mujoco.MjData(model)
     mujoco.mj_step(model, data)
     del core, model, data

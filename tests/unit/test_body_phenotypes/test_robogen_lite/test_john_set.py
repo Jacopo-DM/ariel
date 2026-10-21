@@ -2,6 +2,7 @@
 
 import hashlib
 from collections.abc import Callable
+from typing import cast
 
 import mujoco
 import pytest
@@ -31,7 +32,7 @@ def test_body_builds_and_compiles(builder: Callable[[], CoreModule]) -> None:
     """Every body in the set is a CoreModule that compiles and steps."""
     core = builder()
     assert isinstance(core, CoreModule)
-    model = core.spec.compile()
+    model = cast("mujoco.MjModel", core.spec.compile())
     data = mujoco.MjData(model)
     mujoco.mj_step(model, data)
     assert model.nbody > 1

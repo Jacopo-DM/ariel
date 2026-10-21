@@ -1,5 +1,7 @@
 """Test: MuJoCo utility functions."""
 
+from typing import cast
+
 import mujoco
 import numpy as np
 import pytest
@@ -97,6 +99,6 @@ def test_mjspec_deep_copy_is_independent() -> None:
     spec = _simple_spec()
     copy = mjspec_deep_copy(spec)
     # both should compile without error
-    model_orig = spec.compile()
-    model_copy = copy.compile()
+    model_orig = cast("mujoco.MjModel", spec.compile())
+    model_copy = cast("mujoco.MjModel", copy.compile())
     assert model_orig.ngeom == model_copy.ngeom

@@ -25,6 +25,7 @@ import re
 import sys
 import time
 from collections.abc import Callable
+from typing import cast
 
 import mujoco
 import networkx as nx
@@ -133,7 +134,7 @@ def has_overlap(graph: Graph, core: CoreModule) -> bool:
     bool
         True when a distance is more negative than the tolerance of its pair.
     """
-    model = core.spec.compile()
+    model = cast("mujoco.MjModel", core.spec.compile())
     data = mujoco.MjData(model)
     mujoco.mj_forward(model, data)
     sizes = module_sizes(model)

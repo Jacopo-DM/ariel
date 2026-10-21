@@ -2,6 +2,7 @@
 
 # Standard library
 import inspect
+from typing import cast
 
 # Third-party libraries
 import mujoco
@@ -24,7 +25,7 @@ from ariel.simulation.environments import (
 def test_amphitheatre_terrain_world_initialization() -> None:
     """Simply instantiate the AmphitheatreTerrainWorld class."""
     world = AmphitheatreTerrainWorld()
-    model = world.spec.compile()
+    model = cast("mujoco.MjModel", world.spec.compile())
     data = mujoco.MjData(model)
     del model, data, world
 
@@ -32,7 +33,7 @@ def test_amphitheatre_terrain_world_initialization() -> None:
 def test_base_world_initialization() -> None:
     """Simply instantiate the BaseWorld class."""
     world = BaseWorld()  # type: ignore[abstract]  # known bug: BaseWorld and OlympicArena are abstract (PLAN.md)
-    model = world.spec.compile()
+    model = cast("mujoco.MjModel", world.spec.compile())
     data = mujoco.MjData(model)
     del model, data, world
 
@@ -40,7 +41,7 @@ def test_base_world_initialization() -> None:
 def test_compound_world_initialization() -> None:
     """Simply instantiate the CompoundWorld class."""
     world = CompoundWorld()
-    model = world.spec.compile()
+    model = cast("mujoco.MjModel", world.spec.compile())
     data = mujoco.MjData(model)
     del model, data, world
 
@@ -48,7 +49,7 @@ def test_compound_world_initialization() -> None:
 def test_crater_terrain_world_initialization() -> None:
     """Simply instantiate the CraterTerrainWorld class."""
     world = CraterTerrainWorld()
-    model = world.spec.compile()
+    model = cast("mujoco.MjModel", world.spec.compile())
     data = mujoco.MjData(model)
     del model, data, world
 
@@ -56,7 +57,7 @@ def test_crater_terrain_world_initialization() -> None:
 def test_olympic_arena_initialization() -> None:
     """Simply instantiate the OlympicArena class."""
     world = OlympicArena()  # type: ignore[abstract]  # known bug: BaseWorld and OlympicArena are abstract (PLAN.md)
-    model = world.spec.compile()
+    model = cast("mujoco.MjModel", world.spec.compile())
     data = mujoco.MjData(model)
     del model, data, world
 
@@ -64,7 +65,7 @@ def test_olympic_arena_initialization() -> None:
 def test_rugged_terrain_world_initialization() -> None:
     """Simply instantiate the RuggedTerrainWorld class."""
     world = RuggedTerrainWorld()
-    model = world.spec.compile()
+    model = cast("mujoco.MjModel", world.spec.compile())
     data = mujoco.MjData(model)
     del model, data, world
 
@@ -72,7 +73,7 @@ def test_rugged_terrain_world_initialization() -> None:
 def test_rugged_tilted_world_initialization() -> None:
     """Simply instantiate the RuggedTiltedWorld class."""
     world = RuggedTiltedWorld()
-    model = world.spec.compile()
+    model = cast("mujoco.MjModel", world.spec.compile())
     data = mujoco.MjData(model)
     del model, data, world
 
@@ -80,7 +81,7 @@ def test_rugged_tilted_world_initialization() -> None:
 def test_simple_flat_world_initialization() -> None:
     """Simply instantiate the SimpleFlatWorld class."""
     world = SimpleFlatWorld()
-    model = world.spec.compile()
+    model = cast("mujoco.MjModel", world.spec.compile())
     data = mujoco.MjData(model)
     del model, data, world
 
@@ -88,7 +89,7 @@ def test_simple_flat_world_initialization() -> None:
 def test_simple_tilted_world_initialization() -> None:
     """Simply instantiate the SimpleTiltedWorld class."""
     world = SimpleTiltedWorld()
-    model = world.spec.compile()
+    model = cast("mujoco.MjModel", world.spec.compile())
     data = mujoco.MjData(model)
     del model, data, world
 
@@ -125,7 +126,7 @@ def test_instantiation_of_all_environments() -> None:
         )
 
         # Compile the model and create data
-        model = world.spec.compile()
+        model = cast("mujoco.MjModel", world.spec.compile())
         data = mujoco.MjData(model)
 
         # Step the simulation to ensure no errors

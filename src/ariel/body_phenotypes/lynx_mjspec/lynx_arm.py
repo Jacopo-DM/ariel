@@ -195,7 +195,7 @@ if __name__ == "__main__":
     world = TableWorld()
     world.spawn(arm.spec)
 
-    model = world.spec.compile()
+    model = cast("mujoco.MjModel", world.spec.compile())
     data = mujoco.MjData(model)
 
     mujoco.viewer.launch(model, data)

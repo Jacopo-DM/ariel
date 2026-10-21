@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import runpy
 from pathlib import Path
+from typing import cast
 
 import mujoco
 import numpy as np
@@ -32,7 +33,7 @@ def _compiled_arm(config: ArmConfig | None = None) -> mujoco.MjModel:
     arm = LynxArm(config=config)
     world = TableWorld()
     world.spawn(arm.spec)
-    return world.spec.compile()
+    return cast("mujoco.MjModel", world.spec.compile())
 
 
 # --- ArmConfig and LynxArm -------------------------------------------------- #
@@ -103,7 +104,7 @@ def test_main_block_launches_the_viewer(
 def test_table_world_has_a_target_site() -> None:
     """The table world compiles and carries the target site."""
     world = TableWorld()
-    model = world.spec.compile()
+    model = cast("mujoco.MjModel", world.spec.compile())
     assert mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, "target") >= 0
     del model
 

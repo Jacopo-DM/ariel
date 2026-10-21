@@ -4,6 +4,7 @@
 import runpy
 import sys
 from pathlib import Path
+from typing import cast
 
 # Third-party libraries
 import mujoco
@@ -37,7 +38,9 @@ def test_out_writes_a_loadable_mjcf_file(
     target = tmp_path / "world.xml"
     assert main(["--out", str(target)]) == 0
     assert str(target) in capsys.readouterr().out
-    model = mujoco.MjSpec.from_file(str(target)).compile()
+    model = cast(
+        "mujoco.MjModel", mujoco.MjSpec.from_file(str(target)).compile()
+    )
     assert model.opt.timestep == pytest.approx(0.0025)
 
 

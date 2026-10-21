@@ -15,6 +15,8 @@ Todo
 """
 
 # Third-party libraries
+from typing import cast
+
 import mujoco
 import numpy as np
 
@@ -84,7 +86,7 @@ def has_self_collision(
         If the robot specification cannot be compiled by MuJoCo.
     """
     try:
-        model = robot_spec.compile()
+        model = cast("mujoco.MjModel", robot_spec.compile())
         data = mujoco.MjData(model)
         mujoco.mj_forward(model, data)
         return any(

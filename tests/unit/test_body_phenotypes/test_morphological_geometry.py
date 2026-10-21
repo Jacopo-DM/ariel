@@ -6,7 +6,7 @@ from __future__ import annotations
 import itertools
 import random
 from functools import cache
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 # Third-party libraries
 import mujoco
@@ -64,7 +64,7 @@ def _extent(robot: CoreModule) -> NDArray[np.float64]:
     NDArray[np.float64]
         Extent along x, y and z.
     """
-    model = robot.spec.compile()
+    model = cast("mujoco.MjModel", robot.spec.compile())
     data = mujoco.MjData(model)
     mujoco.mj_forward(model, data)
     core = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "core")

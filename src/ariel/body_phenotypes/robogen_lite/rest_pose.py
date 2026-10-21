@@ -12,6 +12,8 @@ Notes
 """
 
 # Third-party libraries
+from typing import cast
+
 import mujoco
 import numpy as np
 from numpy.typing import NDArray
@@ -87,7 +89,7 @@ def rest_boxes(core: CoreModule) -> RestBoxes:
         ),
         key=lambda pair: -len(pair[0]),
     )
-    model = core.spec.compile()
+    model = cast("mujoco.MjModel", core.spec.compile())
     data = mujoco.MjData(model)
     mujoco.mj_forward(model, data)
     if any(kind != mujoco.mjtGeom.mjGEOM_BOX for kind in model.geom_type):

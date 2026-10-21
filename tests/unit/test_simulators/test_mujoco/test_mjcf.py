@@ -1,6 +1,8 @@
 """Tests for the MJCF writer and the difference list."""
 
 # Third-party libraries
+from typing import cast
+
 import astropy.units as u
 import mujoco
 import pytest
@@ -39,7 +41,7 @@ def same(left: Value, right: Value) -> bool:
 def test_the_xml_loads_and_carries_the_seeds() -> None:
     seeds = Seeds()
     spec = mujoco.MjSpec.from_string(generate_xml(seeds))
-    model = spec.compile()
+    model = cast("mujoco.MjModel", spec.compile())
     assert model.opt.timestep == pytest.approx(seeds.timestep)
     assert model.opt.gravity[2] == pytest.approx(-GRAVITY_M_S2)
     assert model.opt.integrator == mujoco.mjtIntegrator.mjINT_IMPLICITFAST

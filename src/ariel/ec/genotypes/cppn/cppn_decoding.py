@@ -1,6 +1,7 @@
 """Decode a CPPN genome into a robot body and simulate it."""
 
 from pathlib import Path
+from typing import cast
 
 import mujoco
 import numpy as np
@@ -38,7 +39,7 @@ def run(robot: CoreModule, *, with_viewer: bool = False) -> None:
     """Spawn `robot` in a flat world and simulate it, optionally in a viewer."""
     world = SimpleFlatWorld()
     world.spawn(robot.spec)
-    model = world.spec.compile()
+    model = cast("mujoco.MjModel", world.spec.compile())
     data = mujoco.MjData(model)
 
     # with (DATA / f"{SCRIPT_NAME}.xml").open("w", encoding="utf-8") as f:

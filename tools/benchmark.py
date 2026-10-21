@@ -98,7 +98,7 @@ def simulate(spec: mujoco.MjSpec, steps: int) -> float:
     """
     world = SimpleFlatWorld(load_precompiled=False)
     world.spawn(spec, position=(0.0, 0.0, SPAWN_HEIGHT))
-    model = world.spec.compile()
+    model = cast("mujoco.MjModel", world.spec.compile())
     data = mujoco.MjData(model)
     start = float(data.qpos[0])
     for _ in range(steps):

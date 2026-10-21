@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 # Third-party libraries
 import mujoco
 import networkx as nx
@@ -24,7 +26,7 @@ def _graph(robot: CoreModule) -> nx.DiGraph[int]:
 
 
 def _geom_names(robot: CoreModule) -> list[str]:
-    model = robot.spec.compile()
+    model = cast("mujoco.MjModel", robot.spec.compile())
     return [
         mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_GEOM, geom) or ""
         for geom in range(model.ngeom)
