@@ -220,6 +220,9 @@ Decisions and research notes of the mujoco-units goal, moved word for word from 
 
 ## Gotchas
 
+- A pull of a commit that untracks files deletes them from the other clone's disk: 3fbe5bc (2026-10-18, stop tracking `.typings/`) removed the old stubs from the Mac clone, and `.typings/` was also gone on Linux by 2026-10-21 (no transcript shows who removed it). Generated, git-ignored folders are per machine; the commands that rebuild them belong in CLAUDE.md (Library stubs).
+- ty and pyright treat a stub folder in `.typings/` as the whole package: stubs for only MuJoCo's compiled core made `mujoco.viewer`, `mujoco.minimize` and the GL backends "unresolved" in the editor (2026-10-21). Generate every submodule (`-p`, not a list of `-m`).
+
 - `EA(restart=path)` copies the alive individuals of the last generation into a **new** database at `db_file_path` (or `config.db_file_path`); it does not append to the source file, so give the restarted run its own path (found 2026-10-19 while writing `ec_engine.ipynb`).
 - nbclient raises `CellExecutionError` before the failing cell's error output is stored, so `tools/run_notebooks.py` finds the failing cell as the last one with an execution count.
 
