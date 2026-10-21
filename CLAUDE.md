@@ -37,7 +37,8 @@ From the repo root. Python 3.12 (`.python-version` 3.12.9), uv 0.13.1.
 | Duplicated code | `npx --yes jscpd@5.4.1 --min-lines 8 --reporters console --output <scratch dir> src` | read-only, 25 ms; needs Node 22 (installed in `/usr/bin`); downloads a 46 MB Rust binary into `~/.npm` the first time; 4.64% of `src` lines on 2026-10-19; not part of any gate |
 | Probe OpenGL backends | `uv run --no-sync python -m ariel.opengl.gl_manager` | writes `mujoco_user_config.json` in the current folder, ~2 s here (2026-10-20: egl and osmesa work, glfw fails, osmesa selected; before, all three failed); rerun after a driver change |
 | Pre-commit (all hooks) | `uv run --no-sync pre-commit run --all-files` | passes; also runs the notebook hooks (`notebooks-commit` on the committed notebooks, `notebooks-push` at push only; install the push hook with `uv run --no-sync pre-commit install --hook-type pre-commit --hook-type pre-push`); first run clones `pre-commit/pre-commit-hooks` into `~/.cache/pre-commit`; the whitespace/EOF hooks edit files, ruff hooks cover `src` and `tests` only; the hooks are installed in this clone since 2026-10-20 (`.git/hooks/` is not in git, so a fresh clone must run the install command), every commit then runs the quick ones and every push the fast notebook set; the notebooks step prints nothing for about 90 s, do not interrupt it |
-| Types (pyright) | `uv run --no-sync pyright src tests` | fails today (185 errors on 2026-10-21), ~15 s, read-only; first run downloads Node into `~/.cache/pyright-python` (229 MB) |
+| MuJoCo stubs | `uv run --no-sync stubgen --inspect-mode --include-private --include-docstring -o .typings -m mujoco -m mujoco._callbacks -m mujoco._constants -m mujoco._enums -m mujoco._errors -m mujoco._functions -m mujoco._render -m mujoco._rollout -m mujoco._simulate -m mujoco._specs -m mujoco._structs -m mujoco.renderer` | mypy's `stubgen`, no extra tool; writes 12 `.pyi` files into `.typings/mujoco/` (~10 s, 2026-10-21, MuJoCo 3.16.0); rerun after a MuJoCo upgrade; `-p mujoco` fails because it imports every submodule, and the GL ones load only on their own platform (`mujoco.cgl` on macOS, `mujoco.egl` on Linux); `mujoco.minimize`, `mujoco.rollout` and `mujoco.viewer` crash stubgen 1.18.2 (`TypeError: str object expected`), so they are left out; with the stubs pyright drops from 185 to 57 errors |
+| Types (pyright) | `uv run --no-sync pyright src tests` | fails today (57 errors on 2026-10-21 with the MuJoCo stubs in `.typings/`, 185 without), ~15 s, read-only; first run downloads Node into `~/.cache/pyright-python` (229 MB) |
 
 Ruff is pinned to 0.17.* and does not fix by default; `ruff check --fix` is opt-in. Pytest with `--cov=ariel` adds ~4 s and writes `.coverage`. Failing results are listed in PLAN.md.
 
@@ -69,7 +70,7 @@ Ruff is pinned to 0.17.* and does not fix by default; `ruff check --fix` is opt-
 |---|---|---|
 | `__data__/` | generated | runs and examples |
 | `.venv/` | generated | `uv venv` / `uv sync` |
-| `.typings/` | generated stubs, 17 MB, git-ignored | mujoco, torch and other stubs kept on disk for pyright; untracked 2026-10-18 because the global gate type-checks every tracked file and they fail mypy |
+| `.typings/` | generated stubs, git-ignored, per machine | MuJoCo stubs for pyright (`stubPath`), made by the "MuJoCo stubs" command; untracked 2026-10-18 because the global gate type-checks every tracked file and they fail mypy; a pull of that commit deleted the old copy (mujoco 3.8.0 and torch, 17 MB) from other clones |
 | `docs/_build/`, `docs/autoapi/`, `docs/apidocs/` | generated | sphinx |
 | `uv.lock` | generated | `uv lock` |
 | `3_spider_vision_new.npy` | binary, stray | tracked at the repo root; origin not recorded |
