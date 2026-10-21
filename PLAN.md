@@ -203,7 +203,6 @@ Risk across Tier 2: medium (fetched content is summarised by a model; I check th
 
 ## Known problems
 
-- Indentation (audit 2026-10-20, check 19 of the Python standard): `src`, `tests` and `tools` are done (71 docstring lines rounded up to the next multiple of 4, whitespace only). 46 lines remain in `examples/` (XML strings, shell usage text and `examples/re_book/*`, other people's code that ruff excludes); the user decides whether to touch them (`grep -rnP '^(    )* {1,3}[^ ]' --include='*.py' examples`).
 
 - The `docs` dependency group probably holds six unused packages (`numpydoc`, `sphinx-autodoc2`, `sphinx-autodoc-typehints`, `shibuya`, `pandoc`, `pypandoc`), see DESIGN.md Decisions, dependency clean-up. Not removed: `sphinx-build -b html docs <dir>` exits 2 here because the system `pandoc` program is not installed (CI installs it with apt), so a removal cannot be verified on this machine.
 

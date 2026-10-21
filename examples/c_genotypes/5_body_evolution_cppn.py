@@ -74,7 +74,7 @@ NUM_CPPN_OUTPUTS = 1 + T + R
 
 # Id manager for mutations
 id_manager = IdManager(node_start=NUM_CPPN_INPUTS + NUM_CPPN_OUTPUTS - 1,
-                       innov_start=(NUM_CPPN_INPUTS * NUM_CPPN_OUTPUTS) - 1)
+                        innov_start=(NUM_CPPN_INPUTS * NUM_CPPN_OUTPUTS) - 1)
 
 # ---------------------------------------------------------------------------
 # Fitness (same weighting as tree example)

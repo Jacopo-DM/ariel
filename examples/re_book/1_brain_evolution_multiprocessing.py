@@ -211,14 +211,14 @@ def analyze_sections(green_mask):
 # ============================================================================ #
 
 def run_vision_simulation(model,
-                          data,
-                          network: Network,
-                          duration: int,
-                          target_position: Optional[np.ndarray] = None,
-                          renderer=None,
-                          cam_name=None,
-                          control_step_freq=50
-                          ):
+                            data,
+                            network: Network,
+                            duration: int,
+                            target_position: Optional[np.ndarray] = None,
+                            renderer=None,
+                            cam_name=None,
+                            control_step_freq=50
+                            ):
     """Custom runner that processes vision."""
 
     # Setup Renderer if not passed (creates a new context)

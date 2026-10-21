@@ -61,7 +61,7 @@ def main() -> None:
     na_cpg_mat = NaCPG(adj_dict)
 
     ctrl = Controller(controller_callback_function=lambda _, d: na_cpg_mat.forward(d.time),
-                      tracker=tracker)
+                        tracker=tracker)
     ctrl.tracker.setup(world.spec, data)
 
     mujoco.set_mjcb_control(ctrl.set_control)

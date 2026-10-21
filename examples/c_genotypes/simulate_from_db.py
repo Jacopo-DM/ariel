@@ -3,8 +3,8 @@
 Example
 -------
 uv run python examples/c_genotypes/simulate_from_db.py \
-  --db-path __data__/2_body_brain_evolution_tree_fast/database.db \
-  --viewer launcher --dur 20
+    --db-path __data__/2_body_brain_evolution_tree_fast/database.db \
+    --viewer launcher --dur 20
 """
 from __future__ import annotations
 

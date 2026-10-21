@@ -3,9 +3,9 @@ Runner: Load and simulate a saved morphology + brain.
 
 Usage:
     uv run runner_best_individual.py \
-      --morphology path/to/best_morphology.json \
-      --brain path/to/best_brain.npy \
-      --duration 10.0
+        --morphology path/to/best_morphology.json \
+        --brain path/to/best_brain.npy \
+        --duration 10.0
 """
 
 # Standard library

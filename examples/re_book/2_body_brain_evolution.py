@@ -3,8 +3,8 @@ Author: A-lamo (Aron Ferencz)
 JOINT-EVOLUTION: JOINT-evolving Body and Brain.
 
 Genotype:
-  - 'morph': CPPN Genotype (Graph) -> Decodes to Body
-  - 'ctrl':  Float Vector (Array)  -> Decodes to CPG Parameters
+    - 'morph': CPPN Genotype (Graph) -> Decodes to Body
+    - 'ctrl':  Float Vector (Array)  -> Decodes to CPG Parameters
 """
 
 # Standard library

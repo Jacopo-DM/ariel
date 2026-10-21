@@ -9,16 +9,16 @@ every generation presents a different layout (no memorised path generalises
 across generations).
 
 Why this matters:
-  In 4_sequential_waypoints.py the waypoints form a fixed triangle.  A
-  network can learn a timed open-loop motor program that traces the shape
-  without ever consulting the camera.  Here the layout changes every
-  generation, so the only consistent signal available is the green marker
-  visible in the robot's camera.  Visual tracking is no longer optional.
+    In 4_sequential_waypoints.py the waypoints form a fixed triangle.  A
+    network can learn a timed open-loop motor program that traces the shape
+    without ever consulting the camera.  Here the layout changes every
+    generation, so the only consistent signal available is the green marker
+    visible in the robot's camera.  Visual tracking is no longer optional.
 
 Fitness function (lower is better, CMA-ES minimises):
 
-  • Incomplete run:  min_distance_to_next − waypoints_reached × 10
-  • Complete run:    −waypoints_reached × 10 − (DURATION − t_done) / DURATION
+    • Incomplete run:  min_distance_to_next − waypoints_reached × 10
+    • Complete run:    −waypoints_reached × 10 − (DURATION − t_done) / DURATION
 
 Same hierarchy as file 4: each waypoint credit (−10) dominates the
 continuous distance term, and the speed bonus (∈ (−1, 0]) breaks ties
@@ -270,8 +270,8 @@ def compute_fitness(
 
     Incomplete: min_dist − waypoints_reached × 10
     Complete:   −waypoints_reached × 10 − (duration − t_done) / duration
-      Speed bonus ∈ (−1, 0]: faster → more negative → strictly better than
-      any incomplete run score.
+        Speed bonus ∈ (−1, 0]: faster → more negative → strictly better than
+        any incomplete run score.
     """
     if waypoints_reached == num_waypoints and completion_time is not None:
         time_bonus = (duration - completion_time) / duration
@@ -568,9 +568,9 @@ def replay_in_viewer(
     Load saved weights and run the best individual in an interactive MuJoCo viewer.
 
     Waypoint resolution order:
-      1. ``waypoints_path`` if explicitly given.
-      2. ``best_seen_waypoints.npy`` in the same directory as the weights file.
-      3. Freshly sampled waypoints using BASE_SEED (fallback).
+        1. ``waypoints_path`` if explicitly given.
+        2. ``best_seen_waypoints.npy`` in the same directory as the weights file.
+        3. Freshly sampled waypoints using BASE_SEED (fallback).
     """
     import mujoco.viewer  # local import, only needed for this path
 

@@ -9,8 +9,8 @@ signal so the network knows how far through the course it is.
 
 Fitness function (lower is better, CMA-ES minimises):
 
-  • Incomplete run:  min_distance_to_next − waypoints_reached × 10
-  • Complete run:    −waypoints_reached × 10 − (DURATION − t_done) / DURATION
+    • Incomplete run:  min_distance_to_next − waypoints_reached × 10
+    • Complete run:    −waypoints_reached × 10 − (DURATION − t_done) / DURATION
 
 The first term creates a strict hierarchy across waypoint counts (each
 waypoint credit = 10, max possible distance ≈ few metres).  The second
@@ -165,7 +165,7 @@ def run_episode(
     Returns:
         waypoints_reached  – int, how many waypoints were touched in order
         min_dist_to_current – float, closest approach to the next un-reached
-                              waypoint (0 if all reached)
+                                waypoint (0 if all reached)
     """
     current_wp_idx = 0
     waypoints_reached = 0
@@ -234,14 +234,14 @@ def compute_fitness(
     Lower is better.
 
     Incomplete run: min_dist − waypoints_reached × 10.
-      Each waypoint credit (−10) dominates the distance term (max ~few m),
-      so the optimiser is never rewarded for camping near one waypoint.
+        Each waypoint credit (−10) dominates the distance term (max ~few m),
+        so the optimiser is never rewarded for camping near one waypoint.
 
     Complete run (all waypoints reached):
-      −waypoints_reached × 10 − (duration − completion_time) / duration
-      The bonus lies in (−1, 0]: faster completion → more negative.
-      This keeps every completed score below any incomplete score while
-      letting CMA-ES distinguish fast solutions from slow ones.
+        −waypoints_reached × 10 − (duration − completion_time) / duration
+        The bonus lies in (−1, 0]: faster completion → more negative.
+        This keeps every completed score below any incomplete score while
+        letting CMA-ES distinguish fast solutions from slow ones.
     """
     if waypoints_reached == NUM_WAYPOINTS and completion_time is not None:
         time_bonus = (duration - completion_time) / duration  # 0..1, higher = faster
