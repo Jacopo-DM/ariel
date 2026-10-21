@@ -32,8 +32,10 @@ from pydantic import BaseModel, ConfigDict
 
 FUNCTIONAL = Path(__file__).resolve().parents[1] / "tests" / "functional"
 TIMEOUT_SECONDS = 600
+# ariel.rendering picks a working backend (probing in the empty folder), as
+# the notebooks do; plain ``import ariel`` only reads a saved choice.
 OPENGL_PROBE = (
-    "import ariel, mujoco; "
+    "import ariel.rendering, mujoco; "
     "model = mujoco.MjModel.from_xml_string('<mujoco/>'); "
     "mujoco.Renderer(model, 8, 8).close()"
 )

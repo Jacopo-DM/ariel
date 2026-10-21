@@ -1,10 +1,13 @@
 """Example usage for cameras inside mujoco simualtions."""
 
 # Standard library
+import time
 from pathlib import Path
 
+# Chooses the OpenGL backend before MuJoCo loads (CLAUDE.md, Things that bite)
+import ariel.rendering  # ruff: ignore[unused-import]  # imported for its side effect
+
 # Third-party libraries
-import time
 import matplotlib.pyplot as plt
 import mujoco
 import numpy as np
