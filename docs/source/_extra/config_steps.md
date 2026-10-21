@@ -49,7 +49,7 @@ git commit -m "Update: config files from template"
 ```bash
 mkdir -p docs/source docs/_build
 uv add --group=docs shibuya myst-parser sphinx_design sphinx-autodoc2
-uv pip compile --group=docs -o docs/requirements.txt
+uv export --only-group docs --no-hashes --no-emit-project --format requirements-txt -o docs/requirements.txt
 touch docs/conf.py
 # <<< FILL `conf.py` WITH CONTENT >>>
 git add docs/conf.py docs/requirements.txt
