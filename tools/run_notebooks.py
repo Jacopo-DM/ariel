@@ -153,6 +153,10 @@ def run_notebook(
             seconds=0.0,
             detail="needs opengl, which does not work on this machine",
         )
+    # Forget the counts of an earlier saved run: failing_cell reads them
+    for cell in notebook.cells:
+        if cell.cell_type == "code":
+            cell.execution_count = None
     start = time.perf_counter()
     status: Status = "PASS"
     detail = ""

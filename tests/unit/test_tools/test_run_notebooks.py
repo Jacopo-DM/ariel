@@ -67,6 +67,21 @@ def test_a_failing_cell_is_named_in_the_detail(tmp_path: Path) -> None:
     assert outcome.detail == "cell 2: ValueError: boom"
 
 
+def test_old_execution_counts_do_not_move_the_failing_cell(
+    tmp_path: Path,
+) -> None:
+    """A notebook saved from an earlier run still names the cell that failed."""
+    script = _load()
+    path = tmp_path / "saved.ipynb"
+    _write(path, "x = 1", "raise ValueError('boom')", "y = 2")
+    notebook = script.read_notebook(path)
+    for number, cell in enumerate(notebook.cells, start=1):
+        cell.execution_count = number
+    script.write_notebook(notebook, path)
+    outcome = script.run_notebook(path, opengl=False)
+    assert outcome.detail == "cell 2: ValueError: boom"
+
+
 def test_a_notebook_that_needs_opengl_is_skipped_without_it(
     tmp_path: Path,
 ) -> None:
