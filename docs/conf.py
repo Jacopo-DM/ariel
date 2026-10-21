@@ -69,7 +69,6 @@ pygments_dark_style = "monokai"  # Furo-specific: dark mode highlight theme
 # --------- AUTOAPI --------- #
 autoapi_add_toctree_entry = True
 autoapi_dirs = ["../src/ariel/"]
-autoapi_template_dir = "_build/autoapi"
 autoapi_options = [
     "members",
     "undoc-members",

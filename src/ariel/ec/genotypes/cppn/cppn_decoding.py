@@ -42,8 +42,6 @@ def run(robot: CoreModule, *, with_viewer: bool = False) -> None:
     model = cast("mujoco.MjModel", world.spec.compile())
     data = mujoco.MjData(model)
 
-    # with (DATA / f"{SCRIPT_NAME}.xml").open("w", encoding="utf-8") as f:
-
     mujoco.mj_resetData(model, data)
     single_frame_renderer(model, data, steps=10)
 
