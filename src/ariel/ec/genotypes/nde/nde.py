@@ -2,7 +2,6 @@
 
 # Standard library
 from collections.abc import Sequence
-from pathlib import Path
 
 # Third-party libraries
 import numpy as np
@@ -24,12 +23,6 @@ from ariel.body_phenotypes import (
 # Warning Control
 # Type Checking
 # Type Aliases
-
-# --- DATA SETUP --- #
-SCRIPT_NAME = __file__.split("/")[-1][:-3]
-CWD = Path.cwd()
-DATA = CWD / "__data__"
-DATA.mkdir(exist_ok=True)
 
 # --- RANDOM GENERATOR SETUP --- #
 SEED = 42

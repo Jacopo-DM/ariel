@@ -5,9 +5,6 @@ References
     [1] https://dl.acm.org/doi/abs/10.1145/3377929.3389972
 """
 
-# Standard library
-from pathlib import Path
-
 # Third-party libraries
 import numpy as np
 import numpy.typing as npt
@@ -16,12 +13,6 @@ from rich.traceback import install
 
 # Type Aliases
 ArrayGenotype = npt.NDArray[np.float64]
-
-# --- DATA SETUP --- #
-SCRIPT_NAME = __file__.split("/")[-1][:-3]
-CWD = Path.cwd()
-DATA = CWD / "__data__"
-DATA.mkdir(exist_ok=True)
 
 # --- RANDOM GENERATOR SETUP --- #
 SEED = 42
