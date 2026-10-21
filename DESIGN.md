@@ -73,6 +73,14 @@ Open ambiguities: (a) the staleness rule above (mujoco version or platform chang
 - Acceptance criteria: the seven in the goal row in PLAN.md.
 - Non-goals: comparability with Miras 2018 or revolve2; measures of a moving robot; new measures; a speed budget (time per body recorded only).
 
+**types-zero** (spec approved by the user 2026-10-21; the goal is in PLAN.md). Measure: `uv run --locked ty check` and `uv run --no-sync pyright src tests tools`, both deterministic (the same count on every run); baseline 2026-10-21 with the four stub sets in `.typings/` (CLAUDE.md, MuJoCo stubs): ty 401, pyright 44, and 52 lines with `# type: ignore[...]  # known bug`.
+- The 52 known-bug lines were read one by one: all are missing or loose types, not behaviour bugs (the constructor's module dict holds `None` but is typed without it; `Blueprint` reads attributes only its subclasses set; `OlympicArena` builds fine at runtime and runs its own `_extend_spec`, only the name differs from the abstract `_expand_spec`; sqlmodel query types; `cv2.VideoWriter` and `torch` stubs). Their fixes are pinned by the existing tests: the full suite, coverage 100% and the golden values stay unchanged. A fix that would change behaviour stops for the user's approval, with a failing test first.
+- Loose generated stubs (`MjSpec.compile()` typed as `object`) get a typed `cast` at the call site; the stubs are never edited. The physical-checks goal later moves the compile casts into its gate.
+- The world classes' `add_geom(**self._floor_kwargs)` dicts (most of the 149 ty findings in `_simple_flat.py`, `_simple_flat_with_target.py`, `_simple_tilted.py`, `_compound_world.py`) become named arguments; the world XML stays byte-identical.
+- Tests that break types on purpose are rewritten without ignores (user's choice): the misuse checks (a read-only field assigned, a misspelt keyword) use `setattr` or `model_validate` on a dict; the 17 tests that reach into private members go through public interfaces; if the coverage of a private helper drops, the task stops and says so.
+- The only ignores allowed are for a genuine checker mistake: `# ty: ignore[rule]  # ty false positive: <why>` or the pyright form, each listed in Gotchas, and their count is reported with the result.
+- Not in scope: behaviour changes, `docs/` and `examples/`, editing generated stubs, making ty or pyright block a hook or CI.
+
 ## Decisions
 
 Stack and architecture as found in the repo. Reasons are not recorded unless stated.
@@ -134,6 +142,8 @@ Decisions and research notes of the mujoco-units goal, moved word for word from 
 
 - geometry-measures (2026-10-20 and 2026-10-21, the user's choices): re-design the shape measures from the built robot in metres instead of patching `MorphologicalGrid`, because the grid gives a 20 cm core and a 5 cm hinge one box each, has no box for a 45 degree roll, keeps one of two modules that land in one box, and placed children by absolute face directions (FRONT always +x), so a limb folded through a hinge landed on the core's cell; ARIEL's numbers need not stay comparable with Miras 2018 / revolve2. Coverage is a volume fill fraction (bounded 0 to 1, so it mixes with the 0-to-1 weights of the fitness sums in the examples). The symmetry tolerance is half the smaller module. The measures take the built robot only, because with `repair_overlaps=True` the body is built from a pruned copy and a graph-based count or a rebuild would measure modules the simulated robot does not have, and an EA then builds each body once.
 
+- types-zero (2026-10-21, the user's choices): pyright and ty both at 0 over their whole scope (notebooks and `tools/` included); casts at the call site for loose stubs; stubs for `astropy.units` and `nevergrad` made with stubgen's `--inspect-mode` (their members exist only at runtime: source-mode stubs lacked `u.m`, `u.kg` and `parameter.Scalar` and raised ty from 402 to 449; inspect mode gives pyright 54 to 44 and ty 402 to 401), while `mujoco` and `quaternion` use source mode (inspect mode imports MuJoCo's GL backends, which load only on their own platform); tests rewritten instead of ignores; types-zero before physical-checks.
+
 ## Rejected approaches
 
 - Keeping `opencv-python` and documenting `sudo apt install libgl1` only: fixes one machine, leaves CI and new users to hit the same error.
@@ -146,6 +156,7 @@ Decisions and research notes of the mujoco-units goal, moved word for word from 
 - Rejected for opencv: the newest `opencv-python-headless` (5.x major) in a no-behaviour-change task; pinned `==4.11.0.86`, the version `opencv-python` had in the lock.
 - `ompl` dependency removed in commit 08f5b10 ("problematic"); no other reason recorded.
 - Rejected for geometry-measures (2026-10-21): patching the grid with relative placement and a rounding rule for 45 degree rolls (boxes of unequal real size stay wrong; the user chose the re-design); computing the geometry from the graph by hand (repeats MuJoCo's chain of transforms, the grid's mistake); `MorphologicalMeasures(graph, robot)` (counts are off when the repair prunes); telling geoms apart by renaming the prebuilt robots' parts (changes names other code may use); modules per cubic metre as coverage (unbounded); "any overlap" as the symmetry tolerance (looser than the user wanted).
+- Rejected for types-zero (2026-10-21): per-import `# pyright: ignore[reportMissingTypeStubs]` for astropy and nevergrad (inspect-mode stubs work); hand-written stubs for them (must grow with every new unit); patching the generated stubs after stubgen (per machine, out of step after an upgrade); reasoned ignores on the tests that break types on purpose (the user chose to rewrite them); a failing test per known-bug line (none changes behaviour).
 
 ## Results
 
