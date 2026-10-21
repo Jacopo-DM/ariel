@@ -12,7 +12,7 @@ from ariel import console
 from ariel.body_phenotypes.robogen_lite.constructor import (
     construct_mjspec_from_graph,
 )
-from ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding import (
+from ariel.body_phenotypes.robogen_lite.decoders import (
     load_graph_from_json,
 )
 from ariel.simulation.controllers.controller import Controller

@@ -15,7 +15,7 @@ from ariel import console
 from ariel.body_phenotypes.robogen_lite.constructor import (
     construct_mjspec_from_graph,
 )
-from ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding import (
+from ariel.body_phenotypes.robogen_lite.decoders import (
     HighProbabilityDecoder,
     save_graph_as_json,
 )
