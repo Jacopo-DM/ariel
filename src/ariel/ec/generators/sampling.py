@@ -1,7 +1,7 @@
 """Generators of integer and float sequences."""
 
 from collections.abc import Sequence
-from typing import cast
+from typing import cast, overload
 
 import numpy as np
 
@@ -18,6 +18,26 @@ from ariel.ec.generators._shared import (
 class IntegersGenerator:
     """Namespace of static methods for generating integer sequences."""
 
+    @overload
+    @staticmethod
+    def integers(  # pragma: no cover  # typing stub, never runs
+        low: int,
+        high: int,
+        size: None,
+        *,
+        endpoint: bool | None = None,
+    ) -> int: ...
+
+    @overload
+    @staticmethod
+    def integers(  # pragma: no cover  # typing stub, never runs
+        low: int,
+        high: int,
+        size: int | Sequence[int] = 1,
+        *,
+        endpoint: bool | None = None,
+    ) -> Integers: ...
+
     @staticmethod
     def integers(
         low: int,
@@ -25,7 +45,7 @@ class IntegersGenerator:
         size: int | Sequence[int] | None = 1,
         *,
         endpoint: bool | None = None,
-    ) -> Integers:
+    ) -> int | Integers:
         """
         Draw random integers from a uniform discrete distribution.
 
@@ -44,14 +64,15 @@ class IntegersGenerator:
 
         Returns
         -------
-        Integers
-            A flat list of sampled integers with length ``size``.
+        int or Integers
+            One integer when ``size`` is ``None``, otherwise a list of
+            sampled integers with length ``size``.
         """
         ep: bool = (
             endpoint if endpoint is not None else settings.integers_endpoint
         )
         return cast(
-            "Integers",
+            "int | Integers",
             rng
             .integers(
                 low=low,
@@ -63,6 +84,30 @@ class IntegersGenerator:
             .tolist(),
         )
 
+    @overload
+    @staticmethod
+    def choice(  # pragma: no cover  # typing stub, never runs
+        value_set: int | Integers,
+        size: None,
+        probabilities: Sequence[float] | None = None,
+        axis: int = 0,
+        *,
+        replace: bool | None = None,
+        shuffle: bool | None = None,
+    ) -> int: ...
+
+    @overload
+    @staticmethod
+    def choice(  # pragma: no cover  # typing stub, never runs
+        value_set: int | Integers,
+        size: int | Sequence[int] = 1,
+        probabilities: Sequence[float] | None = None,
+        axis: int = 0,
+        *,
+        replace: bool | None = None,
+        shuffle: bool | None = None,
+    ) -> Integers: ...
+
     @staticmethod
     def choice(
         value_set: int | Integers,
@@ -72,7 +117,7 @@ class IntegersGenerator:
         *,
         replace: bool | None = None,
         shuffle: bool | None = None,
-    ) -> Integers:
+    ) -> int | Integers:
         """
         Draw a random sample from a given integer set or range.
 
@@ -98,13 +143,14 @@ class IntegersGenerator:
 
         Returns
         -------
-        Integers
-            A list of sampled integers.
+        int or Integers
+            One integer when ``size`` is ``None``, otherwise a list of
+            sampled integers.
         """
         r: bool = replace if replace is not None else settings.choice_replace
         s: bool = shuffle if shuffle is not None else settings.choice_shuffle
         return cast(
-            "Integers",
+            "int | Integers",
             np
             .array(
                 rng.choice(
@@ -144,12 +190,26 @@ class IntegersGenerator:
 class FloatsGenerator:
     """Namespace of static methods for generating float sequences."""
 
+    @overload
+    @staticmethod
+    def uniform(  # pragma: no cover  # typing stub, never runs
+        low: float, high: float, size: None
+    ) -> float: ...
+
+    @overload
+    @staticmethod
+    def uniform(  # pragma: no cover  # typing stub, never runs
+        low: float,
+        high: float,
+        size: int | Sequence[int] = 1,
+    ) -> Floats: ...
+
     @staticmethod
     def uniform(
         low: float,
         high: float,
         size: int | Sequence[int] | None = 1,
-    ) -> Floats:
+    ) -> float | Floats:
         """
         Draw samples from a continuous uniform distribution.
 
@@ -164,20 +224,41 @@ class FloatsGenerator:
 
         Returns
         -------
-        Floats
-            A list of uniformly sampled floats.
+        float or Floats
+            One float when ``size`` is ``None``, otherwise a list of
+            uniformly sampled floats.
         """
         return cast(
-            "Floats",
-            rng.uniform(low=low, high=high, size=size).tolist(),
+            "float | Floats",
+            np.asarray(rng.uniform(low=low, high=high, size=size)).tolist(),
         )
+
+    @overload
+    @staticmethod
+    def normal(  # pragma: no cover  # typing stub, never runs
+        mean: float, std: float, size: None
+    ) -> float: ...
+
+    @overload
+    @staticmethod
+    def normal(  # pragma: no cover  # typing stub, never runs
+        mean: float = 0.0, std: float = 1.0, *, size: None
+    ) -> float: ...
+
+    @overload
+    @staticmethod
+    def normal(  # pragma: no cover  # typing stub, never runs
+        mean: float = 0.0,
+        std: float = 1.0,
+        size: int | Sequence[int] = 1,
+    ) -> Floats: ...
 
     @staticmethod
     def normal(
         mean: float = 0.0,
         std: float = 1.0,
         size: int | Sequence[int] | None = 1,
-    ) -> Floats:
+    ) -> float | Floats:
         """
         Draw samples from a Gaussian (normal) distribution.
 
@@ -192,20 +273,41 @@ class FloatsGenerator:
 
         Returns
         -------
-        Floats
-            A list of normally distributed floats.
+        float or Floats
+            One float when ``size`` is ``None``, otherwise a list of
+            normally distributed floats.
         """
         return cast(
-            "Floats",
-            rng.normal(loc=mean, scale=std, size=size).tolist(),
+            "float | Floats",
+            np.asarray(rng.normal(loc=mean, scale=std, size=size)).tolist(),
         )
+
+    @overload
+    @staticmethod
+    def lognormal(  # pragma: no cover  # typing stub, never runs
+        mean: float, sigma: float, size: None
+    ) -> float: ...
+
+    @overload
+    @staticmethod
+    def lognormal(  # pragma: no cover  # typing stub, never runs
+        mean: float = 0.0, sigma: float = 1.0, *, size: None
+    ) -> float: ...
+
+    @overload
+    @staticmethod
+    def lognormal(  # pragma: no cover  # typing stub, never runs
+        mean: float = 0.0,
+        sigma: float = 1.0,
+        size: int | Sequence[int] = 1,
+    ) -> Floats: ...
 
     @staticmethod
     def lognormal(
         mean: float = 0.0,
         sigma: float = 1.0,
         size: int | Sequence[int] | None = 1,
-    ) -> Floats:
+    ) -> float | Floats:
         """
         Draw samples from a log-normal distribution.
 
@@ -221,13 +323,36 @@ class FloatsGenerator:
 
         Returns
         -------
-        Floats
-            A list of log-normally distributed floats.
+        float or Floats
+            One float when ``size`` is ``None``, otherwise a list of
+            log-normally distributed floats.
         """
         return cast(
-            "Floats",
-            rng.lognormal(mean=mean, sigma=sigma, size=size).tolist(),
+            "float | Floats",
+            np.asarray(
+                rng.lognormal(mean=mean, sigma=sigma, size=size)
+            ).tolist(),
         )
+
+    @overload
+    @staticmethod
+    def choice(  # pragma: no cover  # typing stub, never runs
+        value_set: Floats,
+        size: None,
+        probabilities: Sequence[float] | None = None,
+        *,
+        replace: bool = True,
+    ) -> float: ...
+
+    @overload
+    @staticmethod
+    def choice(  # pragma: no cover  # typing stub, never runs
+        value_set: Floats,
+        size: int | Sequence[int] = 1,
+        probabilities: Sequence[float] | None = None,
+        *,
+        replace: bool = True,
+    ) -> Floats: ...
 
     @staticmethod
     def choice(
@@ -236,7 +361,7 @@ class FloatsGenerator:
         probabilities: Sequence[float] | None = None,
         *,
         replace: bool = True,
-    ) -> Floats:
+    ) -> float | Floats:
         """
         Draw a random sample from a given float sequence.
 
@@ -254,11 +379,12 @@ class FloatsGenerator:
 
         Returns
         -------
-        Floats
-            A list of sampled floats.
+        float or Floats
+            One float when ``size`` is ``None``, otherwise a list of
+            sampled floats.
         """
         return cast(
-            "Floats",
+            "float | Floats",
             np
             .array(
                 rng.choice(
