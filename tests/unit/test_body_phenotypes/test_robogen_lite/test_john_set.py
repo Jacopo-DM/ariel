@@ -12,7 +12,7 @@ from ariel.body_phenotypes.robogen_lite.prebuilt_robots import john_set
 BUILDERS: list[Callable[[], CoreModule]] = [
     john_set.baby_a,
     john_set.baby_b,
-    john_set.gecko,
+    john_set.gecko_small,
     john_set.linkin_modified,
     john_set.snake,
     john_set.turtle,
@@ -44,7 +44,7 @@ def test_body_builds_and_compiles(builder: Callable[[], CoreModule]) -> None:
 XML_HASHES = {
     "baby_a": "072fdd2263904d89",
     "baby_b": "12fc5667a91747c6",
-    "gecko": "04473cf596aec17d",
+    "gecko_small": "04473cf596aec17d",
     "linkin_modified": "832b1960e1c29c3d",
     "snake": "52280e37a134ae8b",
     "turtle": "a4869e5324c55b9f",

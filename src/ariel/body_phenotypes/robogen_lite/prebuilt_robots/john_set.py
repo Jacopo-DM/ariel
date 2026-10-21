@@ -16,7 +16,7 @@ from ariel.body_phenotypes.robogen_lite.prebuilt_robots.john_tables import (
     CENTIPEDE_3,
     CENTIPEDE_4,
     CENTIPEDE_5,
-    GECKO,
+    GECKO_SMALL,
     IGUANA,
     LINKIN_MODIFIED,
     SNAKE,
@@ -50,7 +50,7 @@ def baby_b() -> CoreModule:
     return build(BABY_B)
 
 
-def gecko() -> CoreModule:
+def gecko_small() -> CoreModule:
     """Build a custom robot body made with the 3D editor.
 
     Returns
@@ -58,7 +58,7 @@ def gecko() -> CoreModule:
     CoreModule
         The core module of the finished robot body.
     """
-    return build(GECKO)
+    return build(GECKO_SMALL)
 
 
 def linkin_modified() -> CoreModule:

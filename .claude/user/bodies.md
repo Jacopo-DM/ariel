@@ -9,21 +9,17 @@ Each returns a `CoreModule`; pass `.spec` to `world.spawn(...)`.
 
 | Function | Import |
 |---|---|
-| `body_spider45()` | `from ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider_with_blocks import body_spider45` |
-| `body_spider()` | `…prebuilt_robots.spider_with_blocks import body_spider` |
-| `spider()` | `…prebuilt_robots.spider import spider` |
+| `spider()` | `from ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider import spider` |
 | `gecko()` | `…prebuilt_robots.gecko import gecko` |
-| `random_spider20(seed=1337)` | `…prebuilt_robots.random_20 import random_spider20` |
+| `spider_8()` | `…prebuilt_robots.john_set import spider_8` |
 
-More (snake, turtle, iguana, centipede_3/4/5, spider_8/12/16, …) in
+More (snake, turtle, iguana, gecko_small, centipede_3/4/5, spider_12/16, …) in
 [prebuilt_robots/john_set.py](../../src/ariel/body_phenotypes/robogen_lite/prebuilt_robots/john_set.py).
 
 ```python
-from ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider_with_blocks import (
-    body_spider45,
-)
+from ariel.body_phenotypes.robogen_lite.prebuilt_robots.john_set import spider_8
 
-core = body_spider45()
+core = spider_8()
 world.spawn(core.spec, position=[0, 0, 0.1])  # see simulation.md
 ```
 

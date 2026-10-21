@@ -24,10 +24,9 @@ ever fails, the source moved — check the package `__init__.py`.
 | `VectorDecoder` | `from ariel.body_phenotypes.robogen_lite.decoders.vector_decoding import VectorDecoder` |
 | `construct_mjspec_from_graph` | `from ariel.body_phenotypes.robogen_lite.constructor import construct_mjspec_from_graph` |
 | `NUM_OF_TYPES_OF_MODULES`, `NUM_OF_ROTATIONS` | `from ariel.body_phenotypes.robogen_lite.config import NUM_OF_TYPES_OF_MODULES, NUM_OF_ROTATIONS` |
-| `body_spider45`, `body_spider` | `from ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider_with_blocks import body_spider45` |
+| `spider_8`, `gecko_small` and the other bodies of John's set | `from ariel.body_phenotypes.robogen_lite.prebuilt_robots.john_set import spider_8` |
 | `spider` | `from ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider import spider` |
 | `gecko` | `from ariel.body_phenotypes.robogen_lite.prebuilt_robots.gecko import gecko` |
-| `random_spider20` | `from ariel.body_phenotypes.robogen_lite.prebuilt_robots.random_20 import random_spider20` |
 | `TreeGenome` | `from ariel.ec.genotypes.tree.tree_genome import TreeGenome` |
 | tree operators (`random_tree`, `add_node`, `mutate_hoist`, …) | `from ariel.ec.genotypes.tree import random_tree, add_node` |
 | `NeuralDevelopmentalEncoding` | `from ariel.ec.genotypes.nde.nde import NeuralDevelopmentalEncoding` |

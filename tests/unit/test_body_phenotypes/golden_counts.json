@@ -149,7 +149,7 @@
   "num_single_neighbour_modules": 12,
   "potential_double_neighbour_bricks_and_active_hinges": 33
  },
- "GECKO": {
+ "GECKO_SMALL": {
   "B": 0.0,
   "D": 1.0,
   "E": 0.6363636363636364,

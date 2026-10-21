@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 # Standard library
+import math
 import random
 
 # Third-party libraries
@@ -14,9 +15,7 @@ from ariel.body_phenotypes.robogen_lite.constructor import (
     construct_mjspec_from_graph,
 )
 from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
-from ariel.body_phenotypes.robogen_lite.prebuilt_robots import (
-    spider_with_blocks,
-)
+from ariel.body_phenotypes.robogen_lite.prebuilt_robots import john_set
 from ariel.body_phenotypes.robogen_lite.rest_pose import (
     owner_by_prefix,
     rest_boxes,
@@ -63,7 +62,14 @@ def test_every_module_of_a_random_body_owns_geoms() -> None:
 
 
 def test_poses_are_in_the_core_frame() -> None:
-    plain = rest_boxes(spider_with_blocks.body_spider())
-    turned = rest_boxes(spider_with_blocks.body_spider45())
+    plain = rest_boxes(john_set.spider_8())
+    turned_core = john_set.spider_8()
+    turned_core.spec.body("core").quat = (
+        math.cos(math.pi / 8),
+        0,
+        0,
+        math.sin(math.pi / 8),
+    )
+    turned = rest_boxes(turned_core)
     assert plain.owners == turned.owners
     np.testing.assert_allclose(turned.poses, plain.poses, atol=1e-9)

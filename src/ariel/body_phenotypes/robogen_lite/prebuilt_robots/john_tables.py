@@ -50,7 +50,7 @@ BABY_B = (
 )
 
 
-GECKO = (
+GECKO_SMALL = (
     hinge(4, "core", ModuleFaces.FRONT),
     brick(6, "hinge_0", ModuleFaces.FRONT),
     hinge(44, "brick_0", ModuleFaces.FRONT),

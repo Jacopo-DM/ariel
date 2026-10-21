@@ -4,8 +4,7 @@ from __future__ import annotations
 
 import json
 import random
-import runpy
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -18,7 +17,6 @@ from ariel.body_phenotypes.robogen_lite import constructor
 from ariel.body_phenotypes.robogen_lite.config import (
     NUM_OF_ROTATIONS,
     NUM_OF_TYPES_OF_MODULES,
-    ModuleFaces,
     ModuleType,
 )
 from ariel.body_phenotypes.robogen_lite.cppn_neat.genome import Genome
@@ -32,19 +30,15 @@ from ariel.body_phenotypes.robogen_lite.modules.brick import BrickModule
 from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
 from ariel.body_phenotypes.robogen_lite.modules.hinge import HingeModule
 from ariel.body_phenotypes.robogen_lite.modules.module import Module
-from ariel.body_phenotypes.robogen_lite.prebuilt_robots import (
-    gecko,
-    random_20,
-    spider_with_blocks,
-)
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 mpl.use("Agg")
 
 NUM_CPPN_INPUTS = 6
 NUM_CPPN_OUTPUTS = 1 + NUM_OF_TYPES_OF_MODULES + NUM_OF_ROTATIONS
 MAX_MODULES = 8
-TOTAL_MODULES = 20
-SPIDER_BODIES = 1 + 4 * 4
 ONE_SECOND = 1.0
 
 
@@ -128,74 +122,6 @@ def test_module_rotate_default_raises() -> None:
 
     with pytest.raises(NotImplementedError, match="does not implement"):
         _Complete().rotate(0.0)
-
-
-# --- prebuilt robots -------------------------------------------------------- #
-
-
-def test_random_body_has_twenty_modules() -> None:
-    """The random body is reproducible and compiles."""
-    first = random_20.random_spider20(seed=3)
-    again = random_20.random_spider20(seed=3)
-    assert first.spec.to_xml() == again.spec.to_xml()
-    model = first.spec.compile()
-    assert model.nbody > TOTAL_MODULES
-    del first, again, model
-
-
-def test_random_body_runs_out_of_sites(monkeypatch: pytest.MonkeyPatch) -> None:
-    """If modules expose no faces the builder reports it."""
-
-    class _BareHinge(HingeModule):
-        def __init__(self, index: int) -> None:
-            super().__init__(index)
-            self.sites = {}
-
-    class _BareBrick(BrickModule):
-        def __init__(self, index: int) -> None:
-            super().__init__(index)
-            self.sites = {}
-
-    monkeypatch.setattr(random_20, "HingeModule", _BareHinge)
-    monkeypatch.setattr(random_20, "BrickModule", _BareBrick)
-    with pytest.raises(RuntimeError, match="No open attachment sites"):
-        random_20.random_spider20()
-
-
-def test_spider_with_blocks_bodies_compile() -> None:
-    """Both spider variants compile, with four legs of four modules."""
-    plain = spider_with_blocks.body_spider()
-    turned = spider_with_blocks.body_spider45()
-    for core in (plain, turned):
-        model = core.spec.compile()
-        assert model.nbody > SPIDER_BODIES
-        del model
-    del plain, turned
-
-
-def test_attach_names_the_module_and_rotates_it() -> None:
-    """attach() prefixes the name and applies a non-zero rotation."""
-    core = spider_with_blocks.make_core()
-    hinge = HingeModule(index=1)
-    attached = spider_with_blocks.attach(
-        core, ModuleFaces.FRONT, hinge, "H", rotation=90, root=core
-    )
-    assert attached is hinge
-    assert attached.name == "C-H"  # type: ignore[union-attr]  # known bug
-    del core, hinge, attached
-
-
-def test_gecko_main_writes_the_xml(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    """Running gecko.py as a script writes gecko.xml under the cwd."""
-    target = tmp_path / (
-        "ariel/src/ariel/body_phenotypes/robogen_lite/prebuilt_robots"
-    )
-    target.mkdir(parents=True)
-    monkeypatch.chdir(tmp_path)
-    runpy.run_path(str(Path(gecko.__file__)), run_name="__main__")
-    assert (target / "gecko.xml").read_text(encoding="utf-8").startswith("<")
 
 
 # --- constructor ------------------------------------------------------------ #

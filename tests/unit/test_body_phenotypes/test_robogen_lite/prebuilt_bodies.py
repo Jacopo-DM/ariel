@@ -9,9 +9,7 @@ from typing import TYPE_CHECKING
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots import (
     gecko,
     john_set,
-    random_20,
     spider,
-    spider_with_blocks,
 )
 
 if TYPE_CHECKING:
@@ -22,7 +20,7 @@ if TYPE_CHECKING:
 JOHN = (
     "baby_a",
     "baby_b",
-    "gecko",
+    "gecko_small",
     "linkin_modified",
     "snake",
     "turtle",
@@ -38,7 +36,4 @@ PREBUILT: dict[str, Callable[[], CoreModule]] = {
     **{f"john_set.{name}": getattr(john_set, name) for name in JOHN},
     "gecko": gecko.gecko,
     "spider": spider.spider,
-    "random_spider20": random_20.random_spider20,
-    "body_spider": spider_with_blocks.body_spider,
-    "body_spider45": spider_with_blocks.body_spider45,
 }

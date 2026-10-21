@@ -43,7 +43,7 @@ TABLES = (
     "CENTIPEDE_3",
     "CENTIPEDE_4",
     "CENTIPEDE_5",
-    "GECKO",
+    "GECKO_SMALL",
     "IGUANA",
     "LINKIN_MODIFIED",
     "SNAKE",

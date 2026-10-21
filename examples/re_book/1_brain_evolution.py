@@ -1,5 +1,6 @@
 # Standard libraries
 import gc
+import math
 import os
 import random
 import time
@@ -38,9 +39,7 @@ from evotorch.neuroevolution import NEProblem
 from torch import nn
 from torch.nn import Tanh
 
-from ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider_with_blocks import (
-    body_spider45,
-)
+from ariel.body_phenotypes.robogen_lite.prebuilt_robots.john_set import spider_8
 from ariel.simulation.controllers.utils.data_get import (
     get_state_from_data as get_robot_state,
 )
@@ -496,7 +495,14 @@ def main():
     )
 
     # Spawn Spider
-    spider_core = body_spider45()
+    spider_core = spider_8()
+    # Turned 45 degrees about the vertical axis
+    spider_core.spec.body("core").quat = (
+        math.cos(math.pi / 8),
+        0,
+        0,
+        math.sin(math.pi / 8),
+    )
     world.spawn(spider_core.spec, position=[0, 0, 0.1])
 
     model = world.spec.compile()

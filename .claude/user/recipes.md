@@ -14,13 +14,11 @@ Source: [examples/a_mujoco/0_mujoco_launcher.py](../../examples/a_mujoco/0_mujoc
 import mujoco
 from mujoco import viewer
 from ariel.simulation.environments import SimpleFlatWorld
-from ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider_with_blocks import (
-    body_spider45,
-)
+from ariel.body_phenotypes.robogen_lite.prebuilt_robots.john_set import spider_8
 
 mujoco.set_mjcb_control(None)
 world = SimpleFlatWorld()
-world.spawn(body_spider45().spec, position=[0, 0, 0.1])
+world.spawn(spider_8().spec, position=[0, 0, 0.1])
 model = world.spec.compile()
 data = mujoco.MjData(model)
 viewer.launch(model=model, data=data)  # interactive

@@ -293,7 +293,7 @@ def evolution() -> None:
 
 def simulation() -> None:
     """Simulate one prebuilt robot for ``SIM_STEPS`` steps."""
-    simulate(john_set.gecko().spec, SIM_STEPS)
+    simulate(john_set.gecko_small().spec, SIM_STEPS)
 
 
 def bodies() -> None:
