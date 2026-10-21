@@ -6,7 +6,7 @@ import numpy as np
 
 from ariel.ec.generators._shared import (
     Integers,
-    _rng,
+    rng,
 )
 
 if TYPE_CHECKING:
@@ -51,13 +51,13 @@ class IntegerMutator:
         """
         arr: NDArray[np.int_] = np.asarray(individual, dtype=np.int_)
         shape = arr.shape
-        replacement = _rng.integers(
+        replacement = rng.integers(
             low=low,
             high=high,
             size=shape,
             endpoint=True,
         )
-        mask: NDArray[np.bool_] = _rng.random(shape) < mutation_probability
+        mask: NDArray[np.bool_] = rng.random(shape) < mutation_probability
         return cast(
             "Integers",
             np.where(mask, replacement, arr).astype(int).tolist(),
@@ -92,9 +92,9 @@ class IntegerMutator:
         """
         arr: NDArray[np.int_] = np.array(individual, dtype=np.int_)
         shape = arr.shape
-        step = _rng.integers(low=1, high=span, size=shape, endpoint=True)
-        sign: NDArray[np.int_] = _rng.choice(np.array([-1, 1]), size=shape)
-        gate: NDArray[np.int_] = _rng.choice(
+        step = rng.integers(low=1, high=span, size=shape, endpoint=True)
+        sign: NDArray[np.int_] = rng.choice(np.array([-1, 1]), size=shape)
+        gate: NDArray[np.int_] = rng.choice(
             np.array([1, 0]),
             size=shape,
             p=[mutation_probability, 1.0 - mutation_probability],
@@ -128,8 +128,8 @@ class IntegerMutator:
         arr: list[int] = list(individual)
         n: int = len(arr)
         for idx in range(n):
-            if _rng.random() < mutation_probability:
-                jdx: int = int(_rng.integers(0, n))
+            if rng.random() < mutation_probability:
+                jdx: int = int(rng.integers(0, n))
                 arr[idx], arr[jdx] = arr[jdx], arr[idx]
         return arr
 
@@ -157,14 +157,14 @@ class IntegerMutator:
             A new genotype with the selected segment reversed, or an
             unchanged copy if mutation did not occur.
         """
-        if _rng.random() >= mutation_probability:
+        if rng.random() >= mutation_probability:
             return list(individual)
         arr: list[int] = list(individual)
         n: int = len(arr)
         lo, hi = sorted(
             cast(
                 "list[int]",
-                _rng.choice(np.arange(n + 1), size=2, replace=False).tolist(),
+                rng.choice(np.arange(n + 1), size=2, replace=False).tolist(),
             ),
         )
         arr[lo:hi] = arr[lo:hi][::-1]
@@ -194,23 +194,23 @@ class IntegerMutator:
             A new genotype with the selected segment scrambled, or an
             unchanged copy if mutation did not occur.
         """
-        if _rng.random() >= mutation_probability:
+        if rng.random() >= mutation_probability:
             return list(individual)
         arr: list[int] = list(individual)
         n: int = len(arr)
         lo, hi = sorted(
             cast(
                 "list[int]",
-                _rng.choice(np.arange(n + 1), size=2, replace=False).tolist(),
+                rng.choice(np.arange(n + 1), size=2, replace=False).tolist(),
             ),
         )
         segment: list[int] = arr[lo:hi]
-        _rng.shuffle(
+        rng.shuffle(
             np.array(segment)
         )  # shuffle produces NDArray; re-assign below
         shuffled: list[int] = cast(
             "list[int]",
-            _rng.permutation(segment).tolist(),
+            rng.permutation(segment).tolist(),
         )
         arr[lo:hi] = shuffled
         return arr

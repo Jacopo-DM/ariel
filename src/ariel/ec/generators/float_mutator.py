@@ -7,7 +7,7 @@ import numpy as np
 from ariel.ec.generators._shared import (
     UNIFORM_MEDIAN,
     Floats,
-    _rng,
+    rng,
 )
 
 if TYPE_CHECKING:
@@ -57,8 +57,8 @@ class FloatMutator:
         """
         arr: NDArray[np.float64] = np.array(individual, dtype=np.float64)
         shape = arr.shape
-        noise: NDArray[np.float64] = _rng.normal(loc=0.0, scale=std, size=shape)
-        mask: NDArray[np.bool_] = _rng.random(shape) < mutation_probability
+        noise: NDArray[np.float64] = rng.normal(loc=0.0, scale=std, size=shape)
+        mask: NDArray[np.bool_] = rng.random(shape) < mutation_probability
         result: NDArray[np.float64] = np.where(mask, arr + noise, arr)
         if lower_bound is not None:
             result = np.maximum(result, lower_bound)
@@ -97,10 +97,10 @@ class FloatMutator:
         """
         arr: NDArray[np.float64] = np.array(individual, dtype=np.float64)
         shape = arr.shape
-        replacement: NDArray[np.float64] = _rng.uniform(
+        replacement: NDArray[np.float64] = rng.uniform(
             low=low, high=high, size=shape
         )
-        mask: NDArray[np.bool_] = _rng.random(shape) < mutation_probability
+        mask: NDArray[np.bool_] = rng.random(shape) < mutation_probability
         return cast("Floats", np.where(mask, replacement, arr).tolist())
 
     @staticmethod
@@ -135,11 +135,11 @@ class FloatMutator:
         """
         arr: NDArray[np.float64] = np.array(individual, dtype=np.float64)
         shape = arr.shape
-        boundary_vals: NDArray[np.float64] = _rng.choice(
+        boundary_vals: NDArray[np.float64] = rng.choice(
             np.array([low, high]),
             size=shape,
         ).astype(np.float64)
-        mask: NDArray[np.bool_] = _rng.random(shape) < mutation_probability
+        mask: NDArray[np.bool_] = rng.random(shape) < mutation_probability
         return cast("Floats", np.where(mask, boundary_vals, arr).tolist())
 
     @staticmethod
@@ -179,8 +179,8 @@ class FloatMutator:
             ``[low, high]``.
         """
         arr: NDArray[np.float64] = np.array(individual, dtype=np.float64)
-        mask: NDArray[np.bool_] = _rng.random(arr.shape) < mutation_probability
-        u: NDArray[np.float64] = _rng.random(arr.shape)
+        mask: NDArray[np.bool_] = rng.random(arr.shape) < mutation_probability
+        u: NDArray[np.float64] = rng.random(arr.shape)
         eta: float = distribution_index
 
         delta_low: NDArray[np.float64] = (arr - low) / (high - low)
@@ -232,8 +232,8 @@ class FloatMutator:
         arr: list[float] = list(individual)
         n: int = len(arr)
         for idx in range(n):
-            if _rng.random() < mutation_probability:
-                jdx: int = int(_rng.integers(0, n))
+            if rng.random() < mutation_probability:
+                jdx: int = int(rng.integers(0, n))
                 arr[idx], arr[jdx] = arr[jdx], arr[idx]
         return arr
 
@@ -261,14 +261,14 @@ class FloatMutator:
             A new genotype with the selected segment reversed, or an
             unchanged copy if mutation did not occur.
         """
-        if _rng.random() >= mutation_probability:
+        if rng.random() >= mutation_probability:
             return list(individual)
         arr: list[float] = list(individual)
         n: int = len(arr)
         lo, hi = sorted(
             cast(
                 "list[int]",
-                _rng.choice(
+                rng.choice(
                     np.arange(n + 1),
                     size=2,
                     replace=False,

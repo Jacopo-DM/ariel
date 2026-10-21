@@ -6,7 +6,7 @@ from typing import cast
 import numpy as np
 from numpy.typing import NDArray
 
-from ariel.ec.generators._shared import _rng
+from ariel.ec.generators._shared import rng
 
 from .individual import JSONIterable
 
@@ -128,7 +128,7 @@ class Crossover:
             right segment from ``parent_i``.
         """
         shape, flat_i, flat_j = _load(parent_i, parent_j)
-        point: int = int(_rng.integers(1, len(flat_i)))
+        point: int = int(rng.integers(1, len(flat_i)))
         c1, c2 = flat_i.copy(), flat_j.copy()
         c1[point:] = flat_j[point:]
         c2[point:] = flat_i[point:]
@@ -181,7 +181,7 @@ class Crossover:
                 msg,
             )
 
-        raw: NDArray[np.intp] = _rng.choice(
+        raw: NDArray[np.intp] = rng.choice(
             np.arange(1, length, dtype=np.intp),
             size=n,
             replace=False,
@@ -242,7 +242,7 @@ class Crossover:
             raise ValueError(msg)
 
         shape, flat_i, flat_j = _load(parent_i, parent_j)
-        mask: NDArray[np.bool_] = _rng.random(len(flat_i)) < swap_probability
+        mask: NDArray[np.bool_] = rng.random(len(flat_i)) < swap_probability
 
         c1, c2 = flat_i.copy(), flat_j.copy()
         c1[mask] = flat_j[mask]
@@ -304,7 +304,7 @@ class Crossover:
         cuts: list[int] = sorted(
             cast(
                 "list[int]",
-                _rng.choice(
+                rng.choice(
                     np.arange(n + 1, dtype=np.intp),
                     size=2,
                     replace=False,

@@ -8,8 +8,8 @@ import numpy as np
 from ariel.ec.generators._shared import (
     Floats,
     Integers,
-    _rng,
-    _settings,
+    rng,
+    settings,
 )
 
 # -- Integer generator ---------------------------------------------------------
@@ -40,7 +40,7 @@ class IntegersGenerator:
             Output shape. Default is ``1``.
         endpoint : bool or None, optional
             Whether ``high`` is included in the range. Falls back to
-            ``_settings.integers_endpoint`` when ``None``.
+            ``settings.integers_endpoint`` when ``None``.
 
         Returns
         -------
@@ -48,11 +48,11 @@ class IntegersGenerator:
             A flat list of sampled integers with length ``size``.
         """
         ep: bool = (
-            endpoint if endpoint is not None else _settings.integers_endpoint
+            endpoint if endpoint is not None else settings.integers_endpoint
         )
         return cast(
             "Integers",
-            _rng
+            rng
             .integers(
                 low=low,
                 high=high,
@@ -91,23 +91,23 @@ class IntegersGenerator:
             multi-dimensional. Default is ``0``.
         replace : bool or None, optional
             Whether to sample with replacement. Falls back to
-            ``_settings.choice_replace`` when ``None``.
+            ``settings.choice_replace`` when ``None``.
         shuffle : bool or None, optional
             Whether to shuffle the output. Falls back to
-            ``_settings.choice_shuffle`` when ``None``.
+            ``settings.choice_shuffle`` when ``None``.
 
         Returns
         -------
         Integers
             A list of sampled integers.
         """
-        r: bool = replace if replace is not None else _settings.choice_replace
-        s: bool = shuffle if shuffle is not None else _settings.choice_shuffle
+        r: bool = replace if replace is not None else settings.choice_replace
+        s: bool = shuffle if shuffle is not None else settings.choice_shuffle
         return cast(
             "Integers",
             np
             .array(
-                _rng.choice(
+                rng.choice(
                     a=value_set,
                     size=size,
                     replace=r,
@@ -135,7 +135,7 @@ class IntegersGenerator:
         list[int]
             A randomly ordered list of integers from ``0`` to ``n - 1``.
         """
-        return cast("list[int]", _rng.permutation(n).tolist())
+        return cast("list[int]", rng.permutation(n).tolist())
 
 
 # -- Float generator -----------------------------------------------------------
@@ -169,7 +169,7 @@ class FloatsGenerator:
         """
         return cast(
             "Floats",
-            _rng.uniform(low=low, high=high, size=size).tolist(),
+            rng.uniform(low=low, high=high, size=size).tolist(),
         )
 
     @staticmethod
@@ -197,7 +197,7 @@ class FloatsGenerator:
         """
         return cast(
             "Floats",
-            _rng.normal(loc=mean, scale=std, size=size).tolist(),
+            rng.normal(loc=mean, scale=std, size=size).tolist(),
         )
 
     @staticmethod
@@ -226,7 +226,7 @@ class FloatsGenerator:
         """
         return cast(
             "Floats",
-            _rng.lognormal(mean=mean, sigma=sigma, size=size).tolist(),
+            rng.lognormal(mean=mean, sigma=sigma, size=size).tolist(),
         )
 
     @staticmethod
@@ -261,7 +261,7 @@ class FloatsGenerator:
             "Floats",
             np
             .array(
-                _rng.choice(
+                rng.choice(
                     a=np.array(value_set),
                     size=size,
                     replace=replace,

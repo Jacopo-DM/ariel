@@ -2,7 +2,7 @@
 
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Literal
+from typing import Literal, cast
 
 from rich.console import Console
 from rich.progress import (
@@ -124,12 +124,17 @@ class EA:
             source_engine = create_engine(f"sqlite:///{source_db}")
             with Session(source_engine) as session:
                 if restart_gen is None:
-                    restart_gen = session.exec(
-                        select(func.max(Individual.time_of_death))
-                    ).one()
-                    if restart_gen is None:
-                        msg = "Source database contains no individuals."  # type: ignore[unreachable]  # known bug
+                    # MAX over no rows is NULL, which the column type hides
+                    latest = cast(
+                        "int | None",
+                        session.exec(
+                            select(func.max(Individual.time_of_death))
+                        ).one(),
+                    )
+                    if latest is None:
+                        msg = "Source database contains no individuals."
                         raise ValueError(msg)
+                    restart_gen = latest
 
                 rows = list(
                     session.exec(
@@ -254,11 +259,10 @@ class EA:
                 Individual.requires_eval == requires_eval,
             )
 
-        match sort:
-            case "desc":
-                statement = statement.order_by(col(Individual.fitness_).desc())
-            case "asc":
-                statement = statement.order_by(col(Individual.fitness_).asc())
+        if sort == "desc":
+            statement = statement.order_by(col(Individual.fitness_).desc())
+        elif sort == "asc":
+            statement = statement.order_by(col(Individual.fitness_).asc())
 
         with Session(self.engine) as session:
             return Population(list(session.exec(statement).all()))
@@ -361,7 +365,9 @@ class EA:
         self.current_generation += 1
         self.fetch_population()
         for op in self.operations:
-            self.population = op(self.population)  # type: ignore[assignment]  # known bug
+            # An operation run on a Population returns one; EAOperation
+            # checks that at run time
+            self.population = cast("Population", op(self.population))
         self._commit()
 
     def run(self) -> None:

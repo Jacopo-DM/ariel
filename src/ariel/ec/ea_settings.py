@@ -61,7 +61,7 @@ class EASettings(BaseSettings):
     db_file_name: str = "database.db"
     db_handling: DBHandlingMode = "delete"
 
-    @computed_field  # type: ignore[prop-decorator]  # known bug
+    @computed_field  # type: ignore[prop-decorator]  # mypy cannot type a decorated property; pydantic documents this ignore
     @property
     def db_file_path(self) -> Path:
         """Absolute path to the SQLite database file.

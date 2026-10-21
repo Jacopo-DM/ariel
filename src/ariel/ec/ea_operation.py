@@ -1,8 +1,7 @@
 """Operation protocol and the EAOperation step wrapper."""
 
 import inspect
-from collections.abc import Callable
-from typing import Concatenate, ParamSpec, Protocol
+from typing import ParamSpec, Protocol, cast
 
 from ariel.ec.population import Population
 
@@ -20,10 +19,29 @@ class Operation(Protocol):
 
     name: str
 
-    def __call__(
+    def __call__(  # pragma: no cover  # typing stub only
         self, *args: object, **kwargs: object
     ) -> "Population | Operation":
         """Run on a population, or bind configuration arguments."""
+        ...
+
+
+class _PipelineFunction[**Q](Protocol):
+    """A named function that takes a Population first and returns one."""
+
+    __name__: str
+
+    def __call__(  # pragma: no cover  # typing stub only
+        self, population: Population, /, *args: Q.args, **kwargs: Q.kwargs
+    ) -> Population: ...
+
+
+class _Factory[**Q](Protocol):
+    """EAOperation's constructor, with the bound arguments left unchecked."""
+
+    def __call__(  # pragma: no cover  # typing stub only
+        self, func: _PipelineFunction[Q], /, *args: object, **kwargs: object
+    ) -> "EAOperation[Q]": ...
 
 
 class EAOperation[**P]:
@@ -37,7 +55,7 @@ class EAOperation[**P]:
 
     Parameters
     ----------
-    func : Callable[Concatenate[Population, P], Population]
+    func : _PipelineFunction[P]
         The pipeline function to wrap. Its first argument must be annotated
         as ``Population`` and its return type must be ``Population``.
     *args : P.args
@@ -73,7 +91,7 @@ class EAOperation[**P]:
 
     def __init__(
         self,
-        func: Callable[Concatenate[Population, P], Population],
+        func: _PipelineFunction[P],
         *args: P.args,
         **kwargs: P.kwargs,
     ) -> None:
@@ -165,9 +183,12 @@ class EAOperation[**P]:
         """
         if args and isinstance(args[0], Population):
             population = args[0]
-            result = self.func(population, *self.args, **self.kwargs)
+            # Checked at run time: a wrapped function may break its annotation
+            result = cast(
+                "object", self.func(population, *self.args, **self.kwargs)
+            )
             if not isinstance(result, Population):
-                msg = (  # type: ignore[unreachable]  # known bug
+                msg = (
                     f"'{self.func.__name__}' expected a Population as return "
                     f"value, got '{type(result).__name__}'."
                 )
@@ -176,7 +197,10 @@ class EAOperation[**P]:
                 )
             return result
 
-        return EAOperation(self.func, *args, **kwargs)  # type: ignore[arg-type]  # known bug
+        # The arguments to bind are whatever P accepts, which only the call
+        # site of the factory can check, so it is called untyped here
+        factory = cast("_Factory[P]", EAOperation)
+        return factory(self.func, *args, **kwargs)
 
     def __repr__(self) -> str:
         """Return the function name with its bound keyword arguments.
@@ -186,7 +210,9 @@ class EAOperation[**P]:
         str
             The function name and its bound keyword arguments.
         """
-        kwargs = ", ".join(f"{k}={v!r}" for k, v in self.kwargs.items())  # type: ignore[attr-defined]  # known bug
+        # P.kwargs is a dict at run time; mypy cannot read a stored one
+        bound = cast("dict[str, object]", self.kwargs)
+        kwargs = ", ".join(f"{k}={v!r}" for k, v in bound.items())
         return f"{self.func.__name__}({kwargs})"
 
 

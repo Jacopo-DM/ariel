@@ -15,6 +15,7 @@ Todo
 """
 
 # Standard library
+from collections.abc import Sequence
 from pathlib import Path
 
 # Third-party libraries
@@ -120,16 +121,16 @@ class NeuralDevelopmentalEncoding(nn.Module):
         for param in self.parameters():
             param.requires_grad = False
 
-    def forward(
+    def forward(  # ty: ignore[invalid-mutable-override]  # torch types forward as a Callable attribute; models override it with a method
         self,
-        genotype: list[npt.NDArray[np.float32]],
+        genotype: Sequence[npt.NDArray[np.float32] | npt.NDArray[np.float64]],
     ) -> list[npt.NDArray[np.float32]]:
         """Forward pass through the neural developmental encoder.
 
         Parameters
         ----------
-        genotype : list[npt.NDArray[np.float32]]
-            List of chromosomes (numpy arrays).
+        genotype : Sequence[npt.NDArray[np.float32 | np.float64]]
+            List of chromosomes (numpy arrays); each is converted to float32.
 
         Returns
         -------
@@ -177,6 +178,6 @@ if __name__ == "__main__":
         rot_p_genes,
     ]
 
-    outputs = nde.forward(genotype)  # type: ignore[arg-type]  # known bug
+    outputs = nde.forward(genotype)
     for output in outputs:
         console.log(output.shape)

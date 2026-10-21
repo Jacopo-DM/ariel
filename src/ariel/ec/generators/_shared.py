@@ -11,7 +11,7 @@ UNIFORM_MEDIAN = 0.5
 
 # -- Module-level RNG (shared across generators, mutators, crossover) ----------
 SEED: int = 42
-_rng: Generator = np.random.default_rng(SEED)
+rng: Generator = np.random.default_rng(SEED)
 
 type Integers = Sequence[int]
 type Floats = Sequence[float]
@@ -42,4 +42,4 @@ class _GeneratorSettings(BaseSettings):
     choice_shuffle: bool = False
 
 
-_settings: _GeneratorSettings = _GeneratorSettings()
+settings: _GeneratorSettings = _GeneratorSettings()

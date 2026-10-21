@@ -5,8 +5,9 @@ from pathlib import Path
 from typing import Literal
 
 import numpy as np
-from sqlalchemy import Engine, Select, create_engine, func
+from sqlalchemy import Engine, create_engine, func
 from sqlmodel import Session, col, select
+from sqlmodel.sql.expression import SelectOfScalar
 
 from ariel.ec.individual import Individual
 from ariel.ec.population import Population
@@ -60,7 +61,7 @@ class Archive:
         death_range: AgeRange = None,
         fitness_range: FitnessRange = None,
         alive_filter: bool | None = None,
-    ) -> Select[tuple[Individual]]:
+    ) -> SelectOfScalar[Individual]:
         """Construct a base SQL query with optional filters.
 
         Parameters
@@ -77,7 +78,7 @@ class Archive:
 
         Returns
         -------
-        Select[tuple[Individual]]
+        SelectOfScalar[Individual]
             SQLModel Select statement with the specified filters applied.
         """
         statement = select(Individual)
@@ -98,18 +99,20 @@ class Archive:
                 Individual.time_of_death <= hi,
             )
         if fitness_range is not None:
-            lo, hi = fitness_range  # type: ignore[assignment]  # known bug
-            statement = statement.where(Individual.fitness_ >= lo).where(  # type: ignore[operator]  # known bug
-                Individual.fitness_ <= hi,  # type: ignore[operator]  # known bug
+            fit_lo, fit_hi = fitness_range
+            statement = statement.where(
+                col(Individual.fitness_) >= fit_lo
+            ).where(
+                col(Individual.fitness_) <= fit_hi,
             )
 
         return statement
 
     def _fetch_all(
-        self, statement: Select[tuple[Individual]]
+        self, statement: SelectOfScalar[Individual]
     ) -> list[Individual]:
         with Session(self.engine) as session:
-            rows = list(session.exec(statement).all())  # type: ignore[call-overload]  # known bug
+            rows = list(session.exec(statement).all())
         for ind in rows:
             ind.id = None
         return rows
@@ -443,7 +446,7 @@ class Archive:
         """Total number of evaluated individuals stored in the archive."""
         with Session(self.engine) as session:
             return session.exec(
-                select(func.count(Individual.id)).where(  # type: ignore[arg-type]  # known bug
+                select(func.count(col(Individual.id))).where(
                     Individual.requires_eval == False,  # ruff: ignore[true-false-comparison]
                 ),
             ).one()
