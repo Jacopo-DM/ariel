@@ -2,20 +2,6 @@
 
 # ARIEL: Autonomous Robots through Integrated Evolution and Learning
 
-<!-- ## Requirements
-
-* [vscode](https://code.visualstudio.com/)
-  * [containers ext](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
-  * [container tools ext](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-containers)
-
-* Container manager:
-  * [podman desktop](https://podman.io/)
-  * [docker desktop](https://www.docker.com/products/docker-desktop/)
-
-* [vscode containers tut](https://code.visualstudio.com/docs/devcontainers/tutorial)
-
---- -->
-
 ## Documentation
 [ARIEL main documentation page](https://ci-group.github.io/ariel/)
 

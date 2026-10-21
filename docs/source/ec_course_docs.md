@@ -15,7 +15,7 @@ Things are a bit simpler if you are using uv. In your terminal simply run the fo
 ```bash
 uv venv
 uv sync
-uv run examples/0_render_single_frame.py
+uv run examples/a_mujoco/1_render_single_frame.py
 ```
 
 These commands will automatically create the virtual environment, activate it, install all the requirements with their respective versions to avoid any conflicts and then run the example file. After you create the venv you can activate it again like you would with a normal one using:

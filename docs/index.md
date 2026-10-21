@@ -55,7 +55,7 @@ ARIEL brings together the full evolutionary robotics pipeline in a single, cohes
 See the [Installation Guide](source/installation_guide) for full details, including:
 
 - Supported platforms and prerequisites
-- Installing with `uv` or VS Code Dev Containers (recommended)
+- Installing with `uv`
 - Verifying your installation
 - Troubleshooting tips
 
