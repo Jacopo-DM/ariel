@@ -187,7 +187,6 @@ Key internal modules to link when relevant:
 | `src/ariel/ec/` | EA base classes, Individual, mutation/crossover operators |
 | `src/ariel/ec/genotypes/tree/` | Tree-based genome (JSON-serializable, NetworkX-based) |
 | `src/ariel/ec/genotypes/nde/` | Neural Developmental Encoding (PyTorch) |
-| `src/ariel/ec/genotypes/cppn/` | CPPN decoders for morphology generation |
 | `src/ariel/body_phenotypes/robogen_lite/` | Modular robot body: Core, Brick, Hinge modules |
 | `src/ariel/body_phenotypes/lynx_mjspec/` | MuJoCo spec pipeline for Lynx arm |
 | `src/ariel/simulation/controllers/` | CPG-based and neural controllers |

@@ -337,11 +337,3 @@ class OlympicArena(BaseWorld):
             ],
             rgba=[1, 1, 1, 1],  # Dark brown cliff color
         )
-
-
-if __name__ == "__main__":
-    # Compile and save the XML for inspection
-    arena = OlympicArena(
-        load_precompiled=False,
-    )
-    arena.store_to_xml()

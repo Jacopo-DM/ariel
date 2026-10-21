@@ -2,16 +2,12 @@
 
 from __future__ import annotations
 
-import runpy
-from pathlib import Path
 from typing import cast
 
 import mujoco
-import mujoco.viewer
 import numpy as np
 import pytest
 
-from ariel.body_phenotypes.lynx_mjspec import lynx_arm as lynx_arm_module
 from ariel.body_phenotypes.lynx_mjspec.lynx_arm import ArmConfig, LynxArm
 from ariel.body_phenotypes.lynx_mjspec.table import TableWorld
 from ariel.body_phenotypes.lynx_mjspec.unified_pipeline import common
@@ -83,20 +79,6 @@ def test_arm_without_rotation_angles_still_builds() -> None:
     model = _compiled_arm(ArmConfig(rotation_angles=[]))
     assert model.njnt == NUM_JOINTS
     del model
-
-
-def test_main_block_launches_the_viewer(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """Running the module as a script builds the arm and opens a viewer."""
-    launched: list[int] = []
-    monkeypatch.setattr(
-        mujoco.viewer,
-        "launch",
-        lambda model, _data: launched.append(model.njnt),
-    )
-    runpy.run_path(str(Path(lynx_arm_module.__file__)), run_name="__main__")
-    assert launched == [NUM_JOINTS]
 
 
 # --- table world ------------------------------------------------------------ #

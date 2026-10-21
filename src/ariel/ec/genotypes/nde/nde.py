@@ -7,7 +7,6 @@ from collections.abc import Sequence
 import numpy as np
 import numpy.typing as npt
 import torch
-from rich.console import Console
 from rich.traceback import install
 from torch import nn
 
@@ -18,19 +17,8 @@ from ariel.body_phenotypes import (
     NUM_OF_TYPES_OF_MODULES,
 )
 
-# Global constants
-# Global functions
-# Warning Control
-# Type Checking
-# Type Aliases
-
-# --- RANDOM GENERATOR SETUP --- #
-SEED = 42
-RNG = np.random.default_rng(SEED)
-
 # --- TERMINAL OUTPUT SETUP --- #
 install(show_locals=False)
-console = Console()
 
 
 class NeuralDevelopmentalEncoding(nn.Module):
@@ -140,23 +128,3 @@ class NeuralDevelopmentalEncoding(nn.Module):
                 x = x.view(self.output_shapes[idx])
                 outputs.append(x.detach().numpy())
         return outputs
-
-
-if __name__ == "__main__":
-    """Usage example."""
-    nde = NeuralDevelopmentalEncoding(number_of_modules=20)
-
-    genotype_size = 64
-    type_p_genes = RNG.random(genotype_size)
-    conn_p_genes = RNG.random(genotype_size)
-    rot_p_genes = RNG.random(genotype_size)
-
-    genotype = [
-        type_p_genes,
-        conn_p_genes,
-        rot_p_genes,
-    ]
-
-    outputs = nde.forward(genotype)
-    for output in outputs:
-        console.log(output.shape)

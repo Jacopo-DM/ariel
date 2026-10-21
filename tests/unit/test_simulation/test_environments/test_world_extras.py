@@ -111,12 +111,6 @@ def test_compile_terrains_script(
     assert "Compiled" in capsys.readouterr().out
 
 
-def test_olympic_arena_script_stores_the_arena(precompiled_dir: Path) -> None:
-    """Running olympic_arena.py as a script stores its XML."""
-    runpy.run_path(str(Path(olympic_arena.__file__)), run_name="__main__")
-    assert list(precompiled_dir.glob("*.xml"))
-
-
 # --- spawning --------------------------------------------------------------- #
 
 

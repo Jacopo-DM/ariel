@@ -123,6 +123,21 @@ def test_controller_nan_output_raises() -> None:
     del model, data
 
 
+def test_controller_saves_to_the_tracker_on_save_steps() -> None:
+    """On a save step the tracker records the simulation data."""
+    tracker = Mock(spec=Tracker)
+    model, data = _build_spider_model()
+    ctrl = Controller(
+        controller_callback_function=_zero_callback,
+        time_steps_per_save=1,
+        tracker=tracker,
+    )
+    mujoco.mj_step(model, data)
+    ctrl.set_control(model, data)
+    tracker.update.assert_called_once_with(data)
+    del model, data
+
+
 def test_controller_waits_between_control_steps() -> None:
     """Between control steps the callback is not called."""
     callback = Mock(return_value=[0.0])

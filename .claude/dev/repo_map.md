@@ -11,7 +11,6 @@ same packages (public imports + snippets), see [../user/00_index.md](../user/00_
 |---|---|---|
 | [ec/](../../src/ariel/ec/) | EA engine: `EA`, `EAOperation`, `EASettings`, `Individual` (SQLModel), `Population`, `Archive`, `Crossover`, mutators/generators | adding evolution-loop machinery or data-layer logic |
 | [ec/genotypes/tree/](../../src/ariel/ec/genotypes/tree/) | Tree genome + functional operators (`add_node`, `subtree_swap`, …) | new tree-genome operators (free functions) |
-| [ec/genotypes/cppn/](../../src/ariel/ec/genotypes/cppn/) | CPPN decoding to morphology | CPPN→body decoding |
 | [ec/genotypes/nde/](../../src/ariel/ec/genotypes/nde/) | `NeuralDevelopmentalEncoding` (PyTorch) | NDE encodings |
 | [body_phenotypes/robogen_lite/](../../src/ariel/body_phenotypes/robogen_lite/) | Modular robot bodies: `modules/` (`Core`/`Brick`/`Hinge`, `Module(ABC)`), `cppn_neat/` (`Genome`, `IdManager`), `decoders/`, `prebuilt_robots/`, `constructor.py` | new module types, decoders, or prebuilt bodies |
 | [body_phenotypes/lynx_mjspec/](../../src/ariel/body_phenotypes/lynx_mjspec/) | Lynx arm pipeline | Lynx-specific body work |

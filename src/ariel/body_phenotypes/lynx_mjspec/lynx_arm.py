@@ -1,14 +1,10 @@
 """Lynxmotion arm body built as a MuJoCo MjSpec."""
 
-from typing import cast
-
 import mujoco
-import mujoco.viewer
 import numpy as np
 from numpy.typing import NDArray
 from pydantic import Field
 
-from ariel.body_phenotypes.lynx_mjspec.table import TableWorld
 from ariel.parameters import FrozenModel
 
 
@@ -186,16 +182,3 @@ class LynxArm:
             rgba=[1, 0, 0, 1],
             size=[0.01, 0.01, 0.01],
         )
-
-
-# Example Usage
-if __name__ == "__main__":
-    arm = LynxArm()
-
-    world = TableWorld()
-    world.spawn(arm.spec)
-
-    model = cast("mujoco.MjModel", world.spec.compile())
-    data = mujoco.MjData(model)
-
-    mujoco.viewer.launch(model, data)
