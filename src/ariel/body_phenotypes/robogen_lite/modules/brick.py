@@ -13,15 +13,18 @@ from ariel.body_phenotypes import quaternions as qnp
 
 # Local libraries
 from ariel.body_phenotypes.robogen_lite.config import ModuleFaces, ModuleType
-from ariel.body_phenotypes.robogen_lite.modules.module import Module
+from ariel.body_phenotypes.robogen_lite.modules.module import (
+    Module,
+    half_extents,
+    kilograms,
+)
+from ariel.parameters import ArielModulesConfig
 
-# --- Robogen Configuration --- #
-# Module weight (kg)
-BRICK_MASS = 0.055
-
-# Module half-sizes (length, width, height) in meters
-BRICK_DIMENSIONS = (0.05, 0.05, 0.05)
-# ------------------------------ #
+# The measured brick (ariel.parameters.module_specs) in MuJoCo's numbers:
+# mass in kg, half of each side in metres
+_BRICK = ArielModulesConfig().brick
+BRICK_MASS = kilograms(_BRICK.mass)
+BRICK_DIMENSIONS = half_extents(_BRICK.size)
 
 
 class BrickModule(Module):

@@ -145,14 +145,18 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 // ── Constants matching the MuJoCo modules (metres, drawn SCALE times larger) ──
+// The measured modules of ariel.parameters.module_specs (physical-checks):
+// core 150 mm, brick 75 mm, hinge 75 x 52 x 52 mm with its axis 31.74 mm from
+// the parent face (the fork, drawn 1% smaller as in MuJoCo) and the cradle after it.
 const SCALE = 4;
-const CORE_HALF = 0.1 * SCALE;
+const CORE_HALF = 0.075 * SCALE;
 const CORE_SIDE_DROP = CORE_HALF / 2; // the core's side sites sit this far below its centre
-const BRICK_HALF = 0.05 * SCALE;
-const STATOR_SIZE = new THREE.Vector3(0.02475 * SCALE, 0.0297 * SCALE, 0.02475 * SCALE);
-const ROTOR_SIZE  = new THREE.Vector3(0.025 * SCALE, 0.02 * SCALE, 0.025 * SCALE);
-const HINGE_GAP_STATOR = 0.03 * SCALE;
-const HINGE_GAP_ROTOR  = 0.08 * SCALE;
+const BRICK_HALF = 0.0375 * SCALE;
+const HINGE_AXIS = 0.03174 * SCALE;
+const STATOR_SIZE = new THREE.Vector3(0.02574 * SCALE, 0.015711 * SCALE, 0.02574 * SCALE);
+const ROTOR_SIZE  = new THREE.Vector3(0.026 * SCALE, 0.02163 * SCALE, 0.026 * SCALE);
+const HINGE_GAP_STATOR = HINGE_AXIS / 2;
+const HINGE_GAP_ROTOR  = HINGE_AXIS + ROTOR_SIZE.y;
 const ROTOR_FRONT = HINGE_GAP_ROTOR + ROTOR_SIZE.y;
 const SITE_RADIUS = 0.018 * SCALE;
 const DRAG_PIXELS = 5; // a click that moved further than this was an orbit drag
@@ -395,7 +399,7 @@ function createHingeModule(siteObj, preRotation, index = moduleIndex++) {
     new THREE.CylinderGeometry(0.01 * SCALE, 0.01 * SCALE, STATOR_SIZE.z * 2.5, 8),
     new THREE.MeshStandardMaterial({ color: 0xffff00, emissive: 0xffff00, emissiveIntensity: 0.3 })
   );
-  jointMesh.position.set(0, (HINGE_GAP_STATOR + HINGE_GAP_ROTOR) / 2, 0);
+  jointMesh.position.set(0, HINGE_AXIS, 0);
   jointMesh.rotation.x = Math.PI / 2; // the cylinder's default axis is Y
   group.add(jointMesh);
 

@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
 MM = 1e-3
-CORE_SIDE = 0.2  # metres
+CORE_SIDE = 0.15  # metres, the measured core (0.2 before physical-checks)
 SEED = 42
 BODIES = 60
 MODULES = 20

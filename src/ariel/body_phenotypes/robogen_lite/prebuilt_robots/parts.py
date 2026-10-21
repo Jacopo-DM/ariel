@@ -163,13 +163,16 @@ def build(parts: tuple[Part, ...]) -> CoreModule:
     core = CoreModule(index=0)
     start_graph(core)
     named: dict[str, CoreModule | Piece] = {"core": core}
+    # Steps from the core: a hinge's servo cable runs back to the core
+    steps = {"core": 0}
     counts = {"hinge": 0, "brick": 0}
     for part in parts:
         name = f"{part.kind}_{counts[part.kind]}"
         counts[part.kind] += 1
+        steps[name] = steps[part.parent] + 1
         module: Piece
         if part.kind == "hinge":
-            module = HingeModule(index=part.index)
+            module = HingeModule(index=part.index, steps_from_core=steps[name])
         else:
             module = BrickModule(index=part.index)
         if part.rotation is not None:

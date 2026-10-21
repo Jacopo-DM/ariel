@@ -79,9 +79,10 @@ def test_module_sizes_read_the_hinge_and_the_brick() -> None:
     sizes = script.module_sizes(model)
     brick_volume, brick_side = sizes[1]
     hinge_volume, hinge_side = sizes[2]
-    assert brick_side == pytest.approx(0.1)
-    assert brick_volume == pytest.approx(0.1**3)
-    assert hinge_side == pytest.approx(0.04)  # the rotor is the thinnest part
+    assert brick_side == pytest.approx(0.075)
+    assert brick_volume == pytest.approx(0.075**3)
+    # The fork, from the plate to the axis (31.74 mm, drawn 1% smaller)
+    assert hinge_side == pytest.approx(0.03174 * 0.99)
     assert hinge_volume < brick_volume
 
 

@@ -7,6 +7,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, cast
 
 # Third-party libraries
+import networkx as nx
+
 # Local libraries
 from ariel.body_phenotypes.robogen_lite.config import (
     IDX_OF_CORE,
@@ -77,6 +79,12 @@ def _construct(graph: DiGraph[int]) -> CoreModule:
     ValueError
         If the graph contains unknown module types.
     """
+    # Steps from the core: a hinge's servo cable runs back to the core
+    steps = (
+        nx.single_source_shortest_path_length(graph, IDX_OF_CORE)
+        if IDX_OF_CORE in graph
+        else {}
+    )
     modules: dict[int, Module | None] = {}
     for node in graph.nodes:
         # Extract module type and rotation from the graph node
@@ -89,7 +97,9 @@ def _construct(graph: DiGraph[int]) -> CoreModule:
             case ModuleType.CORE.name:
                 module = CoreModule(index=IDX_OF_CORE)
             case ModuleType.HINGE.name:
-                module = HingeModule(index=node)
+                module = HingeModule(
+                    index=node, steps_from_core=max(steps.get(node, 1), 1)
+                )
             case ModuleType.BRICK.name:
                 module = BrickModule(index=node)
             case ModuleType.NONE.name:

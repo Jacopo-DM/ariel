@@ -45,21 +45,22 @@ def test_body_builds_and_compiles(name: str) -> None:
 
 # sha256 (first 16 hex digits) of ``spec.to_xml()`` for every body, taken from
 # the hand-written builders before they became a table. A change here means a
-# robot changed shape, names or order.
+# robot changed shape, names or order. Taken again on 2026-10-21, when the
+# modules got their measured sizes and masses (physical-checks PC3).
 XML_HASHES = {
-    "baby_a": "072fdd2263904d89",
-    "baby_b": "12fc5667a91747c6",
-    "gecko_small": "04473cf596aec17d",
-    "linkin_modified": "832b1960e1c29c3d",
-    "snake": "52280e37a134ae8b",
-    "turtle": "a4869e5324c55b9f",
-    "iguana": "b955c97f97b65dcc",
-    "spider_8": "bcb4c03cd04a7e3e",
-    "spider_12": "d9fc03b81751c7c8",
-    "spider_16": "30ec920d3aafdcb5",
-    "centipede_3": "85e596e9b7c718ae",
-    "centipede_4": "ecf9cbff9f094a33",
-    "centipede_5": "86599d34b2a37465",
+    "baby_a": "13c9854493d25c5e",
+    "baby_b": "1928d4975f508ac4",
+    "gecko_small": "16c02b4b7e2d5189",
+    "linkin_modified": "362587c94b75457f",
+    "snake": "10db453350b0fdda",
+    "turtle": "15d61300fc6f7673",
+    "iguana": "d3354a77f548e88c",
+    "spider_8": "cbf1afd2f5427391",
+    "spider_12": "deb556b6d7383fa3",
+    "spider_16": "f9d531951b4f3f92",
+    "centipede_3": "8263f1cbe586f6b5",
+    "centipede_4": "b83d2772556e73d2",
+    "centipede_5": "5621784d5ed35e2a",
 }
 
 

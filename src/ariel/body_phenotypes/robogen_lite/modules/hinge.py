@@ -5,6 +5,9 @@ Todo:
     [ ] ".rotate" as superclass method?
 """
 
+# Standard library
+from functools import cache
+
 # Third-party libraries
 import mujoco
 import numpy as np
@@ -13,24 +16,48 @@ from ariel.body_phenotypes import quaternions as qnp
 
 # Local libraries
 from ariel.body_phenotypes.robogen_lite.config import ModuleFaces, ModuleType
-from ariel.body_phenotypes.robogen_lite.modules.module import Module
+from ariel.body_phenotypes.robogen_lite.modules.module import (
+    Module,
+    kilograms,
+    metres,
+)
+from ariel.parameters import ArielModulesConfig
 
 # Global constants
 SHRINK = 0.99
 
-# Type Aliases
-type WeightType = float
-type DimensionType = tuple[float, float, float]
+# The measured hinge (ariel.parameters.module_specs) in MuJoCo's numbers.
+# The stator is the fork on the parent, from the parent face to the rotation
+# axis; the rotor is the cradle holding the servo, from the axis to the child
+# face. Half of each side in metres; masses in kg (the rotor's mass depends
+# on the hinge's place in the body, see HingeModule).
+_HINGE = ArielModulesConfig().hinge
+_HALF_WIDTH = metres(_HINGE.width) / 2
+_AXIS = metres(_HINGE.axis_from_parent)
+STATOR_MASS = kilograms(_HINGE.parent_mass)
+STATOR_DIMENSIONS = (_HALF_WIDTH, _AXIS / 2, _HALF_WIDTH)
+ROTOR_DIMENSIONS = (
+    _HALF_WIDTH,
+    (metres(_HINGE.length) - _AXIS) / 2,
+    _HALF_WIDTH,
+)
 
-# --- Robogen Configuration --- #
-# Module weights (kg)
-STATOR_MASS: WeightType = 0.02  # 20 grams
-ROTOR_MASS: WeightType = 0.04  # 40 grams
 
-# Module dimensions (length, width, height) in meters
-STATOR_DIMENSIONS: DimensionType = (0.025, 0.03, 0.025)
-ROTOR_DIMENSIONS: DimensionType = (0.025, 0.02, 0.025)
-# ------------------------------ #
+@cache
+def _rotor_mass(steps_from_core: int) -> float:
+    """Return the rotor's mass in kg; cached, astropy arithmetic is slow.
+
+    Parameters
+    ----------
+    steps_from_core : int
+        Edges between the core and the hinge in the body's tree.
+
+    Returns
+    -------
+    float
+        The mass of the cradle, the servo and its cable, in kg.
+    """
+    return kilograms(_HINGE.child_mass(steps_from_core))
 
 
 class HingeModule(Module):
@@ -40,14 +67,20 @@ class HingeModule(Module):
     module_type: ModuleType = ModuleType.HINGE
     body: mujoco.MjsBody
 
-    def __init__(self, index: int) -> None:  # ruff: ignore[too-many-locals]  # long routine kept as written; splitting it is a refactor outside this goal
+    def __init__(  # ruff: ignore[too-many-locals]  # long routine kept as written; splitting it is a refactor outside this goal
+        self, index: int, steps_from_core: int = 1
+    ) -> None:
         """Initialize the hinge module.
 
         Parameters
         ----------
         index
             The index of the hinge module being instantiated
+        steps_from_core
+            Edges between the core and this hinge in the body's tree; the
+            servo's cable runs back to the core, so it sets the rotor's mass
         """
+        rotor_mass = _rotor_mass(steps_from_core)
         # Set the index of the module
         self.index = index
 
@@ -58,7 +91,6 @@ class HingeModule(Module):
         hinge_name = self.module_type.name.lower()
         hinge = spec.worldbody.add_body(
             name=hinge_name,
-            mass=STATOR_MASS + ROTOR_MASS,
         )
 
         # ========= Stator =========
@@ -84,7 +116,7 @@ class HingeModule(Module):
         rotor.add_geom(
             name=rotor_name,
             type=mujoco.mjtGeom.mjGEOM_BOX,
-            mass=ROTOR_MASS,
+            mass=rotor_mass,
             size=ROTOR_DIMENSIONS,
             rgba=(160 / 255, 24 / 255, 33 / 255, 1),
         )

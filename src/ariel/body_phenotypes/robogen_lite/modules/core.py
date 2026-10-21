@@ -14,22 +14,21 @@ from ariel.body_phenotypes.robogen_lite.config import (
     ModuleFaces,
     ModuleType,
 )
-from ariel.body_phenotypes.robogen_lite.modules.module import Module
+from ariel.body_phenotypes.robogen_lite.modules.module import (
+    Module,
+    half_extents,
+    kilograms,
+)
+from ariel.parameters import ArielModulesConfig
 
 if TYPE_CHECKING:
     import networkx as nx
 
-# Type Aliases
-type WeightType = float
-type DimensionType = tuple[float, float, float]
-
-# --- Robogen Configuration --- #
-# Module weights (kg)
-CORE_MASS: WeightType = 1
-
-# Module dimensions (length, width, height) in meters
-CORE_DIMENSIONS: DimensionType = (0.10, 0.10, 0.10)
-# ------------------------------ #
+# The measured core with battery and camera (ariel.parameters.module_specs)
+# in MuJoCo's numbers: mass in kg, half of each side in metres
+_CORE = ArielModulesConfig().core
+CORE_MASS = kilograms(_CORE.mass)
+CORE_DIMENSIONS = half_extents(_CORE.size)
 
 
 class CoreModule(Module):
