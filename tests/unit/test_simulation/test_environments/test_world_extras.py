@@ -20,11 +20,12 @@ from ariel.simulation.environments import (
     CompoundWorld,
     OlympicArena,
     SimpleFlatWorld,
-    compile_terrains,
     heightmap_functions,
     olympic_arena,
 )
 from ariel.simulators.mujoco import Seeds
+
+TOOL = Path(__file__).resolve().parents[4] / "tools" / "compile_terrains.py"
 
 _base_world = importlib.import_module(
     "ariel.simulation.environments._base_world"
@@ -92,7 +93,8 @@ def test_compile_all_worlds_writes_one_xml_each(
     precompiled_dir: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     """compile_all_world stores every world class."""
-    compile_terrains.compile_all_world(with_load_compiled=False)
+    tool = runpy.run_path(str(TOOL))
+    tool["compile_all_world"](with_load_compiled=False)
     assert len(list(precompiled_dir.glob("*.xml"))) >= len(_world_classes()) - 1
     assert "Compiled" in capsys.readouterr().out
 
@@ -100,8 +102,8 @@ def test_compile_all_worlds_writes_one_xml_each(
 def test_compile_terrains_script(
     precompiled_dir: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    """Running the module as a script compiles all worlds."""
-    runpy.run_path(str(Path(compile_terrains.__file__)), run_name="__main__")
+    """Running the tool as a script compiles all worlds."""
+    runpy.run_path(str(TOOL), run_name="__main__")
     assert list(precompiled_dir.glob("*.xml"))
     assert "Compiled" in capsys.readouterr().out
 

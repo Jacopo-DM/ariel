@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib
 import os
 import runpy
 from pathlib import Path
@@ -9,16 +10,16 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from ariel.simulation import example_usage
-from ariel.simulation.example_usage import (
-    LocomotionConfig,
-    TargetedLocomotionWorker,
-    evaluate_population,
-)
 from ariel.simulation.mujoco_worker import EvalConfig, MuJoCoWorkerBase
 
 if TYPE_CHECKING:
+    from types import ModuleType
+
     import mujoco
+
+# The example lives in examples/; it is imported by its module name (not
+# loaded from a path) so that the spawned pool can unpickle its worker.
+EXAMPLES = Path(__file__).resolve().parents[3] / "examples"
 
 ROBOT_XML = """
 <mujoco>
@@ -77,8 +78,21 @@ def test_eval_config_is_frozen_and_strict() -> None:
         EvalConfig(spawn_position=SPAWN, target_position=TARGET, speed=1)  # type: ignore[call-arg]  # deliberately wrong
 
 
-def _tiny_config() -> LocomotionConfig:
-    return LocomotionConfig(
+@pytest.fixture
+def example(monkeypatch: pytest.MonkeyPatch) -> ModuleType:
+    """Import ``examples/parallel_robot_eval.py`` by its module name.
+
+    Returns
+    -------
+    ModuleType
+        The example module.
+    """
+    monkeypatch.syspath_prepend(str(EXAMPLES))
+    return importlib.import_module("parallel_robot_eval")
+
+
+def _tiny_config(example: ModuleType) -> EvalConfig:
+    config: EvalConfig = example.LocomotionConfig(
         spawn_position=SPAWN,
         target_position=TARGET,
         seed=SEED,
@@ -86,28 +100,31 @@ def _tiny_config() -> LocomotionConfig:
         cma_pop_size=2,
         hidden_size=2,
     )
+    return config
 
 
-def test_locomotion_worker_returns_a_distance() -> None:
+def test_locomotion_worker_returns_a_distance(example: ModuleType) -> None:
     """The example worker optimises briefly and returns a fitness."""
-    worker = TargetedLocomotionWorker()
-    fitness = worker((ROBOT_XML, _tiny_config()))
+    worker = example.TargetedLocomotionWorker()
+    fitness = worker((ROBOT_XML, _tiny_config(example)))
     assert fitness >= FITNESS_FLOOR
 
 
-def test_evaluate_population_uses_a_process_pool() -> None:
+def test_evaluate_population_uses_a_process_pool(example: ModuleType) -> None:
     """Two evaluations in a spawned pool give two fitness values."""
     args: list[tuple[str, EvalConfig]] = [
-        (ROBOT_XML, _tiny_config()),
-        (ROBOT_XML, _tiny_config()),
+        (ROBOT_XML, _tiny_config(example)),
+        (ROBOT_XML, _tiny_config(example)),
     ]
-    results = evaluate_population(args, TargetedLocomotionWorker(), 1)
+    results = example.evaluate_population(
+        args, example.TargetedLocomotionWorker(), 1
+    )
     assert len(results) == len(args)
 
 
-def test_example_script_runs(
-    capsys: pytest.CaptureFixture[str],
-) -> None:
-    """The module's own demo prints the fitness values."""
-    runpy.run_path(str(Path(example_usage.__file__)), run_name="__main__")
+def test_example_script_runs(capsys: pytest.CaptureFixture[str]) -> None:
+    """The example's own demo prints the fitness values."""
+    runpy.run_path(
+        str(EXAMPLES / "parallel_robot_eval.py"), run_name="__main__"
+    )
     assert "Fitness values" in capsys.readouterr().out
