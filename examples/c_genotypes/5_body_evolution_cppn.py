@@ -3,9 +3,8 @@ Morphology-only evolution for CPPN genomes using the same morphological fitness
 as the tree-based example. Decodes CPPNs into module graphs using the
 best-first decoder and evaluates with MorphologicalMeasures.
 
-No `from __future__ import annotations` here: EAOperation checks that each
-step is annotated with the Population class itself, and that import would
-turn the annotation into the string "Population".
+Pass --no-visualize to skip the MuJoCo viewer at the end (it needs a
+display).
 """
 
 import argparse
@@ -49,7 +48,12 @@ parser = argparse.ArgumentParser(description="Morphology-only CPPN evolution")
 parser.add_argument("--budget", type=int, default=50)
 parser.add_argument("--pop", type=int, default=100)
 parser.add_argument("--max-modules", type=int, default=15)
-parser.add_argument("--visualize", type=bool, default=True, help="Launch MuJoCo viewer for best individual")
+parser.add_argument(
+    "--visualize",
+    action=argparse.BooleanOptionalAction,
+    default=True,
+    help="Launch MuJoCo viewer for best individual (--no-visualize to skip)",
+)
 args = parser.parse_args()
 
 POP_SIZE = args.pop
