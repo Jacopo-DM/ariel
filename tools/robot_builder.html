@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>ARIEL Robot Editor</title>
+<!--
+  Build a robot body by clicking, then export it as a table of parts for
+  ariel.body_phenotypes.robogen_lite.prebuilt_robots.parts.build.
+
+  Open this file in a browser (it loads three.js from cdn.jsdelivr.net).
+  Sizes and attachment frames copy the MuJoCo modules in
+  robogen_lite/modules/: the core's four side faces sit 5 cm below its
+  centre, and a child on a TOP or BOTTOM face has its up axis along -y.
+-->
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { overflow: hidden; font-family: 'Segoe UI', Arial, sans-serif; background: #1a1a2e; color: #eee; }
+#canvas { display: block; }
+
+#toolbar {
+  position: absolute; top: 10px; left: 10px;
+  background: rgba(20,20,40,0.92); border-radius: 10px; padding: 14px;
+  width: 220px; box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+}
+#toolbar h2 { font-size: 15px; margin-bottom: 10px; color: #7ecfff; }
+#toolbar h3 { font-size: 12px; margin: 10px 0 6px; color: #999; text-transform: uppercase; letter-spacing: 1px; }
+
+.module-btn {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 8px 10px; margin-bottom: 6px;
+  border: 2px solid transparent; border-radius: 6px;
+  background: rgba(255,255,255,0.06); cursor: pointer;
+  color: #ddd; font-size: 13px; transition: all 0.15s;
+}
+.module-btn:hover { background: rgba(255,255,255,0.12); }
+.module-btn.active { border-color: #7ecfff; background: rgba(126,207,255,0.12); }
+.module-btn .swatch { width: 22px; height: 22px; border-radius: 4px; flex-shrink: 0; }
+
+.action-btn {
+  width: 100%; padding: 8px; margin-top: 4px;
+  border: 1px solid rgba(255,255,255,0.15); border-radius: 6px;
+  background: rgba(255,255,255,0.06); cursor: pointer;
+  color: #ddd; font-size: 12px; transition: all 0.15s;
+}
+.action-btn:hover { background: rgba(255,255,255,0.15); }
+
+#info-panel {
+  position: absolute; bottom: 10px; left: 10px;
+  background: rgba(20,20,40,0.88); border-radius: 8px; padding: 10px 14px;
+  font-size: 12px; color: #aaa; max-width: 460px;
+}
+#info-panel span { color: #7ecfff; }
+
+#rotation-panel {
+  position: absolute; top: 10px; right: 10px;
+  background: rgba(20,20,40,0.92); border-radius: 10px; padding: 14px;
+  width: 220px; box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  display: none;
+}
+#rotation-panel h3 { font-size: 12px; margin-bottom: 8px; color: #999; text-transform: uppercase; letter-spacing: 1px; }
+#rotation-panel label { font-size: 12px; display: block; margin: 6px 0 2px; }
+#rotation-panel input[type=range] { width: 100%; }
+#rotation-panel input[type=number] {
+  width: 60px; background: #111; color: #ccc; border: 1px solid #444;
+  border-radius: 4px; padding: 2px 6px; font-size: 12px;
+}
+
+#dialog {
+  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center;
+}
+#dialog.show { display: flex; }
+#dialog-content {
+  background: #1e1e3a; border-radius: 12px; padding: 20px; width: 600px; max-height: 80vh;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+}
+#dialog-content h3 { margin-bottom: 10px; color: #7ecfff; }
+#dialog-message { font-size: 13px; color: #ccc; margin-bottom: 6px; }
+#dialog-content textarea {
+  width: 100%; height: 300px; background: #111; color: #ccc; border: 1px solid #444;
+  border-radius: 6px; padding: 10px; font-family: 'Consolas', monospace; font-size: 11px;
+  resize: vertical;
+}
+#dialog-content button { margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div id="toolbar">
+  <h2>Robot Editor</h2>
+  <h3>Modules</h3>
+  <button class="module-btn" data-type="core">
+    <div class="swatch" style="background:#fdc940"></div> Core (start)
+  </button>
+  <button class="module-btn" data-type="brick">
+    <div class="swatch" style="background:#1c77c3"></div> Brick
+  </button>
+  <button class="module-btn active" data-type="hinge">
+    <div class="swatch" style="background:#df2935"></div> Hinge (joint)
+  </button>
+
+  <h3>Actions</h3>
+  <button class="action-btn" id="btn-delete">Delete selected module</button>
+  <button class="action-btn" id="btn-clear">Clear all</button>
+  <button class="action-btn" id="btn-export">Export table</button>
+</div>
+
+<div id="rotation-panel">
+  <h3>Hinge Pre-Rotation</h3>
+  <label>Degrees: <input type="number" id="rotation-num" min="-180" max="180" value="0" style="margin-left:4px"/></label>
+  <input type="range" id="rotation-slider" min="-180" max="180" step="1" value="0"/>
+</div>
+
+<div id="info-panel">
+  <span>Click</span> green sphere to place module &nbsp;|&nbsp;
+  <span>Right-click</span> module to select &nbsp;|&nbsp;
+  <span>Left-drag</span> orbit &nbsp;|&nbsp;
+  <span>Middle-drag</span> pan &nbsp;|&nbsp;
+  <span>Scroll</span> zoom &nbsp;|&nbsp;
+  <span>Del</span> delete selected
+</div>
+
+<div id="dialog">
+  <div id="dialog-content">
+    <h3 id="dialog-title"></h3>
+    <p id="dialog-message"></p>
+    <textarea id="dialog-text" readonly></textarea>
+    <button class="action-btn" id="btn-copy">Copy to clipboard</button>
+    <button class="action-btn" id="btn-dismiss">Dismiss</button>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ── Constants matching the MuJoCo modules (metres, drawn SCALE times larger) ──
+const SCALE = 4;
+const CORE_HALF = 0.1 * SCALE;
+const CORE_SIDE_DROP = CORE_HALF / 2; // the core's side sites sit this far below its centre
+const BRICK_HALF = 0.05 * SCALE;
+const STATOR_SIZE = new THREE.Vector3(0.02475 * SCALE, 0.0297 * SCALE, 0.02475 * SCALE);
+const ROTOR_SIZE  = new THREE.Vector3(0.025 * SCALE, 0.02 * SCALE, 0.025 * SCALE);
+const HINGE_GAP_STATOR = 0.03 * SCALE;
+const HINGE_GAP_ROTOR  = 0.08 * SCALE;
+const ROTOR_FRONT = HINGE_GAP_ROTOR + ROTOR_SIZE.y;
+const SITE_RADIUS = 0.018 * SCALE;
+const DRAG_PIXELS = 5; // a click that moved further than this was an orbit drag
+
+const COLORS = {
+  core: 0xfdc940, brick: 0x1c77c3,
+  stator: 0xdf2935, rotor: 0xa01820,
+  site: 0x44ff88, siteHover: 0xffffff, selected: 0xff66ff,
+};
+
+// ── Scene setup (Z is up, as in MuJoCo) ──
+
+const canvas = document.getElementById('canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1a1a2e);
+
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
+camera.up.set(0, 0, 1);
+camera.position.set(4, -5, 4);
+
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+// Right-click selects a module, so the right button does not pan.
+controls.mouseButtons = { LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.PAN, RIGHT: null };
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+dirLight.position.set(5, 5, 8);
+dirLight.castShadow = true;
+scene.add(dirLight);
+scene.add(new THREE.HemisphereLight(0x7ecfff, 0x443322, 0.3));
+
+const grid = new THREE.GridHelper(8, 20, 0x333355, 0x222244);
+grid.rotation.x = Math.PI / 2; // lay the grid flat on the XY floor
+scene.add(grid);
+
+// ── State ──
+let selectedTool = 'hinge';
+let moduleIndex = 0;
+let allModules = [];
+let allSites = [];
+let selectedModule = null;
+let hoveredSite = null;
+let coreExists = false;
+let pointerMoved = false; // the pointer moved since the last hover check
+let pointerDown = null;   // where the left button went down
+
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+const siteGeometry = new THREE.SphereGeometry(SITE_RADIUS, 12, 12);
+
+// ── Face definitions (local space of a box module) ──
+// "front" is local +Y, the direction in which MuJoCo chains bodies. `localUp`
+// is the up axis a child attached on that face gets, as in the modules' site
+// frames.
+const BOX_FACES = {
+  front:  { localDir: new THREE.Vector3(0,  1,  0), localUp: new THREE.Vector3(0,  0, 1) },
+  back:   { localDir: new THREE.Vector3(0, -1,  0), localUp: new THREE.Vector3(0,  0, 1) },
+  left:   { localDir: new THREE.Vector3(-1, 0,  0), localUp: new THREE.Vector3(0,  0, 1) },
+  right:  { localDir: new THREE.Vector3( 1, 0,  0), localUp: new THREE.Vector3(0,  0, 1) },
+  top:    { localDir: new THREE.Vector3(0,  0,  1), localUp: new THREE.Vector3(0, -1, 0) },
+  bottom: { localDir: new THREE.Vector3(0,  0, -1), localUp: new THREE.Vector3(0, -1, 0) },
+};
+
+const BRICK_FACE_NAMES = ['front', 'left', 'right', 'top', 'bottom']; // no back (attachment side)
+const CORE_FACE_NAMES  = ['front', 'back', 'left', 'right', 'top', 'bottom'];
+
+// ── Helpers ──
+
+/** Create a site sphere at a world position, storing world-space outward normal and up. */
+function createSite(worldPos, worldDir, worldUp, owner, face) {
+  const mat = new THREE.MeshStandardMaterial({
+    color: COLORS.site, emissive: COLORS.site, emissiveIntensity: 0.4,
+    transparent: true, opacity: 0.7,
+  });
+  const mesh = new THREE.Mesh(siteGeometry, mat);
+  mesh.position.copy(worldPos);
+  scene.add(mesh);
+  const site = { mesh, owner, face, occupied: false, worldDir: worldDir.clone(), worldUp: worldUp.clone() };
+  allSites.push(site);
+  return site;
+}
+
+/** Compute world-space site position, direction, and up for a face on a box group. */
+function computeFaceSite(group, halfSize, faceName, drop = 0) {
+  const f = BOX_FACES[faceName];
+  const localPos = f.localDir.clone().multiplyScalar(halfSize);
+  localPos.z -= drop;
+  const worldPos = localPos.applyMatrix4(group.matrixWorld);
+  const worldDir = f.localDir.clone().applyQuaternion(group.quaternion).normalize();
+  const worldUp  = f.localUp.clone().applyQuaternion(group.quaternion).normalize();
+  return { worldPos, worldDir, worldUp };
+}
+
+/** Orient a group so that its local +Y axis points along worldDir, with local +Z ~ worldUp. */
+function orientAlongY(group, worldDir, worldUp) {
+  const y = worldDir.clone().normalize();
+  const z = worldUp.clone();
+  const x = new THREE.Vector3().crossVectors(y, z).normalize();
+  z.crossVectors(x, y).normalize();
+  group.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(x, y, z));
+}
+
+/** Free the GPU memory of a module's meshes and its sites. */
+function disposeModule(m) {
+  for (const s of m.sites) { scene.remove(s.mesh); s.mesh.material.dispose(); }
+  scene.remove(m.group);
+  m.group.traverse(c => {
+    if (c.geometry) c.geometry.dispose();
+    for (const mat of [].concat(c.material || [])) {
+      if (mat.map) mat.map.dispose();
+      mat.dispose();
+    }
+  });
+}
+
+// ── Module creation ──
+
+/** Creates a texture with centered text to map onto a cube face. */
+function createTextTexture(text, backgroundColor) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256; canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+
+  ctx.fillStyle = backgroundColor; ctx.fillRect(0, 0, 256, 256);
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 10; ctx.strokeRect(0, 0, 256, 256);
+
+  ctx.fillStyle = '#ffffff'; ctx.font = 'bold 40px Segoe UI, Arial, sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+
+  ctx.save();
+  ctx.translate(128, 128);
+  // Rotate side text so it stays upright in the Z-up world
+  if (text === 'right') ctx.rotate(-Math.PI / 2);
+  if (text === 'left') ctx.rotate(Math.PI / 2);
+  if (text === 'front') ctx.rotate(Math.PI);
+  ctx.fillText(text.toUpperCase(), 0, 0);
+  ctx.restore();
+
+  return new THREE.CanvasTexture(canvas);
+}
+
+function createCoreModule(position) {
+  const group = new THREE.Group();
+  group.position.copy(position);
+  group.updateMatrixWorld(true);
+
+  const geo = new THREE.BoxGeometry(CORE_HALF * 2, CORE_HALF * 2, CORE_HALF * 2);
+  // Three.js face order: [ +X (right), -X (left), +Y (front), -Y (back), +Z (top), -Z (bottom) ]
+  const hexColor = '#' + new THREE.Color(COLORS.core).getHexString();
+  const mats = ['right', 'left', 'back', 'front', 'top', 'bottom'].map(
+    label => new THREE.MeshStandardMaterial({ map: createTextTexture(label, hexColor), roughness: 0.4 })
+  );
+  const mesh = new THREE.Mesh(geo, mats);
+  mesh.castShadow = true;
+  group.add(mesh);
+  scene.add(group);
+  group.updateMatrixWorld(true);
+
+  const mod = { type: 'core', group, sites: [], parent: null, face: null, rotation: 0, index: moduleIndex++, children: [] };
+  allModules.push(mod);
+
+  for (const faceName of CORE_FACE_NAMES) {
+    const sideFace = faceName !== 'top' && faceName !== 'bottom';
+    const { worldPos, worldDir, worldUp } = computeFaceSite(group, CORE_HALF, faceName, sideFace ? CORE_SIDE_DROP : 0);
+    mod.sites.push(createSite(worldPos, worldDir, worldUp, mod, faceName));
+  }
+
+  coreExists = true;
+  return mod;
+}
+
+function occupy(site, mod) {
+  site.owner.children.push(mod);
+  allModules.push(mod);
+  site.occupied = true;
+  site.mesh.visible = false;
+}
+
+function createBrickModule(siteObj, index = moduleIndex++) {
+  const { worldDir, worldUp } = siteObj;
+
+  // The brick's back face touches the site
+  const group = new THREE.Group();
+  group.position.copy(siteObj.mesh.position).add(worldDir.clone().multiplyScalar(BRICK_HALF));
+  orientAlongY(group, worldDir, worldUp);
+  group.updateMatrixWorld(true);
+
+  const geo = new THREE.BoxGeometry(BRICK_HALF * 2, BRICK_HALF * 2, BRICK_HALF * 2);
+  const mat = new THREE.MeshStandardMaterial({ color: COLORS.brick, roughness: 0.4, metalness: 0.1 });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.castShadow = true;
+  group.add(mesh);
+  scene.add(group);
+  group.updateMatrixWorld(true);
+
+  const mod = { type: 'brick', group, sites: [], parent: siteObj.owner, face: siteObj.face, rotation: 0, index, children: [] };
+  occupy(siteObj, mod);
+
+  for (const faceName of BRICK_FACE_NAMES) {
+    const { worldPos, worldDir: wd, worldUp: wu } = computeFaceSite(group, BRICK_HALF, faceName);
+    mod.sites.push(createSite(worldPos, wd, wu, mod, faceName));
+  }
+  return mod;
+}
+
+function createHingeModule(siteObj, preRotation, index = moduleIndex++) {
+  const group = new THREE.Group();
+  group.position.copy(siteObj.mesh.position);
+  orientAlongY(group, siteObj.worldDir, siteObj.worldUp);
+
+  // Pre-rotation turns the hinge about its outward axis (local +Y)
+  if (preRotation) {
+    group.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(
+      new THREE.Vector3(0, 1, 0), THREE.MathUtils.degToRad(preRotation)
+    ));
+  }
+  group.updateMatrixWorld(true);
+
+  const addBox = (size, color, y) => {
+    const box = new THREE.Mesh(
+      new THREE.BoxGeometry(size.x * 2, size.y * 2, size.z * 2),
+      new THREE.MeshStandardMaterial({ color, roughness: 0.35, metalness: 0.15 })
+    );
+    box.position.set(0, y, 0);
+    box.castShadow = true;
+    group.add(box);
+  };
+  addBox(STATOR_SIZE, COLORS.stator, HINGE_GAP_STATOR);
+  addBox(ROTOR_SIZE, COLORS.rotor, HINGE_GAP_ROTOR);
+
+  // Joint axis indicator: a cylinder along local Z, the servo axis in MuJoCo
+  const jointMesh = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.01 * SCALE, 0.01 * SCALE, STATOR_SIZE.z * 2.5, 8),
+    new THREE.MeshStandardMaterial({ color: 0xffff00, emissive: 0xffff00, emissiveIntensity: 0.3 })
+  );
+  jointMesh.position.set(0, (HINGE_GAP_STATOR + HINGE_GAP_ROTOR) / 2, 0);
+  jointMesh.rotation.x = Math.PI / 2; // the cylinder's default axis is Y
+  group.add(jointMesh);
+
+  scene.add(group);
+  group.updateMatrixWorld(true);
+
+  const mod = {
+    type: 'hinge', group, sites: [],
+    parent: siteObj.owner, face: siteObj.face,
+    rotation: preRotation || 0, index, children: [],
+  };
+  occupy(siteObj, mod);
+
+  // Front attachment site: at the end of the rotor, along local +Y
+  const frontWorldPos = new THREE.Vector3(0, ROTOR_FRONT, 0).applyMatrix4(group.matrixWorld);
+  const frontWorldDir = new THREE.Vector3(0, 1, 0).applyQuaternion(group.quaternion).normalize();
+  const frontWorldUp  = new THREE.Vector3(0, 0, 1).applyQuaternion(group.quaternion).normalize();
+  mod.sites.push(createSite(frontWorldPos, frontWorldDir, frontWorldUp, mod, 'front'));
+  return mod;
+}
+
+// ── Selection & interaction ──
+
+function setRotationInputs(value) {
+  document.getElementById('rotation-slider').value = value;
+  document.getElementById('rotation-num').value = value;
+}
+
+function selectModule(mod) {
+  if (selectedModule) deselectModule();
+  selectedModule = mod;
+  highlightModule(mod, true);
+  if (mod.type === 'hinge') {
+    document.getElementById('rotation-panel').style.display = 'block';
+    setRotationInputs(mod.rotation);
+  }
+}
+
+function deselectModule() {
+  if (selectedModule) highlightModule(selectedModule, false);
+  selectedModule = null;
+  document.getElementById('rotation-panel').style.display = 'none';
+}
+
+function highlightModule(mod, on) {
+  mod.group.traverse(c => {
+    for (const mat of [].concat(c.isMesh ? c.material : [])) {
+      mat.emissive = new THREE.Color(on ? COLORS.selected : 0);
+      mat.emissiveIntensity = on ? 0.3 : 0;
+    }
+  });
+}
+
+function deleteModule(mod) {
+  if (mod.type === 'core') { clearAll(); return; }
+
+  const toDelete = [];
+  (function collect(m) { toDelete.push(m); for (const c of m.children) collect(c); })(mod);
+
+  for (const m of toDelete) disposeModule(m);
+  allSites = allSites.filter(s => !toDelete.includes(s.owner));
+  allModules = allModules.filter(m => !toDelete.includes(m));
+  if (hoveredSite && toDelete.includes(hoveredSite.owner)) hoveredSite = null;
+
+  mod.parent.children = mod.parent.children.filter(c => c !== mod);
+  const parentSite = mod.parent.sites.find(s => s.face === mod.face);
+  parentSite.occupied = false;
+  parentSite.mesh.visible = true;
+
+  if (selectedModule && toDelete.includes(selectedModule)) {
+    selectedModule = null;
+    document.getElementById('rotation-panel').style.display = 'none';
+  }
+  return parentSite;
+}
+
+function clearAll() {
+  for (const m of allModules) disposeModule(m);
+  allModules = []; allSites = []; selectedModule = null; hoveredSite = null;
+  coreExists = false; moduleIndex = 0;
+  document.getElementById('rotation-panel').style.display = 'none';
+}
+
+// ── Rebuild a hinge with a new rotation, keeping what hangs on it ──
+// The rebuilt modules keep their indices, so the export order does not change.
+
+function serializeSubtree(mod) {
+  return { type: mod.type, index: mod.index, face: mod.face, rotation: mod.rotation, children: mod.children.map(serializeSubtree) };
+}
+
+function recreateChildren(parent, childrenData) {
+  for (const cd of childrenData) {
+    const site = parent.sites.find(s => s.face === cd.face && !s.occupied);
+    const newMod = cd.type === 'brick' ? createBrickModule(site, cd.index) : createHingeModule(site, cd.rotation, cd.index);
+    recreateChildren(newMod, cd.children);
+  }
+}
+
+function rebuildHingeRotation(mod, newRotation) {
+  const children = serializeSubtree(mod).children;
+  const parentSite = deleteModule(mod);
+  const newMod = createHingeModule(parentSite, newRotation, mod.index);
+  recreateChildren(newMod, children);
+  selectModule(newMod);
+}
+
+// ── Dialog (export and messages; stays until dismissed) ──
+
+function showDialog(title, message, text) {
+  document.getElementById('dialog-title').textContent = title;
+  document.getElementById('dialog-message').textContent = message;
+  const area = document.getElementById('dialog-text');
+  area.value = text;
+  area.style.display = text ? 'block' : 'none';
+  document.getElementById('btn-copy').style.display = text ? 'block' : 'none';
+  document.getElementById('btn-copy').textContent = 'Copy to clipboard';
+  document.getElementById('dialog').classList.add('show');
+}
+
+async function copyExport() {
+  const area = document.getElementById('dialog-text');
+  const button = document.getElementById('btn-copy');
+  try {
+    await navigator.clipboard.writeText(area.value);
+    button.textContent = 'Copied';
+  } catch {
+    // The clipboard API needs a secure context; a file:// page may not be one
+    area.select();
+    button.textContent = document.execCommand('copy') ? 'Copied' : 'Copy failed: select the text and press Ctrl+C';
+  }
+}
+
+// ── Events ──
+
+document.querySelectorAll('.module-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.module-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedTool = btn.dataset.type;
+  });
+});
+
+document.getElementById('btn-delete').addEventListener('click', () => { if (selectedModule) deleteModule(selectedModule); });
+document.getElementById('btn-clear').addEventListener('click', clearAll);
+document.getElementById('btn-export').addEventListener('click', exportTable);
+document.getElementById('btn-copy').addEventListener('click', copyExport);
+document.getElementById('btn-dismiss').addEventListener('click', () => document.getElementById('dialog').classList.remove('show'));
+
+function onRotationChange(val) {
+  val = Math.max(-180, Math.min(180, parseInt(val, 10) || 0));
+  setRotationInputs(val);
+  if (selectedModule && selectedModule.type === 'hinge' && selectedModule.rotation !== val) {
+    rebuildHingeRotation(selectedModule, val);
+  }
+}
+document.getElementById('rotation-slider').addEventListener('input', (e) => onRotationChange(e.target.value));
+document.getElementById('rotation-num').addEventListener('change', (e) => onRotationChange(e.target.value));
+
+canvas.addEventListener('pointermove', (e) => {
+  mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  pointerMoved = true;
+});
+
+canvas.addEventListener('pointerdown', (e) => {
+  if (e.button === 0) pointerDown = { x: e.clientX, y: e.clientY };
+});
+
+canvas.addEventListener('click', (e) => {
+  if (e.button !== 0) return;
+  // A click that ends an orbit drag places nothing
+  if (pointerDown && Math.hypot(e.clientX - pointerDown.x, e.clientY - pointerDown.y) > DRAG_PIXELS) return;
+  raycaster.setFromCamera(mouse, camera);
+
+  const hits = raycaster.intersectObjects(allSites.filter(s => !s.occupied).map(s => s.mesh));
+  if (hits.length > 0) {
+    const site = allSites.find(s => s.mesh === hits[0].object);
+    if (selectedTool === 'brick') selectModule(createBrickModule(site));
+    else if (selectedTool === 'hinge') {
+      selectModule(createHingeModule(site, parseInt(document.getElementById('rotation-num').value, 10) || 0));
+    }
+    return;
+  }
+  if (selectedTool === 'core' && !coreExists) {
+    selectModule(createCoreModule(new THREE.Vector3(0, CORE_HALF, 0)));
+  }
+  pointerMoved = true; // new sites may now sit under the pointer
+});
+
+canvas.addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+  raycaster.setFromCamera(mouse, camera);
+  const owners = new Map();
+  allModules.forEach(m => m.group.traverse(c => { if (c.isMesh) owners.set(c, m); }));
+  const hits = raycaster.intersectObjects([...owners.keys()]);
+  if (hits.length > 0) selectModule(owners.get(hits[0].object));
+  else deselectModule();
+});
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+window.addEventListener('keydown', (e) => {
+  // Keys typed into a field (the rotation number) are not editor commands
+  if (e.target instanceof HTMLInputElement) return;
+  if (e.key === 'Delete' && selectedModule) deleteModule(selectedModule);
+  if (e.key === 'Escape') deselectModule();
+});
+
+// ── Export ──
+
+const FACE_MAP = { front: 'FRONT', back: 'BACK', left: 'LEFT', right: 'RIGHT', top: 'TOP', bottom: 'BOTTOM' };
+
+/**
+ * The robot as rows for parts.build, in the order the modules were placed
+ * (their index; a parent is always placed before its children). That order is the
+ * order MuJoCo numbers the hinges' actuators in, so a controller sees the
+ * joints as placed. Each part is named after its kind and its place among
+ * the parts of that kind (hinge_0, brick_0, ...), the names build() gives.
+ */
+function tableRows(modules) {
+  const rows = [];
+  const names = new Map();
+  const counts = { hinge: 0, brick: 0 };
+  for (const mod of [...modules].sort((a, b) => a.index - b.index)) {
+    if (mod.type === 'core') { names.set(mod, 'core'); continue; }
+    names.set(mod, `${mod.type}_${counts[mod.type]++}`);
+    const face = `ModuleFaces.${FACE_MAP[mod.face]}`;
+    const rotation = mod.type === 'hinge' && mod.rotation ? `, ${mod.rotation}` : '';
+    rows.push(`    ${mod.type}(${mod.index}, "${names.get(mod.parent)}", ${face}${rotation}),`);
+  }
+  return rows;
+}
+
+function exportTable() {
+  const core = allModules.find(m => m.type === 'core');
+  if (!core) {
+    showDialog('Nothing to export', 'Place a core first: choose Core (start) and click the floor.', '');
+    return;
+  }
+  const lines = [
+    'from ariel.body_phenotypes.robogen_lite.config import ModuleFaces',
+    'from ariel.body_phenotypes.robogen_lite.prebuilt_robots.parts import (',
+    '    brick,',
+    '    build,',
+    '    hinge,',
+    ')',
+    '',
+    'ROBOT = (',
+    ...tableRows(allModules),
+    ')',
+    '',
+    'robot = build(ROBOT)',
+  ];
+  showDialog('Table export', 'Paste into a Python file; build(ROBOT) returns the CoreModule.', lines.join('\n'));
+}
+
+// ── Render loop ──
+
+function updateHover() {
+  if (hoveredSite) {
+    hoveredSite.mesh.material.color.set(COLORS.site);
+    hoveredSite.mesh.material.emissive.set(COLORS.site);
+    hoveredSite.mesh.scale.setScalar(1);
+    hoveredSite = null;
+  }
+  canvas.style.cursor = 'default';
+  if (selectedTool === 'core') return;
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObjects(allSites.filter(s => !s.occupied).map(s => s.mesh));
+  if (hits.length > 0) {
+    hoveredSite = allSites.find(s => s.mesh === hits[0].object);
+    hoveredSite.mesh.material.color.set(COLORS.siteHover);
+    hoveredSite.mesh.material.emissive.set(COLORS.siteHover);
+    hoveredSite.mesh.scale.setScalar(1.4);
+    canvas.style.cursor = 'pointer';
+  }
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  if (controls.update()) pointerMoved = true; // the camera moved under the pointer
+  if (pointerMoved) { updateHover(); pointerMoved = false; }
+
+  const opacity = 0.5 + Math.sin(performance.now() * 0.003) * 0.2;
+  for (const s of allSites) {
+    if (!s.occupied && s !== hoveredSite) s.mesh.material.opacity = opacity;
+  }
+  renderer.render(scene, camera);
+}
+
+animate();
+createCoreModule(new THREE.Vector3(0, CORE_HALF, 0));
+
+</script>
+</body>
+</html>
