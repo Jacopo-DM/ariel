@@ -12,9 +12,15 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from ariel.body_phenotypes.morphological_counts import MorphologicalCounts
-from ariel.body_phenotypes.robogen_lite import IDX_OF_CORE, rest_boxes
+from ariel.body_phenotypes.robogen_lite import (
+    IDX_OF_CORE,
+    module_sizes,
+    rest_boxes,
+)
 
 if TYPE_CHECKING:
+    from numpy.typing import NDArray
+
     from ariel.body_phenotypes.robogen_lite import CoreModule
 
 # Axes of the core's frame: FRONT points along +y, RIGHT along x, TOP along +z
@@ -34,6 +40,13 @@ class MorphologicalMeasures(MorphologicalCounts):  # ruff: ignore[too-many-publi
     TOP to BOTTOM. This class adds the proportions and the single-letter
     aliases.
 
+    Symmetry, per plane through the centre of the core: a module is on the
+    plane when its centre (the volume-weighted centre of its geoms) is
+    within half its thinnest side of it; an off-plane module is mirrored
+    when a module of the same type sits at its mirror point, within half the
+    thinner of the two thinnest sides. The score is the share of off-plane
+    modules that are mirrored, 0.0 when no module is off the plane.
+
     Parameters
     ----------
     robot : CoreModule
@@ -50,7 +63,23 @@ class MorphologicalMeasures(MorphologicalCounts):  # ruff: ignore[too-many-publi
         )
         low, high = centres - reach, centres + reach
         self.extent = high.max(axis=0) - low.min(axis=0)
-        self.module_volume = float(np.prod(boxes.halves, axis=1).sum() * 8)
+        volumes = np.prod(boxes.halves, axis=1) * 8
+        self.module_volume = float(volumes.sum())
+        self.centres: dict[int, NDArray[np.float64]] = {}
+        for node in set(boxes.owners):
+            mine = np.array(boxes.owners) == node
+            self.centres[node] = (
+                volumes[mine] @ centres[mine] / volumes[mine].sum()
+            )
+        self.thinnest = {
+            node: thinnest
+            for node, (_, thinnest) in module_sizes(
+                boxes.owners, boxes.halves
+            ).items()
+        }
+        self.xy_symmetry = self._mirror_symmetry(HEIGHT_AXIS)
+        self.xz_symmetry = self._mirror_symmetry(DEPTH_AXIS)
+        self.yz_symmetry = self._mirror_symmetry(WIDTH_AXIS)
         core = np.array(boxes.owners) == IDX_OF_CORE
         self.reaches_past_core = bool(
             high[:, HEIGHT_AXIS].max()
@@ -58,6 +87,38 @@ class MorphologicalMeasures(MorphologicalCounts):  # ruff: ignore[too-many-publi
             or low[:, HEIGHT_AXIS].min()
             < low[core, HEIGHT_AXIS].min() - FLAT_TOLERANCE
         )
+
+    def _mirror_symmetry(self, axis: int) -> float:
+        """Share of off-plane modules that have a mirror partner.
+
+        Parameters
+        ----------
+        axis : int
+            The axis the mirror plane is perpendicular to (0 x, 1 y, 2 z).
+
+        Returns
+        -------
+        float
+            Mirrored off-plane modules over off-plane modules, in [0, 1].
+        """
+        plane = self.centres[IDX_OF_CORE][axis]
+        off = [
+            node
+            for node, centre in self.centres.items()
+            if abs(centre[axis] - plane) > self.thinnest[node] / 2
+        ]
+        mirrored = 0
+        for node in off:
+            image = self.centres[node].copy()
+            image[axis] = 2 * plane - image[axis]
+            mirrored += any(
+                other != node
+                and self._get_node_type(other) == self._get_node_type(node)
+                and np.linalg.norm(centre - image)
+                <= min(self.thinnest[node], self.thinnest[other]) / 2
+                for other, centre in self.centres.items()
+            )
+        return mirrored / len(off) if off else 0.0
 
     # ------------------------------------------------------------------
     # Bounding box, in metres

@@ -24,6 +24,7 @@ from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
 from ariel.body_phenotypes.robogen_lite.overlap import (
     Overlap,
     find_overlaps,
+    module_sizes,
     repair_overlaps,
 )
 from ariel.body_phenotypes.robogen_lite.rest_pose import RestBoxes, rest_boxes
@@ -46,6 +47,7 @@ __all__ = [
     "RestBoxes",
     "construct_mjspec_from_graph",
     "find_overlaps",
+    "module_sizes",
     "repair_overlaps",
     "rest_boxes",
 ]

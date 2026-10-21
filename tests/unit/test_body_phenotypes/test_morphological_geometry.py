@@ -88,6 +88,12 @@ def _check_box(robot: CoreModule) -> None:
     assert measures.bounding_box_width == pytest.approx(width, abs=MM)
     assert measures.bounding_box_height == pytest.approx(height, abs=MM)
     assert 0.0 < measures.coverage <= 1.0
+    for score in (
+        measures.xy_symmetry,
+        measures.xz_symmetry,
+        measures.yz_symmetry,
+    ):
+        assert 0.0 <= score <= 1.0
 
 
 def test_a_lone_core_is_one_core_wide() -> None:
