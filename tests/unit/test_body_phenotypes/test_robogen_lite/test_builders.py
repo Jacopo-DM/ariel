@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import json
 import random
-from typing import TYPE_CHECKING, cast
+import tempfile
+from pathlib import Path
+from typing import cast
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -12,6 +14,8 @@ import mujoco
 import networkx as nx
 import numpy as np
 import pytest
+from hypothesis import example, given
+from hypothesis import strategies as st
 
 from ariel.body_phenotypes.robogen_lite import constructor
 from ariel.body_phenotypes.robogen_lite.config import (
@@ -31,9 +35,6 @@ from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
 from ariel.body_phenotypes.robogen_lite.modules.hinge import HingeModule
 from ariel.body_phenotypes.robogen_lite.modules.module import Module
 from tests.unit.misuse import untyped
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 mpl.use("Agg")
 
@@ -83,6 +84,99 @@ def test_graph_json_roundtrip(tmp_path: Path) -> None:
     assert set(loaded.nodes) == {0, 1}
     assert loaded.edges[0, 1]["face"] == "FRONT"
     assert loaded.nodes[1]["type"] == "HINGE"
+
+
+GRAPH_NAMES = st.sampled_from(["CORE", "BRICK", "HINGE", "DEG_0", "FRONT"])
+
+
+@st.composite
+def graphs(draw: st.DrawFn) -> nx.DiGraph[int]:
+    """Draw a directed graph with module attributes on nodes and edges.
+
+    Returns
+    -------
+    nx.DiGraph[int]
+        The drawn graph.
+    """
+    nodes = draw(st.lists(st.integers(), unique=True, max_size=5))
+    graph: nx.DiGraph[int] = nx.DiGraph()
+    for node in nodes:
+        graph.add_node(
+            node, type=draw(GRAPH_NAMES | st.text()), rotation=draw(st.text())
+        )
+    if nodes:
+        pairs = st.tuples(st.sampled_from(nodes), st.sampled_from(nodes))
+        for parent, child in draw(st.lists(pairs, max_size=5)):
+            graph.add_edge(parent, child, face=draw(st.text()))
+    return graph
+
+
+@given(graphs())
+def test_graph_json_file_round_trip(graph: nx.DiGraph[int]) -> None:
+    """Loading a saved graph gives the same nodes, edges and attributes."""
+    with tempfile.TemporaryDirectory() as folder:
+        path = Path(folder) / "graph.json"
+        save_graph_as_json(graph, path)
+        loaded = load_graph_from_json(path)
+    assert dict(loaded.nodes.items()) == dict(graph.nodes.items())
+    assert sorted(loaded.edges(data="face")) == sorted(graph.edges(data="face"))
+
+
+GRAPH_FILE_VALUES = (
+    st.none() | st.booleans() | st.integers() | st.text(max_size=3)
+)
+GRAPH_FILES = st.one_of(
+    st.binary(),
+    st.fixed_dictionaries(
+        {},
+        optional={
+            "directed": st.booleans(),
+            "multigraph": st.booleans(),
+            "graph": st.dictionaries(st.text(max_size=3), GRAPH_FILE_VALUES),
+            "nodes": st.lists(
+                st.dictionaries(
+                    st.sampled_from(["id", "type"]), GRAPH_FILE_VALUES
+                ),
+                max_size=3,
+            )
+            | GRAPH_FILE_VALUES,
+            "edges": st.lists(
+                st.dictionaries(
+                    st.sampled_from(["source", "target", "face"]),
+                    GRAPH_FILE_VALUES,
+                ),
+                max_size=3,
+            )
+            | GRAPH_FILE_VALUES,
+        },
+    ).map(lambda data: json.dumps(data).encode()),
+)
+VALID_GRAPH_FILE = (
+    b'{"directed": true, "multigraph": false, "graph": {}, '
+    b'"nodes": [{"id": 0, "type": "CORE"}, {"id": 1, "type": "HINGE"}], '
+    b'"edges": [{"source": 0, "target": 1, "face": "FRONT"}]}'
+)
+
+
+@given(GRAPH_FILES)
+@example(VALID_GRAPH_FILE)
+@example(b"[]")
+@example(b"{}")
+@example(b'{"nodes": 1, "edges": []}')
+@example(b'{"nodes": [{}], "edges": []}')
+@example(b'{"directed": false, "nodes": [], "edges": []}')
+@example(b'{"multigraph": true, "nodes": [], "edges": []}')
+def test_load_graph_from_json_boundary(raw: bytes) -> None:
+    """Any file content loads as a simple DiGraph or raises ValueError."""
+    with tempfile.TemporaryDirectory() as folder:
+        path = Path(folder) / "graph.json"
+        path.write_bytes(raw)
+        try:
+            graph = load_graph_from_json(path)
+        except ValueError:
+            return
+    assert isinstance(graph, nx.DiGraph)
+    assert not graph.is_multigraph()
 
 
 def test_draw_graph_saves_an_image(tmp_path: Path) -> None:

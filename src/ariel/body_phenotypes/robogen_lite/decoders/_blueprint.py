@@ -119,15 +119,30 @@ def load_graph_from_json(
     -------
     DiGraph
         The loaded directed graph.
+
+    Raises
+    ------
+    ValueError
+        If the file is not UTF-8 JSON in node-link form, or it declares
+        an undirected graph or a multigraph.
     """
     with Path(load_file).open("r", encoding="utf-8") as f:
         data = json.load(f)
-    graph: DiGraph[int] = json_graph.node_link_graph(
-        data,
-        directed=True,
-        multigraph=False,
-        edges="edges",
-    )
+    try:
+        graph: DiGraph[int] = json_graph.node_link_graph(
+            data,
+            directed=True,
+            multigraph=False,
+            edges="edges",
+        )
+    except (KeyError, TypeError, AttributeError) as error:
+        msg = f"not a node-link graph file: {load_file}"
+        raise ValueError(msg) from error
+    # The file's own "directed" and "multigraph" keys override the
+    # arguments above, so check what came back.
+    if not graph.is_directed() or graph.is_multigraph():
+        msg = f"not a simple directed graph file: {load_file}"
+        raise ValueError(msg)
     return graph
 
 
