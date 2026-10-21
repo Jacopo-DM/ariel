@@ -22,10 +22,9 @@ import numpy as np
 from pydantic import Field, PlainValidator, computed_field
 
 # Local libraries
-from ariel.parameters import FrozenModel
+from ariel.parameters import STANDARD_GRAVITY, FrozenModel, quantity_of
 
 # Global constants
-STANDARD_GRAVITY = 9.80665  # m / s^2, exact by definition (ISO 80000-3)
 AIR_DENSITY_20C = 1.204  # kg / m^3, consensus of the research reports
 AIR_VISCOSITY_20C = 1.81e-5  # Pa s, consensus of the research reports
 DEFAULT_LENGTH_SCALE = 0.05  # m, one brick
@@ -35,69 +34,6 @@ DEFAULT_FRICTION = 1.0  # MuJoCo's own default
 DEFAULT_ALPHA = 0.05  # advection limit
 DEFAULT_KAPPA = 0.28  # contact time constant, 14 ms for the default scales
 DEFAULT_GAMMA = 0.5  # joint-frequency limit
-
-
-_ANGLES = u.dimensionless_angles()
-
-
-def _to(value: u.Quantity, unit: u.UnitBase) -> u.Quantity:
-    """Convert a quantity to a unit, treating radians as dimensionless.
-
-    The one place that calls astropy's untyped ``Quantity.to``.
-
-    Parameters
-    ----------
-    value : astropy.units.Quantity
-        The quantity.
-    unit : astropy.units.UnitBase
-        The target unit.
-
-    Returns
-    -------
-    astropy.units.Quantity
-        The quantity in ``unit``.
-    """
-    converted: u.Quantity = value.to(unit, equivalencies=_ANGLES)  # type: ignore[no-untyped-call]  # astropy ships no type hints
-    return converted
-
-
-def _quantity_of(
-    unit: u.UnitBase,
-) -> PlainValidator:
-    """Build a validator for a positive, finite, scalar quantity.
-
-    Parameters
-    ----------
-    unit : astropy.units.UnitBase
-        The canonical unit; the value is converted to it.
-
-    Returns
-    -------
-    PlainValidator
-        A pydantic validator that returns the value in ``unit``.
-    """
-
-    def check(value: object) -> u.Quantity:
-        if not isinstance(value, u.Quantity):
-            msg = f"needs an astropy quantity in {unit}, got {value!r}"
-            raise ValueError(msg)  # ruff: ignore[type-check-without-type-error]  # pydantic only reports ValueError
-        # A Quantity always has a unit; the stub allows None
-        if value.unit is None or not value.unit.is_equivalent(
-            unit, equivalencies=_ANGLES
-        ):
-            msg = f"needs the dimension of {unit}, got {value.unit}"
-            raise ValueError(msg)
-        if not value.isscalar:
-            msg = "needs a scalar quantity"
-            raise ValueError(msg)
-        converted = _to(value, unit)
-        number = float(converted.value)
-        if not (np.isfinite(number) and number > 0.0):
-            msg = f"needs a positive and finite value, got {value}"
-            raise ValueError(msg)
-        return converted
-
-    return PlainValidator(check)
 
 
 def _positive(value: float) -> float:
@@ -124,12 +60,12 @@ def _positive(value: float) -> float:
     return value
 
 
-type Length = Annotated[u.Quantity, _quantity_of(u.m)]
-type Speed = Annotated[u.Quantity, _quantity_of(u.m / u.s)]
-type AngularFrequency = Annotated[u.Quantity, _quantity_of(u.rad / u.s)]
-type Acceleration = Annotated[u.Quantity, _quantity_of(u.m / u.s**2)]
-type Density = Annotated[u.Quantity, _quantity_of(u.kg / u.m**3)]
-type Viscosity = Annotated[u.Quantity, _quantity_of(u.Pa * u.s)]
+type Length = Annotated[u.Quantity, quantity_of(u.m)]
+type Speed = Annotated[u.Quantity, quantity_of(u.m / u.s)]
+type AngularFrequency = Annotated[u.Quantity, quantity_of(u.rad / u.s)]
+type Acceleration = Annotated[u.Quantity, quantity_of(u.m / u.s**2)]
+type Density = Annotated[u.Quantity, quantity_of(u.kg / u.m**3)]
+type Viscosity = Annotated[u.Quantity, quantity_of(u.Pa * u.s)]
 type TimestepLimit = Literal["advection", "contact", "joint"]
 type Positive = Annotated[float, PlainValidator(_positive)]
 
