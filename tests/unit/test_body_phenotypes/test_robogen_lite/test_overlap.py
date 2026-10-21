@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import random
 from typing import TYPE_CHECKING
 
 import mujoco
@@ -26,6 +27,7 @@ from ariel.body_phenotypes.robogen_lite.overlap import (
     owner_of,
     pair_tolerance,
 )
+from ariel.ec.genotypes.tree import random_tree
 
 CUBE = 0.05  # half size of a brick
 THIN = 0.01  # half size of a thin plate
@@ -220,3 +222,12 @@ def test_a_box_mesh_is_made_once_per_size() -> None:
     assert box_mesh((0.1, 0.1, 0.1)) is first
     assert box_mesh((0.1, 0.2, 0.1)) is not first
     assert first.extents.tolist() == pytest.approx([0.1, 0.1, 0.1])
+
+
+def test_every_module_of_a_random_body_owns_its_own_geoms() -> None:
+    random.seed(42)
+    for _ in range(20):
+        graph = random_tree(20).to_networkx()
+        model = construct_mjspec_from_graph(graph).spec.compile()
+        owners = {owner_of(model, geom) for geom in range(model.ngeom)}
+        assert owners == set(graph.nodes)
