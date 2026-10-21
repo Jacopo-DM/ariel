@@ -5,15 +5,41 @@ import json
 import os
 import subprocess  # ruff: ignore[suspicious-subprocess-import]  # runs fixed local probe commands only
 import sys
+import tempfile
 import threading
 import time
+import warnings
 from pathlib import Path
 
 import pytest
+from hypothesis import example, given
+from hypothesis import strategies as st
 from rich.console import Console
 
-from ariel.opengl import gl_backend
-from ariel.opengl.gl_backend import CONFIG_NAME, BackendName, GLConfig
+from ariel.opengl import gl_backend, gl_manager
+from ariel.opengl.gl_backend import (
+    CONFIG_NAME,
+    BackendName,
+    BackendResult,
+    GLConfig,
+)
+
+BACKEND_RESULTS = st.builds(
+    BackendResult,
+    ok=st.booleans(),
+    render_ms=st.none() | st.floats(allow_nan=False, allow_infinity=False),
+    error=st.none() | st.text(),
+)
+GL_CONFIGS = st.builds(
+    GLConfig,
+    version=st.integers(),
+    platform=st.none() | st.text(),
+    python=st.none() | st.text(),
+    mujoco=st.none() | st.text(),
+    backends=st.dictionaries(st.text(), BACKEND_RESULTS, max_size=3),
+    selected=st.sampled_from([None, "glfw", "egl", "osmesa"]),
+    viewer_available=st.booleans(),
+)
 
 
 def _write(folder: Path, content: object) -> None:
@@ -42,6 +68,27 @@ def test_read_config_invalid_warns(tmp_path: Path, content: str) -> None:
     _write(tmp_path, content)
     with pytest.warns(UserWarning, match=CONFIG_NAME):
         assert gl_backend.read_config(tmp_path / CONFIG_NAME) is None
+
+
+@given(st.binary())
+@example(b'{"version": 1, "selected": "egl"}')
+def test_read_config_boundary(raw: bytes) -> None:
+    """Any file content reads as a GLConfig or None, never an exception."""
+    with tempfile.TemporaryDirectory() as folder, warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        path = Path(folder) / CONFIG_NAME
+        path.write_bytes(raw)
+        config = gl_backend.read_config(path)
+    assert config is None or isinstance(config, GLConfig)
+
+
+@given(GL_CONFIGS)
+def test_config_round_trip(config: GLConfig) -> None:
+    """Reading back the file the probe writes gives the same config."""
+    with tempfile.TemporaryDirectory() as folder:
+        path = Path(folder) / CONFIG_NAME
+        gl_manager._write_atomically(path, config)  # ruff: ignore[private-member-access]  # the writer the probe uses
+        assert gl_backend.read_config(path) == config
 
 
 def test_apply_config_sets_selected_backend() -> None:
