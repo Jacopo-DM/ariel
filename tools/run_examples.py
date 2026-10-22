@@ -176,7 +176,9 @@ EXAMPLES: dict[str, Example] = {
         after="z_ec_course/A3_template.py",
     ),
     "z_ec_course/A3_template.py": row(opengl=True),
-    "z_ec_course/A3_template_jack.py": row("--samples 2 --dur 2", opengl=True),
+    "z_ec_course/A3_example_solution.py": row(
+        "--samples 2 --dur 2", opengl=True
+    ),
     "z_ec_course/plot_fit_per_gen.py": row(
         after="c_genotypes/1_body_evolution_tree.py"
     ),

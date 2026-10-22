@@ -3,7 +3,6 @@
 # Standard library
 import argparse
 from pathlib import Path
-from typing import Any
 
 # Chooses the OpenGL backend before MuJoCo loads (CLAUDE.md, Things that bite)
 import ariel.rendering  # ruff: ignore[unused-import]  # imported for its side effect
@@ -20,10 +19,7 @@ from ariel.body_phenotypes.robogen_lite.decoders import (
     load_graph_from_json,
 )
 from ariel.simulation.controllers.controller import Controller
-from ariel.simulation.environments import OlympicArena
-from ariel.rendering import video_renderer
 from ariel.simulation.tracker import Tracker
-from ariel.rendering import VideoRecorder
 
 # --- DATA SETUP --- #
 SCRIPT_NAME = __file__.split("/")[-1][:-3]
@@ -55,76 +51,9 @@ args = parser.parse_args()
 
 # Local scripts
 from A3_plot_function import show_xpos_history
+from A3_template import experiment, fitness_function
 
 
-def fitness_function(history: list[tuple[float, float, float]]) -> float:
-    xt, yt, zt = TARGET_POSITION
-    xc, yc, zc = history[-1]
-
-    # Minimize the distance --> maximize the negative distance
-    cartesian_distance = np.sqrt(
-        (xt - xc) ** 2 + (yt - yc) ** 2 + (zt - zc) ** 2,
-    )
-    return -cartesian_distance
-
-
-def experiment(
-    robot: Any,
-    controller: Controller,
-    duration: int = TIME_OUT,
-) -> None:
-    """Run the simulation with custom controller."""
-    # ==================================================================== #
-    # Initialise controller to controller to None, always in the beginning.
-    mj.set_mjcb_control(None)  # DO NOT REMOVE
-
-    # Initialise world
-    # Import environments from ariel.simulation.environments
-    world = OlympicArena(
-        load_precompiled=False,
-    )
-
-    # Spawn robot in the world
-    # Check docstring for spawn conditions
-    world.spawn(
-        robot.spec,
-        position=SPAWN_POS,
-        correct_collision_with_floor=True,
-    )
-
-    # Generate the model and data
-    # These are standard parts of the simulation USE THEM AS IS, DO NOT CHANGE
-    model = world.compile()
-    data = mj.MjData(model)
-
-    # Reset state and time of simulation
-    mj.mj_resetData(model, data)
-
-    # Pass the model and data to the tracker
-    controller.tracker.setup(world.spec, data)
-
-    # Set the control callback function
-    # This is called every time step to get the next action.
-    args: list[Any] = []  # IF YOU NEED MORE ARGUMENTS ADD THEM HERE!
-    kwargs: dict[Any, Any] = {}  # IF YOU NEED MORE ARGUMENTS ADD THEM HERE!
-
-    mj.set_mjcb_control(
-        lambda m, d: controller.set_control(m, d, *args, **kwargs),
-    )
-
-    # ------------------------------------------------------------------ #
-
-    # This records a video of the simulation
-    path_to_video_folder = str(DATA / "videos")
-    video_recorder = VideoRecorder(output_folder=path_to_video_folder)
-
-    # Render with video recorder
-    video_renderer(
-        model,
-        data,
-        duration=duration,
-        video_recorder=video_recorder,
-    )
     # ==================================================================== #
 
 
@@ -157,7 +86,9 @@ def main() -> None:
     )
 
     # Simulate the robot
-    experiment(robot=core, controller=ctrl, duration=args.duration)
+    experiment(
+        robot=core, controller=ctrl, duration=args.duration, mode="video"
+    )
 
     # Plot the x-position history
     show_xpos_history(

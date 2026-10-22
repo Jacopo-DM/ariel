@@ -1,4 +1,4 @@
-"""EC A3 Template Code (Jack)."""
+"""EC A3 worked solution (by Jack): random robots, a small network, the best kept."""
 
 # Standard library
 import argparse
