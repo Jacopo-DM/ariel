@@ -39,7 +39,6 @@ from typing import Any, Optional, cast
 import ariel.rendering  # ruff: ignore[unused-import]  # imported for its side effect
 
 # Third-party
-import cv2
 import multiprocessing as mp
 import mujoco
 import nevergrad as ng
@@ -48,13 +47,15 @@ import torch
 from concurrent.futures import ProcessPoolExecutor
 from rich.console import Console
 from rich.traceback import install
-from torch import nn
 
 # ARIEL
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots.gecko import gecko as body_spider45
 from ariel.simulation.controllers.utils.data_get import get_state_from_data as get_robot_state
 from ariel.simulation.environments import SimpleFlatWorld
 from ariel.rendering import VideoRecorder
+
+# Shared with the other re_book scripts (examples/re_book/_vision.py)
+from _vision import Network, analyze_sections, fill_parameters, isolate_green
 
 install()
 console = Console()
@@ -132,52 +133,6 @@ def sample_waypoints(
             theta = rng.uniform(0.0, 2.0 * np.pi)
             wps.append(np.array([r * np.cos(theta), r * np.sin(theta), 0.1]))
     return wps
-
-
-# ── Network ───────────────────────────────────────────────────────────────────
-
-class Network(nn.Module):
-    def __init__(self, input_size: int, output_size: int, hidden_size: int = 32) -> None:
-        super().__init__()
-        self.fc1    = nn.Linear(input_size, hidden_size)
-        self.fc2    = nn.Linear(hidden_size, hidden_size)
-        self.fc_out = nn.Linear(hidden_size, output_size)
-        self.hidden_act = nn.ELU()
-        self.out_act    = nn.Tanh()
-        for p in self.parameters():
-            p.requires_grad = False
-
-    @torch.inference_mode()
-    def forward(self, model, data, state: np.ndarray) -> np.ndarray:  # noqa: ARG002
-        x = torch.as_tensor(state, dtype=torch.float32)
-        x = self.hidden_act(self.fc1(x))
-        x = self.hidden_act(self.fc2(x))
-        return (self.out_act(self.fc_out(x)) * (torch.pi / 2)).numpy()
-
-
-@torch.no_grad()
-def fill_parameters(net: nn.Module, vector: np.ndarray) -> None:
-    address = 0
-    for p in net.parameters():
-        d = p.data.view(-1)
-        n = len(d)
-        d[:] = torch.as_tensor(vector[address : address + n])
-        address += n
-    if address != len(vector):
-        raise IndexError("Parameter vector length mismatch")
-
-
-# ── Vision helpers ────────────────────────────────────────────────────────────
-
-def isolate_green(frame: np.ndarray) -> np.ndarray:
-    hsv = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
-    return cv2.inRange(hsv, np.array([35, 40, 40]), np.array([85, 255, 255]))
-
-
-def analyze_sections(mask: np.ndarray) -> list[float]:
-    """Split mask into left / centre / right thirds; return green fraction each."""
-    sections = np.array_split(mask, 3, axis=1)
-    return [cv2.countNonZero(s) / max(s.size, 1) for s in sections]
 
 
 # ── Episode runner ────────────────────────────────────────────────────────────

@@ -7,7 +7,6 @@ import time
 from pathlib import Path
 from typing import Any, List, Literal, Optional, cast
 
-import cv2
 
 # Pretty little errors and progress bars
 from rich.console import Console
@@ -39,8 +38,6 @@ import torch
 # Learner
 from evotorch.algorithms import CMAES
 from evotorch.neuroevolution import NEProblem
-from torch import nn
-from torch.nn import Tanh
 
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots.john_set import spider_8
 from ariel.simulation.controllers.utils.data_get import (
@@ -59,6 +56,9 @@ from ariel.simulation.tasks.targeted_locomotion import (
 )
 from ariel.rendering import VideoRecorder, video_renderer
 from ariel.simulation.tracker import Tracker
+
+# Shared with the other re_book scripts (examples/re_book/_vision.py)
+from _vision import Network, analyze_sections, fill_parameters, isolate_green
 
 parser = argparse.ArgumentParser(
     description="Evolution simulation with configurable budget"
@@ -110,106 +110,6 @@ SCRIPT_NAME = Path(__file__).stem
 CWD = Path.cwd()
 DATA = Path(CWD / "__data__" / SCRIPT_NAME)
 DATA.mkdir(exist_ok=True, parents=True)
-
-
-# ============================================================================ #
-#                       Network and Helper function                            #
-# ============================================================================ #
-class Network(nn.Module):
-    def __init__(
-        self, input_size: int, output_size: int, hidden_size: int
-    ) -> None:
-        super(Network, self).__init__()
-        self.fc1 = nn.Linear(input_size, hidden_size)
-        self.fc2 = nn.Linear(hidden_size, hidden_size)
-        self.fc4 = nn.Linear(hidden_size, output_size)
-
-        self.hidden_activation = nn.ELU()
-        self.output_activation = nn.Tanh()
-
-        self.input = input_size
-
-        # Disable gradients for all parameters
-        for param in self.parameters():
-            param.requires_grad = False
-
-    @torch.inference_mode()
-    def forward(self, model, data, state):
-        x = torch.Tensor(state)
-
-        x = self.hidden_activation(self.fc1(x))
-        x = self.hidden_activation(self.fc2(x))
-        x = self.output_activation(self.fc4(x)) * (torch.pi / 2)
-
-        return x.detach().numpy()
-
-
-@torch.no_grad()
-def fill_parameters(net: nn.Module, vector: torch.Tensor):
-    """Fill the parameters of a torch module (net) from a vector.
-
-    No gradient information is kept.
-
-    The vector's length must be exactly the same with the number
-    of parameters of the PyTorch module.
-
-    Args:
-        net: The torch module whose parameter values will be filled.
-        vector: A 1-D torch tensor which stores the parameter values.
-    """
-    address = 0
-    for p in net.parameters():
-        d = p.data.view(-1)
-        n = len(d)
-        d[:] = torch.as_tensor(vector[address : address + n], device=d.device)
-        address += n
-
-    if address != len(vector):
-        raise IndexError("The parameter vector is larger than expected")
-
-
-# ============================================================================ #
-#                         Camera frame processing                              #
-# ============================================================================ #
-
-
-def isolate_green(frame):
-    # Convert to HSV color space
-    # Enhances colours, makes it easier to detect target colour
-    hsv = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
-
-    # Define range for green color
-    # At the moment hardcoding seems to work best
-    lower_green = np.array([35, 40, 40])
-    upper_green = np.array([85, 255, 255])
-
-    # Create mask for green color
-    green_mask = cv2.inRange(hsv, lower_green, upper_green)
-
-    return green_mask
-
-
-def analyze_sections(green_mask):
-    sections = np.array_split(green_mask, 3, axis=1)
-    left_section, middle_section, right_section = (
-        sections[0],
-        sections[1],
-        sections[2],
-    )
-
-    # Calculate percentage of green pixels in each section
-    def get_green_percentage(section):
-        total_pixels = section.size
-        if total_pixels == 0:
-            return 0.0
-        green_pixels = cv2.countNonZero(section)
-        return green_pixels / total_pixels
-
-    left_percent = get_green_percentage(left_section)
-    middle_percent = get_green_percentage(middle_section)
-    right_percent = get_green_percentage(right_section)
-
-    return [left_percent, middle_percent, right_percent]
 
 
 # ============================================================================ #

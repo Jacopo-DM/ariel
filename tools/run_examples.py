@@ -188,7 +188,10 @@ EXAMPLES: dict[str, Example] = {
 }
 
 # Imported by the scripts, never run on their own
-MODULES = frozenset({"z_ec_course/A3_plot_function.py"})
+MODULES = frozenset({
+    "re_book/_vision.py",
+    "z_ec_course/A3_plot_function.py",
+})
 
 
 def opengl_works() -> bool:
