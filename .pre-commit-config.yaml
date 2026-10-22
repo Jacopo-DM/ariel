@@ -17,13 +17,13 @@ repos:
         name: ruff
         entry: uv run --no-sync ruff check
         language: system
-        types_or: [python, pyi]
+        types_or: [python, pyi, jupyter]
         files: ^(src|tests)/
       - id: ruff-format
         name: ruff-format
         entry: uv run --no-sync ruff format
         language: system
-        types_or: [python, pyi]
+        types_or: [python, pyi, jupyter]
         files: ^(src|tests)/
       # Functional notebooks (tests/functional): see tests/functional/README.md.
       # At commit, only the notebooks in the commit; at push, all non-slow ones.
