@@ -288,6 +288,11 @@ _THREAD_LOCAL = threading.local()
 # Contexts are built on the main thread up-front (see _prebuild_contexts) and
 # handed out to worker threads on first use.
 _CONTEXT_POOL: "queue.Queue[dict[str, Any]]" = queue.Queue()
+# EGL (and OSMesa) bind a context to the thread that made it current, so a
+# context built on the main thread cannot be claimed by a worker (EGL fails
+# with EGL_BAD_ACCESS). Those backends can build a context on any thread, so
+# there each worker builds its own; the main-thread pool is for GLFW only.
+_BUILD_IN_WORKER = os.environ.get("MUJOCO_GL") in {"egl", "osmesa"}
 
 
 def _build_simulation_context() -> dict[str, Any]:
@@ -385,7 +390,11 @@ def _prebuild_contexts(num_contexts: int) -> None:
 def _get_thread_context() -> dict[str, Any]:
     """Claim one pre-built Mujoco context for the calling worker thread."""
     if not hasattr(_THREAD_LOCAL, "ctx"):
-        _THREAD_LOCAL.ctx = _CONTEXT_POOL.get()
+        _THREAD_LOCAL.ctx = (
+            _build_simulation_context()
+            if _BUILD_IN_WORKER
+            else _CONTEXT_POOL.get()
+        )
     return cast(dict[str, Any], _THREAD_LOCAL.ctx)
 
 
@@ -482,9 +491,10 @@ def evolve(world, model, data) -> tuple[np.ndarray, int]:
 
     console.log(f"Population size: {POP_SIZE} | Workers: {NUM_WORKERS}")
 
-    # Must happen before the pool starts: GL contexts can only be created on
-    # the main thread.
-    _prebuild_contexts(NUM_WORKERS)
+    # With GLFW this must happen before the pool starts: GLFW contexts can
+    # only be created on the main thread.
+    if not _BUILD_IN_WORKER:
+        _prebuild_contexts(NUM_WORKERS)
 
     # The context manager handles worker shutdown and joining.
     with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
