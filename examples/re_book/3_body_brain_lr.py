@@ -49,6 +49,7 @@ from ariel.simulation.environments import SimpleFlatWorld
 from ariel.rendering import single_frame_renderer, video_renderer
 from ariel.simulation.runners import simple_runner
 from ariel.rendering import VideoRecorder
+from ariel.simulators import compile_model
 
 # Type Checking
 type ViewerTypes = Literal["launcher", "video", "simple", "no_control", "frame"]
@@ -349,7 +350,7 @@ def learning_robot(
 
     # Check inputs
     mj.set_mjcb_control(None)
-    model = robot.spec.compile()
+    model = compile_model(robot.spec)
     data = mj.MjData(model)
     num_of_inputs = len(data.ctrl)
     del model, data
@@ -457,7 +458,7 @@ def experiment(
 
     # Generate the model and data
     # These are standard parts of the simulation USE THEM AS IS, DO NOT CHANGE
-    model = world.spec.compile()
+    model = world.compile()
     data = mj.MjData(model)
 
     # ------------------------------------------------------------------ #
@@ -548,7 +549,7 @@ def evaluate_robot(
     # -------------------------------------------------------------- #
     # Load robot model
     mj.set_mjcb_control(None)  # DO NOT REMOVE
-    model = robot.spec.compile()
+    model = compile_model(robot.spec)
     data = mj.MjData(model)
     num_of_joints = model.nu
     del model, data

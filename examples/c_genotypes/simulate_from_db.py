@@ -34,6 +34,7 @@ from ariel.simulation.environments._simple_flat_with_target import (
 from ariel.rendering import video_renderer
 from ariel.simulation.tracker import Tracker
 from ariel.rendering import VideoRecorder
+from ariel.simulators import compile_model
 
 console = Console()
 
@@ -101,7 +102,7 @@ def run_simulation(mode: ViewerTypes, ind: Individual, duration: float, out_dir:
         return float("inf")
 
     try:
-        model = spec.compile()
+        model = compile_model(spec)
     except Exception:
         return float("inf")
 
@@ -110,7 +111,7 @@ def run_simulation(mode: ViewerTypes, ind: Individual, duration: float, out_dir:
 
     world = SimpleFlatWorldWithTarget()
     world.spawn(spec, position=SPAWN_POSITION)
-    model = world.spec.compile()
+    model = world.compile()
     data = mujoco.MjData(model)
 
     adj_dict = create_fully_connected_adjacency(model.nu)

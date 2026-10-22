@@ -50,7 +50,7 @@ def main() -> None:
     gecko_core = gecko()
     world.spawn(gecko_core.spec, position=[0, 0, 0])
 
-    model = world.spec.compile()
+    model = world.compile()
     data = mujoco.MjData(model)
 
     mujoco_type_to_find = mujoco.mjtObj.mjOBJ_GEOM

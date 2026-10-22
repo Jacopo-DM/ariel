@@ -55,6 +55,7 @@ from ariel.simulation.environments._simple_flat_with_target import (
 from ariel.rendering import video_renderer
 from ariel.simulation.tracker import Tracker
 from ariel.rendering import VideoRecorder
+from ariel.simulators import compile_model
 
 # Initialize rich console
 install()
@@ -174,7 +175,7 @@ class Evolution:
         if spec is None:
             return 0
         try:
-            return spec.compile().nu
+            return compile_model(spec).nu
         except:
             return 0
 
@@ -383,7 +384,7 @@ class Evolution:
             temp_spec = self.map_genotype_to_body(ind.genotype["morph"])
             if temp_spec:
                 try:
-                    temp_model = temp_spec.compile()
+                    temp_model = compile_model(temp_spec)
                     if mode == "simple" or temp_model.nu == expected_joints:
                         spec = temp_spec
                         model = temp_model
@@ -393,7 +394,7 @@ class Evolution:
         if model is None:
             spec = self.map_genotype_to_body(ind.genotype["morph"])
             if spec:
-                model = spec.compile()
+                model = compile_model(spec)
             else:
                 return float("inf")
         if mode == "simple":
@@ -403,7 +404,7 @@ class Evolution:
             ind.tags["debug_joints"] = model.nu
         world = SimpleFlatWorldWithTarget()
         world.spawn(spec, position=SPAWN_POSITION)
-        model = world.spec.compile()
+        model = world.compile()
         data = mujoco.MjData(model)
         adj_dict = create_fully_connected_adjacency(model.nu)
         cpg = HopfCPG(adj_dict)
