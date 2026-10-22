@@ -13,6 +13,9 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any, Literal
 
+# Chooses the OpenGL backend before MuJoCo loads (CLAUDE.md, Things that bite)
+import ariel.rendering  # ruff: ignore[unused-import]  # imported for its side effect
+
 # Third-party libraries
 import mujoco as mj
 import nevergrad as ng

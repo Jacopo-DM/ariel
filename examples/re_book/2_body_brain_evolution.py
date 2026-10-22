@@ -13,6 +13,9 @@ import random
 from pathlib import Path
 from typing import Literal
 
+# Chooses the OpenGL backend before MuJoCo loads (CLAUDE.md, Things that bite)
+import ariel.rendering  # ruff: ignore[unused-import]  # imported for its side effect
+
 import mujoco
 
 # Third-party libraries

@@ -12,6 +12,9 @@ import argparse
 from pathlib import Path
 from typing import Any, Literal, cast
 
+# Chooses the OpenGL backend before MuJoCo loads (CLAUDE.md, Things that bite)
+import ariel.rendering  # ruff: ignore[unused-import]  # imported for its side effect
+
 import mujoco
 import numpy as np
 import torch

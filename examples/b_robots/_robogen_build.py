@@ -16,8 +16,12 @@ References
 """
 
 # Standard library
+import argparse
 import contextlib
 from pathlib import Path
+
+# Chooses the OpenGL backend before MuJoCo loads (CLAUDE.md, Things that bite)
+import ariel.rendering  # ruff: ignore[unused-import]  # imported for its side effect
 
 # Third-party libraries
 import mujoco
@@ -43,6 +47,16 @@ DATA.mkdir(parents=True, exist_ok=True)
 
 # Global functions
 console = Console(width=180)
+
+# --- COMMAND LINE --- #
+parser = argparse.ArgumentParser(description="Build robots module by module.")
+parser.add_argument(
+    "--visualize",
+    action=argparse.BooleanOptionalAction,
+    default=True,
+    help="Open the viewer (--no-visualize renders a frame without a window)",
+)
+args = parser.parse_args()
 
 
 class DummyRobotTestAttach:
@@ -204,13 +218,13 @@ def run(
 def main() -> None:
     """Entry point."""
     robot_1 = DummyRobotTestCtrl()
-    run(robot_1, with_viewer=True)
+    run(robot_1, with_viewer=args.visualize)
 
     robot_2 = DummyRobotTestRotate()
-    run(robot_2, with_viewer=True)
+    run(robot_2, with_viewer=args.visualize)
 
     robot_3 = DummyRobotTestAttach()
-    run(robot_3, with_viewer=True)
+    run(robot_3, with_viewer=args.visualize)
 
 
 if __name__ == "__main__":

@@ -20,6 +20,9 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
+# Chooses the OpenGL backend before MuJoCo loads (CLAUDE.md, Things that bite)
+import ariel.rendering  # ruff: ignore[unused-import]  # imported for its side effect
+
 # Third-party
 import mujoco
 import mujoco.viewer

@@ -19,6 +19,9 @@ from rich.traceback import install
 install()
 console = Console()
 
+# Chooses the OpenGL backend before MuJoCo loads (CLAUDE.md, Things that bite)
+import ariel.rendering  # ruff: ignore[unused-import]  # imported for its side effect
+
 # Third-party libraries
 import numpy as np
 import mujoco

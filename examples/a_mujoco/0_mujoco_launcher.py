@@ -1,6 +1,7 @@
 """Launching the MuJoCo viewer."""
 
 # Standard library
+import argparse
 from pathlib import Path
 
 # Third-party libraries
@@ -27,6 +28,16 @@ RNG = np.random.default_rng(SEED)
 install(show_locals=False)
 console = Console()
 
+# --- COMMAND LINE --- #
+parser = argparse.ArgumentParser(description="Open the MuJoCo viewer.")
+parser.add_argument(
+    "--visualize",
+    action=argparse.BooleanOptionalAction,
+    default=True,
+    help="Open the viewer (--no-visualize steps 5 s without a window)",
+)
+args = parser.parse_args()
+
 
 def main() -> None:
     """Entry point."""
@@ -49,8 +60,11 @@ def main() -> None:
     model = world.compile()
     data = mujoco.MjData(model)
 
-    # Render a single frame
-    viewer.launch(model, data)
+    # Open the viewer, or step five seconds without a window
+    if args.visualize:
+        viewer.launch(model, data)
+    else:
+        mujoco.mj_step(model, data, nstep=int(5 / model.opt.timestep))
 
 
 if __name__ == "__main__":

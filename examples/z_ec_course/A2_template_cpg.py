@@ -1,6 +1,7 @@
 """A2: Template for creating a custom controller using NaCPG."""
 
 # Standard libraries
+import argparse
 from pathlib import Path
 
 # Third-party libraries
@@ -24,6 +25,20 @@ SCRIPT_NAME = __file__.split("/")[-1][:-3]
 CWD = Path.cwd()
 DATA = CWD / "__data__" / SCRIPT_NAME
 DATA.mkdir(parents=True, exist_ok=True)
+
+# --- COMMAND LINE --- #
+parser = argparse.ArgumentParser(description="Tune a NaCPG with Nevergrad.")
+parser.add_argument("--budget", type=int, default=500, help="Evaluations")
+parser.add_argument(
+    "--dur", type=float, default=10, help="Seconds simulated per evaluation"
+)
+parser.add_argument(
+    "--visualize",
+    action=argparse.BooleanOptionalAction,
+    default=True,
+    help="Open the viewer (--no-visualize steps the best gait without a window)",
+)
+args = parser.parse_args()
 
 # Global variables
 SPAWN_POS = [-0.8, 0, 0.1]
@@ -108,7 +123,7 @@ def main() -> None:
         b=ng.p.Array(shape=(len(data.ctrl),)).set_bounds(-100, 100),
     )
     num_of_workers = 50
-    budget = 500
+    budget = args.budget
     optim = ng.optimizers.PSO
     optimizer = optim(
         parametrization=params,
@@ -145,7 +160,7 @@ def main() -> None:
         simple_runner(
             model,
             data,
-            duration=10,
+            duration=args.dur,
         )
         loss = fitness_function(tracker.history["xpos"][0])
         optimizer.tell(x, loss)
@@ -163,10 +178,13 @@ def main() -> None:
 
     # This opens a viewer window and runs the simulation with your controller
     # If mujoco.set_mjcb_control(None), then you can control the limbs yourself.
-    viewer.launch(
-        model=model,
-        data=data,
-    )
+    if args.visualize:
+        viewer.launch(
+            model=model,
+            data=data,
+        )
+    else:
+        simple_runner(model, data, duration=args.dur)
 
     show_xpos_history(tracker.history["xpos"][0])
 

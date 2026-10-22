@@ -77,6 +77,12 @@ parser.add_argument(
     default=0.1,
     help="Spawn position Z",
 )
+parser.add_argument(
+    "--visualize",
+    action=argparse.BooleanOptionalAction,
+    default=True,
+    help="Open the viewer (--no-visualize steps the duration without one)",
+)
 
 args = parser.parse_args()
 
@@ -210,7 +216,11 @@ def main() -> None:
     mujoco.mj_resetData(model, data)
 
     try:
-        if sys.platform == "darwin" or not hasattr(mujoco.viewer, "launch_passive"):
+        if not args.visualize:
+            for _ in range(int(DURATION / model.opt.timestep)):
+                controller.set_control(model, data)
+                mujoco.mj_step(model, data)
+        elif sys.platform == "darwin" or not hasattr(mujoco.viewer, "launch_passive"):
             console.log("[yellow]Using active MuJoCo viewer fallback.[/yellow]")
             mujoco.set_mjcb_control(controller.set_control)
             mujoco.viewer.launch(model=model, data=data)

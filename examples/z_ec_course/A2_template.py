@@ -1,6 +1,7 @@
 """EC A2 Template Code."""
 
 # Standard libraries
+import argparse
 from pathlib import Path
 
 # Third-party libraries
@@ -23,6 +24,16 @@ SCRIPT_NAME = __file__.split("/")[-1][:-3]
 CWD = Path.cwd()
 DATA = CWD / "__data__"
 DATA.mkdir(parents=True, exist_ok=True)
+
+# --- COMMAND LINE --- #
+parser = argparse.ArgumentParser(description="Move a gecko at random.")
+parser.add_argument(
+    "--visualize",
+    action=argparse.BooleanOptionalAction,
+    default=True,
+    help="Open the viewer (--no-visualize steps 10 s without a window)",
+)
+args = parser.parse_args()
 
 
 def random_move(
@@ -148,10 +159,13 @@ def main() -> None:
 
     # This opens a viewer window and runs the simulation with the controller you defined
     # If mujoco.set_mjcb_control(None), then you can control the limbs yourself.
-    viewer.launch(
-        model=model,
-        data=data,
-    )
+    if args.visualize:
+        viewer.launch(
+            model=model,
+            data=data,
+        )
+    else:
+        mujoco.mj_step(model, data, nstep=int(10 / model.opt.timestep))
 
     # If you want to record a video of your simulation, you can use the video renderer.
     # Non-default VideoRecorder options

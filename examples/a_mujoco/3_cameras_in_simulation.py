@@ -1,6 +1,7 @@
 """Example usage for cameras inside mujoco simualtions."""
 
 # Standard library
+import argparse
 import time
 from pathlib import Path
 
@@ -37,6 +38,16 @@ RNG = np.random.default_rng(SEED)
 # --- TERMINAL OUTPUT SETUP --- #
 install(show_locals=False)
 console = Console()
+
+# --- COMMAND LINE --- #
+parser = argparse.ArgumentParser(description="Show a camera inside a world.")
+parser.add_argument(
+    "--visualize",
+    action=argparse.BooleanOptionalAction,
+    default=True,
+    help="Open the viewer (--no-visualize steps 5 s without a window)",
+)
+args = parser.parse_args()
 
 
 SPEED_MULTIPLIER = 5.0
@@ -86,6 +97,14 @@ def main() -> None:
     figure, axis = plt.subplots(num="Inset Camera View")
     image = axis.imshow(np.zeros((240, 240, 3), dtype=np.uint8))
     axis.axis("off")
+
+    if not args.visualize:
+        # Step five seconds, then render the camera once, without a window
+        mujoco.mj_step(model, data, nstep=int(5 / model.opt.timestep))
+        renderer.update_scene(data, camera=found_camera_name)
+        image.set_data(renderer.render())
+        plt.close(figure)
+        return
 
     with mujoco.viewer.launch_passive(model, data) as viewer:
         while viewer.is_running():

@@ -9,8 +9,12 @@ Status:     Completed ✅
 """
 
 # Standard library
+import argparse
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
+
+# Chooses the OpenGL backend before MuJoCo loads (CLAUDE.md, Things that bite)
+import ariel.rendering  # ruff: ignore[unused-import]  # imported for its side effect
 
 # Third-party libraries
 import mujoco
@@ -58,6 +62,17 @@ SEED = 40
 
 # Global functions
 console = Console()
+
+# --- COMMAND LINE --- #
+parser = argparse.ArgumentParser(description="Place a robot on the terrains.")
+parser.add_argument(
+    "--visualize",
+    action=argparse.BooleanOptionalAction,
+    default=True,
+    help="Open the viewer (--no-visualize steps 5 s without a window)",
+)
+args = parser.parse_args()
+
 RNG = np.random.default_rng(SEED)
 
 
@@ -102,7 +117,7 @@ def main() -> None:
     core = construct_mjspec_from_graph(graph)
 
     # Simulate the robot
-    run(core, with_viewer=True)
+    run(core, with_viewer=args.visualize)
 
 
 def run(
@@ -152,6 +167,8 @@ def run(
     # View
     if with_viewer:
         viewer.launch(model=model, data=data)
+    else:
+        mujoco.mj_step(model, data, nstep=int(5 / model.opt.timestep))
 
     print(model)
 

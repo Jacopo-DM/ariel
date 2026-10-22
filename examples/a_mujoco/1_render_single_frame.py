@@ -8,6 +8,9 @@ Hardware:   M4 Pro
 Status:     Completed ✅
 """
 
+# Chooses the OpenGL backend before MuJoCo loads (CLAUDE.md, Things that bite)
+import ariel.rendering  # ruff: ignore[unused-import]  # imported for its side effect
+
 # Third-party libraries
 import mujoco
 from pathlib import Path
