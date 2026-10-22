@@ -63,7 +63,7 @@ row, a row names a notebook that does not exist, or a notebook has no row.
 | `parameters` | `parameters` |
 | `rendering` | `ariel_modules`, `sim_environments`, `opengl_and_video`, `prebuilt_robots` |
 | `simulation` | `speed_tests` |
-| `simulation/controllers` | `cpg` |
+| `simulation/controllers` | `cpg`, `cpg_properties`, `cpg_locomotion` |
 | `simulation/environments` | `sim_environments`, `utils` |
 | `simulation/tasks` | `tasks` |
 | `simulators` | `mujoco_settings` |
