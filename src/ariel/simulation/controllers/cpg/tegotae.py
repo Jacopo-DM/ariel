@@ -21,8 +21,8 @@ body, with no wiring between the oscillators (``coupling`` is 0 by default).
 the derivative of the action term, the reaction term and the gain become
 small networks, shared by every joint and tuned with the other parameters::
 
-    dphi_i/dt = w_i + G(cos phi_i, sin phi_i, N_i) A'(cos phi_i, sin phi_i)
-                      (R(N_i) - R(0))
+    dphi_i/dt = w_i + G(cos phi_i, sin phi_i, N_i)
+                    * A'(cos phi_i, sin phi_i) * (R(N_i) - R(0))
 
 Each network has one hidden layer of ``hidden`` tanh units. ``R(0)`` is
 subtracted so that a limb that touches nothing gets no feedback, as in the
