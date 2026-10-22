@@ -24,9 +24,11 @@ signal ``F_i`` (Righetti and Ijspeert, ICRA 2006, equations 1 to 3)::
 With a periodic input the frequency converges to one of the input's
 frequencies. With no input it behaves like ``HopfCPG``. The paper's networks
 that learn a whole teaching signal (equations 4 to 11) are not built here: an
-evolved controller has no teaching signal. The input is set with ``set_input``
-before each ``forward``; feeding back, for example, the difference between
-the measured and the commanded joint angle lets the frequency follow the body.
+evolved controller has no teaching signal. ``F`` is the fast handle
+``teaching``: by default ``set_input`` takes one value per joint before each
+``forward``, and feeding back, for example, the difference between the
+measured and the commanded joint angle lets the frequency follow the body.
+The ``frequency`` handle multiplies the learned frequency, not the state.
 
 References
 ----------
@@ -36,6 +38,7 @@ References
 
 # Standard library
 import math
+from collections.abc import Sequence
 from typing import ClassVar
 
 # Third-party libraries
@@ -47,7 +50,7 @@ from ariel.simulation.controllers.cpg._base import (
     CPG,
     BetaParams,
     E,
-    ParamInput,
+    InputRoute,
     uniform,
 )
 
@@ -70,7 +73,7 @@ class HopfCPG(CPG):
     offset: nn.Parameter
     xy: torch.Tensor
 
-    def __init__(
+    def __init__(  # ruff: ignore[too-many-arguments]  # the shared CPG arguments plus the model's constants
         self,
         adjacency_dict: dict[int, list[int]],
         gamma: float = 10.0,
@@ -84,6 +87,7 @@ class HopfCPG(CPG):
         coupling: float = 1.0,
         clipping: bool = True,
         angle_tracking: bool = False,
+        inputs: Sequence[InputRoute] | None = None,
     ) -> None:
         """Initialize the network.
 
@@ -105,6 +109,9 @@ class HopfCPG(CPG):
             If True, the output angles are clipped to ``angle_limits``.
         angle_tracking : bool, optional
             If True, every output is appended to ``angle_history``.
+        inputs : Sequence[InputRoute] | None, optional
+            Where each entry of the vector given to ``set_input`` goes.
+            None gives no input.
         """
         super().__init__(
             adjacency_dict,
@@ -114,6 +121,7 @@ class HopfCPG(CPG):
             coupling=coupling,
             clipping=clipping,
             angle_tracking=angle_tracking,
+            inputs=inputs,
         )
         self.gamma = gamma
         self.reset_state()
@@ -150,24 +158,26 @@ class HopfCPG(CPG):
 
     def _step(self, step: float) -> None:
         """Take one Euler step of ``step`` seconds."""
-        self.xy += self._rates(self.group("w")) * step
+        self.xy += self._rates(self.group("w") * self.frequency_factor()) * step
 
     def _angles(self) -> torch.Tensor:
-        """Return ``offset_i + A_i * x_i``.
+        """Return ``offset_i + A_i * x_i``, with the inputs applied.
 
         Returns
         -------
         torch.Tensor
             One angle per oscillator.
         """
-        return self.group("offset") + self.group("amplitudes") * self.xy[:, 0]
+        offset = self.group("offset") + self.handle("offset")
+        amplitude = self.group("amplitudes") * self.amplitude_factor()
+        return offset + amplitude * self.xy[:, 0]
 
 
 class AdaptiveHopfCPG(HopfCPG):
     """Hopf oscillators whose frequencies adapt to an input signal."""
 
+    FAST_HANDLES: ClassVar[tuple[str, ...]] = ("teaching",)
     frequency: torch.Tensor
-    inputs: torch.Tensor
 
     def __init__(  # ruff: ignore[too-many-arguments]  # one argument per constant of the paper's equations
         self,
@@ -184,6 +194,7 @@ class AdaptiveHopfCPG(HopfCPG):
         coupling: float = 1.0,
         clipping: bool = True,
         angle_tracking: bool = False,
+        inputs: Sequence[InputRoute] | None = None,
     ) -> None:
         """Initialize the network.
 
@@ -208,6 +219,9 @@ class AdaptiveHopfCPG(HopfCPG):
             If True, the output angles are clipped to ``angle_limits``.
         angle_tracking : bool, optional
             If True, every output is appended to ``angle_history``.
+        inputs : Sequence[InputRoute] | None, optional
+            Where each entry of the vector given to ``set_input`` goes.
+            None sends entry ``i`` to the teaching signal of joint ``i``.
         """
         self.epsilon = epsilon
         super().__init__(
@@ -219,29 +233,20 @@ class AdaptiveHopfCPG(HopfCPG):
             coupling=coupling,
             clipping=clipping,
             angle_tracking=angle_tracking,
+            inputs=inputs,
         )
 
-    def set_input(self, values: ParamInput) -> None:
-        """Set the input ``F_i`` used by the following steps.
-
-        Parameters
-        ----------
-        values : ParamInput
-            One value per oscillator.
-        """
-        self.inputs = self.param_type_converter(values).reshape(self.n).clone()
-
     def _reset(self) -> None:
-        """Start on the unit circle, at the set frequencies, with no input."""
+        """Start on the unit circle, at the set frequencies."""
         super()._reset()
         self.frequency = self.group("w").clone()
-        self.inputs = torch.zeros(self.n)
 
     def _step(self, step: float) -> None:
         """Take one Euler step of ``step`` seconds."""
-        rates = self._rates(self.frequency)
-        rates[:, 0] += self.epsilon * self.inputs
+        teaching = self.handle("teaching")
+        rates = self._rates(self.frequency * self.frequency_factor())
+        rates[:, 0] += self.epsilon * teaching
         radius = torch.sqrt((self.xy**2).sum(dim=1)) + E
-        frequency_rate = -self.epsilon * self.inputs * self.xy[:, 1] / radius
+        frequency_rate = -self.epsilon * teaching * self.xy[:, 1] / radius
         self.xy += rates * step
         self.frequency += frequency_rate * step

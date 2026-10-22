@@ -32,6 +32,7 @@ References
 
 # Standard library
 import math
+from collections.abc import Sequence
 from typing import ClassVar
 
 # Third-party libraries
@@ -39,7 +40,12 @@ import torch
 from torch import nn
 
 # Local libraries
-from ariel.simulation.controllers.cpg._base import CPG, BetaParams, uniform
+from ariel.simulation.controllers.cpg._base import (
+    CPG,
+    BetaParams,
+    InputRoute,
+    uniform,
+)
 
 __all__ = ["SwingStanceCPG"]
 
@@ -78,6 +84,7 @@ class SwingStanceCPG(CPG):
         coupling: float = 1.0,
         clipping: bool = True,
         angle_tracking: bool = False,
+        inputs: Sequence[InputRoute] | None = None,
     ) -> None:
         """Initialize the network.
 
@@ -104,6 +111,9 @@ class SwingStanceCPG(CPG):
             If True, the output angles are clipped to ``angle_limits``.
         angle_tracking : bool, optional
             If True, every output is appended to ``angle_history``.
+        inputs : Sequence[InputRoute] | None, optional
+            Where each entry of the vector given to ``set_input`` goes.
+            None gives no input.
         """
         super().__init__(
             adjacency_dict,
@@ -113,6 +123,7 @@ class SwingStanceCPG(CPG):
             coupling=coupling,
             clipping=clipping,
             angle_tracking=angle_tracking,
+            inputs=inputs,
         )
         self.alpha = alpha
         self.beta = beta
@@ -125,12 +136,14 @@ class SwingStanceCPG(CPG):
         Returns
         -------
         torch.Tensor
-            ``w_stance`` for ``y`` well above 0, ``w_swing`` well below.
+            ``w_stance`` for ``y`` well above 0, ``w_swing`` well below,
+            both times the frequency factor of the inputs.
         """
         y = self.xy[:, 1]
         stance = torch.sigmoid(self.steepness * y)  # 1 / (exp(-b y) + 1)
         swing = torch.sigmoid(-self.steepness * y)  # 1 / (exp(b y) + 1)
-        return self.group("w_stance") * stance + self.group("w_swing") * swing
+        both = self.group("w_stance") * stance + self.group("w_swing") * swing
+        return both * self.frequency_factor()
 
     def _reset(self) -> None:
         """Put every oscillator on the unit circle at its target phase."""
@@ -155,11 +168,13 @@ class SwingStanceCPG(CPG):
         self.xy += rates * step
 
     def _angles(self) -> torch.Tensor:
-        """Return ``offset_i + A_i * x_i``.
+        """Return ``offset_i + A_i * x_i``, with the inputs applied.
 
         Returns
         -------
         torch.Tensor
             One angle per oscillator.
         """
-        return self.group("offset") + self.group("amplitudes") * self.xy[:, 0]
+        offset = self.group("offset") + self.handle("offset")
+        amplitude = self.group("amplitudes") * self.amplitude_factor()
+        return offset + amplitude * self.xy[:, 0]

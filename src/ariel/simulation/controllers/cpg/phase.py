@@ -31,6 +31,7 @@ References
 
 # Standard library
 import math
+from collections.abc import Sequence
 from typing import ClassVar
 
 # Third-party libraries
@@ -38,7 +39,12 @@ import torch
 from torch import nn
 
 # Local libraries
-from ariel.simulation.controllers.cpg._base import CPG, BetaParams, uniform
+from ariel.simulation.controllers.cpg._base import (
+    CPG,
+    BetaParams,
+    InputRoute,
+    uniform,
+)
 
 __all__ = ["PhaseCPG"]
 
@@ -61,7 +67,7 @@ class PhaseCPG(CPG):
     r: torch.Tensor
     r_dot: torch.Tensor
 
-    def __init__(
+    def __init__(  # ruff: ignore[too-many-arguments]  # the shared CPG arguments plus the model's constants
         self,
         adjacency_dict: dict[int, list[int]],
         convergence: float = 20.0,
@@ -75,6 +81,7 @@ class PhaseCPG(CPG):
         coupling: float = 1.0,
         clipping: bool = True,
         angle_tracking: bool = False,
+        inputs: Sequence[InputRoute] | None = None,
     ) -> None:
         """Initialize the network.
 
@@ -97,6 +104,9 @@ class PhaseCPG(CPG):
             If True, the output angles are clipped to ``angle_limits``.
         angle_tracking : bool, optional
             If True, every output is appended to ``angle_history``.
+        inputs : Sequence[InputRoute] | None, optional
+            Where each entry of the vector given to ``set_input`` goes.
+            None gives no input.
         """
         super().__init__(
             adjacency_dict,
@@ -106,6 +116,7 @@ class PhaseCPG(CPG):
             coupling=coupling,
             clipping=clipping,
             angle_tracking=angle_tracking,
+            inputs=inputs,
         )
         self.convergence = convergence
         self.reset_state()
@@ -123,19 +134,22 @@ class PhaseCPG(CPG):
             self.theta[None, :] - self.theta[:, None] - self.phase_offsets().T
         )
         pull = (self.r[None, :] * torch.sin(error) * self.adjacency).sum(dim=1)
-        theta_dot = self.group("w") + self.coupling * pull
+        w = self.group("w") * self.frequency_factor()
+        theta_dot = w + self.coupling * pull
         a = self.convergence
-        r_ddot = a * (a / 4 * (self.group("amplitudes") - self.r) - self.r_dot)
+        amplitude = self.group("amplitudes") * self.amplitude_factor()
+        r_ddot = a * (a / 4 * (amplitude - self.r) - self.r_dot)
         self.theta += theta_dot * step
         self.r_dot += r_ddot * step
         self.r += self.r_dot * step
 
     def _angles(self) -> torch.Tensor:
-        """Return ``offset_i + r_i cos(theta_i)``.
+        """Return ``offset_i + r_i cos(theta_i)``, with the offset input.
 
         Returns
         -------
         torch.Tensor
             One angle per oscillator.
         """
-        return self.group("offset") + self.r * torch.cos(self.theta)
+        offset = self.group("offset") + self.handle("offset")
+        return offset + self.r * torch.cos(self.theta)

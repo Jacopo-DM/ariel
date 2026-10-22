@@ -12,6 +12,25 @@ a 1 Hz CPG through 0.125 of a cycle per call. The first timed call, and any
 call with a time earlier than the previous one (a new episode), resets the
 state first. ``forward()`` without a time advances by one step of ``dt``.
 
+Every CPG takes one input vector ``u`` through ``set_input``, held until the
+next call. ``inputs`` says where each entry goes. An ``InputRoute`` names a
+handle and either one joint, which gets the value as it is, or no joint: then
+every joint gets the value times a weight of its own, from the parameter group
+``input_weights``, which is searched with the other parameters. With the
+routes ``[InputRoute(handle="offset")]`` on two joints and the weights
+``(0.2, -0.2)``, ``u = (1,)`` bends the first joint 0.2 rad one way and the
+second 0.2 rad the other way.
+
+The slow handles change the gait. With ``d`` the value routed to a joint,
+``amplitude`` and ``frequency`` multiply that joint's amplitude and frequency
+by ``1 + d`` (never below 0) and ``offset`` adds ``d`` radians to its offset.
+They follow ``d`` through a critically damped filter,
+``s'' = k^2 (d - s) - 2 k s'`` with ``k = SMOOTHING``, so a jump of ``u`` never
+makes a servo jump: 96 % of a change is done after ``5 / k`` = 0.5 s. A model
+may add fast handles (``FAST_HANDLES``), used at once inside its equations: the
+load of the Tegotae models, the teaching signal of ``AdaptiveHopfCPG``. Its
+default routes send entry ``i`` of ``u`` to the fast handle of joint ``i``.
+
 Subclasses name their parameter groups and their sampling ranges in
 ``PARAMETER_RANGES`` and implement ``_reset``, ``_step`` and ``_angles``. A
 group holds one value per oscillator unless ``shared_group_sizes`` gives it
@@ -21,6 +40,7 @@ another size (for example the weights of a network every joint uses).
 # Standard library
 import math
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from pathlib import Path
 from typing import ClassVar
 
@@ -36,6 +56,7 @@ from ariel.parameters import FrozenModel
 __all__ = [
     "CPG",
     "BetaParams",
+    "InputRoute",
     "ParamInput",
     "create_fully_connected_adjacency",
     "scaled_beta",
@@ -43,6 +64,8 @@ __all__ = [
 
 # Global constants
 E = 1e-9
+SLOW_HANDLES = ("amplitude", "offset", "frequency")
+SMOOTHING = 10.0  # 1/s, the constant k of the filter on the slow handles
 
 type ParamInput = list[float] | NDArray[np.float64] | torch.Tensor
 
@@ -54,6 +77,18 @@ class BetaParams(FrozenModel):
     b: float
     c: float
     d: float
+
+
+class InputRoute(FrozenModel):
+    """Where one entry of the input vector ``u`` goes.
+
+    ``handle`` names a slow handle (``amplitude``, ``offset``, ``frequency``)
+    or one of the model's ``FAST_HANDLES``. ``joint`` sends the value to that
+    joint alone; None sends it to every joint, times a learned weight each.
+    """
+
+    handle: str
+    joint: int | None = None
 
 
 def scaled_beta(
@@ -116,7 +151,12 @@ class CPG(nn.Module, ABC):
     """A network of coupled oscillators that outputs one angle per joint."""
 
     PARAMETER_RANGES: ClassVar[dict[str, BetaParams]]
+    FAST_HANDLES: ClassVar[tuple[str, ...]] = ()
     angles: torch.Tensor
+    inputs: torch.Tensor
+    smoothed: torch.Tensor
+    smoothed_rate: torch.Tensor
+    targets: dict[str, torch.Tensor]
 
     def __init__(
         self,
@@ -131,6 +171,7 @@ class CPG(nn.Module, ABC):
         coupling: float = 1.0,
         clipping: bool = True,
         angle_tracking: bool = False,
+        inputs: Sequence[InputRoute] | None = None,
     ) -> None:
         """Build the network and sample its parameters.
 
@@ -153,12 +194,17 @@ class CPG(nn.Module, ABC):
             either way.
         angle_tracking : bool, optional
             If True, every output is appended to ``angle_history``.
+        inputs : Sequence[InputRoute] | None, optional
+            Where each entry of the vector given to ``set_input`` goes. None
+            routes entry ``i`` to each fast handle of joint ``i``, and gives
+            no input to a model without fast handles.
 
         Raises
         ------
         ValueError
-            If the keys of ``adjacency_dict`` are not ``0 .. n - 1`` or a
-            neighbour is not a node.
+            If the keys of ``adjacency_dict`` are not ``0 .. n - 1``, a
+            neighbour is not a node, or a route names an unknown handle or
+            joint.
         """
         super().__init__()
 
@@ -175,6 +221,8 @@ class CPG(nn.Module, ABC):
                     raise ValueError(msg)
                 self.adjacency[node, neighbour] = 1.0
 
+        self._build_routes(inputs)
+
         self.dt = dt
         self.coupling = coupling
         self.angle_limits = angle_limits
@@ -186,11 +234,15 @@ class CPG(nn.Module, ABC):
 
         rng = np.random.default_rng(seed)
         self.parameter_groups: dict[str, nn.Parameter] = {}
+        self.parameter_ranges = dict(self.PARAMETER_RANGES)
         self.group_sizes = (
             dict.fromkeys(self.PARAMETER_RANGES, self.n)
             | self.shared_group_sizes()
         )
-        for name, params in self.PARAMETER_RANGES.items():
+        if self.weighted:
+            self.parameter_ranges["input_weights"] = uniform(-1, 1)
+            self.group_sizes["input_weights"] = self.n * len(self.weighted)
+        for name, params in self.parameter_ranges.items():
             group = nn.Parameter(
                 scaled_beta(params, self.group_sizes[name], rng),
                 requires_grad=False,
@@ -200,6 +252,47 @@ class CPG(nn.Module, ABC):
         self.num_of_parameters = sum(self.group_sizes.values())
         self.num_of_parameter_groups = len(self.parameter_groups)
         self.angles = torch.zeros(self.n)
+        self._reset_inputs()
+
+    def _build_routes(self, inputs: Sequence[InputRoute] | None) -> None:
+        """Check the routes and turn them into matrices and weight rows.
+
+        Raises
+        ------
+        ValueError
+            If a route names an unknown handle or joint.
+        """
+        self.handles = SLOW_HANDLES + self.FAST_HANDLES
+        self.routes = tuple(
+            [
+                InputRoute(handle=handle, joint=joint)
+                for handle in self.FAST_HANDLES
+                for joint in range(self.n)
+            ]
+            if inputs is None
+            else inputs
+        )
+        # Routes with a joint: a fixed matrix per handle, from u to joints
+        self.direct = {
+            handle: torch.zeros(self.n, len(self.routes))
+            for handle in self.handles
+        }
+        # Routes without a joint: (entry of u, handle), one weight per joint
+        self.weighted: list[tuple[int, str]] = []
+        for entry, route in enumerate(self.routes):
+            if route.handle not in self.handles:
+                msg = (
+                    f"Unknown handle '{route.handle}'; "
+                    f"this CPG has {self.handles}."
+                )
+                raise ValueError(msg)
+            if route.joint is None:
+                self.weighted.append((entry, route.handle))
+            elif 0 <= route.joint < self.n:
+                self.direct[route.handle][route.joint, entry] = 1.0
+            else:
+                msg = f"A route goes to the unknown joint {route.joint}."
+                raise ValueError(msg)
 
     def shared_group_sizes(self) -> dict[str, int]:  # ruff: ignore[no-self-use]  # subclasses with shared groups override it
         """Return the size of every group that is not one value per joint.
@@ -331,7 +424,7 @@ class CPG(nn.Module, ABC):
             ``get_flat_params``.
         """
         sizes = torch.tensor(list(self.group_sizes.values()))
-        ranges = self.PARAMETER_RANGES.values()
+        ranges = self.parameter_ranges.values()
         lower = torch.tensor([min(params.c, params.d) for params in ranges])
         upper = torch.tensor([max(params.c, params.d) for params in ranges])
         return (
@@ -339,10 +432,103 @@ class CPG(nn.Module, ABC):
             upper.repeat_interleave(sizes),
         )
 
+    # --- inputs -------------------------------------------------------------
+
+    def set_input(self, values: ParamInput) -> None:
+        """Set the input vector ``u`` used by the following steps.
+
+        Parameters
+        ----------
+        values : ParamInput
+            One value per route in ``routes``.
+
+        Raises
+        ------
+        ValueError
+            If the vector does not have one value per route.
+        """
+        safe_values = self.param_type_converter(values).flatten()
+        if safe_values.numel() != len(self.routes):
+            msg = f"Expected {len(self.routes)} inputs, got "
+            msg += f"{safe_values.numel()}."
+            raise ValueError(msg)
+        self.inputs = safe_values.to(torch.float32).clone()
+        self._update_targets()
+
+    def handle(self, name: str) -> torch.Tensor:
+        """Return the value a handle has now at every joint.
+
+        Returns
+        -------
+        torch.Tensor
+            The filtered value for a slow handle, the routed input itself
+            for a fast one; one value per joint.
+        """
+        if name in SLOW_HANDLES:
+            return self.smoothed[SLOW_HANDLES.index(name)]
+        return self.targets[name]
+
+    def amplitude_factor(self) -> torch.Tensor:
+        """Return the factor the inputs put on every amplitude.
+
+        Returns
+        -------
+        torch.Tensor
+            ``1 + amplitude`` handle, never below 0.
+        """
+        return torch.clamp(1 + self.handle("amplitude"), min=0.0)
+
+    def frequency_factor(self) -> torch.Tensor:
+        """Return the factor the inputs put on every frequency.
+
+        Returns
+        -------
+        torch.Tensor
+            ``1 + frequency`` handle, never below 0.
+        """
+        return torch.clamp(1 + self.handle("frequency"), min=0.0)
+
+    def _update_targets(self) -> None:
+        """Route ``u`` to the handles with the current weights."""
+        targets = {
+            handle: matrix @ self.inputs
+            for handle, matrix in self.direct.items()
+        }
+        if self.weighted:
+            weights = self.group("input_weights").reshape(
+                len(self.weighted), self.n
+            )
+            for row, (entry, handle) in zip(
+                weights, self.weighted, strict=True
+            ):
+                targets[handle] += row * self.inputs[entry]
+        self.targets = targets
+
+    def _smooth(self, step: float) -> None:
+        """Move the slow handles towards their targets over ``step``."""
+        target = torch.stack([self.targets[name] for name in SLOW_HANDLES])
+        acceleration = (
+            SMOOTHING**2 * (target - self.smoothed)
+            - 2 * SMOOTHING * self.smoothed_rate
+        )
+        self.smoothed_rate += acceleration * step
+        self.smoothed += self.smoothed_rate * step
+
+    def _reset_inputs(self) -> None:
+        """Set ``u`` to zero and the slow handles to rest at zero."""
+        self.inputs = torch.zeros(len(self.routes))
+        self.smoothed = torch.zeros(len(SLOW_HANDLES), self.n)
+        self.smoothed_rate = torch.zeros(len(SLOW_HANDLES), self.n)
+        self._update_targets()
+
     # --- state and time -----------------------------------------------------
 
     def reset_state(self) -> None:
-        """Put every oscillator at its start state and forget the history."""
+        """Put every oscillator at its start state and forget the history.
+
+        The input goes back to zero, so ``set_input`` after the reset.
+        """
+        self._reset_inputs()
         self._reset()
         self.angles = torch.zeros(self.n)
         self.angle_history = []
@@ -371,14 +557,18 @@ class CPG(nn.Module, ABC):
         """
         with torch.inference_mode():
             if time is None:
+                self._update_targets()
+                self._smooth(self.dt)
                 self._step(self.dt)
             else:
                 if self.last_time is None or time < self.last_time:
                     self.reset_state()
                     self.last_time = time
+                self._update_targets()
                 elapsed = time - self.last_time
                 steps = math.ceil(elapsed / self.dt - E)
                 for _ in range(steps):
+                    self._smooth(elapsed / steps)
                     self._step(elapsed / steps)
                 self.last_time = time
             angles = self._angles()

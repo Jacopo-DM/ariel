@@ -40,6 +40,22 @@ action = cpg.forward(data.time)  # -> one target angle per joint
   is sampled from. Set them before the run, or call `reset_state()` after.
 - `angle_limits` (default plus or minus pi/2) clip the output; `clamping_error`
   is the mean overshoot. `angle_tracking=True` keeps `angle_history`.
+- Inputs: every model takes one vector `u` through `set_input(u)`, held until
+  the next call and cleared by a reset. `inputs=[InputRoute(...), ...]` says
+  where each entry goes: to one joint as it is (`joint=2`), or to every
+  joint times a weight each from the group `input_weights` (no `joint`). The
+  handles `amplitude` and `frequency` multiply by `1 + d`, `offset` adds `d`
+  radians, all through a filter that settles in about 0.5 s. The Tegotae
+  models also have `load` and `AdaptiveHopfCPG` has `teaching`; by default
+  entry `i` goes to that handle of joint `i`, which is why `set_input(loads)`
+  takes one value per joint.
+
+```python
+from ariel.simulation import InputRoute, PhaseCPG
+
+cpg = PhaseCPG(adj, inputs=[InputRoute(handle="offset")])
+cpg.set_input([0.5])  # each joint moves by 0.5 times its weight
+```
 
 `tests/functional/cpg_properties.ipynb` shows what each model can and cannot
 do (for example, `SwingStanceCPG` only holds in-phase and anti-phase pairs);

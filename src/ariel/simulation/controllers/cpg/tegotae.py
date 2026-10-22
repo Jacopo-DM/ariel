@@ -28,9 +28,9 @@ Each network has one hidden layer of ``hidden`` tanh units. ``R(0)`` is
 subtracted so that a limb that touches nothing gets no feedback, as in the
 fixed rule; the paper does not say how it handles that case.
 
-The load comes from outside: call ``set_input`` with one value per joint
-(for example the vertical ground force on the bodies the joint moves, in
-newtons) before ``forward``. It is held until the next call.
+The load ``N_i`` is the fast handle ``load``. By default ``set_input`` takes
+one load per joint (for example the vertical ground force on the bodies the
+joint moves, in newtons) before ``forward``; it is held until the next call.
 
 References
 ----------
@@ -44,6 +44,7 @@ References
 
 # Standard library
 import math
+from collections.abc import Sequence
 from typing import ClassVar
 
 # Third-party libraries
@@ -54,7 +55,7 @@ from torch import nn
 from ariel.simulation.controllers.cpg._base import (
     CPG,
     BetaParams,
-    ParamInput,
+    InputRoute,
     uniform,
 )
 
@@ -71,13 +72,13 @@ class TegotaeCPG(CPG):
         "offset": uniform(-0.5, 0.5),
         "sigma": uniform(0, 2),  # rad/s per newton
     }
+    FAST_HANDLES: ClassVar[tuple[str, ...]] = ("load",)
 
     phase: nn.Parameter
     w: nn.Parameter
     amplitudes: nn.Parameter
     offset: nn.Parameter
     theta: torch.Tensor
-    loads: torch.Tensor
 
     def __init__(
         self,
@@ -92,6 +93,7 @@ class TegotaeCPG(CPG):
         coupling: float = 0.0,
         clipping: bool = True,
         angle_tracking: bool = False,
+        inputs: Sequence[InputRoute] | None = None,
     ) -> None:
         """Initialize the network.
 
@@ -113,6 +115,9 @@ class TegotaeCPG(CPG):
             If True, the output angles are clipped to ``angle_limits``.
         angle_tracking : bool, optional
             If True, every output is appended to ``angle_history``.
+        inputs : Sequence[InputRoute] | None, optional
+            Where each entry of the vector given to ``set_input`` goes.
+            None sends entry ``i`` to the load of joint ``i``.
         """
         super().__init__(
             adjacency_dict,
@@ -122,18 +127,9 @@ class TegotaeCPG(CPG):
             coupling=coupling,
             clipping=clipping,
             angle_tracking=angle_tracking,
+            inputs=inputs,
         )
         self.reset_state()
-
-    def set_input(self, values: ParamInput) -> None:
-        """Set the load ``N_i`` each joint feels, used by the next steps.
-
-        Parameters
-        ----------
-        values : ParamInput
-            One value per oscillator, 0 for a limb that touches nothing.
-        """
-        self.loads = self.param_type_converter(values).reshape(self.n).clone()
 
     def feedback(self) -> torch.Tensor:
         """Return the Tegotae feedback ``sigma_i dT_i/dphi_i``.
@@ -143,12 +139,12 @@ class TegotaeCPG(CPG):
         torch.Tensor
             ``-sigma_i N_i cos(phi_i)``, in rad/s.
         """
-        return -self.group("sigma") * self.loads * torch.cos(self.theta)
+        loads = self.handle("load")
+        return -self.group("sigma") * loads * torch.cos(self.theta)
 
     def _reset(self) -> None:
-        """Start every phase at its target, with no load."""
+        """Start every phase at its target."""
         self.theta = self.group("phase").clone()
-        self.loads = torch.zeros(self.n)
 
     def _step(self, step: float) -> None:
         """Take one Euler step of ``step`` seconds."""
@@ -157,20 +153,21 @@ class TegotaeCPG(CPG):
             self.theta[None, :] - self.theta[:, None] - self.phase_offsets().T
         )
         pull = (torch.sin(error) * self.adjacency).sum(dim=1)
-        rate = self.group("w") + self.coupling * pull + self.feedback()
+        w = self.group("w") * self.frequency_factor()
+        rate = w + self.coupling * pull + self.feedback()
         self.theta += rate * step
 
     def _angles(self) -> torch.Tensor:
-        """Return ``offset_i + A_i cos(phi_i)``.
+        """Return ``offset_i + A_i cos(phi_i)``, with the inputs applied.
 
         Returns
         -------
         torch.Tensor
             One angle per oscillator.
         """
-        return self.group("offset") + self.group("amplitudes") * torch.cos(
-            self.theta
-        )
+        offset = self.group("offset") + self.handle("offset")
+        amplitude = self.group("amplitudes") * self.amplitude_factor()
+        return offset + amplitude * torch.cos(self.theta)
 
 
 def mlp(
@@ -214,7 +211,7 @@ class LearnableTegotaeCPG(TegotaeCPG):
     }
     INPUTS: ClassVar[dict[str, int]] = {"action": 2, "reaction": 1, "gain": 3}
 
-    def __init__(
+    def __init__(  # ruff: ignore[too-many-arguments]  # the shared CPG arguments plus the model's constants
         self,
         adjacency_dict: dict[int, list[int]],
         hidden: int = 4,
@@ -228,6 +225,7 @@ class LearnableTegotaeCPG(TegotaeCPG):
         coupling: float = 0.0,
         clipping: bool = True,
         angle_tracking: bool = False,
+        inputs: Sequence[InputRoute] | None = None,
     ) -> None:
         """Initialize the network.
 
@@ -250,6 +248,9 @@ class LearnableTegotaeCPG(TegotaeCPG):
             If True, the output angles are clipped to ``angle_limits``.
         angle_tracking : bool, optional
             If True, every output is appended to ``angle_history``.
+        inputs : Sequence[InputRoute] | None, optional
+            Where each entry of the vector given to ``set_input`` goes.
+            None sends entry ``i`` to the load of joint ``i``.
         """
         self.hidden = hidden
         super().__init__(
@@ -260,6 +261,7 @@ class LearnableTegotaeCPG(TegotaeCPG):
             coupling=coupling,
             clipping=clipping,
             angle_tracking=angle_tracking,
+            inputs=inputs,
         )
 
     def shared_group_sizes(self) -> dict[str, int]:
@@ -284,7 +286,7 @@ class LearnableTegotaeCPG(TegotaeCPG):
             The feedback, in rad/s.
         """
         phase = torch.stack([torch.cos(self.theta), torch.sin(self.theta)], 1)
-        loads = self.loads[:, None]
+        loads = self.handle("load")[:, None]
         action = mlp(self.group("action"), phase, self.hidden)
         reaction = mlp(self.group("reaction"), loads, self.hidden) - mlp(
             self.group("reaction"), torch.zeros_like(loads), self.hidden

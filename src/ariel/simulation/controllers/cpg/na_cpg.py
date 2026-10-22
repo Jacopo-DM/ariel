@@ -29,6 +29,9 @@ and obeys::
     margin for the asymmetry. A cubic fitted elsewhere can be given as
     ``coefficients``.
 
+The ``offset`` input moves the centre ``b_i`` of the cycle, so the output
+glides to the new offset; ``frequency`` scales ``w_i``, in the constraint too.
+
 References
 ----------
     [1] https://www.sciencedirect.com/science/article/pii/S2667379722000353
@@ -36,6 +39,7 @@ References
 
 # Standard library
 import math
+from collections.abc import Sequence
 from typing import ClassVar
 
 # Third-party libraries
@@ -48,6 +52,7 @@ from ariel.simulation.controllers.cpg._base import (
     CPG,
     BetaParams,
     E,
+    InputRoute,
     ParamInput,
     uniform,
 )
@@ -77,7 +82,7 @@ class NaCPG(CPG):
     xy: torch.Tensor
     xy_dot_old: torch.Tensor
 
-    def __init__(
+    def __init__(  # ruff: ignore[too-many-arguments]  # the shared CPG arguments plus the model's constants
         self,
         adjacency_dict: dict[int, list[int]],
         alpha: float = 30.0,
@@ -91,6 +96,7 @@ class NaCPG(CPG):
         coupling: float = 1.0,
         clipping: bool = True,
         angle_tracking: bool = False,
+        inputs: Sequence[InputRoute] | None = None,
     ) -> None:
         """Initialize the NA-CPG network.
 
@@ -113,6 +119,9 @@ class NaCPG(CPG):
             If True, the output angles are clipped to ``angle_limits``.
         angle_tracking : bool, optional
             If True, every output is appended to ``angle_history``.
+        inputs : Sequence[InputRoute] | None, optional
+            Where each entry of the vector given to ``set_input`` goes.
+            None gives no input.
         """
         super().__init__(
             adjacency_dict,
@@ -122,6 +131,7 @@ class NaCPG(CPG):
             coupling=coupling,
             clipping=clipping,
             angle_tracking=angle_tracking,
+            inputs=inputs,
         )
         self.alpha = alpha
         # Cubic (highest power first) for CF(w); None uses the default
@@ -152,7 +162,7 @@ class NaCPG(CPG):
         torch.Tensor
             ``CF(w)`` for every oscillator, never below zero.
         """
-        w = self.group("w")
+        w = self.group("w") * self.frequency_factor()
         if self.coefficients is None:
             return CONSTRAINT_MARGIN * w**2 * step
         value = np.polyval(self.coefficients, w.numpy())
@@ -189,9 +199,10 @@ class NaCPG(CPG):
     def _step(self, step: float) -> None:
         """Take one constrained Euler step of ``step`` seconds."""
         x = self.xy[:, 0]
-        y = self.xy[:, 1] - self.group("b")  # centred on the offset
+        centre = self.group("b") + self.handle("offset")
+        y = self.xy[:, 1] - centre  # centred on the offset
         gain = self.alpha * (1 - (x**2 + y**2))
-        rotation = self.group("w") / self.zeta()
+        rotation = self.group("w") * self.frequency_factor() / self.zeta()
 
         # Coupling: R(phi_i - phi_j) (x_j, y_j - b_j), over the neighbours
         delta = self.phase_offsets()
@@ -218,11 +229,13 @@ class NaCPG(CPG):
         self.xy_dot_old = xy_dot
 
     def _angles(self) -> torch.Tensor:
-        """Return ``A_i * y_i``.
+        """Return ``A_i * y_i``, with the amplitude input.
 
         Returns
         -------
         torch.Tensor
             One angle per oscillator.
         """
-        return self.group("amplitudes") * self.xy[:, 1]
+        return (
+            self.group("amplitudes") * self.amplitude_factor() * self.xy[:, 1]
+        )

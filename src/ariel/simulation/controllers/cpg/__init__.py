@@ -11,6 +11,7 @@ them.
 from ariel.simulation.controllers.cpg._base import (
     CPG,
     BetaParams,
+    InputRoute,
     create_fully_connected_adjacency,
     scaled_beta,
 )
@@ -28,6 +29,7 @@ __all__ = [
     "AdaptiveHopfCPG",
     "BetaParams",
     "HopfCPG",
+    "InputRoute",
     "LearnableTegotaeCPG",
     "NaCPG",
     "PhaseCPG",
