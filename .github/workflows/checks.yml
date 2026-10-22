@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   checks:
     runs-on: ubuntu-latest
@@ -16,23 +19,28 @@ jobs:
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.13.1"
+          enable-cache: true
 
-      - name: Install Python and Dependencies
-        run: uv sync --all-groups
-
-      - name: Unit tests with coverage
-        run: uv run --no-sync pytest tests/unit -q -p no:cacheprovider --cov=ariel
-
-      - name: Ruff lint
-        run: uv run --no-sync ruff check src tests
+      # Python 3.12.9 comes from .python-version
+      - name: Install the locked environment
+        run: uv sync --all-groups --locked
 
       - name: Ruff format
-        run: uv run --no-sync ruff format --check src tests
+        run: uv run --locked ruff format --check
+
+      - name: Ruff lint (ruff.toml has fix = false; --no-fix keeps it read-only)
+        run: uv run --locked ruff check --no-fix
 
       - name: Mypy
-        run: uv run --no-sync mypy src
+        run: uv run --locked mypy .
 
-      # Pyright still reports errors (see PLAN.md); informational until fixed.
+      # pytest.ini sets 100% branch coverage over src and tests
+      - name: Tests and coverage
+        run: uv run --locked pytest -q -p no:cacheprovider
+
+      # Pyright reads stubs from .typings/, which CI does not generate
       - name: Pyright (informational)
-        run: uv run --no-sync pyright src tests
+        run: uv run --locked pyright src tests
         continue-on-error: true
