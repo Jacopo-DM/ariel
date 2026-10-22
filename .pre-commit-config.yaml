@@ -32,6 +32,7 @@ repos:
         entry: uv run --no-sync python tools/run_notebooks.py --timeout 300
         language: system
         files: ^tests/functional/.*\.ipynb$
+        stages: [pre-commit]
       - id: notebooks-push
         name: notebooks (all, non-slow)
         entry: uv run --no-sync python tools/run_notebooks.py
