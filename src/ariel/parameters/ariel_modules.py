@@ -6,11 +6,14 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Local libraries
 from ariel.parameters.module_specs import BrickSpec, CoreSpec, HingeSpec
-from ariel.parameters.servos import DSSM15
+from ariel.parameters.servos import DSSM15, ServoSettings
 
 
 class ArielModulesConfig(BaseSettings):
     """Measured sizes and masses of the modules, and the hinge's servo.
+
+    ``servo`` is the datasheet; ``servo_settings`` says how the simulated
+    hinge uses it (voltage, holding stiffness, gearbox inertia).
 
     An environment variable overrides one value, written with its unit and
     named by the path to it: ``BRICK__MASS="0.1 kg"``. A bare number is
@@ -23,3 +26,4 @@ class ArielModulesConfig(BaseSettings):
     core: CoreSpec = Field(default_factory=CoreSpec)
     hinge: HingeSpec = Field(default_factory=HingeSpec)
     servo: DSSM15 = Field(default_factory=DSSM15)
+    servo_settings: ServoSettings = Field(default_factory=ServoSettings)

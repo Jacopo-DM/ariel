@@ -9,9 +9,13 @@ References
     [1] DFRobot, "DF Metal Geared 15Kg Standard Servo 180 (DSS-M15)",
         SKU SER0019, https://www.dfrobot.com/product-120.html (the datasheet
         PDF in the user's uploads, 2026-10-21).
+    [2] maxon, "A-max 16, 16 mm, graphite brushes, 2 W", part 110079,
+        https://www.maxongroup.com/maxon/view/product/110079 (read
+        2026-10-22): rotor inertia 0.816 g cm2, stall torque 4.49 mN m.
 """
 
 # Standard library
+import math
 from collections.abc import Callable
 from typing import Annotated
 
@@ -21,7 +25,7 @@ from pydantic import ConfigDict, Field
 
 # Local libraries
 from ariel.parameters.base_model import FrozenModel
-from ariel.parameters.quantities import KILOGRAM_FORCE, quantity_of
+from ariel.parameters.quantities import KILOGRAM_FORCE, quantity_of, to_unit
 
 type Angle = Annotated[u.Quantity, quantity_of(u.rad)]
 type AngularSpeed = Annotated[u.Quantity, quantity_of(u.rad / u.s)]
@@ -29,6 +33,7 @@ type Current = Annotated[u.Quantity, quantity_of(u.A)]
 type Duration = Annotated[u.Quantity, quantity_of(u.s)]
 type Frequency = Annotated[u.Quantity, quantity_of(u.Hz)]
 type Length = Annotated[u.Quantity, quantity_of(u.m)]
+type MomentOfInertia = Annotated[u.Quantity, quantity_of(u.kg * u.m**2)]
 type Torque = Annotated[u.Quantity, quantity_of(u.N * u.m)]
 type Voltage = Annotated[u.Quantity, quantity_of(u.V)]
 
@@ -137,3 +142,149 @@ class DSSM15(FrozenModel):
     )
     min_pwm_frequency: Frequency = Field(default_factory=_quantity(50, u.Hz))
     max_pwm_frequency: Frequency = Field(default_factory=_quantity(330, u.Hz))
+
+
+# Units of the derived values: per radian, so a rotation is never a number
+_DAMPING = u.N * u.m * u.s / u.rad
+_STIFFNESS = u.N * u.m / u.rad
+
+
+class ServoSettings(FrozenModel):
+    """How the simulated hinge uses its DSS-M15 (goal servo-dynamics).
+
+    The datasheet says what the servo can do; these settings choose the
+    supply voltage, how firmly it holds its angle, and the gearbox inertia
+    the datasheet leaves out. The methods derive MuJoCo's joint and
+    actuator values from both.
+    """
+
+    # The defaults go through the same unit check and SI conversion
+    model_config = ConfigDict(
+        frozen=True, extra="forbid", validate_default=True
+    )
+
+    voltage: Voltage = Field(
+        default_factory=_quantity(6.0, u.V),
+        description="supply voltage; the datasheet rates 6 V and 7.2 V",
+    )
+    holding_error: Angle = Field(
+        default_factory=_quantity(5, u.deg),
+        description="angle error at which the servo pushes its stall torque",
+    )
+    rotor_inertia: MomentOfInertia = Field(
+        default_factory=_quantity(0.816, u.g * u.cm**2),
+        description="motor rotor inertia, an estimate (see the source)",
+    )
+    rotor_inertia_source: str = (
+        "estimate: maxon A-max 16, part 110079 (0.816 g cm2; stall torque "
+        "4.49 mN m, 1.39 N m after the 310:1 gear, close to the DSS-M15's "
+        "1.32 N m); the datasheet gives none"
+    )
+
+    def rating(self, servo: DSSM15) -> ServoRating:
+        """Return the datasheet column for this supply voltage.
+
+        Parameters
+        ----------
+        servo : DSSM15
+            The servo's datasheet record.
+
+        Returns
+        -------
+        ServoRating
+            The rating at ``voltage``.
+
+        Raises
+        ------
+        ValueError
+            If the datasheet has no rating at ``voltage``.
+        """
+        for rating in (servo.at_6_volts, servo.at_7_2_volts):
+            # Both are stored in volts (SI)
+            if math.isclose(rating.voltage.value, self.voltage.value):
+                return rating
+        msg = f"the DSS-M15 has no rating at {self.voltage:g}: 6 V or 7.2 V"
+        raise ValueError(msg)
+
+    def stall_torque(self, servo: DSSM15) -> u.Quantity:
+        """Return the largest torque the servo exerts (its torque cap).
+
+        Parameters
+        ----------
+        servo : DSSM15
+            The servo's datasheet record.
+
+        Returns
+        -------
+        astropy.units.Quantity
+            The stall torque at ``voltage``, in N m.
+        """
+        return self.rating(servo).stall_torque
+
+    def no_load_speed(self, servo: DSSM15) -> u.Quantity:
+        """Return the top speed under the servo's own power.
+
+        Parameters
+        ----------
+        servo : DSSM15
+            The servo's datasheet record.
+
+        Returns
+        -------
+        astropy.units.Quantity
+            The no-load speed at ``voltage``, in rad / s.
+        """
+        return self.rating(servo).speed
+
+    def damping(self, servo: DSSM15) -> u.Quantity:
+        """Return the joint damping that gives the motor's torque-speed line.
+
+        A DC motor's torque falls in a straight line from the stall torque
+        at rest to zero at the no-load speed; a damping of their ratio
+        gives that line.
+
+        Parameters
+        ----------
+        servo : DSSM15
+            The servo's datasheet record.
+
+        Returns
+        -------
+        astropy.units.Quantity
+            Stall torque over no-load speed, in N m s / rad.
+        """
+        return to_unit(
+            self.stall_torque(servo) / self.no_load_speed(servo), _DAMPING
+        )
+
+    def stiffness(self, servo: DSSM15) -> u.Quantity:
+        """Return the position gain: full torque at the holding error.
+
+        Parameters
+        ----------
+        servo : DSSM15
+            The servo's datasheet record.
+
+        Returns
+        -------
+        astropy.units.Quantity
+            Stall torque over holding error, in N m / rad.
+        """
+        return to_unit(
+            self.stall_torque(servo) / self.holding_error, _STIFFNESS
+        )
+
+    def armature(self, servo: DSSM15) -> u.Quantity:
+        """Return the motor's inertia as the joint feels it through the gear.
+
+        Parameters
+        ----------
+        servo : DSSM15
+            The servo's datasheet record.
+
+        Returns
+        -------
+        astropy.units.Quantity
+            Rotor inertia times the gear ratio squared, in kg m2.
+        """
+        return to_unit(self.rotor_inertia * servo.gear_ratio**2, u.kg * u.m**2)
