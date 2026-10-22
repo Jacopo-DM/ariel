@@ -48,19 +48,21 @@ OVERLAPPING: Spec = (
 )
 
 # sha256 of each body's XML; taken again on 2026-10-21, when the modules got
-# their measured sizes and masses (physical-checks PC3)
+# their measured sizes and masses (physical-checks PC3), and on 2026-10-22,
+# when every hinge became a DSS-M15 (servo-dynamics SD2; the core alone has
+# no hinge and kept its hash)
 XML_HASHES = {
     "core only": (
         "869d7890024e371dff9f612d53f095e7bedbf470bf403fbe3440194c41a5f028"
     ),
     "snake": (
-        "40066e31bbe0c635d7e273428b2cd928e59694e0e9c7fe33a066a9a6c8b86462"
+        "1018ba9f0d365b27431d3410787f15e2cf352583edea0289b14dc603e25cc40e"
     ),
     "cross": (
-        "5914fdca62f002fdfb2b00b8e2b31ed53f723f58784d4ab2b2877487703736df"
+        "c849a6dea836d98fc5c3eb1ad618177643a93f2ef72d8dc5678e4f982c23846c"
     ),
     "overlapping": (
-        "04ba9f552c2f8994b5bca4f70718e48d81dc1c1c2a433fc423a02a856392f6d7"
+        "2a937011198c5d491e07eb447acb69d4c74426925bb1c2873e804ecc97b67cc0"
     ),
 }
 SPECS = {

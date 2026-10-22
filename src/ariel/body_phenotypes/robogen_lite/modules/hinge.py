@@ -6,6 +6,7 @@ Todo:
 """
 
 # Standard library
+import math
 from functools import cache
 
 # Third-party libraries
@@ -17,7 +18,7 @@ from ariel.body_phenotypes import quaternions as qnp
 # Local libraries
 from ariel.body_phenotypes.robogen_lite.config import ModuleFaces, ModuleType
 from ariel.body_phenotypes.robogen_lite.modules.module import Module
-from ariel.parameters import ArielModulesConfig, kilograms, metres
+from ariel.parameters import ArielModulesConfig, kilograms, metres, radians
 
 # Global constants
 SHRINK = 0.99
@@ -27,7 +28,8 @@ SHRINK = 0.99
 # axis; the rotor is the cradle holding the servo, from the axis to the child
 # face. Half of each side in metres; masses in kg (the rotor's mass depends
 # on the hinge's place in the body, see HingeModule).
-_HINGE = ArielModulesConfig().hinge
+_MODULES = ArielModulesConfig()
+_HINGE = _MODULES.hinge
 _HALF_WIDTH = metres(_HINGE.width) / 2
 _AXIS = metres(_HINGE.axis_from_parent)
 STATOR_MASS = kilograms(_HINGE.parent_mass)
@@ -37,6 +39,57 @@ ROTOR_DIMENSIONS = (
     (metres(_HINGE.length) - _AXIS) / 2,
     _HALF_WIDTH,
 )
+
+# The DSS-M15 as MuJoCo sees it (goal servo-dynamics): the servo's datasheet
+# and the settings of the simulated servo, in SI numbers
+_SERVO, _SETTINGS = _MODULES.servo, _MODULES.servo_settings
+SERVO_HALF_TRAVEL = radians(_SERVO.angle_range) / 2
+SERVO_STALL_TORQUE = float(_SETTINGS.stall_torque(_SERVO).value)  # N m
+SERVO_DAMPING = float(_SETTINGS.damping(_SERVO).value)  # N m s / rad
+SERVO_STIFFNESS = float(_SETTINGS.stiffness(_SERVO).value)  # N m / rad
+SERVO_ARMATURE = float(_SETTINGS.armature(_SERVO).value)  # kg m2
+
+
+def _rotor_inertia(mass: float) -> float:
+    """Return the rotor box's inertia about the hinge axis, in kg m2.
+
+    The axis runs along the box's z, through the middle of the face that
+    meets the stator: a box's own inertia plus the parallel-axis term.
+
+    Parameters
+    ----------
+    mass : float
+        The rotor's mass, in kg.
+
+    Returns
+    -------
+    float
+        ``mass * (a^2 + 4 b^2) / 3`` for half-sizes ``a`` across and ``b``
+        along the rotor.
+    """
+    across, along, _ = ROTOR_DIMENSIONS
+    return mass * (across**2 + 4 * along**2) / 3
+
+
+@cache
+def _servo_damping(steps_from_core: int) -> float:
+    """Return the actuator's velocity gain for a critically damped hinge.
+
+    The hinge (rotor plus the gearbox armature) then settles on a new angle
+    without ringing; the joint's own damping counts towards it.
+
+    Parameters
+    ----------
+    steps_from_core : int
+        Edges between the core and the hinge; they set the rotor's mass.
+
+    Returns
+    -------
+    float
+        ``2 sqrt(kp I) - damping``, in N m s / rad.
+    """
+    inertia = _rotor_inertia(_rotor_mass(steps_from_core)) + SERVO_ARMATURE
+    return 2 * math.sqrt(SERVO_STIFFNESS * inertia) - SERVO_DAMPING
 
 
 @cache
@@ -80,8 +133,10 @@ class HingeModule(Module):
         # Set the index of the module
         self.index = index
 
-        # Create the parent spec.
+        # Create the parent spec; its angles (the joint range) are radians,
+        # as the world's, or MuJoCo reads the range as degrees on attach
         spec = mujoco.MjSpec()
+        spec.compiler.degree = False
 
         # ========= Hinge =========
         hinge_name = self.module_type.name.lower()
@@ -125,27 +180,31 @@ class HingeModule(Module):
         )
 
         # ========= Servo =========
-        # Robot actuators
-        kp = 1
-        kv = 1  # critically damp oscillator
+        # The DSS-M15 (goal servo-dynamics): a position servo whose torque
+        # is capped at the stall torque; the joint's damping gives the
+        # motor's torque-speed line, its armature the gearbox inertia
         servo_axis = (0, 0, 1)
-
         servo_name = "servo"
         rotor.add_joint(
             name=servo_name,
             type=mujoco.mjtJoint.mjJNT_HINGE,
             axis=servo_axis,
             pos=[0, -ROTOR_DIMENSIONS[1], 0],
+            range=(-SERVO_HALF_TRAVEL, SERVO_HALF_TRAVEL),
+            limited=mujoco.mjtLimited.mjLIMITED_TRUE,
+            damping=SERVO_DAMPING,
+            armature=SERVO_ARMATURE,
         )
 
-        # Actuator parameters are defined over a range of 10...
-        dynprm = np.zeros(10)
-        gainprm = np.zeros(10)
-        biasprm = np.zeros(10)
+        # Actuator parameters are defined over MuJoCo's fixed lengths...
+        dynprm = np.zeros(mujoco.mjNDYN)
+        gainprm = np.zeros(mujoco.mjNGAIN)
+        biasprm = np.zeros(mujoco.mjNBIAS)
 
-        # ... but only a few of the parameters are actually used
-        gainprm[0] = kp
-        biasprm[:3] = [0, -kp, -kv]
+        # ... but only a few are used: torque = kp (target - angle) - kv speed
+        gainprm[0] = SERVO_STIFFNESS
+        biasprm[1] = -SERVO_STIFFNESS
+        biasprm[2] = -_servo_damping(steps_from_core)
 
         # Contact exclusion
         spec.add_exclude(
@@ -168,10 +227,9 @@ class HingeModule(Module):
             biasprm=biasprm.tolist(),
             trntype=trntype,
             target=servo_name,
-            ctrlrange=(
-                -np.pi / 2,
-                np.pi / 2,
-            ),  # [-90, 90] degrees (range of 180)
+            ctrlrange=(-SERVO_HALF_TRAVEL, SERVO_HALF_TRAVEL),
+            forcerange=(-SERVO_STALL_TORQUE, SERVO_STALL_TORQUE),
+            forcelimited=mujoco.mjtLimited.mjLIMITED_TRUE,
         )
 
         # Save model specifications

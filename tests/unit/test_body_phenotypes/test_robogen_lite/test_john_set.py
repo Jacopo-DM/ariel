@@ -46,21 +46,22 @@ def test_body_builds_and_compiles(name: str) -> None:
 # sha256 (first 16 hex digits) of ``spec.to_xml()`` for every body, taken from
 # the hand-written builders before they became a table. A change here means a
 # robot changed shape, names or order. Taken again on 2026-10-21, when the
-# modules got their measured sizes and masses (physical-checks PC3).
+# modules got their measured sizes and masses (physical-checks PC3), and on
+# 2026-10-22, when every hinge became a DSS-M15 (servo-dynamics SD2).
 XML_HASHES = {
-    "baby_a": "13c9854493d25c5e",
-    "baby_b": "1928d4975f508ac4",
-    "gecko_small": "16c02b4b7e2d5189",
-    "linkin_modified": "362587c94b75457f",
-    "snake": "10db453350b0fdda",
-    "turtle": "15d61300fc6f7673",
-    "iguana": "d3354a77f548e88c",
-    "spider_8": "cbf1afd2f5427391",
-    "spider_12": "deb556b6d7383fa3",
-    "spider_16": "f9d531951b4f3f92",
-    "centipede_3": "8263f1cbe586f6b5",
-    "centipede_4": "b83d2772556e73d2",
-    "centipede_5": "5621784d5ed35e2a",
+    "baby_a": "544c813b6b2289db",
+    "baby_b": "6818963c0b30a20a",
+    "gecko_small": "000f7dc355175b7f",
+    "linkin_modified": "3b99ac0db6fb30d9",
+    "snake": "db93990cf85b1d52",
+    "turtle": "ad2d98a4e742d582",
+    "iguana": "62d7b664e6b618c0",
+    "spider_8": "60ce9ba1d45f605f",
+    "spider_12": "db7a43f8119476cc",
+    "spider_16": "33542a1ef2254591",
+    "centipede_3": "8a89db162113d412",
+    "centipede_4": "7118d206fc708c75",
+    "centipede_5": "ddd4799630af3d26",
 }
 
 
