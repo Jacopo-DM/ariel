@@ -58,10 +58,10 @@ notebook sits outside the folders of the areas that list it.
 |---|---|
 | `body_phenotypes` | `body_phenotypes/decoders`, `body_phenotypes/cppn_genome`, `body_phenotypes/morphology` |
 | `body_phenotypes/lynx_mjspec` | none yet |
-| `body_phenotypes/robogen_lite` | `body_phenotypes/ariel_modules`, `body_phenotypes/decoders`, `body_phenotypes/cppn_genome`, `body_phenotypes/prebuilt_robots`, `body_phenotypes/overlap_repair`, `body_phenotypes/body_density` |
+| `body_phenotypes/robogen_lite` | `body_phenotypes/ariel_modules`, `body_phenotypes/decoders`, `body_phenotypes/cppn_genome`, `body_phenotypes/prebuilt_robots`, `body_phenotypes/overlap_repair`, `body_phenotypes/body_density`, `body_phenotypes/body_density_repair_nde`, `body_phenotypes/body_density_repair_others` |
 | `ec` | `ec/ec_engine` |
 | `ec/generators` | `ec/ec_engine` |
-| `ec/genotypes` | `ec/nde`, `ec/tree_genome`, `body_phenotypes/body_density` |
+| `ec/genotypes` | `ec/nde`, `ec/tree_genome`, `body_phenotypes/body_density`, `body_phenotypes/body_density_repair_nde`, `body_phenotypes/body_density_repair_others` |
 | `ec/optimizers` | none yet |
 | `opengl` | `opengl/opengl_and_video` |
 | `parameters` | `parameters/parameters` |
