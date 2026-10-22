@@ -102,7 +102,7 @@ class VectorDecoder(Blueprint):
 
             cumulative_weight = np.cumsum(current_weight)
 
-            symbol_idx = np.searchsorted(cumulative_weight, value)
+            symbol_idx = int(np.searchsorted(cumulative_weight, value))
             symbol_idx = min(symbol_idx, num_symbols - 1)
 
             result.append(current_symbols[symbol_idx])

@@ -156,9 +156,11 @@ def box_overlaps(
         pair is the deepest contact between any of their boxes.
     """
     manager = CollisionManager()  # type: ignore[no-untyped-call]  # trimesh.collision is untyped
-    for index, (half, pose) in enumerate(zip(halves, poses, strict=True)):
+    sides = (2 * halves).tolist()
+    for index, (side, pose) in enumerate(zip(sides, poses, strict=True)):
+        x, y, z = side
         manager.add_object(  # type: ignore[no-untyped-call]  # trimesh.collision is untyped
-            str(index), box_mesh(tuple(float(side) for side in 2 * half)), pose
+            str(index), box_mesh((float(x), float(y), float(z))), pose
         )
     _, contacts = manager.in_collision_internal(return_data=True)  # type: ignore[no-untyped-call]  # trimesh.collision is untyped
     depths: dict[tuple[int, int], float] = {}
