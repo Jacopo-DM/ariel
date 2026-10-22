@@ -56,7 +56,7 @@ RNG = np.random.default_rng(SEED)
 SCRIPT_NAME = __file__.split("/")[-1][:-3]
 CWD = Path.cwd()
 DATA = CWD / "__data__" / SCRIPT_NAME
-DATA.mkdir(exist_ok=True)
+DATA.mkdir(parents=True, exist_ok=True)
 
 # Global variables
 SPAWN_POS = [-0.8, 0, 0.1]

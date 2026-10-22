@@ -17,7 +17,7 @@ from ariel.simulation.environments import OlympicArena as World
 SCRIPT_NAME = __file__.split("/")[-1][:-3]
 CWD = Path.cwd()
 DATA = CWD / "__data__"
-DATA.mkdir(exist_ok=True)
+DATA.mkdir(parents=True, exist_ok=True)
 
 # --- RANDOM GENERATOR SETUP --- #
 SEED = 42
