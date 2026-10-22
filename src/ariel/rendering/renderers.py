@@ -21,6 +21,26 @@ from ariel.rendering.file_ops import generate_save_path
 from ariel.rendering.video_recorder import VideoRecorder
 
 
+def _step_to(model: mujoco.MjModel, data: mujoco.MjData, time: float) -> None:
+    """Step the simulation until its clock reaches ``time``.
+
+    Steps use the model's own timestep, so each video frame shows exactly
+    one frame's worth of simulated time on average.
+
+    Parameters
+    ----------
+    model : mujoco.MjModel
+        The model, whose ``opt.timestep`` sets the step.
+    data : mujoco.MjData
+        The state to advance.
+    time : float
+        The simulated time, in seconds, of the next frame.
+    """
+    # A small tolerance, so a clock that lands on the frame time stops
+    steps = math.ceil((time - data.time) / model.opt.timestep - 1e-9)
+    mujoco.mj_step(model, data, nstep=max(steps, 1))
+
+
 def single_frame_renderer(  # ruff: ignore[too-many-arguments]
     model: mujoco.MjModel,
     data: mujoco.MjData,
@@ -134,11 +154,8 @@ def video_renderer(
     # Reset state and time of simulation
     mujoco.mj_resetData(model, data)
 
-    # Calculate steps per frame to avoid single iterations (see 'Notes'.)
-    options = mujoco.MjOption()
-    steps_per_frame = duration / (
-        options.timestep * duration * video_recorder.fps
-    )
+    # Frame k shows the simulation at k / fps seconds
+    frame_time = 1 / video_recorder.fps
 
     # Update rendering engine
     camera = mujoco.mj_name2id(
@@ -172,9 +189,11 @@ def video_renderer(
         width=video_recorder.width,
         height=video_recorder.height,
     ) as renderer:
+        frames = 0
         while data.time < duration:
-            # Move simulation forward one iteration/step
-            mujoco.mj_step(model, data, nstep=math.floor(steps_per_frame))
+            # Move the simulation to the next frame's time
+            frames += 1
+            _step_to(model, data, frames * frame_time)
 
             # Update rendering engine
             renderer.update_scene(
@@ -262,11 +281,8 @@ def tracking_video_renderer(
     else:
         log.warning("No 'core' body found - using default free camera.")
 
-    # Calculate steps per frame to avoid single iterations
-    options = mujoco.MjOption()
-    steps_per_frame = duration / (
-        options.timestep * duration * video_recorder.fps
-    )
+    # Frame k shows the simulation at k / fps seconds
+    frame_time = 1 / video_recorder.fps
 
     # Build the tracking camera once (reused every frame)
     if core_body_id is not None:
@@ -285,9 +301,11 @@ def tracking_video_renderer(
         width=video_recorder.width,
         height=video_recorder.height,
     ) as renderer:
+        frames = 0
         while data.time < duration:
-            # Move simulation forward one iteration/step
-            mujoco.mj_step(model, data, nstep=math.floor(steps_per_frame))
+            # Move the simulation to the next frame's time
+            frames += 1
+            _step_to(model, data, frames * frame_time)
 
             renderer.update_scene(
                 data,

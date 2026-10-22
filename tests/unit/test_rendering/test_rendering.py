@@ -38,6 +38,11 @@ NO_CAMERA_XML = """
 </mujoco>"""
 FOVY = 60.0
 TWO_FRAMES = 2
+# A timestep that does not divide a 30 fps frame (8.89 steps per frame)
+STEP_XML = MODEL_XML.replace(
+    "<mujoco>", '<mujoco><option timestep="0.00375"/>', 1
+)
+ONE_SECOND = 1.0
 
 
 pytestmark = pytest.mark.usefixtures("fake_opengl")
@@ -247,6 +252,30 @@ def test_tracking_renderer_with_defaults(
     model, data = _scene()
     renderers.tracking_video_renderer(model, data, duration=DURATION)
     assert list(tmp_path.glob("video_*.mp4"))
+
+
+@pytest.mark.parametrize("camera", ["fixed", "tracking"])
+def test_a_video_lasts_as_long_as_the_simulation(
+    tmp_path: Path, camera: str
+) -> None:
+    """One simulated second at 30 fps gives 30 frames, a one-second video.
+
+    The frames follow the model's own timestep, not MuJoCo's default 2 ms.
+    """
+    model, data = _scene(STEP_XML)
+    recorder = _recorder(tmp_path)
+    if camera == "tracking":
+        renderers.tracking_video_renderer(
+            model, data, duration=ONE_SECOND, video_recorder=recorder
+        )
+    else:
+        renderers.video_renderer(
+            model, data, duration=ONE_SECOND, video_recorder=recorder
+        )
+    assert recorder.frame_count / recorder.fps == pytest.approx(
+        ONE_SECOND, abs=1 / recorder.fps
+    )
+    assert data.time == pytest.approx(ONE_SECOND, abs=model.opt.timestep)
 
 
 def test_recorder_accepts_a_string_folder(tmp_path: Path) -> None:
