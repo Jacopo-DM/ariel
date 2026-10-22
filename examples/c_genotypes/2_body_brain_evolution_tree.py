@@ -83,6 +83,8 @@ parser.add_argument(
     help="Launch MuJoCo viewer for best individual",
 )
 args = parser.parse_args()
+if args.dur <= 1:
+    parser.error("--dur must be longer than the 1 s settling delay")
 
 # Constants
 DURATION: int = args.dur

@@ -1,6 +1,7 @@
 """EC A3 Template Code (Jack)."""
 
 # Standard library
+import argparse
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, cast
 
@@ -66,6 +67,16 @@ SPAWN_POS = [-0.8, 0, 0.1]
 NUM_OF_MODULES = 30
 TARGET_POSITION = [5, 0, 0.5]
 GENOTYPE_SIZE = 64
+
+# --- COMMAND LINE --- #
+parser = argparse.ArgumentParser(description="Sample random robots and brains.")
+parser.add_argument(
+    "--samples", type=int, default=200, help="Random robots to try"
+)
+parser.add_argument(
+    "--dur", type=int, default=30, help="Seconds simulated per robot"
+)
+args = parser.parse_args()
 
 
 def fitness_function(history: list[tuple[float, float, float]]) -> float:
@@ -345,7 +356,7 @@ def evaluate(
     mj.set_mjcb_control(controller.set_control)
 
     # Choose the mode
-    duration = 30
+    duration = args.dur
     if plot_and_record is True:
         # Run the simulation
         run(
@@ -373,7 +384,7 @@ def evaluate(
 def main() -> None:
     """Entry point."""
     best_fitness = -np.inf
-    for _ in track(range(200)):
+    for _ in track(range(args.samples)):
         # Create a robot
         robot = create_robot_body()
         nn = NN(robot)

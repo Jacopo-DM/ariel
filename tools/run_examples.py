@@ -167,18 +167,19 @@ EXAMPLES: dict[str, Example] = {
     "z_ec_course/A2_template.py": row("--no-visualize"),
     "z_ec_course/A2_template_cpg.py": row("--budget 2 --dur 2 --no-visualize"),
     "z_ec_course/A3_competition_tester.py": row(
-        "--graph __data__/A3_template/robot_graph.json",
+        "--graph __data__/A3_template/robot_graph.json --duration 2",
         opengl=True,
         after="z_ec_course/A3_template.py",
     ),
     "z_ec_course/A3_template.py": row(opengl=True),
-    "z_ec_course/A3_template_jack.py": row(opengl=True),
+    "z_ec_course/A3_template_jack.py": row("--samples 2 --dur 2", opengl=True),
     "z_ec_course/plot_fit_per_gen.py": row(
         after="c_genotypes/1_body_evolution_tree.py"
     ),
     "z_ec_course/plot_learning_deltas_per_individual.py": row(
-        "--path __data__/3_body_brain_joint_evolution_tree_nn_learning",
-        after=C_GENOTYPES_3,
+        "--path __data__/"
+        "4_body_brain_joint_evolution_tree_nn_learning_multiprocessing",
+        after=C_GENOTYPES_4,
     ),
 }
 

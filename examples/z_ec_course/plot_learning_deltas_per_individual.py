@@ -5,7 +5,7 @@ Visualizes how each robot's brain-learning performance improves (or not)
 within each generation, and aggregates this across generations.
 
 Usage:
-    python plot_learning_deltas_per_individual.py --path __data__/5_minimal_tree_morph_brain_combo_multiprocessing
+    python plot_learning_deltas_per_individual.py --path __data__/4_body_brain_joint_evolution_tree_nn_learning_multiprocessing
 """
 
 import argparse
@@ -263,7 +263,7 @@ def main():
     parser.add_argument(
         "--path",
         type=str,
-        default="__data__/5_minimal_tree_morph_brain_combo_multiprocessing",
+        default="__data__/4_body_brain_joint_evolution_tree_nn_learning_multiprocessing",
         help="Path to the data directory",
     )
     parser.add_argument(
@@ -277,7 +277,7 @@ def main():
     data_dir = Path(args.path)
     if not data_dir.exists():
         console.log(f"[red]Data directory not found: {data_dir}[/red]")
-        return
+        raise SystemExit(1)
 
     # Find database file
     if args.db_file:
@@ -286,7 +286,7 @@ def main():
         db_files = list(data_dir.glob("database_*.db"))
         if not db_files:
             console.log(f"[red]No database files found in {data_dir}[/red]")
-            return
+            raise SystemExit(1)
         db_path = sorted(db_files)[-1]  # Use most recent
 
     console.log(f"[cyan]Loading database:[/cyan] {db_path}")
@@ -299,8 +299,8 @@ def main():
     console.log(f"Individuals with learning deltas: {len(individuals_with_deltas)} / {len(df)}")
 
     if len(individuals_with_deltas) == 0:
-        console.log("[yellow]No individuals with learning deltas found![/yellow]")
-        return
+        console.log("[red]No individuals with learning deltas found![/red]")
+        raise SystemExit(1)
 
     # Create output directory
     output_dir = data_dir / "plots"

@@ -1,6 +1,7 @@
 """Robot Olympics Competition template code."""
 
 # Standard library
+import argparse
 from pathlib import Path
 from typing import Any
 
@@ -35,6 +36,22 @@ SPAWN_POS = [-0.8, 0, 0.1]
 NUM_OF_MODULES = 30
 TARGET_POSITION = [5, 0, 0.5]
 TIME_OUT = 500
+
+# --- COMMAND LINE --- #
+parser = argparse.ArgumentParser(description="Score one robot in the arena.")
+parser.add_argument(
+    "--graph",
+    type=Path,
+    default=CWD / "YOUR_ROBOT_GRAPH.json",
+    help="Robot graph to load (default: YOUR_ROBOT_GRAPH.json here)",
+)
+parser.add_argument(
+    "--duration",
+    type=int,
+    default=TIME_OUT,
+    help="Seconds to simulate and record",
+)
+args = parser.parse_args()
 
 # Local scripts
 from A3_plot_function import show_xpos_history
@@ -114,8 +131,7 @@ def experiment(
 def main() -> None:
     """Entry point."""
     # Load your robot graph here
-    path_to_graph = CWD / "YOUR_ROBOT_GRAPH.json"
-    robot_graph = load_graph_from_json(path_to_graph)
+    robot_graph = load_graph_from_json(args.graph)
 
     # Construct the robot from the graph
     core = construct_mjspec_from_graph(robot_graph)
@@ -128,8 +144,11 @@ def main() -> None:
         name_to_bind=name_to_bind,
     )
 
-    # !!! Replace None with your controller function !!!
-    your_controller = None
+    # !!! Replace this with your controller function !!!
+    # It takes (model, data) and returns one target angle per actuator;
+    # this placeholder holds every joint at 0 so the file runs as given.
+    def your_controller(model: mj.MjModel, _data: mj.MjData) -> np.ndarray:
+        return np.zeros(model.nu)
 
     # Create the controller
     ctrl = Controller(
@@ -138,7 +157,7 @@ def main() -> None:
     )
 
     # Simulate the robot
-    experiment(robot=core, controller=ctrl)
+    experiment(robot=core, controller=ctrl, duration=args.duration)
 
     # Plot the x-position history
     show_xpos_history(
