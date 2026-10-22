@@ -5,7 +5,7 @@ Visualizes how each robot's brain-learning performance improves (or not)
 within each generation, and aggregates this across generations.
 
 Usage:
-    python plot_learning_deltas_per_individual.py --path __data__/4_body_brain_joint_evolution_tree_nn_learning_multiprocessing
+    python plot_learning_deltas_per_individual.py --path __data__/3_body_brain_joint_evolution_tree_nn_learning
 """
 
 import argparse
@@ -263,7 +263,7 @@ def main():
     parser.add_argument(
         "--path",
         type=str,
-        default="__data__/4_body_brain_joint_evolution_tree_nn_learning_multiprocessing",
+        default="__data__/3_body_brain_joint_evolution_tree_nn_learning",
         help="Path to the data directory",
     )
     parser.add_argument(

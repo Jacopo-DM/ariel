@@ -78,10 +78,6 @@ class Outcome(BaseModel):
 
 C_GENOTYPES_8_DATA = "__data__/8_bootstrap_pipeline_population_evolution"
 C_GENOTYPES_3 = "c_genotypes/3_body_brain_joint_evolution_tree_nn_learning.py"
-C_GENOTYPES_4 = (
-    "c_genotypes/"
-    "4_body_brain_joint_evolution_tree_nn_learning_multiprocessing.py"
-)
 C_GENOTYPES_8 = "c_genotypes/8_bootstrap_pipeline_population_evolution.py"
 
 
@@ -117,10 +113,6 @@ EXAMPLES: dict[str, Example] = {
         "--budget 1 --pop 4 --dur 3 --no-visualize", opengl=True
     ),
     C_GENOTYPES_3: row(
-        "--budget 1 --pop 2 --dur 2 --eval-delay 0.5 --learn-budget 1"
-        " --learn-pop 2 --max-modules 5 --max-depth 3 --no-visualize"
-    ),
-    C_GENOTYPES_4: row(
         "--bud 1 --pop 2 --dur 2 --eval-delay 0.5 --learn-bud 1 --learn-pop 2"
         " --eval-workers 2 --max-modules 5 --max-depth 3 --no-save-video"
         " --no-visualize"
@@ -183,9 +175,8 @@ EXAMPLES: dict[str, Example] = {
         after="c_genotypes/1_body_evolution_tree.py"
     ),
     "z_ec_course/plot_learning_deltas_per_individual.py": row(
-        "--path __data__/"
-        "4_body_brain_joint_evolution_tree_nn_learning_multiprocessing",
-        after=C_GENOTYPES_4,
+        "--path __data__/3_body_brain_joint_evolution_tree_nn_learning",
+        after=C_GENOTYPES_3,
     ),
 }
 
