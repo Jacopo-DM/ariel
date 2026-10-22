@@ -215,6 +215,9 @@ def mutation(population: Population) -> Population:
             0.8, 0.5, ID_MANAGER.get_next_innov_id, ID_MANAGER.get_next_node_id,
         )
         ind.genotype["morph"] = morph.to_dict()
+        # A new body can have a different number of hinges, so the brain
+        # learned for the old one may not fit it: learn it again.
+        ind.tags["requires_lr"] = True
 
         # 2. Control Mutation (Gaussian Creep)
         ctrl = np.array(ind.genotype["ctrl"])

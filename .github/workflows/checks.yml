@@ -40,6 +40,11 @@ jobs:
       - name: Tests and coverage
         run: uv run --locked pytest -q -p no:cacheprovider
 
+      # Each script in examples/ runs briefly; the ones that render are
+      # skipped here, since the runner has no OpenGL backend
+      - name: Examples
+        run: uv run --locked python tools/run_examples.py
+
       # Pyright reads stubs from .typings/, which CI does not generate
       - name: Pyright (informational)
         run: uv run --locked pyright src tests

@@ -23,7 +23,8 @@ create a MuJoCo renderer. The scripts run with ``MPLBACKEND=Agg``, so a
 ``plt.show()`` returns at once, and with no input, so a prompt fails.
 
 With script arguments (paths relative to ``examples/``) only those scripts
-run, together with their producers.
+run, together with their producers. Up to ``JOBS`` scripts run at once:
+first every producer and every script without one, then the readers.
 """
 
 import os
@@ -31,6 +32,7 @@ import subprocess  # ruff: ignore[suspicious-subprocess-import]  # runs the repo
 import sys
 import tempfile
 import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Literal
 
@@ -38,6 +40,8 @@ from pydantic import BaseModel, ConfigDict
 
 EXAMPLES_FOLDER = Path(__file__).resolve().parents[1] / "examples"
 TIMEOUT_SECONDS = 120
+# Scripts run at once; one at a time took 3 min 37 s for all 33 (ER6)
+JOBS = 4
 # The same probe as tools/run_notebooks.py, which is the user's shared
 # template and stays a copy of it, so the probe is repeated here.
 OPENGL_PROBE = (
@@ -363,27 +367,36 @@ def main(argv: list[str]) -> int:
             )
             failed += 1
     opengl = opengl_works()
+    order = chosen(names)
     outcomes: dict[str, Outcome] = {}
-    with tempfile.TemporaryDirectory() as root:
-        folders: dict[str, Path] = {}
-        for name in chosen(names):
+    with (
+        tempfile.TemporaryDirectory() as root,
+        ThreadPoolExecutor(max_workers=JOBS) as pool,
+    ):
+
+        def start(name: str) -> Outcome:
             example = EXAMPLES[name]
             producer = example.after
             if producer and outcomes[producer].status != "PASS":
-                outcome = Outcome(
+                return Outcome(
                     name=name,
                     status="SKIP",
                     seconds=0.0,
                     detail=f"needs {producer}, which did not pass",
                 )
-            else:
-                folder = folders[producer] if producer else Path(root) / name
-                folder.mkdir(parents=True, exist_ok=True)
-                folders[name] = folder
-                outcome = run_example(name, example, folder, opengl=opengl)
-            outcomes[name] = outcome
-            report(outcome)
-            failed += outcome.status == "FAIL"
+            folder = Path(root) / (producer or name)
+            folder.mkdir(parents=True, exist_ok=True)
+            return run_example(name, example, folder, opengl=opengl)
+
+        # Producers first, then the scripts that read their files
+        for wave in (
+            [name for name in order if not EXAMPLES[name].after],
+            [name for name in order if EXAMPLES[name].after],
+        ):
+            for name, outcome in zip(wave, pool.map(start, wave), strict=True):
+                outcomes[name] = outcome
+                report(outcome)
+                failed += outcome.status == "FAIL"
     return 1 if failed else 0
 
 

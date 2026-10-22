@@ -40,5 +40,13 @@ repos:
         pass_filenames: false
         always_run: true
         stages: [pre-push]
+      # Example scripts (examples/): each runs briefly, see tools/run_examples.py
+      - id: examples-push
+        name: examples (all, briefly)
+        entry: uv run --no-sync python tools/run_examples.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
       # pydoclint is left out on purpose: `uv run pydoclint src` still reports
       # findings (see PLAN.md, Known problems).
