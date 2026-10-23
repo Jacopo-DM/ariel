@@ -215,3 +215,23 @@ def test_failing_cell_is_zero_when_nothing_ran() -> None:
     notebook = nbformat.v4.new_notebook()  # type: ignore[no-untyped-call]  # nbformat is untyped
     notebook.cells = [nbformat.v4.new_code_cell("x = 1")]  # type: ignore[no-untyped-call]  # nbformat is untyped
     assert script.failing_cell(notebook) == 0
+
+
+def test_notebooks_in_subfolders_run_and_checkpoints_do_not(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    script = _load()
+    (tmp_path / "ec").mkdir()
+    (tmp_path / "ec" / ".ipynb_checkpoints").mkdir()
+    _write(tmp_path / "top.ipynb", "x = 1")
+    _write(tmp_path / "ec" / "nested.ipynb", "x = 1")
+    _write(
+        tmp_path / "ec" / ".ipynb_checkpoints" / "nested-checkpoint.ipynb", "x"
+    )
+    monkeypatch.setattr(script, "FUNCTIONAL", tmp_path)
+    monkeypatch.setattr(script, "opengl_works", lambda: True)
+    assert script.main([]) == 0
+    names = [ln.split()[1] for ln in capsys.readouterr().out.splitlines()]
+    assert names == ["nested", "top"]

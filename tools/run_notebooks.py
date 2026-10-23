@@ -8,9 +8,10 @@ error; a skipped one prints the reason. The exit code is 1 when any notebook
 fails (SKIP is not a failure).
 
 With file arguments only those notebooks run. Without, every notebook in
-``tests/functional`` runs except the ones marked ``"slow": true`` in their
-metadata; ``--slow`` includes them. ``--timeout SECONDS`` sets the limit per
-notebook (default 600).
+``tests/functional`` and its subfolders runs (Jupyter's
+``.ipynb_checkpoints`` copies excepted) except the ones marked
+``"slow": true`` in their metadata; ``--slow`` includes them.
+``--timeout SECONDS`` sets the limit per notebook (default 600).
 
 A notebook that needs OpenGL carries ``"requires": ["opengl"]`` in its
 metadata and is skipped when this machine cannot create a MuJoCo renderer.
@@ -211,7 +212,11 @@ def main(argv: list[str]) -> int:
     paths = (
         [Path(n) for n in names]
         if names
-        else sorted(FUNCTIONAL.glob("*.ipynb"))
+        else sorted(
+            path
+            for path in FUNCTIONAL.rglob("*.ipynb")
+            if ".ipynb_checkpoints" not in path.parts
+        )
     )
     opengl = opengl_works()
     failed = 0
