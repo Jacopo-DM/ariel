@@ -19,7 +19,7 @@ NONE_VALUE = 3
 DEG_90_INDEX = 2
 DEG_45_VALUE = 45
 DEG_90_VALUE = 90
-CORE_FACE_COUNT = 4
+CORE_FACE_COUNT = 6
 BRICK_FACE_COUNT = 5
 
 
@@ -64,7 +64,7 @@ def test_derived_constants() -> None:
 
 
 def test_allowed_faces_core_has_four_faces() -> None:
-    """CORE is allowed four faces (FRONT, BACK, RIGHT, LEFT)."""
+    """CORE is allowed all six faces."""
     assert len(ALLOWED_FACES[ModuleType.CORE]) == CORE_FACE_COUNT
 
 

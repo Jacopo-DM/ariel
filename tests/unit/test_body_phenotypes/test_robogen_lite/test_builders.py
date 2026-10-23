@@ -20,6 +20,7 @@ from ariel.body_phenotypes.robogen_lite import constructor
 from ariel.body_phenotypes.robogen_lite.config import (
     NUM_OF_ROTATIONS,
     NUM_OF_TYPES_OF_MODULES,
+    ModuleFaces,
     ModuleType,
 )
 from ariel.body_phenotypes.robogen_lite.cppn_neat.genome import Genome
@@ -41,6 +42,7 @@ mpl.use("Agg")
 NUM_CPPN_INPUTS = 6
 NUM_CPPN_OUTPUTS = 1 + NUM_OF_TYPES_OF_MODULES + NUM_OF_ROTATIONS
 MAX_MODULES = 8
+BODIES_FOR_FACES = 20
 ONE_SECOND = 1.0
 
 
@@ -289,6 +291,51 @@ def test_best_first_decoder_stalls_without_free_faces(
         genome, max_modules=MAX_MODULES
     ).decode()
     assert list(graph.nodes) == [0]
+
+
+def test_best_first_decoder_stalls_without_allowed_rotations(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A candidate whose rotation its type does not allow is dropped."""
+    monkeypatch.setattr(
+        cppn_best_first,
+        "ALLOWED_ROTATIONS",
+        {module_type: [] for module_type in ModuleType},
+    )
+    genome = Genome.random(
+        NUM_CPPN_INPUTS,
+        NUM_CPPN_OUTPUTS,
+        NUM_CPPN_INPUTS + NUM_CPPN_OUTPUTS,
+        0,
+    )
+    graph = cppn_best_first.MorphologyDecoderBestFirst(
+        genome, max_modules=MAX_MODULES
+    ).decode()
+    assert list(graph.nodes) == [0]
+
+
+def test_best_first_decoder_uses_every_face_of_the_parent() -> None:
+    """The face is checked against the parent, so BACK and TOP are used."""
+    random.seed(0)
+    faces: set[str] = set()
+    hinge_faces: set[str] = set()
+    for _ in range(BODIES_FOR_FACES):
+        genome = Genome.random(
+            NUM_CPPN_INPUTS,
+            NUM_CPPN_OUTPUTS,
+            NUM_CPPN_INPUTS + NUM_CPPN_OUTPUTS,
+            0,
+        )
+        graph = cppn_best_first.MorphologyDecoderBestFirst(
+            genome, max_modules=MAX_MODULES
+        ).decode()
+        for parent, child in graph.edges:
+            face = str(graph.edges[parent, child]["face"])
+            faces.add(face)
+            if graph.nodes[child]["type"] == "HINGE":
+                hinge_faces.add(face)
+    assert faces == {face.name for face in ModuleFaces}
+    assert hinge_faces != {"FRONT"}
 
 
 def test_brick_and_hinge_expose_sites() -> None:

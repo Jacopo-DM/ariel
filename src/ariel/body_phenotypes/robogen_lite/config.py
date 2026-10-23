@@ -79,8 +79,8 @@ ALLOWED_FACES: dict[ModuleType, list[ModuleFaces]] = {
         ModuleFaces.BACK,
         ModuleFaces.RIGHT,
         ModuleFaces.LEFT,
-        # ModuleFaces.TOP,
-        # ModuleFaces.BOTTOM,
+        ModuleFaces.TOP,
+        ModuleFaces.BOTTOM,
     ],
     ModuleType.BRICK: [
         ModuleFaces.FRONT,

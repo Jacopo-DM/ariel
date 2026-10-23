@@ -181,10 +181,13 @@ def test_allowed_shapes(
             id="hinge-top",
         ),
         pytest.param(
-            [CORE, BRICK],
-            [{"parent": 0, "child": 1, "face": "TOP"}],
-            "has no TOP face",
-            id="core-top",
+            [CORE, BRICK, BRICK],
+            [
+                {"parent": 0, "child": 1, "face": "FRONT"},
+                {"parent": 1, "child": 2, "face": "BACK"},
+            ],
+            "has no BACK face",
+            id="brick-back",
         ),
         pytest.param(
             [CORE, BRICK],

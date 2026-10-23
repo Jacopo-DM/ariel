@@ -4,7 +4,8 @@
 random trees of up to 20 modules (``random.seed(42)``, as
 ``tools/measure_overlap.py``) and the 13 robots of ``john_set`` (from their
 tables), recorded with the grid-based ``MorphologicalMeasures`` of commit
-``ef74198``. The shape
+``ef74198``. The core had four faces then (no TOP or BOTTOM), so the trees
+are grown with those four, which gives the same 60 trees. The shape
 measures (bounding box, coverage, proportion, symmetry, ``is_2d``) are left
 out on purpose: their meaning changes with the goal geometry-measures.
 """
@@ -17,12 +18,16 @@ import random
 from functools import cache
 from pathlib import Path
 from typing import TYPE_CHECKING
+from unittest.mock import patch
 
 # Third-party libraries
 import pytest
 
 # Local libraries
 from ariel.body_phenotypes import (
+    ALLOWED_FACES,
+    ModuleFaces,
+    ModuleType,
     MorphologicalMeasures,
     construct_mjspec_from_graph,
 )
@@ -37,6 +42,12 @@ GOLDEN = Path(__file__).with_name("golden_counts.json")
 SEED = 42
 BODIES = 60
 MODULES = 20
+CORE_FACES_THEN = [
+    ModuleFaces.FRONT,
+    ModuleFaces.BACK,
+    ModuleFaces.RIGHT,
+    ModuleFaces.LEFT,
+]
 TABLES = (
     "BABY_A",
     "BABY_B",
@@ -96,11 +107,11 @@ def bodies() -> dict[str, CoreModule]:
         Body name to the built robot.
     """
     random.seed(SEED)
+    with patch.dict(ALLOWED_FACES, {ModuleType.CORE: CORE_FACES_THEN}):
+        graphs = [random_tree(MODULES).to_networkx() for _ in range(BODIES)]
     named = {
-        f"tree {i}": construct_mjspec_from_graph(
-            random_tree(MODULES).to_networkx()
-        )
-        for i in range(BODIES)
+        f"tree {i}": construct_mjspec_from_graph(graph)
+        for i, graph in enumerate(graphs)
     }
     for table in TABLES:
         named[table] = build(getattr(john_tables, table))

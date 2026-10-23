@@ -157,10 +157,8 @@ class MorphologyDecoderBestFirst:
                         np.argmax(softmax(rot_scores))
                     )
 
-                    if (
-                        face in ALLOWED_FACES[child_type]
-                        and child_rot in ALLOWED_ROTATIONS[child_type]
-                    ):
+                    # The face is checked against the parent's faces above
+                    if child_rot in ALLOWED_ROTATIONS[child_type]:
                         potential_connections.append(
                             _Candidate(
                                 score=conn_score,
