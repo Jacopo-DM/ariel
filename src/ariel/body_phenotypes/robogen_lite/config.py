@@ -51,6 +51,10 @@ class ModuleRotationsTheta(Enum):
     DEG_0 = 0
     DEG_45 = 45
     DEG_90 = 90
+    # Not in ModuleRotationsIdx, so no decoder picks it: only the mirrored
+    # copy of a 45-degree hinge uses it (goal sims-genotype, DESIGN.md
+    # Decisions, "Mirroring modules")
+    DEG_MINUS_45 = -45
 
 
 class ModuleInstance(BaseModel):
