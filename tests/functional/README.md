@@ -72,7 +72,7 @@ notebook sits outside the folders of the areas that list it.
 | `opengl` | `opengl/opengl_and_video` |
 | `parameters` | `parameters/parameters` |
 | `rendering` | `body_phenotypes/ariel_modules`, `simulation/sim_environments`, `opengl/opengl_and_video`, `body_phenotypes/prebuilt_robots` |
-| `simulation` | `simulation/speed_tests` |
+| `simulation` | `simulation/speed_tests`, `simulation/parallel_timing` |
 | `simulation/controllers` | `simulation/cpg_properties`, `simulation/cpg_locomotion`, `simulation/cpg_steering`, `simulation/cpg_initialisation`, `simulation/cpg_initialisation_search` |
 | `simulation/environments` | `simulation/sim_environments` |
 | `simulation/tasks` | `simulation/tasks` |
