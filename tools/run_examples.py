@@ -86,6 +86,7 @@ def row(
     *,
     opengl: bool = False,
     after: str = "",
+    timeout: int = TIMEOUT_SECONDS,
 ) -> Example:
     """Build a row from its arguments written as one string.
 
@@ -94,7 +95,9 @@ def row(
     Example
         The row, with ``args`` split on spaces.
     """
-    return Example(args=tuple(args.split()), opengl=opengl, after=after)
+    return Example(
+        args=tuple(args.split()), opengl=opengl, after=after, timeout=timeout
+    )
 
 
 EXAMPLES: dict[str, Example] = {
@@ -152,7 +155,8 @@ EXAMPLES: dict[str, Example] = {
     "re_book/2_body_brain_evolution.py": row(
         "--budget 1 --pop 4 --dur 3 --no-visualize", opengl=True
     ),
-    "re_book/3_body_brain_lr.py": row(opengl=True),
+    # 97 s alone since the core's six faces and the CPPN face fix (2026-10-23)
+    "re_book/3_body_brain_lr.py": row(opengl=True, timeout=240),
     "re_book/4_sequential_waypoints.py": row(
         "--budget 1 --population 2 --dur 1 --workers 1 --no-video", opengl=True
     ),

@@ -292,3 +292,14 @@ def test_every_example_and_module_is_a_real_file() -> None:
     producers = {row.after for row in script.EXAMPLES.values() if row.after}
     assert producers <= set(script.EXAMPLES)
     assert all(not script.EXAMPLES[name].after for name in producers)
+
+
+def test_a_row_can_set_its_own_timeout() -> None:
+    """A slow script gets its own limit; the others keep the default."""
+    script = _load()
+    slow = script.row(timeout=2 * script.TIMEOUT_SECONDS)
+    assert slow.timeout == 2 * script.TIMEOUT_SECONDS
+    assert script.row().timeout == script.TIMEOUT_SECONDS
+    assert script.EXAMPLES["re_book/3_body_brain_lr.py"].timeout > (
+        script.TIMEOUT_SECONDS
+    )
