@@ -13,12 +13,17 @@ With file arguments only those notebooks run. Without, every notebook in
 ``"slow": true`` in their metadata; ``--slow`` includes them.
 ``--timeout SECONDS`` sets the limit per notebook (default 600).
 
+The kernel finds the ``.py`` files beside its notebook: the notebook's
+folder comes first on its ``PYTHONPATH``, which the process pool workers a
+notebook starts inherit (``gecko_trials`` for the slow CPG notebooks).
+
 A notebook that needs OpenGL carries ``"requires": ["opengl"]`` in its
 metadata and is skipped when this machine cannot create a MuJoCo renderer.
 ``--save`` writes the executed notebooks, with their outputs, back to the
 repo; without it the notebooks on disk are never changed.
 """
 
+import os
 import subprocess  # ruff: ignore[suspicious-subprocess-import]  # runs one fixed probe command
 import sys
 import tempfile
@@ -133,6 +138,18 @@ def is_slow(notebook: nbformat.NotebookNode) -> bool:
     return bool(notebook.metadata.get("slow", False))
 
 
+def kernel_environment(folder: Path) -> dict[str, str]:
+    """Return this process's environment with ``folder`` first on the path.
+
+    Returns
+    -------
+    dict[str, str]
+        The variables for a notebook's kernel.
+    """
+    paths = [str(folder), os.environ.get("PYTHONPATH", "")]
+    return {**os.environ, "PYTHONPATH": os.pathsep.join(filter(None, paths))}
+
+
 def run_notebook(
     path: Path,
     *,
@@ -170,7 +187,7 @@ def run_notebook(
             resources={"metadata": {"path": folder}},
         )
         try:
-            client.execute()
+            client.execute(env=kernel_environment(path.resolve().parent))
         except CellExecutionError as error:
             status = "FAIL"
             cell = failing_cell(notebook)

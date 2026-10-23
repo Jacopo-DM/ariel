@@ -21,6 +21,12 @@ notebooks.
 A notebook that needs a working OpenGL backend carries `"requires": ["opengl"]`
 in its metadata and prints SKIP, with the reason, on a machine without one.
 
+The kernel runs in a temporary folder but finds the `.py` files beside its
+notebook: the runner puts the notebook's folder first on `PYTHONPATH`. The
+slow CPG notebooks import `simulation/gecko_trials.py` that way, because the
+worker processes of `ariel.simulation.process_pool` can only run a function
+they import from a file (`tests/unit/test_gecko_trials.py` tests it).
+
 ## Hooks
 
 Two pre-commit hooks run the notebooks (`.pre-commit-config.yaml`). At commit,

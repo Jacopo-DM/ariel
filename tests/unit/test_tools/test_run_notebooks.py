@@ -2,6 +2,7 @@
 
 # Standard library
 import importlib.util
+import os
 import subprocess  # ruff: ignore[suspicious-subprocess-import]  # only builds fake results
 from pathlib import Path
 from types import ModuleType
@@ -56,6 +57,30 @@ def test_a_clean_notebook_passes(tmp_path: Path) -> None:
     assert outcome.status == "PASS"
     assert outcome.name == "good"
     assert outcome.seconds > 0
+
+
+def test_a_notebook_imports_a_module_beside_it(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """The kernel runs elsewhere but finds the notebook's own .py files."""
+    script = _load()
+    (tmp_path / "beside.py").write_text("VALUE = 7\n", encoding="utf-8")
+    path = tmp_path / "imports.ipynb"
+    _write(path, "import beside", "assert beside.VALUE == 7")
+    monkeypatch.delenv("PYTHONPATH", raising=False)
+    assert script.run_notebook(path, opengl=False).status == "PASS"
+
+
+def test_the_kernel_path_puts_the_folder_before_the_old_path(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """An existing PYTHONPATH stays, after the notebook's folder."""
+    script = _load()
+    monkeypatch.setenv("PYTHONPATH", "elsewhere")
+    path = script.kernel_environment(tmp_path)["PYTHONPATH"]
+    assert path == f"{tmp_path}{os.pathsep}elsewhere"
+    monkeypatch.delenv("PYTHONPATH")
+    assert script.kernel_environment(tmp_path)["PYTHONPATH"] == str(tmp_path)
 
 
 def test_a_failing_cell_is_named_in_the_detail(tmp_path: Path) -> None:
