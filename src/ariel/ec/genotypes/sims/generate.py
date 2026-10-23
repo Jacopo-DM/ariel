@@ -25,7 +25,14 @@ TERMINAL_CHANCE = 0.1
 TYPES = (ModuleType.BRICK, ModuleType.HINGE)
 
 
-def _node(rng: np.random.Generator, cap: int) -> SimsNode:
+def random_node(rng: np.random.Generator, cap: int) -> SimsNode:
+    """Draw a brick or hinge template with copy limit 1 to `cap`.
+
+    Returns
+    -------
+    SimsNode
+        The template, with a rotation its type allows.
+    """
     kind = TYPES[rng.integers(len(TYPES))]
     rotations = ALLOWED_ROTATIONS[kind]
     return SimsNode(
@@ -35,13 +42,20 @@ def _node(rng: np.random.Generator, cap: int) -> SimsNode:
     )
 
 
-def _connection(
+def random_connection(
     rng: np.random.Generator,
     nodes: tuple[SimsNode, ...],
     parent: int,
     child: int,
     reflect_chance: float,
 ) -> SimsConnection:
+    """Draw a connection from `parent` to `child` on a face it allows.
+
+    Returns
+    -------
+    SimsConnection
+        Mirrored with `reflect_chance`, terminal-only a tenth of the time.
+    """
     faces = ALLOWED_FACES[nodes[parent].type]
     return SimsConnection(
         parent=parent,
@@ -56,12 +70,12 @@ def _draw(rng: np.random.Generator, cap: int, *, mirror: bool) -> SimsGenome:
     templates = int(rng.integers(1, MAX_TEMPLATES + 1))
     nodes = (
         SimsNode(type=ModuleType.CORE),
-        *(_node(rng, cap) for _ in range(templates)),
+        *(random_node(rng, cap) for _ in range(templates)),
     )
     chance = REFLECT_CHANCE if mirror else 0.0
     # Template k is reached from the core or an earlier template
     connections = [
-        _connection(
+        random_connection(
             rng,
             nodes,
             int(rng.integers(child)) if child > 1 else IDX_OF_CORE,
@@ -72,7 +86,7 @@ def _draw(rng: np.random.Generator, cap: int, *, mirror: bool) -> SimsGenome:
     ]
     extra = int(rng.integers(EXTRA_PER_TEMPLATE * templates + 1))
     connections += [
-        _connection(
+        random_connection(
             rng,
             nodes,
             int(rng.integers(len(nodes))),

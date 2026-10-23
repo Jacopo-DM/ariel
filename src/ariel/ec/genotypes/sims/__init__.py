@@ -2,6 +2,7 @@
 
 from .generate import random_genome
 from .genome import SimsConnection, SimsGenome, SimsNode
+from .mutations import mutate
 from .unfold import max_copy_limit, unfold
 
 __all__ = [
@@ -9,6 +10,7 @@ __all__ = [
     "SimsGenome",
     "SimsNode",
     "max_copy_limit",
+    "mutate",
     "random_genome",
     "unfold",
 ]
