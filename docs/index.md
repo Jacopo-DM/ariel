@@ -16,7 +16,7 @@ ARIEL brings together the full evolutionary robotics pipeline in a single, cohes
 - **End-to-end**: genome encoding → evolution → simulation → result analysis.
 - **Batteries included**: pre-built robot bodies, CPG controllers, and EA operators so you spend time on science, not scaffolding.
 - **Flexible**: swap genotype representations (NDE, CPPN, Tree, Vector) or optimisers without rewriting your experiment.
-- **Scalable**: native support for parallel evaluation via [multiprocessing](source/parallel_robot_eval/index) and [Ray](source/EA_intro/parallel_ackley).
+- **Scalable**: parallel evaluation across CPU cores with a [process pool](source/parallel_robot_eval/index).
 - **Reproducible**: built-in database logging and pandas/polars/SQLite export for every run.
 
 | Framework        | 🧬 Body–Brain Co-Design | 🧠 Learning | 🤖 Physical Twins | ⚡ Async Evo & Learning | 🧪 Built-in Simulation | 🖥️ GUI | 🗄️ Database Integration | 🧩 Modularity |
@@ -43,7 +43,7 @@ ARIEL brings together the full evolutionary robotics pipeline in a single, cohes
 | [Multiple Genotype Encodings](source/genoty_docs) | NDE, CPPN, Tree, and Vector representations, each with evolutionary operators.                |
 | [Robot Systems](source/robot_systems)             | Modular robot morphology and the ARIEL Lynx Arm, simulated in MuJoCo.                         |
 | **Simulation & Control**                          | CPG-based controllers (simple, NA-CPG, normalised) and prebuilt terrains.                     |
-| [Parallelisation](source/parallel_robot_eval/index)| Scale robot evaluations across CPU cores (MuJoCo Worker) or machines (Ray).                 |
+| [Parallelisation](source/parallel_robot_eval/index)| Scale robot evaluations across CPU cores with a process pool.                                 |
 | [Database & Analysis](source/Db_examples)         | Automatic SQLite experiment logging with pandas, polars, and sqlite3 query examples.          |
 | **Visualisation**                                 | GUI (in progress) and analysis utilities for plotting fitness progression and robot behaviour.|
 | [MuJoCo Integration](source/Mujoco_docs)          | Full access to MuJoCo data variables, forces, sensors, spatial transforms, and more.         |

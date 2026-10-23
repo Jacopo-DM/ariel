@@ -80,6 +80,6 @@ best individual: [examples/c_genotypes/runner_best_individual.py](../../examples
 
 ## Parallel evaluation
 
-Multiprocessing / Ray patterns for evaluating a population in parallel:
+`ariel.simulation.process_pool` evaluates a population in parallel:
 [docs/source/parallel_robot_eval/](../../docs/source/parallel_robot_eval/) and
 [examples/re_book/1_brain_evolution_multiprocessing.py](../../examples/re_book/1_brain_evolution_multiprocessing.py).
