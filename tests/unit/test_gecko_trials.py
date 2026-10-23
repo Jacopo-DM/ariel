@@ -259,3 +259,17 @@ def test_walk_timed_returns_the_distance_and_seconds() -> None:
     scored = g.walk_timed(job)
     assert scored.distance == PHASE_DISTANCE
     assert scored.seconds > 0
+
+
+def test_steer_timed_returns_the_rows_and_seconds() -> None:
+    """The timed steering job gives steer's rows and a positive time."""
+    job = g.Steer(
+        cpg="PhaseCPG",
+        params=PHASE_GAIT,
+        steered=False,
+        pair=PAIR,
+        seconds=SHORT,
+    )
+    rows, seconds = g.steer_timed(job)
+    assert np.array_equal(rows, g.steer(job))
+    assert seconds > 0

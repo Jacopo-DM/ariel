@@ -459,6 +459,19 @@ def walk_timed(job: Walk) -> Scored:
     return Scored(distance=distance, seconds=time.perf_counter() - started)
 
 
+def steer_timed(job: Steer) -> tuple[Floats, float]:
+    """Run one steering trial and time it.
+
+    Returns
+    -------
+    tuple[Floats, float]
+        The trial's rows, as ``steer`` returns them, and its wall time.
+    """
+    started = time.perf_counter()
+    rows = steer(job)
+    return rows, time.perf_counter() - started
+
+
 def generation_size(optimizer: Optimizer) -> int:
     """Return how many candidates a CMA-ES optimizer draws per generation.
 
