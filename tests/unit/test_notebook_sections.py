@@ -15,14 +15,6 @@ from pydantic import BaseModel, ConfigDict
 
 FUNCTIONAL = Path(__file__).resolve().parents[2] / "tests" / "functional"
 
-# Still to fix, emptied task by task in goal notebook-folders (PLAN.md)
-TO_FIX = frozenset({
-    "simulation/cpg_initialisation",
-    "simulation/cpg_initialisation_search",
-    "simulation/cpg_locomotion",
-    "simulation/cpg_steering",
-})
-
 
 class Cell(BaseModel):
     """One cell of a notebook, as far as the rule needs it."""
@@ -104,11 +96,4 @@ def test_a_section_needs_an_assert_in_its_last_code_cell() -> None:
 def test_every_section_ends_with_checks(name: str) -> None:
     notebook = Notebook.model_validate_json(_notebooks()[name].read_text())
     missing = unchecked_sections(notebook)
-    if name in TO_FIX:
-        assert missing, f"{name} meets the rule now: remove it from TO_FIX"
-    else:
-        assert not missing, f"{name}: sections without checks: {missing}"
-
-
-def test_every_name_in_to_fix_is_a_notebook() -> None:
-    assert set(_notebooks()) >= TO_FIX
+    assert not missing, f"{name}: sections without checks: {missing}"
