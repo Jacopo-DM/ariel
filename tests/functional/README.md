@@ -46,28 +46,32 @@ cell. A SKIP means the machine lacks something the notebook declared.
 ## Coverage
 
 One row per package and sub-package of `src/ariel`. The rule: every area has a
-row, and a new area gets a row in the same commit. `none yet` marks an area with
+row, and a new area gets a row in the same commit. A notebook lives in the
+folder of its main package (`ec/nde.ipynb`) and the table names it by that
+path; a notebook listed under several areas sits in the folder of one of them,
+and only a notebook about no ARIEL area sits at the top. `none yet` marks an area with
 no notebook. `tests/unit/test_functional_notebooks.py` fails when an area has no
-row, a row names a notebook that does not exist, or a notebook has no row.
+row, a row names a notebook that does not exist, a notebook has no row, or a
+notebook sits outside the folders of the areas that list it.
 
 | Area | Notebook |
 |---|---|
-| `body_phenotypes` | `decoders`, `cppn_genome`, `morphology` |
+| `body_phenotypes` | `body_phenotypes/decoders`, `body_phenotypes/cppn_genome`, `body_phenotypes/morphology` |
 | `body_phenotypes/lynx_mjspec` | none yet |
-| `body_phenotypes/robogen_lite` | `decoders`, `cppn_genome`, `prebuilt_robots`, `overlap_repair`, `body_density` |
-| `ec` | `ec_engine` |
-| `ec/generators` | `ec_engine` |
-| `ec/genotypes` | `nde`, `tree_genome`, `body_density` |
+| `body_phenotypes/robogen_lite` | `body_phenotypes/ariel_modules`, `body_phenotypes/decoders`, `body_phenotypes/cppn_genome`, `body_phenotypes/prebuilt_robots`, `body_phenotypes/overlap_repair`, `body_phenotypes/body_density` |
+| `ec` | `ec/ec_engine` |
+| `ec/generators` | `ec/ec_engine` |
+| `ec/genotypes` | `ec/nde`, `ec/tree_genome`, `body_phenotypes/body_density` |
 | `ec/optimizers` | none yet |
-| `opengl` | `opengl_and_video` |
-| `parameters` | `parameters` |
-| `rendering` | `ariel_modules`, `sim_environments`, `opengl_and_video`, `prebuilt_robots` |
-| `simulation` | `speed_tests` |
-| `simulation/controllers` | `cpg_properties`, `cpg_locomotion`, `cpg_steering`, `cpg_initialisation`, `cpg_initialisation_search` |
-| `simulation/environments` | `sim_environments`, `utils` |
-| `simulation/tasks` | `tasks` |
-| `simulators` | `mujoco_settings` |
-| `simulators/mujoco` | `mujoco_settings` |
+| `opengl` | `opengl/opengl_and_video` |
+| `parameters` | `parameters/parameters` |
+| `rendering` | `body_phenotypes/ariel_modules`, `simulation/sim_environments`, `opengl/opengl_and_video`, `body_phenotypes/prebuilt_robots` |
+| `simulation` | `simulation/speed_tests` |
+| `simulation/controllers` | `simulation/cpg_properties`, `simulation/cpg_locomotion`, `simulation/cpg_steering`, `simulation/cpg_initialisation`, `simulation/cpg_initialisation_search` |
+| `simulation/environments` | `simulation/sim_environments`, `simulation/utils` |
+| `simulation/tasks` | `simulation/tasks` |
+| `simulators` | `simulators/mujoco_settings` |
+| `simulators/mujoco` | `simulators/mujoco_settings` |
 | `visualisation` | none yet |
 | `visualisation/analysis` | none yet |
 | (third-party libraries, not an ARIEL area) | `external_libs` |

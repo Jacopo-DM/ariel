@@ -3,8 +3,8 @@
 Every class here shares the interface of ``CPG``: parameter groups that can be
 set as one flat vector, ``forward(time)`` that follows the simulation clock,
 angle limits and an optional history. The functional notebooks
-``tests/functional/cpg_properties.ipynb`` and ``cpg_locomotion.ipynb`` compare
-them.
+``cpg_properties.ipynb`` and ``cpg_locomotion.ipynb`` in
+``tests/functional/simulation/`` compare them.
 """
 
 # Local libraries

@@ -49,6 +49,22 @@ def _notebooks(cell: str) -> list[str]:
     return re.findall(r"`([^`]+)`", cell)
 
 
+def _on_disk() -> set[str]:
+    """List the notebooks under ``tests/functional`` as table paths.
+
+    Returns
+    -------
+    set[str]
+        Paths without ``.ipynb``, relative to ``tests/functional``, such as
+        ``ec/nde``; Jupyter's checkpoint copies are left out.
+    """
+    return {
+        path.relative_to(FUNCTIONAL).with_suffix("").as_posix()
+        for path in FUNCTIONAL.rglob("*.ipynb")
+        if ".ipynb_checkpoints" not in path.parts
+    }
+
+
 def test_every_area_has_a_row() -> None:
     missing = _areas() - set(_rows())
     assert not missing, f"areas without a row in the README: {sorted(missing)}"
@@ -71,5 +87,21 @@ def test_a_row_names_notebooks_or_says_none_yet() -> None:
 
 def test_every_notebook_has_a_row() -> None:
     named = {name for cell in _rows().values() for name in _notebooks(cell)}
-    notebooks = {path.stem for path in FUNCTIONAL.glob("*.ipynb")}
+    notebooks = _on_disk()
     assert notebooks <= named, f"notebooks without a row: {notebooks - named}"
+
+
+def test_every_notebook_sits_in_the_folder_of_an_area_that_lists_it() -> None:
+    """A notebook lives in the folder of its main package, as ``ec/nde``.
+
+    A notebook listed under several areas sits in the folder of one of them;
+    only a notebook that is not about an ARIEL area sits at the top.
+    """
+    folders: dict[str, set[str]] = {}
+    for area, cell in _rows().items():
+        folder = "" if area == NOT_AN_AREA else area.split("/")[0]
+        for name in _notebooks(cell):
+            folders.setdefault(name, set()).add(folder)
+    for name, allowed in folders.items():
+        here = name.rpartition("/")[0]
+        assert here in allowed, f"{name} sits outside {sorted(allowed)}"

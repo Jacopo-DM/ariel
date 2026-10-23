@@ -57,9 +57,9 @@ cpg = PhaseCPG(adj, inputs=[InputRoute(handle="offset")])
 cpg.set_input([0.5])  # each joint moves by 0.5 times its weight
 ```
 
-`tests/functional/cpg_properties.ipynb` shows what each model can and cannot
+`tests/functional/simulation/cpg_properties.ipynb` shows what each model can and cannot
 do (for example, `SwingStanceCPG` only holds in-phase and anti-phase pairs);
-`tests/functional/cpg_locomotion.ipynb` compares them on the gecko. For mapping
+`tests/functional/simulation/cpg_locomotion.ipynb` compares them on the gecko. For mapping
 a genome vector onto the groups, see `map_genotype_to_brain` in
 [examples/re_book/2_body_brain_evolution.py](../../examples/re_book/2_body_brain_evolution.py).
 
