@@ -19,12 +19,10 @@ FUNCTIONAL = Path(__file__).resolve().parents[2] / "tests" / "functional"
 TO_FIX = frozenset({
     "body_phenotypes/body_density",
     "body_phenotypes/cppn_genome",
-    "body_phenotypes/decoders",
     "body_phenotypes/morphology",
     "body_phenotypes/overlap_repair",
     "body_phenotypes/prebuilt_robots",
     "ec/ec_engine",
-    "ec/nde",
     "ec/tree_genome",
     "external_libs",
     "simulation/cpg_initialisation",
