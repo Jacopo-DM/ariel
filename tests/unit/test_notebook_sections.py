@@ -31,9 +31,7 @@ TO_FIX = frozenset({
     "simulation/cpg_initialisation_search",
     "simulation/cpg_locomotion",
     "simulation/cpg_steering",
-    "simulation/sim_environments",
     "simulation/speed_tests",
-    "simulation/utils",
 })
 
 
