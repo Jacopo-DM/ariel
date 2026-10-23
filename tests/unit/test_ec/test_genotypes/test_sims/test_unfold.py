@@ -9,7 +9,7 @@ import networkx as nx
 import numpy as np
 import numpy.typing as npt
 import pytest
-from hypothesis import given
+from hypothesis import example, given
 
 from ariel.body_phenotypes import (
     ALLOWED_FACES,
@@ -43,6 +43,10 @@ LEFT, RIGHT = ModuleFaces.LEFT, ModuleFaces.RIGHT
 TOP, BOTTOM = ModuleFaces.TOP, ModuleFaces.BOTTOM
 MIRROR = np.array([-1.0, 1.0, 1.0])  # through the core's centre plane
 SYMMETRY_TOLERANCE = 1e-3  # metres; the modules round their quaternions
+# Without that rounding a mirror is exact up to floating point: the rounding
+# alone leaves 0.15 mm in a 5-module body and 1.10 mm in a 23-module chain
+# of 45-degree bricks and hinges, and 0 mm at every length without it
+EXACT_TOLERANCE = 1e-6  # metres
 CORNERS = np.array([
     [x, y, z] for x in (-1, 1) for y in (-1, 1) for z in (-1, 1)
 ])
@@ -416,12 +420,55 @@ def test_every_genome_unfolds_into_a_buildable_body(genome: SimsGenome) -> None:
     compile_model(construct_mjspec_from_graph(graph).spec)
 
 
+def _unrounded(
+    values: npt.ArrayLike, decimals: int = 0, out: None = None
+) -> npt.NDArray[np.float64]:
+    """Stand in for ``np.round`` and leave the values as they are.
+
+    Returns
+    -------
+    npt.NDArray[np.float64]
+        The values, unrounded.
+    """
+    del decimals, out
+    return np.asarray(values, dtype=np.float64)
+
+
+# A 23-module chain of 45-degree bricks and hinges, drawn by Hypothesis on
+# 2026-10-23: 1.10 mm asymmetric with the modules' rounding, 0 without
+CHAIN_OF_45 = SimsGenome(
+    nodes=(
+        CORE,
+        SimsNode(
+            type=ModuleType.BRICK,
+            rotation=ModuleRotationsIdx.DEG_45,
+            copy_limit=DEFAULT_CAP,
+        ),
+        SimsNode(
+            type=ModuleType.HINGE,
+            rotation=ModuleRotationsIdx.DEG_45,
+            copy_limit=DEFAULT_CAP - 1,
+        ),
+    ),
+    connections=(_connect(2, 1, FRONT), _connect(1, 2, RIGHT)),
+)
+
+
 @given(genomes())
+@example(CHAIN_OF_45)
 def test_mirrored_limbs_make_symmetric_bodies(genome: SimsGenome) -> None:
-    """A core that grows only one mirrored limb gives a symmetric body."""
+    """A core that grows only one mirrored limb gives an exact mirror image.
+
+    The modules round their quaternions to 3 decimals, and in a long chain
+    that rounding alone adds up past a millimetre; this test builds without
+    it, so it checks the mirroring itself, exactly, at any chain length.
+    """
     limb = (
         (_connect(0, 1, LEFT, reflect=True),) if len(genome.nodes) > 1 else ()
     )
     rest = tuple(c for c in genome.connections if c.parent != 0)
     symmetric = genome.model_copy(update={"connections": limb + rest})
-    assert _asymmetry(unfold(symmetric)) < SYMMETRY_TOLERANCE
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(np, "round", _unrounded)
+        asymmetry = _asymmetry(unfold(symmetric))
+    assert asymmetry < EXACT_TOLERANCE
