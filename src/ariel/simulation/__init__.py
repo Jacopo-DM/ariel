@@ -31,7 +31,7 @@ from ariel.simulation.mujoco_ops import (
     has_self_collision,
     mjspec_deep_copy,
 )
-from ariel.simulation.mujoco_worker import EvalConfig, MuJoCoWorkerBase
+from ariel.simulation.parallel import process_pool
 from ariel.simulation.tracker import Tracker
 
 __all__ = [
@@ -42,11 +42,9 @@ __all__ = [
     "CompoundWorld",
     "Controller",
     "CraterTerrainWorld",
-    "EvalConfig",
     "HopfCPG",
     "InputRoute",
     "LearnableTegotaeCPG",
-    "MuJoCoWorkerBase",
     "NaCPG",
     "NormMethod",
     "OlympicArena",
@@ -63,4 +61,5 @@ __all__ = [
     "euler_to_quat_conversion",
     "has_self_collision",
     "mjspec_deep_copy",
+    "process_pool",
 ]

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import multiprocessing
 from concurrent.futures import ProcessPoolExecutor
 from datetime import UTC, datetime
 from pathlib import Path
@@ -270,7 +271,10 @@ def main() -> None:  # ruff: ignore[too-many-locals]  # long routine kept as wri
     )
 
     workers = min(int(args.population), int(args.workers))
-    with ProcessPoolExecutor(max_workers=workers) as executor:
+    # spawn on every platform, as ariel.simulation.process_pool does
+    with ProcessPoolExecutor(
+        max_workers=workers, mp_context=multiprocessing.get_context("spawn")
+    ) as executor:
         for gen in range(1, int(args.generations) + 1):
             candidates = [optimizer.ask() for _ in range(int(args.population))]
             genomes = [

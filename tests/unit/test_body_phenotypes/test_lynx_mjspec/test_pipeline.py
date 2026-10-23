@@ -145,11 +145,21 @@ def test_evaluate_diverging_simulation_is_ranked_after_progress(
     assert fitness < evolve.INVALID_FITNESS
 
 
+class _ThreadPool(ThreadPoolExecutor):
+    """A thread pool that takes and drops the process pool's spawn context.
+
+    Threads run in this process, so coverage sees the work.
+    """
+
+    def __init__(self, max_workers: int, mp_context: object) -> None:
+        del mp_context
+        super().__init__(max_workers=max_workers)
+
+
 def _run_evolve(
     monkeypatch: pytest.MonkeyPatch, out_dir: Path, optimizer: str
 ) -> Path:
-    # Threads run in this process, so coverage sees the work.
-    monkeypatch.setattr(evolve, "ProcessPoolExecutor", ThreadPoolExecutor)
+    monkeypatch.setattr(evolve, "ProcessPoolExecutor", _ThreadPool)
     monkeypatch.setattr(
         sys,
         "argv",
@@ -445,9 +455,7 @@ def test_evolve_runs_as_a_script(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     """Running evolve.py as a program calls main()."""
-    monkeypatch.setattr(
-        concurrent.futures, "ProcessPoolExecutor", ThreadPoolExecutor
-    )
+    monkeypatch.setattr(concurrent.futures, "ProcessPoolExecutor", _ThreadPool)
     monkeypatch.setattr(
         sys,
         "argv",

@@ -1,10 +1,11 @@
-"""Example: parallel robot evaluation using MuJoCoWorkerBase.
+"""Example: parallel robot evaluation with ``ariel.simulation.process_pool``.
 
-Shows how to subclass MuJoCoWorkerBase for a targeted-locomotion task
-with a CMA-ES-optimised ANN controller, then run it through a process pool.
+Scores robots on a targeted-locomotion task with a CMA-ES-optimised ANN
+controller, each robot in its own worker process. The function the pool
+runs, ``evaluate``, lives at the top level of this file: a spawned worker
+imports it by module name, which a function defined in a notebook cell
+does not allow.
 """
-
-from multiprocessing import get_context
 
 import mujoco as mj
 import nevergrad as ng
@@ -12,7 +13,9 @@ import numpy as np
 import torch
 from numpy.typing import NDArray
 
-from ariel.simulation.mujoco_worker import EvalConfig, MuJoCoWorkerBase
+from ariel.parameters import FrozenModel
+from ariel.simulation import process_pool
+from ariel.simulators import compile_model
 
 # ---------------------------------------------------------------------------
 # Minimal ANN controller (experiment-specific)
@@ -50,96 +53,89 @@ def _fill_parameters(net: _Network, params: NDArray[np.float64]) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Experiment-specific EvalConfig (optional, plain EvalConfig also works)
+# What each job carries
 # ---------------------------------------------------------------------------
 
 
-class LocomotionConfig(EvalConfig):
-    """Experiment-specific config for the targeted-locomotion task.
+class LocomotionConfig(FrozenModel):
+    """Settings of one evaluation: where the robot starts and aims, and CMA-ES."""
 
-    Carries the same fields as EvalConfig, plus additional ones for
-    CMA-ES and the ANN controller.
-    """
-
+    spawn_position: tuple[float, float, float]
+    target_position: tuple[float, float, float]
+    seed: int | None = None
     cma_generations: int = 20
     cma_pop_size: int = 5
     hidden_size: int = 16
 
 
 # ---------------------------------------------------------------------------
-# Worker subclass
+# The function each worker runs
 # ---------------------------------------------------------------------------
 
 
-class TargetedLocomotionWorker(MuJoCoWorkerBase[LocomotionConfig]):
-    """Evaluates a robot on a targeted-locomotion task.
+def evaluate(job: tuple[str, LocomotionConfig]) -> float:
+    """Build the robot, optimise a controller with CMA-ES, return the best.
 
-    Fitness = distance to target after CMA-ES controller optimisation
+    Fitness is the distance to the target after the controller has run
     (lower is better).
+
+    Returns
+    -------
+    float
+        The best fitness found.
     """
+    xml, config = job
+    model = compile_model(mj.MjSpec.from_string(xml))
+    data = mj.MjData(model)
+    rng = np.random.default_rng(config.seed)
 
-    def evaluate(  # ruff: ignore[no-self-use]  # keeps the interface shared with the sibling classes
-        self,
-        model: mj.MjModel,
-        data: mj.MjData,
-        config: LocomotionConfig,
-    ) -> float:
-        """Optimise a controller with CMA-ES and return the best fitness.
+    state_size = len(data.qpos) + len(data.qvel) + 3
+    net = _Network(state_size, config.hidden_size, model.nu)
+    num_vars = sum(p.numel() for p in net.parameters())
 
-        Returns
-        -------
-        float
-            The best fitness found.
-        """
-        rng = np.random.default_rng(config.seed)
+    opt = ng.optimizers.CMA(
+        parametrization=num_vars,
+        budget=config.cma_generations * config.cma_pop_size,
+    )
 
-        state_size = len(data.qpos) + len(data.qvel) + 3
-        net = _Network(state_size, config.hidden_size, model.nu)
-        num_vars = sum(p.numel() for p in net.parameters())
+    min_fitness = float("inf")
 
-        opt = ng.optimizers.CMA(
-            parametrization=num_vars,
-            budget=config.cma_generations * config.cma_pop_size,
-        )
+    for _ in range(config.cma_generations):
+        candidates = [opt.ask() for _ in range(config.cma_pop_size)]
+        for cand in candidates:
+            _fill_parameters(net, cand.value)
+            mj.mj_resetData(model, data)
 
-        min_fitness = float("inf")
+            # Warmup
+            data.ctrl[:] = rng.normal(scale=0.1, size=model.nu)
+            mj.mj_step(model, data, nstep=300)
 
-        for _ in range(config.cma_generations):
-            candidates = [opt.ask() for _ in range(config.cma_pop_size)]
-            for cand in candidates:
-                _fill_parameters(net, cand.value)
-                mj.mj_resetData(model, data)
+            displacement = data.qpos[:3].copy()
+            target = tuple(np.array(config.target_position) + displacement)
 
-                # Warmup
-                data.ctrl[:] = rng.normal(scale=0.1, size=model.nu)
-                mj.mj_step(model, data, nstep=300)
+            def cb(m: mj.MjModel, d: mj.MjData) -> None:
+                pos = d.qpos[:3].copy()
+                vec = np.array(target) - pos  # ruff: ignore[function-uses-loop-variable]
+                dist = np.linalg.norm(vec) + 1e-6
+                state = np.concatenate([
+                    d.qpos.copy(),
+                    d.qvel.copy(),
+                    vec / dist,
+                ])
+                ctrl = net.forward(torch.tensor(state, dtype=torch.float32))
+                d.ctrl[:] = ctrl.detach().numpy()[: m.nu]
 
-                displacement = data.qpos[:3].copy()
-                target = tuple(np.array(config.target_position) + displacement)
+            mj.set_mjcb_control(cb)
+            mj.mj_step(model, data, nstep=1_000)
+            mj.set_mjcb_control(None)
 
-                def cb(m: mj.MjModel, d: mj.MjData) -> None:
-                    pos = d.qpos[:3].copy()
-                    vec = np.array(target) - pos  # ruff: ignore[function-uses-loop-variable]
-                    dist = np.linalg.norm(vec) + 1e-6
-                    state = np.concatenate([
-                        d.qpos.copy(),
-                        d.qvel.copy(),
-                        vec / dist,
-                    ])
-                    ctrl = net.forward(torch.tensor(state, dtype=torch.float32))
-                    d.ctrl[:] = ctrl.detach().numpy()[: m.nu]
+            fitness = float(
+                np.linalg.norm(np.array(target) - data.qpos[:3])
+            )
+            opt.tell(cand, fitness)
+            min_fitness = min(min_fitness, fitness)
 
-                mj.set_mjcb_control(cb)
-                mj.mj_step(model, data, nstep=1_000)
-                mj.set_mjcb_control(None)
-
-                fitness = float(
-                    np.linalg.norm(np.array(target) - data.qpos[:3])
-                )
-                opt.tell(cand, fitness)
-                min_fitness = min(min_fitness, fitness)
-
-        return min_fitness
+    return min_fitness
 
 
 # ---------------------------------------------------------------------------
@@ -147,21 +143,19 @@ class TargetedLocomotionWorker(MuJoCoWorkerBase[LocomotionConfig]):
 # ---------------------------------------------------------------------------
 
 
-def evaluate_population[C: EvalConfig](
-    eval_args: list[tuple[str, C]],
-    worker: MuJoCoWorkerBase[C],
+def evaluate_population(
+    jobs: list[tuple[str, LocomotionConfig]],
     num_workers: int = 8,
 ) -> list[float]:
-    """Run eval_args through a process pool and return fitness values.
+    """Run the jobs through a process pool and return fitness values.
 
     Returns
     -------
     list[float]
-        The fitness of each individual.
+        The fitness of each job, in the order of the jobs.
     """
-    ctx = get_context("spawn")
-    with ctx.Pool(processes=num_workers) as pool:
-        return list(pool.imap(worker, eval_args, chunksize=1))
+    with process_pool(workers=num_workers) as pool:
+        return list(pool.map(evaluate, jobs))
 
 
 if __name__ == "__main__":
@@ -192,8 +186,6 @@ if __name__ == "__main__":
         seed=42,
     )
 
-    eval_args = [(dummy_xml, config), (dummy_xml, config)]
-    worker = TargetedLocomotionWorker()
-
-    results = evaluate_population(eval_args, worker, num_workers=2)
+    jobs = [(dummy_xml, config), (dummy_xml, config)]
+    results = evaluate_population(jobs, num_workers=2)
     print("Fitness values:", results)

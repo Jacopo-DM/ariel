@@ -100,7 +100,7 @@ ariel/
 │   │   ├── environments/           #   Terrains/worlds (flat, rugged, crater, arena, ...)
 │   │   ├── tasks/                  #   Tasks (targeted locomotion, gait, turning)
 │   │   ├── controllers/            #   Controllers (CPG variants, neural)
-│   │   └── mujoco_worker.py        #   Evaluates an individual, returns fitness
+│   │   └── parallel.py             #   Process pool that scores robots in parallel
 │   ├── parameters/                 # Shared types, module defs, MuJoCo params
 │   ├── utils/                      # Renderers, trackers, video, optimizers, descriptors
 │   └── visualisation/              # Analysis tooling (dashboards: feature-dashboard branch)
