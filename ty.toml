@@ -4,8 +4,10 @@
 [environment]
 python-version = "3.12"
 # The MuJoCo stubs that pyright reads too (CLAUDE.md, MuJoCo stubs); git-ignored,
-# so a machine without them sees MuJoCo as before.
-extra-paths = [".typings"]
+# so a machine without them sees MuJoCo as before. The slow CPG notebooks import
+# gecko_trials.py from their own folder, which tools/run_notebooks.py puts on the
+# kernel's path (user's choice, 2026-10-23).
+extra-paths = [".typings", "tests/functional/simulation"]
 
 [src]
 # The same folders mypy.ini and ruff.toml leave out (user's choice, 2026-10-18 and

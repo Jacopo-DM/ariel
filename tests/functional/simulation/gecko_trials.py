@@ -95,8 +95,10 @@ STEERING = [
 ]
 
 
-def targets_of(pair: tuple[float, float], start: Floats) -> Floats:
+def targets_of(pair: npt.ArrayLike, start: Floats) -> Floats:
     """Place targets A and B on the circle around the start.
+
+    ``pair`` is the two angles (a, b), in radians.
 
     Returns
     -------
