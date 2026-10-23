@@ -121,7 +121,7 @@ Stack and architecture as found in the repo. Reasons are not recorded unless sta
 - Evolution engine in `ariel.ec`: `EA` with operations over a `Population` of `Individual`s stored with SQLModel/SQLAlchemy (database-backed, with restart from the database and an `Archive`). Reason not recorded.
 - Body encodings: RoboGen-lite modular robots (`Core`, `Brick`, `Hinge`) decoded from genotypes (tree, CPPN-NEAT, NDE in PyTorch, vectors). The Lynx arm is a separate body family.
 - Controllers are CPG-based (five models in `simulation/controllers/cpg/`, see the cpg-variants decision below), and tasks are free-function fitness functions.
-- Optimisation libraries available: DEAP, EvoTorch, Nevergrad, plus an in-repo `RevDE`.
+- Optimisation libraries available: Nevergrad, plus an in-repo `RevDE`. EvoTorch left with Ray in goal parallelism P5 (2026-10-23); DEAP, listed here before, is not a dependency (not in `pyproject.toml` or `uv.lock`).
 - Dashboards (Plotly/Panel) live on the `feature-dashboard` branch, not on `main`; `main` has no plotting dependencies.
 - Typing and docs: strict ruff (`ALL`), strict mypy and pyright, NumPy docstrings, 100% coverage target. Free functions are preferred over classes (`.claude/dev/functional_vs_oo.md`); records are pydantic models, see the global-standard decision below.
 - Global state at import: `ariel/__init__.py` sets `DATA`, a seeded `RNG` (seed 42) and rich logging. Reason not recorded.

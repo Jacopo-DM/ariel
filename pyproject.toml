@@ -10,7 +10,6 @@ classifiers = ["Development Status :: 2 - Pre-Alpha"]
 
 dependencies = [
   "astropy>=8.0.2",
-  "evotorch>=0.6.1",
   "ipykernel>=6.30.1",
   "jupyter>=1.1.1",
   "matplotlib>=3.9.4",

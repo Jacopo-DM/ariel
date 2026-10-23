@@ -74,10 +74,11 @@ locomotion examples **minimise distance to target**.
 
 ## Brain-only: external optimizers
 
-For evolving just controller weights, skip the `EA` engine and use EvoTorch
-CMA-ES or Nevergrad directly. See
+For evolving just controller weights, skip the `EA` engine and use
+Nevergrad's CMA-ES directly. See
 [examples/re_book/1_brain_evolution.py](../../examples/re_book/1_brain_evolution.py)
-(EvoTorch `CMAES` + `NEProblem`) and `3_body_brain_lr.py` (Nevergrad).
+(`ParametrizedCMA`, serial), its `_multiprocessing` sibling (the same search
+through a process pool) and `3_body_brain_lr.py`.
 Algorithm internals: [../wiki/](../wiki/) (`CMA-ES_*.md`, `Nevergrad_*.md`) via
 [`/query`](../commands/query.md).
 

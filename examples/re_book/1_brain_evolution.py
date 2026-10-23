@@ -36,8 +36,7 @@ import numpy as np
 import torch
 
 # Learner
-from evotorch.algorithms import CMAES
-from evotorch.neuroevolution import NEProblem
+import nevergrad as ng
 
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots.john_set import spider_8
 from ariel.simulation.controllers.utils.data_get import (
@@ -336,39 +335,39 @@ def evolve(world, model, data) -> tuple[np.ndarray, int]:
         input_size=input_dim, output_size=model.nu, hidden_size=32
     )
 
-    # Initialise Problem for the solver/learner
-    problem = NEProblem(
-        objective_sense="min",
-        network_eval_func=fitness_function,
-        network=network.eval(),
-        initial_bounds=(-0.5, 0.5),
-        device="cpu",
+    # CMA-ES needs at least 4 + floor(3 ln n) candidates per generation,
+    # as in 1_brain_evolution_multiprocessing.py
+    num_params = sum(p.numel() for p in network.parameters())
+    pop_size = max(POP_SIZE, 4 + int(3 * np.log(max(num_params, 2))))
+
+    # Start from weights drawn in [-0.5, 0.5], step size 0.075
+    param = ng.p.Array(init=np.random.uniform(-0.5, 0.5, size=num_params))
+    param.set_mutation(sigma=0.075)
+    optimizer = ng.optimizers.ParametrizedCMA(popsize=pop_size)(
+        parametrization=param, budget=(BUDGET + 1) * pop_size
     )
 
-    # Initialise CMA-ES learner
-    searcher = CMAES(
-        problem=problem,
-        stdev_init=0.075,
-        popsize=POP_SIZE,
-    )
-
-    console.log(f"Population size: {searcher.popsize}")
+    console.log(f"Population size: {pop_size} (requested {POP_SIZE})")
 
     for bud in range(BUDGET + 1):
-        searcher.step()
-        gen_best = searcher.status["pop_best_eval"]
+        candidates = [optimizer.ask() for _ in range(pop_size)]
+        fitnesses = []
+        for candidate in candidates:
+            fill_parameters(network, candidate.value)
+            fitnesses.append(fitness_function(network))
+        for candidate, fit in zip(candidates, fitnesses):
+            optimizer.tell(candidate, fit)
+        gen_best = min(fitnesses)
 
         console.rule(f"Budget: {bud}/{BUDGET}")
         console.log(f"Best Fit (Avg): {gen_best:.4f}")
 
-    best_ind = searcher.status["best"].values
+    best_ind = optimizer.provide_recommendation().value
 
     # Release the evaluation renderer's GL context before the replay/video
     # stage creates its own.
     renderer.close()
 
-    # np.array (not asarray) forces a writable copy; EvoTorch hands back a
-    # read-only tensor, which torch.Tensor() later warns about.
     return np.array(best_ind, dtype=np.float32), input_dim
 
 

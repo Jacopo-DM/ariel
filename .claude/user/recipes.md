@@ -64,21 +64,26 @@ video_renderer(model, data, duration=30, video_recorder=rec)
 Source: [examples/re_book/1_brain_evolution.py](../../examples/re_book/1_brain_evolution.py)
 
 ```python
-from evotorch.algorithms import CMAES
-from evotorch.neuroevolution import NEProblem
-from ariel.simulation.tasks.targeted_locomotion import distance_to_target
+import nevergrad as ng
+import numpy as np
 
-problem = NEProblem(
-    objective_sense="min",
-    network=network.eval(),
-    network_eval_func=fitness_function,
-    initial_bounds=(-0.5, 0.5),
-    device="cpu",
+from _vision import fill_parameters  # examples/re_book/_vision.py
+
+num_params = sum(p.numel() for p in network.parameters())
+param = ng.p.Array(init=np.random.uniform(-0.5, 0.5, size=num_params))
+param.set_mutation(sigma=0.075)
+optimizer = ng.optimizers.ParametrizedCMA(popsize=pop_size)(
+    parametrization=param, budget=(budget + 1) * pop_size
 )
-searcher = CMAES(problem=problem, stdev_init=0.075, popsize=10)
 for _ in range(budget + 1):
-    searcher.step()
-best = searcher.status["best"].values
+    candidates = [optimizer.ask() for _ in range(pop_size)]
+    fitnesses = []
+    for candidate in candidates:
+        fill_parameters(network, candidate.value)
+        fitnesses.append(fitness_function(network))
+    for candidate, fit in zip(candidates, fitnesses, strict=True):
+        optimizer.tell(candidate, fit)
+best = optimizer.provide_recommendation().value
 ```
 
 ## 5. Joint body + brain evolution with the EA engine
