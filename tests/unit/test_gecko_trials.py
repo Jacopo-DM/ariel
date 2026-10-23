@@ -1,6 +1,7 @@
 """Test: the gecko trials the slow CPG notebooks send to their pool."""
 
 import mujoco
+import nevergrad as ng
 import numpy as np
 import pytest
 
@@ -186,3 +187,75 @@ def test_the_unsteered_cpg_has_only_its_sensor_routes() -> None:
     plain = g.steering_cpg("PhaseCPG", PHASE_GAIT, steered=False, nu=8)
     assert isinstance(plain, PhaseCPG)
     assert plain.routes == ()
+
+
+DIMENSION = 26
+BUDGET = 17  # not a whole number of generations
+TARGET = 0.3
+
+
+def _optimizer(kind: str, seed: int) -> g.Optimizer:
+    parametrization = ng.p.Array(shape=(DIMENSION,), lower=0, upper=1)
+    parametrization.value = np.full(DIMENSION, 0.5)
+    parametrization.random_state = np.random.RandomState(seed)
+    if kind == "CMA":
+        return ng.optimizers.CMA(parametrization=parametrization, budget=BUDGET)
+    return ng.optimizers.ParametrizedCMA(scale=0.4)(
+        parametrization=parametrization, budget=BUDGET
+    )
+
+
+def _loss(candidate: g.Candidate) -> float:
+    return float(np.sum((np.asarray(candidate.value) - TARGET) ** 2))
+
+
+@pytest.mark.parametrize("kind", ["CMA", "ParametrizedCMA"])
+def test_lockstep_asks_what_one_at_a_time_asks(kind: str) -> None:
+    """Whole generations in rounds give the one-at-a-time candidates."""
+    alone = _optimizer(kind, 1)
+    expected = []
+    for _ in range(BUDGET):
+        candidate = alone.ask()
+        alone.tell(candidate, _loss(candidate))
+        expected.append(np.asarray(candidate.value).copy())
+
+    rounds: list[list[tuple[str, int]]] = []
+
+    def evaluate(
+        asked: list[tuple[str, int, g.Candidate]],
+    ) -> list[float]:
+        rounds.append([(key, index) for key, index, _ in asked])
+        return [_loss(candidate) for _, _, candidate in asked]
+
+    other = "CMA" if kind == "ParametrizedCMA" else "ParametrizedCMA"
+    # Generations of 7 and 13: one search finishes a round before the other
+    told = g.lockstep(
+        {"a": _optimizer(kind, 1), "b": _optimizer(other, 2)}, BUDGET, evaluate
+    )
+    got = [np.asarray(candidate.value) for candidate, _ in told["a"]]
+    assert np.array_equal(np.array(got), np.array(expected))
+    assert [value for _, value in told["b"]] == [
+        _loss(candidate) for candidate, _ in told["b"]
+    ]
+    indices = [
+        index for round_ in rounds for key, index in round_ if key == "a"
+    ]
+    assert indices == list(range(BUDGET))
+    assert len(rounds) > 1
+
+
+def test_generation_size_reads_both_kinds_of_cma() -> None:
+    """The meta CMA keeps its CMA-ES inside; the configured one is it."""
+    meta, configured = _optimizer("CMA", 0), _optimizer("ParametrizedCMA", 0)
+    meta.ask()
+    configured.ask()
+    assert g.generation_size(meta) == 7  # ruff: ignore[magic-value-comparison]  # measured 2026-10-23
+    assert g.generation_size(configured) == 4 + int(3 * np.log(DIMENSION))
+
+
+def test_walk_timed_returns_the_distance_and_seconds() -> None:
+    """The timed job gives the same distance as walk."""
+    job = g.Walk(cpg="PhaseCPG", params=PHASE_GAIT, seed=0)
+    scored = g.walk_timed(job)
+    assert scored.distance == PHASE_DISTANCE
+    assert scored.seconds > 0

@@ -11,14 +11,24 @@ folder on the kernel's path, and the workers inherit it).
 Each process builds its gecko once, on first use (``walker()`` and
 ``steerer()``), and every trial resets it. A trial sets MuJoCo's control
 callback, which is one global per process, so trials never run in threads.
+
+``lockstep`` runs many CMA-ES searches together: each round, every search
+asks one whole generation, all the trials of the round are scored in one
+call (one ``pool.map``), and each search is told its values in the order it
+asked. CMA-ES draws a generation at once and updates only when the whole
+generation is told, so this gives exactly the candidates of asking and
+telling one at a time.
 """
 
 # Standard library
-from collections.abc import Callable
+import time
+from collections.abc import Callable, Mapping, Sequence
 from functools import cache
+from typing import Protocol
 
 # Third-party libraries
 import mujoco
+import nevergrad as ng
 import numpy as np
 import numpy.typing as npt
 
@@ -43,6 +53,22 @@ from ariel.simulation import (
 
 type Floats = npt.NDArray[np.float64]
 type AfterStep = Callable[[mujoco.MjData, int], None]
+type Candidate = ng.p.Parameter
+
+
+class Optimizer(Protocol):
+    """What ``lockstep`` uses of a nevergrad optimizer."""
+
+    def ask(self) -> Candidate:  # pragma: no cover  # typing stub only
+        """Return the next candidate."""
+        ...
+
+    def tell(  # pragma: no cover  # typing stub only
+        self, candidate: Candidate, loss: float
+    ) -> None:
+        """Report a candidate's loss."""
+        ...
+
 
 MODELS: list[type[CPG]] = [
     HopfCPG,
@@ -411,3 +437,81 @@ def steer(job: Steer) -> Floats:
         job.cpg, job.params, steered=job.steered, nu=gecko_.model.nu
     )
     return gecko_.steer(cpg, job.pair, seconds=job.seconds)
+
+
+class Scored(FrozenModel):
+    """A trial's distance and the seconds it took in its worker."""
+
+    distance: float
+    seconds: float
+
+
+def walk_timed(job: Walk) -> Scored:
+    """Score one walking trial and time it.
+
+    Returns
+    -------
+    Scored
+        The distance walked, in metres, and the trial's wall time.
+    """
+    started = time.perf_counter()
+    distance = walk(job)
+    return Scored(distance=distance, seconds=time.perf_counter() - started)
+
+
+def generation_size(optimizer: Optimizer) -> int:
+    """Return how many candidates a CMA-ES optimizer draws per generation.
+
+    Call it after the optimizer's first ``ask``, which builds the inner
+    CMA-ES. ``ng.optimizers.CMA`` keeps it in ``_optim``; a
+    ``ParametrizedCMA(...)`` optimizer is the inner CMA-ES itself. Neither
+    has a public reader for the size.
+
+    Returns
+    -------
+    int
+        The population size.
+    """
+    inner = vars(optimizer).get("_optim") or optimizer
+    return int(vars(inner)["_popsize"])
+
+
+def lockstep[K](
+    optimizers: Mapping[K, Optimizer],
+    budget: int,
+    evaluate: Callable[[list[tuple[K, int, Candidate]]], Sequence[float]],
+) -> dict[K, list[tuple[Candidate, float]]]:
+    """Run CMA-ES searches together, one generation of each per round.
+
+    ``evaluate`` gets every candidate of a round as ``(key, index,
+    candidate)``, with ``index`` the candidate's place in its own search
+    (0 to ``budget - 1``), and returns one value per candidate, in order.
+    Each optimizer is told those values in the order it asked; a search
+    stops after ``budget`` candidates, its last generation cut short.
+
+    Returns
+    -------
+    dict[K, list[tuple[Candidate, float]]]
+        Every search's candidates and told values, in asking order.
+    """
+    told: dict[K, list[tuple[Candidate, float]]] = {
+        key: [] for key in optimizers
+    }
+    while any(len(done) < budget for done in told.values()):
+        asked: list[tuple[K, int, Candidate]] = []
+        for key, optimizer in optimizers.items():
+            start = len(told[key])
+            if start == budget:
+                continue
+            batch = [optimizer.ask()]
+            size = min(generation_size(optimizer), budget - start)
+            batch += [optimizer.ask() for _ in range(size - 1)]
+            asked += [
+                (key, start + offset, candidate)
+                for offset, candidate in enumerate(batch)
+            ]
+        values = evaluate(asked)
+        for (key, _, candidate), value in zip(asked, values, strict=True):
+            optimizers[key].tell(candidate, value)
+            told[key].append((candidate, value))
+    return told
