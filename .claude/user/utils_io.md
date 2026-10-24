@@ -61,8 +61,8 @@ Used in [examples/c_genotypes/1_body_evolution_tree.py](../../examples/c_genotyp
 
 ## Reading the results DB
 
-An `EA` run writes SQLite (default `__data__/database.db`). Load with sqlite3 /
-pandas / polars:
+An `EA` run writes SQLite (default `__data__/database.db`). Load with sqlite3
+or pandas:
 
 ```python
 import pandas as pd, sqlite3
@@ -72,7 +72,7 @@ df = pd.read_sql(
 )
 ```
 
-Schema, the birth/death temporal model, and pandas/polars access patterns are
+Schema, the birth/death temporal model, and pandas access patterns are
 documented in [../wiki/ariel_database.md](../wiki/ariel_database.md) and
 [../../wiki/ariel_db_pandas.md](../../wiki/ariel_db_pandas.md). Replay a saved
 best individual: [examples/c_genotypes/runner_best_individual.py](../../examples/c_genotypes/runner_best_individual.py),

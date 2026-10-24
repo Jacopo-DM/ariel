@@ -1,6 +1,6 @@
 ---
 type: ariel_reference
-tags: [ariel, database, sqlite, pandas, polars]
+tags: [ariel, database, sqlite, pandas]
 source: https://ci-group.github.io/ariel/source/Db_examples/db_with_sqlite3.html
 title: "ARIEL SQLite3 Database Reference"
 date_ingested: 2026-04-11
@@ -11,7 +11,6 @@ date_ingested: 2026-04-11
 Source pages ingested:
 - https://ci-group.github.io/ariel/source/Db_examples/db_with_sqlite3.html
 - https://ci-group.github.io/ariel/source/Db_examples/db_with_pandas.html
-- https://ci-group.github.io/ariel/source/Db_examples/db_with_polars.html
 
 ---
 
@@ -31,7 +30,7 @@ This is a standard SQLite3 file. The `__data__/` directory is relative to the wo
 
 Only one table is documented across all three example pages: **`individual`**.
 
-| Column | Type (Polars schema) | Description |
+| Column | Type | Description |
 |---|---|---|
 | `id` | `i64` | Unique identifier for this individual |
 | `alive` | `i64` | Live/dead flag (0 or 1) |
@@ -49,7 +48,7 @@ Only one table is documented across all three example pages: **`individual`**.
 
 ## Data Access Patterns
 
-### Pattern 1 — Raw sqlite3 (no pandas/polars dependency)
+### Pattern 1 — Raw sqlite3 (no pandas dependency)
 
 ```python
 import sqlite3
@@ -83,27 +82,6 @@ data = pd.read_sql(
 )
 data["genotype_"] = data["genotype_"].apply(json5.loads)
 ```
-
-### Pattern 3 — Polars
-
-```python
-import sqlite3
-import json5
-import polars as pl
-
-conn = sqlite3.connect("__data__/database.db")
-
-data = pl.DataFrame(
-    conn.execute("SELECT * FROM individual").fetchall(),
-    schema=[col[1] for col in conn.execute("PRAGMA table_info(individual)")],
-)
-
-data = data.with_columns(
-    pl.col("genotype_").map_elements(json5.loads).alias("genotype_")
-)
-```
-
-Note the Polars pattern uses `PRAGMA table_info(individual)` to derive column names rather than `cursor.description`.
 
 ---
 
@@ -143,20 +121,6 @@ population_per_gen = {
     gen: data.loc[
         (data["time_of_birth"] <= gen) & (data["time_of_death"] > gen), "id"
     ].tolist()
-    for gen in range(min_gen, max_gen + 1)
-}
-```
-
-### Polars
-
-```python
-min_gen = int(data["time_of_birth"].min())
-max_gen = int(data["time_of_death"].max())
-
-population_per_gen = {
-    gen: data.filter(
-        (pl.col("time_of_birth") <= gen) & (pl.col("time_of_death") > gen)
-    )["id"].to_list()
     for gen in range(min_gen, max_gen + 1)
 }
 ```
@@ -207,14 +171,6 @@ for gen in pop_df["generation"]:
     maxs.append(float(np.min(fits)))
 ```
 
-### Polars
-
-```python
-fitness_by_id = data.select(["id", "fitness_"])
-```
-
-(The polars page shows the setup; statistics loop follows the same pattern as above.)
-
 ---
 
 ## Accessing Genotypes
@@ -242,7 +198,7 @@ weights = np.array(genotype_of_best, dtype=float)
 
 ## Plotting Fitness Progression
 
-Standard pattern (sqlite3 example, adaptable to pandas/polars):
+Standard pattern (sqlite3 example, adaptable to pandas):
 
 ```python
 gens = np.array(generations, dtype=int)
@@ -304,7 +260,6 @@ plt.fill_between(x, mean - std, mean + std, color="C0", alpha=0.25)
 | `json5` | decodes genotype strings (not stdlib `json`) |
 | `numpy` | fitness array statistics |
 | `pandas` | optional; DataFrame-based access |
-| `polars` | optional; DataFrame-based access |
 | `matplotlib` | plotting |
 
 ---
