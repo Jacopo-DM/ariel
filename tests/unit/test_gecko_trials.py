@@ -273,3 +273,95 @@ def test_steer_timed_returns_the_rows_and_seconds() -> None:
     rows, seconds = g.steer_timed(job)
     assert np.array_equal(rows, g.steer(job))
     assert seconds > 0
+
+
+def test_a_knob_trial_of_the_found_gait_walks_its_distance() -> None:
+    """With no input the knob trial walks the gait as cpg_locomotion did."""
+    walked = g.knob_trial(
+        g.Knob(cpg="PhaseCPG", params=PHASE_GAIT, constants={})
+    )
+    assert walked.distance == PHASE_DISTANCE
+    assert 0 <= walked.overspeed <= 1
+    assert 0 <= walked.end_stop <= 1
+    assert walked.turn_plus != walked.turn_minus
+
+
+def test_the_turn_input_bends_the_spine_and_mirrors() -> None:
+    """Offsets on the spine only, wider legs on one side, then the mirror."""
+    plus = g.turn_input(1.0, 8)
+    minus = g.turn_input(-1.0, 8)
+    assert plus[:8] == [0.2, 0.2, 0, 0, 0, 0, 0, 0]
+    assert plus[8:] == [0, 0, 0.3, 0.3, -0.3, -0.3, 0.3, -0.3]
+    assert minus == [-value for value in plus]
+
+
+def test_knob_cpg_sets_the_constants_and_refuses_unknown_ones() -> None:
+    """Constants become attributes; a name the CPG lacks raises."""
+    job = g.Knob(
+        cpg="AdaptiveHopfCPG",
+        params=PHASE_GAIT,
+        constants={"coupling": 2.5, "epsilon": 0.5},
+    )
+    cpg = g.knob_cpg(job, 8)
+    assert isinstance(cpg, AdaptiveHopfCPG)
+    assert cpg.coupling == pytest.approx(2.5)
+    assert cpg.epsilon == pytest.approx(0.5)
+    assert len(cpg.routes) == 3 * 8  # teaching, offset, amplitude
+    wrong = job.model_copy(update={"constants": {"alpha": 1.0}})
+    with pytest.raises(ValueError, match="no constant 'alpha'"):
+        g.knob_cpg(wrong, 8)
+
+
+@pytest.mark.parametrize("name", ["AdaptiveHopfCPG", "TegotaeCPG"])
+def test_a_sensing_cpg_runs_a_knob_walk(name: str) -> None:
+    """The sensory inputs reach the CPG during a knob walk."""
+    gecko = g.walker()
+    cpg_class = g.CLASSES[name]
+    params = cpg_class(gecko.adjacency, seed=0).get_flat_params().tolist()
+    job = g.Knob(cpg=name, params=params, constants={})
+    walked = g.run(gecko, job, g.turn_input(1.0, gecko.model.nu))
+    assert walked.times[0] == pytest.approx(0.0)
+    assert len(walked.commands) == len(walked.yaws) == len(walked.times)
+    assert np.isfinite(walked.distance)
+
+
+def _record(
+    times: list[float], yaws: list[float], commands: list[list[float]]
+) -> g.Run:
+    return g.Run(times=times, yaws=yaws, distance=0.0, commands=commands)
+
+
+def test_the_turn_rate_counts_after_settling_and_unwraps() -> None:
+    """A steady turn across the +-pi seam gives its rate in deg/s."""
+    times = np.arange(0, 10, 0.5)
+    yaws = np.angle(np.exp(1j * np.radians(20.0) * times))  # wraps at pi
+    walked = _record(times.tolist(), yaws.tolist(), [[0.0]] * len(times))
+    assert g.turn_rate(walked) == pytest.approx(20.0)
+
+
+def test_servo_strain_counts_fast_steps_and_the_end_stop() -> None:
+    """One of two hinge steps too fast, one at the stop."""
+    walked = _record(
+        [0.0, 0.1],
+        [0.0, 0.0],
+        [[0.0, 1.0], [1.0, 1.56]],  # hinge 0 at 10 rad/s, hinge 1 at 5.6
+    )
+    assert g.servo_strain([walked]) == (0.5, 0.5)
+
+
+def test_the_rhythm_spread_compares_the_moving_hinges() -> None:
+    """Same frequency: 0; 1 Hz and 2 Hz: (2 - 1) / 1.5; one mover: 0."""
+    times = np.arange(0, 12, 0.015)
+    one_hz = np.sin(2 * np.pi * times)
+    two_hz = np.sin(4 * np.pi * times)
+    still = np.zeros_like(times)
+
+    def spread(*hinges: g.Floats) -> float:
+        commands = np.stack(hinges, axis=1).tolist()
+        return g.rhythm_spread(
+            _record(times.tolist(), [0.0] * len(times), commands)
+        )
+
+    assert spread(one_hz, one_hz) == pytest.approx(0.0)
+    assert spread(one_hz, two_hz) == pytest.approx(2 / 3, abs=0.02)
+    assert spread(one_hz, still) == pytest.approx(0.0)

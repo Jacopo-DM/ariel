@@ -1,12 +1,12 @@
 """Gecko trials shared by the slow CPG notebooks and their pool workers.
 
 The notebooks ``cpg_locomotion``, ``cpg_initialisation``,
-``cpg_initialisation_search`` and ``cpg_steering`` score thousands of CPG
-parameter vectors on the gecko. They send the vectors to the worker
-processes of ``ariel.simulation.process_pool``, and a spawned worker can
-only run a function it imports from a ``.py`` file, so the trials live
-here and the notebooks import this module (the notebook runner puts this
-folder on the kernel's path, and the workers inherit it).
+``cpg_initialisation_search``, ``cpg_steering`` and ``cpg_knobs`` score
+thousands of CPG parameter vectors on the gecko. They send the vectors to
+the worker processes of ``ariel.simulation.process_pool``, and a spawned
+worker can only run a function it imports from a ``.py`` file, so the
+trials live here and the notebooks import this module (the notebook runner
+puts this folder on the kernel's path, and the workers inherit it).
 
 Each process builds its gecko once, on first use (``walker()`` and
 ``steerer()``), and every trial resets it. A trial sets MuJoCo's control
@@ -21,6 +21,7 @@ telling one at a time.
 """
 
 # Standard library
+import math
 import time
 from collections.abc import Callable, Mapping, Sequence
 from functools import cache
@@ -34,7 +35,7 @@ import numpy.typing as npt
 
 # Local libraries
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots.gecko import gecko
-from ariel.parameters import FrozenModel
+from ariel.parameters import DSSM15, FrozenModel, ServoSettings
 from ariel.simulation import (
     CPG,
     AdaptiveHopfCPG,
@@ -530,3 +531,253 @@ def lockstep[K](
             optimizers[key].tell(candidate, value)
             told[key].append((candidate, value))
     return told
+
+
+# Knob trials of cpg_knobs: a gait with its constants, walked three times
+
+KNOB_SETTLE = 2.0  # seconds left out of the turning rate and the rhythm
+TOP_SPEED = float(ServoSettings().rating(DSSM15()).speed.value)  # rad/s
+END_STOP = math.pi / 2 - 0.02  # a command this close to 90 degrees
+MOVES = 0.05  # rad: a hinge swinging less is left out of the rhythm
+MIN_HINGES = 2  # a rhythm spread needs at least two moving hinges
+SPINE = (0, 1)  # the gecko's two spine hinges (yaw)
+LEFT = (2, 3, 6)  # hinges at core-frame x < 0
+RIGHT = (4, 5, 7)  # hinges at core-frame x > 0
+TURN_OFFSET = 0.2  # rad on the spine
+TURN_AMPLITUDE = 0.3  # one side 1 + this, the other 1 - this
+
+
+class Knob(FrozenModel):
+    """One trial to run in a worker: a gait and its constants."""
+
+    cpg: str
+    params: list[float]
+    constants: dict[str, float]
+
+
+class Walked(FrozenModel):
+    """What one trial measured."""
+
+    distance: float  # metres, the walk with no input
+    turn_plus: float  # deg/s under the turn input
+    turn_minus: float  # deg/s under its mirror
+    drift: float  # deg/s with no input
+    overspeed: float  # share of hinge steps asked above TOP_SPEED
+    end_stop: float  # share of hinge steps commanded at the 90-degree stop
+    rhythm_spread: float  # (fastest - slowest) / median hinge frequency
+    seconds: float  # wall time in the worker
+
+
+def turn_input(sign: float, nu: int) -> list[float]:
+    """Return the offsets, then the amplitude changes, of one turn input.
+
+    Returns
+    -------
+    list[float]
+        ``nu`` offsets in radians, then ``nu`` amplitude changes.
+    """
+    offsets = np.zeros(nu)
+    offsets[list(SPINE)] = sign * TURN_OFFSET
+    amplitudes = np.zeros(nu)
+    amplitudes[list(LEFT)] = sign * TURN_AMPLITUDE
+    amplitudes[list(RIGHT)] = -sign * TURN_AMPLITUDE
+    return [*offsets.tolist(), *amplitudes.tolist()]
+
+
+def knob_cpg(job: Knob, nu: int) -> CPG:
+    """Build the CPG with its sensory inputs and the turn routes.
+
+    The sensory inputs (joint error for AdaptiveHopfCPG, limb loads for the
+    Tegotae models) come first in u, then one offset and one amplitude
+    route per hinge, which take the turn input with no weights.
+
+    Returns
+    -------
+    CPG
+        The network with the job's constants and parameters.
+
+    Raises
+    ------
+    ValueError
+        If a constant is not one of the CPG's attributes.
+    """
+    cpg_class = CLASSES[job.cpg]
+    sensors = [
+        InputRoute(handle=handle, joint=joint)
+        for handle in cpg_class.FAST_HANDLES
+        for joint in range(nu)
+    ]
+    turns = [
+        InputRoute(handle=handle, joint=joint)
+        for handle in ("offset", "amplitude")
+        for joint in range(nu)
+    ]
+    cpg = cpg_class(
+        create_fully_connected_adjacency(nu), inputs=[*sensors, *turns]
+    )
+    # Every constructor only stores its constants as attributes of the same
+    # name, read at each step, so setting them afterwards is the same
+    for constant, value in job.constants.items():
+        if not hasattr(cpg, constant):
+            msg = f"{job.cpg} has no constant {constant!r}"
+            raise ValueError(msg)
+        setattr(cpg, constant, value)
+    cpg.set_flat_params(np.array(job.params, dtype=np.float64))
+    return cpg
+
+
+def yaw_of(data: mujoco.MjData, body: int) -> float:
+    """Return the heading of a body's local x axis in the floor plane.
+
+    Returns
+    -------
+    float
+        The angle from the world x axis, in radians.
+    """
+    frame = data.xmat[body].reshape(3, 3)
+    return float(np.arctan2(frame[1, 0], frame[0, 0]))
+
+
+class Run(FrozenModel):
+    """One walk's record: heading, start and end, and every command."""
+
+    times: list[float]
+    yaws: list[float]
+    distance: float
+    commands: list[list[float]]
+
+
+def run(gecko: Gecko, job: Knob, turn: list[float]) -> Run:
+    """Walk the gecko once with a fixed turn input.
+
+    Returns
+    -------
+    Run
+        The heading at every control call, the distance and the commands.
+    """
+    nu = gecko.model.nu
+    cpg = knob_cpg(job, nu)
+    data = gecko.data
+    mujoco.mj_resetData(gecko.model, data)
+    mujoco.mj_forward(gecko.model, data)
+    start = data.xpos[gecko.core, :2].copy()
+    sensor = np.zeros(nu)
+    times: list[float] = []
+    yaws: list[float] = []
+    commands: list[list[float]] = []
+
+    def callback(d: mujoco.MjData) -> object:
+        if isinstance(cpg, AdaptiveHopfCPG):
+            sensor[:] = d.qpos[gecko.joint_qpos] - d.ctrl
+        u = [float(value) for value in sensor] if cpg.FAST_HANDLES else []
+        cpg.set_input([*u, *turn])
+        times.append(float(d.time))
+        yaws.append(yaw_of(d, gecko.core))
+        command = cpg.forward(d.time).numpy()
+        commands.append(command.tolist())
+        return command
+
+    def step_done(_step: int) -> None:
+        # Read the loads after the step, as gecko_trials does
+        if isinstance(cpg, TegotaeCPG):  # LearnableTegotaeCPG too
+            sensor[:] = gecko.limb_loads(data)
+
+    gecko._run(gecko._controller(callback), SECONDS, step_done)  # ruff: ignore[private-member-access]  # the gecko's own run loop
+    end = data.xpos[gecko.core, :2]
+    return Run(
+        times=times,
+        yaws=yaws,
+        distance=float(np.linalg.norm(end - start)),
+        commands=commands,
+    )
+
+
+def turn_rate(walked: Run) -> float:
+    """Return the turning rate after KNOB_SETTLE, in degrees per second.
+
+    Returns
+    -------
+    float
+        Positive for a turn to the left (counter-clockwise from above).
+    """
+    times = np.array(walked.times)
+    yaws = np.unwrap(np.array(walked.yaws))
+    kept = times >= KNOB_SETTLE
+    turned = yaws[kept][-1] - yaws[kept][0]
+    return float(np.degrees(turned) / (times[kept][-1] - times[kept][0]))
+
+
+def servo_strain(walks: list[Run]) -> tuple[float, float]:
+    """Share of hinge steps commanded too fast and at the end stop.
+
+    Returns
+    -------
+    tuple[float, float]
+        The share above TOP_SPEED, then the share at END_STOP.
+    """
+    fast = 0
+    stopped = 0
+    total = 0
+    for walked in walks:
+        commands = np.array(walked.commands)
+        times = np.array(walked.times)
+        speed = np.abs(np.diff(commands, axis=0)) / np.diff(times)[:, None]
+        fast += int((speed > TOP_SPEED).sum())
+        stopped += int((np.abs(commands[1:]) > END_STOP).sum())
+        total += speed.size
+    return fast / total, stopped / total
+
+
+def rhythm_spread(walked: Run) -> float:
+    """How far the moving hinges' main frequencies differ.
+
+    Each hinge's main frequency is the peak of its command's spectrum after
+    KNOB_SETTLE. Hinges in one rhythm share it, so the spread is 0; a spread
+    near 1 means some hinge runs at twice another's rate or slips.
+
+    Returns
+    -------
+    float
+        (fastest - slowest) / median, over hinges swinging more than MOVES;
+        0 when fewer than two hinges move.
+    """
+    times = np.array(walked.times)
+    commands = np.array(walked.commands)[times >= KNOB_SETTLE]
+    step = float(np.median(np.diff(times)))
+    frequencies = np.fft.rfftfreq(len(commands), step)
+    peaks = []
+    for hinge in commands.T:
+        if np.ptp(hinge) < MOVES:
+            continue
+        spectrum = np.abs(np.fft.rfft(hinge - hinge.mean()))
+        peaks.append(frequencies[1:][np.argmax(spectrum[1:])])
+    if len(peaks) < MIN_HINGES:
+        return 0.0
+    return float((max(peaks) - min(peaks)) / np.median(peaks))
+
+
+def knob_trial(job: Knob) -> Walked:
+    """Run one trial; the function the notebook sends to the pool.
+
+    Returns
+    -------
+    Walked
+        Everything the trial measured, and its wall time.
+    """
+    started = time.perf_counter()
+    gecko = walker()
+    nu = gecko.model.nu
+    still = run(gecko, job, [0.0] * (2 * nu))
+    plus = run(gecko, job, turn_input(1.0, nu))
+    minus = run(gecko, job, turn_input(-1.0, nu))
+    overspeed, end_stop = servo_strain([still, plus, minus])
+    return Walked(
+        distance=still.distance,
+        turn_plus=turn_rate(plus),
+        turn_minus=turn_rate(minus),
+        drift=turn_rate(still),
+        overspeed=overspeed,
+        end_stop=end_stop,
+        rhythm_spread=rhythm_spread(still),
+        seconds=time.perf_counter() - started,
+    )
