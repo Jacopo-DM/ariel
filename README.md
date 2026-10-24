@@ -1,13 +1,52 @@
-![ariel-header](./docs/resources/ariel_logo.svg)
+<div align="center">
 
-# ARIEL: Autonomous Robots through Integrated Evolution and Learning
+<img src="docs/logo.svg" alt="ARIEL logo: a white triangle on a teal tile" width="160">
 
-## Documentation
-[ARIEL main documentation page](https://ci-group.github.io/ariel/)
+# ARIEL
 
-## Quickstart
+Autonomous Robots through Integrated Evolution and Learning
 
-After [installing](#installation-and-running), build a prebuilt robot, drop it into a world, and launch the MuJoCo viewer:
+[![Docs][docs-shield]][docs-url]
+[![License][license-shield]][license-url]
+[![Last commit][commit-shield]][commit-url]
+
+[![Python][tool-python-shield]][tool-python-url]
+[![uv][tool-uv-shield]][tool-uv-url]
+[![MuJoCo][tool-mujoco-shield]][tool-mujoco-url]
+[![PyTorch][tool-pytorch-shield]][tool-pytorch-url]
+[![NumPy][tool-numpy-shield]][tool-numpy-url]
+[![SQLite][tool-sqlite-shield]][tool-sqlite-url]
+
+[Docs](https://ci-group.github.io/ariel/) · [Report a bug][issues-url]
+
+</div>
+
+## Installation
+
+ARIEL needs **MuJoCo** 3.16.0 or later and **[uv](https://docs.astral.sh/uv/)** for environment and dependency management. All Python dependencies are declared in [`pyproject.toml`](pyproject.toml) and are installed automatically by `uv sync`.
+
+To run the code examples, please do:
+1. Clone the repository
+```bash
+git clone https://github.com/ci-group/ariel.git
+cd ariel
+```
+2. Create a uv virtual environment inside the repository folder
+```bash
+  uv venv
+```
+3. Sync the virtual environment with the requirements
+```bash
+uv sync
+```
+4. Run an example, in this case, brain evolution (aka learning) using:
+```bash
+uv run examples/re_book/1_brain_evolution.py
+```
+
+## Usage
+
+After [installing](#installation), build a prebuilt robot, drop it into a world, and launch the MuJoCo viewer:
 
 ```python
 import mujoco
@@ -32,37 +71,6 @@ viewer.launch(model, data)
 ```
 
 From here, see [`examples/`](examples/) for adding controllers, defining fitness, and running full evolutionary loops.
-
-## Requirements
-
-- **Python** ≥ 3.12
-- **MuJoCo** ≥ 3.3.6
-- **[uv](https://docs.astral.sh/uv/)** for environment and dependency management
-
-All Python dependencies are declared in [`pyproject.toml`](pyproject.toml) and are installed automatically by `uv sync`.
-
-## Installation and Running
-
-This project uses [uv](https://docs.astral.sh/uv/).
-
-To run the code examples, please do:
-1. Clone the repository
-```bash
-git clone https://github.com/ci-group/ariel.git
-cd ariel
-```
-2. Create a uv virtual environment inside the repository folder
-```bash
-  uv venv
-```
-3. Sync the virtual environment with the requirements
-```bash
-uv sync
-```
-4. Run an example, in this case, brain evolution (aka learning) using:
-```bash
-uv run examples/re_book/1_brain_evolution.py
-```
 
 ## Rendering and OpenGL
 
@@ -172,3 +180,23 @@ Contributions are welcome! Please see the [Contributor Guide](CONTRIBUTING.md) a
 ## License
 
 Distributed under the terms of the [GPL-3.0 license](LICENSE). ARIEL is free and open source software.
+
+[docs-shield]: https://img.shields.io/github/actions/workflow/status/ci-group/ariel/sphinx.yml?branch=main&label=docs
+[docs-url]: https://github.com/ci-group/ariel/actions/workflows/sphinx.yml
+[license-shield]: https://img.shields.io/badge/license-GPL--3.0-blue
+[license-url]: LICENSE
+[commit-shield]: https://img.shields.io/github/last-commit/ci-group/ariel
+[commit-url]: https://github.com/ci-group/ariel/commits
+[tool-python-shield]: https://img.shields.io/badge/Python-3.12%2B-3776AB?style=for-the-badge&logo=python&logoColor=white
+[tool-python-url]: https://www.python.org/
+[tool-uv-shield]: https://img.shields.io/badge/uv-DE5FE9?style=for-the-badge&logo=uv&logoColor=white
+[tool-uv-url]: https://docs.astral.sh/uv/
+[tool-mujoco-shield]: https://img.shields.io/badge/MuJoCo-333333?style=for-the-badge
+[tool-mujoco-url]: https://mujoco.org/
+[tool-pytorch-shield]: https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white
+[tool-pytorch-url]: https://pytorch.org/
+[tool-numpy-shield]: https://img.shields.io/badge/NumPy-013243?style=for-the-badge&logo=numpy&logoColor=white
+[tool-numpy-url]: https://numpy.org/
+[tool-sqlite-shield]: https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white
+[tool-sqlite-url]: https://www.sqlite.org/
+[issues-url]: https://github.com/ci-group/ariel/issues
