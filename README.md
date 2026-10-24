@@ -1,8 +1,6 @@
 <div align="center">
 
-<img src="docs/logo.svg" alt="ARIEL logo: a white triangle on a teal tile" width="160">
-
-# ARIEL
+# <img src="docs/logo.svg" alt="ARIEL logo: a white triangle on a teal tile" width="160"><br>ARIEL
 
 Autonomous Robots through Integrated Evolution and Learning
 
