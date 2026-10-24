@@ -28,9 +28,9 @@ This is a standard SQLite3 file. The `__data__/` directory is relative to the wo
 
 ## Schema: `individual` Table
 
-Only one table is documented across all three example pages: **`individual`**.
+Only one table is documented across both example pages: **`individual`**.
 
-| Column | Type | Description |
+| Column | Type (`i64` integer, `f64` float) | Description |
 |---|---|---|
 | `id` | `i64` | Unique identifier for this individual |
 | `alive` | `i64` | Live/dead flag (0 or 1) |
