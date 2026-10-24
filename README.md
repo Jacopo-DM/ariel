@@ -6,6 +6,7 @@
 
 Autonomous Robots through Integrated Evolution and Learning
 
+[![CI][ci-shield]][ci-url]
 [![Docs][docs-shield]][docs-url]
 [![License][license-shield]][license-url]
 [![Last commit][commit-shield]][commit-url]
@@ -17,7 +18,7 @@ Autonomous Robots through Integrated Evolution and Learning
 [![NumPy][tool-numpy-shield]][tool-numpy-url]
 [![SQLite][tool-sqlite-shield]][tool-sqlite-url]
 
-[Docs](https://ci-group.github.io/ariel/) · [Report a bug][issues-url]
+[Docs](https://ci-group.github.io/ariel/)
 
 </div>
 
@@ -181,12 +182,14 @@ Contributions are welcome! Please see the [Contributor Guide](CONTRIBUTING.md) a
 
 Distributed under the terms of the [GPL-3.0 license](LICENSE). ARIEL is free and open source software.
 
-[docs-shield]: https://img.shields.io/github/actions/workflow/status/ci-group/ariel/sphinx.yml?branch=main&label=docs
-[docs-url]: https://github.com/ci-group/ariel/actions/workflows/sphinx.yml
+[ci-shield]: https://img.shields.io/github/actions/workflow/status/Jacopo-DM/ariel/checks.yml?branch=main&label=CI
+[ci-url]: https://github.com/Jacopo-DM/ariel/actions/workflows/checks.yml
+[docs-shield]: https://img.shields.io/github/actions/workflow/status/Jacopo-DM/ariel/sphinx.yml?branch=main&label=docs
+[docs-url]: https://github.com/Jacopo-DM/ariel/actions/workflows/sphinx.yml
 [license-shield]: https://img.shields.io/badge/license-GPL--3.0-blue
 [license-url]: LICENSE
-[commit-shield]: https://img.shields.io/github/last-commit/ci-group/ariel
-[commit-url]: https://github.com/ci-group/ariel/commits
+[commit-shield]: https://img.shields.io/github/last-commit/Jacopo-DM/ariel
+[commit-url]: https://github.com/Jacopo-DM/ariel/commits
 [tool-python-shield]: https://img.shields.io/badge/Python-3.12%2B-3776AB?style=for-the-badge&logo=python&logoColor=white
 [tool-python-url]: https://www.python.org/
 [tool-uv-shield]: https://img.shields.io/badge/uv-DE5FE9?style=for-the-badge&logo=uv&logoColor=white
@@ -199,4 +202,3 @@ Distributed under the terms of the [GPL-3.0 license](LICENSE). ARIEL is free and
 [tool-numpy-url]: https://numpy.org/
 [tool-sqlite-shield]: https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white
 [tool-sqlite-url]: https://www.sqlite.org/
-[issues-url]: https://github.com/ci-group/ariel/issues
